@@ -35,7 +35,7 @@ def main() -> None:
     ap.add_argument("--epochs", type=float, default=1.0)
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--grad-accum", type=int, default=16)
-    ap.add_argument("--max-length", type=int, default=3072)
+    ap.add_argument("--max-length", type=int, default=2560)
     ap.add_argument("--max-steps", type=int, default=-1)
     ap.add_argument("--limit-rows", type=int, default=0, help="debug: keep only the first N selected rows")
     ap.add_argument("--lora-r", type=int, default=16)
@@ -45,9 +45,11 @@ def main() -> None:
     import torch
     from agenttune.agentic.distill_trainer import create_distill_trainer
 
-    from ragharness import qlora, training
+    from ragharness import modelref, qlora, training
 
     assert torch.cuda.is_available(), "this script trains on a CUDA GPU"
+    model_path, model_revision, model_source = modelref.resolve()
+    print("model source:", model_source)
     torch.manual_seed(args.seed)
     ep_dir = ROOT / "data" / "processed" / "episodes"
     set_path = ROOT / "data" / "processed" / "training" / f"{args.set}.jsonl"
@@ -61,11 +63,11 @@ def main() -> None:
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     factory = qlora.QLoraFactory(
-        system, quantize=True, dtype="float16", lora_r=args.lora_r, lora_alpha=2 * args.lora_r, revision=REVISION,
+        system, quantize=True, dtype="float16", lora_r=args.lora_r, lora_alpha=2 * args.lora_r, revision=model_revision,
         max_length=args.max_length, metas=metas, keep=keys,
     )
     trainer = create_distill_trainer(
-        MODEL, trajectories=logs, trainer_factory=factory, output_dir=str(out),
+        model_path, trajectories=logs, trainer_factory=factory, output_dir=str(out),
         num_train_epochs=args.epochs, max_steps=args.max_steps, learning_rate=args.lr, lr_scheduler_type="cosine", warmup_steps=0.03,
         per_device_train_batch_size=1, gradient_accumulation_steps=args.grad_accum, seed=args.seed,
         optim="paged_adamw_8bit", weight_decay=0.0, max_grad_norm=1.0,
@@ -85,7 +87,7 @@ def main() -> None:
     import peft, transformers, trl
 
     report = {
-        "set": args.set, "model": MODEL, "revision": REVISION, "git_commit": git_commit(),
+        "set": args.set, "model": MODEL, "revision": REVISION, "model_source": model_source, "git_commit": git_commit(),
         "rows_selected": len(keys), "rows_trained": factory.n_train_rows, "episodes": len(logs),
         "processed_tokens": processed, "supervised_tokens": supervised,
         "wall_seconds": round(wall, 1), "processed_tokens_per_second": round(processed * args.epochs / wall, 1),

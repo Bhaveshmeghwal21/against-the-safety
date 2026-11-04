@@ -56,7 +56,7 @@ class QLoraFactory:
         lora_dropout: float = 0.05,
         lora_targets: str | list[str] = "all-linear",
         revision: str | None = None,
-        max_length: int = 3072,
+        max_length: int = 2560,
         max_tokens_est: int | None = None,
         gradient_checkpointing: bool = True,
         use_cpu: bool = False,

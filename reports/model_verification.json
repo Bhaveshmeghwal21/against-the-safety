@@ -1,0 +1,16 @@
+{
+  "matched": [
+    "model-00001-of-00002.safetensors",
+    "model-00002-of-00002.safetensors"
+  ],
+  "mismatched": [],
+  "missing_on_hub": [],
+  "published_files": [
+    "assets/TinyAya_Global.png",
+    "model-00001-of-00002.safetensors",
+    "model-00002-of-00002.safetensors",
+    "tokenizer.json"
+  ],
+  "identical_to_pinned_revision": true,
+  "revision": "af89d219b53ed9b13b8a4645f9c8028973510324"
+}

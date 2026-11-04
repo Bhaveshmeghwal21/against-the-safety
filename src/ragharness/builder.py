@@ -88,6 +88,8 @@ def make_specs(q: Question, corpus: Corpus, search: MaskedSearch) -> dict[str, S
     if distractor is not None:
         full = [_hit(corpus, c) for c in support.values()] + [distractor]
         specs["prefill_sufficient"] = Spec("prefill_sufficient", prefill=_order(q.qid, full))
+        # evaluation only (never trained on): the same evidence without the distractor, for the paired distractor effect
+        specs["prefill_clean"] = Spec("prefill_clean", prefill=_order(q.qid, [_hit(corpus, c) for c in support.values()]))
         if len(support) >= 2 and len(extras) >= 2:
             # leave out the support paragraph whose title the question does not mention (the hop-2 page)
             from .policy import contains, mention

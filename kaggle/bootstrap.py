@@ -1,33 +1,37 @@
-"""Kaggle notebook bootstrap: unpack the bundle, install pinned libraries for the T4 driver, run a stage.
+"""Kaggle runner: unpack the bundle, build a pinned environment, run one stage.
 
-In a Kaggle notebook (GPU T4, internet on), with the bundle dataset attached and the secret HF_TOKEN set
-(the account must have accepted the Tiny Aya gate):
+Used by the kernels that `scripts/kaggle_launch.py` pushes. Inputs the kernel must have attached:
+  - dataset  <user>/against-the-safety-bundle   (the zip built by scripts/bundle_for_kaggle.py)
+  - model    cohere-labs/tiny-aya/transformers/global/1   (Tiny Aya Global; verified against the pinned HF hashes)
+  - for eval stages: the kernel that produced the adapters (kernel_sources)
+No Hugging Face token is needed or used: the weights come from Kaggle Models and are hash-checked.
 
-    !python /kaggle/input/against-the-safety-bundle/kaggle/bootstrap.py smoke
+Stages
+  smoke                  two-hour compatibility test (one T4)
+  train-both             main on GPU 0 and control on GPU 1 at the same time
+  eval-dev | eval-test   base (GPU 0) and main adapter (GPU 1), then closed-book (GPU 0) and control adapter (GPU 1)
 
-Stages: smoke | train-main | train-control | eval-dev-base | eval-dev-adapter | eval-test-base | eval-test-adapter | eval-test-closed
-Everything is written under /kaggle/working/out (download it or save the version). Training and evaluation stages need
-the smoke stage to have passed once on this driver.
+The repo and the Python environment live in /kaggle/temp so they are not saved as notebook output; only /kaggle/working/out is.
 """
 
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
 import zipfile
 from pathlib import Path
 
-WORK = Path("/kaggle/working")
-REPO = WORK / "repo"
-OUT = WORK / "out"
+TMP = Path("/kaggle/temp") if Path("/kaggle/temp").exists() else Path("/tmp")
+REPO = TMP / "repo"
+OUT = Path("/kaggle/working/out")
+EXTRA_PIP: list[str] = []  # nothing beyond the lock file
 
 
-def sh(cmd: str, check: bool = True) -> str:
+def sh(cmd: str, check: bool = True, env: dict | None = None) -> str:
     print("$", cmd, flush=True)
-    p = subprocess.run(cmd, shell=True, text=True, capture_output=True)
-    print((p.stdout + p.stderr)[-3000:], flush=True)
+    p = subprocess.run(cmd, shell=True, text=True, capture_output=True, env={**os.environ, **(env or {})})
+    print((p.stdout + p.stderr)[-3500:], flush=True)
     if check and p.returncode != 0:
         raise SystemExit(f"command failed ({p.returncode}): {cmd}")
     return p.stdout
@@ -40,21 +44,35 @@ def driver_major() -> int:
 
 
 def unpack() -> None:
+    """Copy the attached bundle dataset to writable scratch space (Kaggle auto-extracts uploaded zips)."""
+    import shutil
+
     if REPO.exists():
+        return
+    roots = [p.parent for p in Path("/kaggle/input").rglob("pyproject.toml") if (p.parent / "src" / "ragharness").exists()]
+    if roots:
+        shutil.copytree(roots[0], REPO)
         return
     zips = list(Path("/kaggle/input").rglob("against-the-safety.zip"))
     if not zips:
-        raise SystemExit("attach the bundle dataset (against-the-safety.zip) to this notebook")
+        raise SystemExit("attach the bundle dataset (against-the-safety-bundle) to this kernel")
     REPO.mkdir(parents=True)
     with zipfile.ZipFile(zips[0]) as z:
         z.extractall(REPO)
 
 
+def find_model() -> str:
+    for cand in Path("/kaggle/input").rglob("model.safetensors.index.json"):
+        if "tiny-aya" in cand.as_posix() and "global" in cand.as_posix():
+            return str(cand.parent)
+    raise SystemExit("attach the model cohere-labs/tiny-aya/transformers/global/1 to this kernel")
+
+
 def python_for_env() -> str:
-    """AgentTune needs Python 3.12+. Use the notebook's interpreter if it qualifies, otherwise build a 3.12 venv with uv."""
+    """AgentTune needs Python 3.12+. Use the kernel's interpreter if it qualifies, otherwise build a 3.12 venv with uv."""
     if sys.version_info >= (3, 12):
         return sys.executable
-    venv = WORK / "venv312"
+    venv = TMP / "venv312"
     if not (venv / "bin" / "python").exists():
         sh("pip install -q uv")
         sh(f"uv venv --python 3.12 --seed {venv}")
@@ -62,7 +80,7 @@ def python_for_env() -> str:
 
 
 def install(py: str) -> None:
-    marker = WORK / ".installed"
+    marker = TMP / ".installed"
     if marker.exists():
         return
     major = driver_major()
@@ -75,14 +93,20 @@ def install(py: str) -> None:
     marker.write_text(json.dumps({"driver_major": major, "python": py}))
 
 
-def hf_login() -> None:
-    try:
-        from kaggle_secrets import UserSecretsClient
-
-        os.environ["HF_TOKEN"] = UserSecretsClient().get_secret("HF_TOKEN")
-    except Exception as e:  # noqa: BLE001
-        if "HF_TOKEN" not in os.environ:
-            raise SystemExit(f"set a Kaggle secret named HF_TOKEN ({type(e).__name__})")
+def run_parallel(jobs: list[tuple[str, dict, str]]) -> int:
+    """jobs: (command, extra env, log name). All start together; returns the worst exit code."""
+    procs = []
+    for cmd, env, log in jobs:
+        f = open(OUT / log, "w")
+        print("$ (parallel)", env, cmd, flush=True)
+        procs.append((subprocess.Popen(cmd, shell=True, stdout=f, stderr=subprocess.STDOUT, env={**os.environ, **env}), f, log))
+    worst = 0
+    for p, f, log in procs:
+        rc = p.wait()
+        f.close()
+        print(f"{log}: exit {rc}; tail:\n" + (OUT / log).read_text()[-1500:], flush=True)
+        worst = max(worst, rc)
+    return worst
 
 
 def main() -> None:
@@ -90,26 +114,42 @@ def main() -> None:
     extra = " ".join(sys.argv[2:])
     OUT.mkdir(parents=True, exist_ok=True)
     unpack()
+    model = find_model()
     py = python_for_env()
     install(py)
-    hf_login()
     os.chdir(REPO)
-    os.environ.update({"PYTHONUTF8": "1", "HF_HOME": str(WORK / "hf"), "TOKENIZERS_PARALLELISM": "false"})
+    base_env = {"PYTHONUTF8": "1", "HF_HOME": str(TMP / "hf"), "TOKENIZERS_PARALLELISM": "false", "TINY_AYA_PATH": model}
+    os.environ.update(base_env)
     sh("nvidia-smi")
-    cmds = {
-        "smoke": f"{py} scripts/smoke_test.py --out {OUT}/smoke {extra}",
-        "train-main": f"{py} scripts/train.py --set main --out {OUT}/main {extra}",
-        "train-control": f"{py} scripts/train.py --set control --out {OUT}/control {extra}",
-        "eval-dev-base": f"{py} scripts/run_eval.py --system base --split dev --out {OUT}/eval/base_dev {extra}",
-        "eval-dev-adapter": f"{py} scripts/run_eval.py --system adapter --adapter {OUT}/main/adapter --split dev --out {OUT}/eval/main_dev {extra}",
-        "eval-test-base": f"{py} scripts/run_eval.py --system base --split test --out {OUT}/eval/base_test {extra}",
-        "eval-test-adapter": f"{py} scripts/run_eval.py --system adapter --adapter {OUT}/main/adapter --split test --out {OUT}/eval/main_test {extra}",
-        "eval-test-closed": f"{py} scripts/run_eval.py --system closed_book --split test --out {OUT}/eval/closed_test {extra}",
-    }
-    if stage not in cmds:
-        raise SystemExit(f"unknown stage {stage!r}; choose from {', '.join(cmds)}")
-    sh(cmds[stage], check=False)
-    print("done; outputs in", OUT)
+    adapters = {p.parent.parent.name: str(p.parent) for p in Path("/kaggle/input").rglob("adapter_config.json")}
+    print("adapters found:", adapters)
+
+    g0, g1 = {"CUDA_VISIBLE_DEVICES": "0"}, {"CUDA_VISIBLE_DEVICES": "1"}
+    rc = 0
+    if stage == "smoke":
+        sh(f"{py} scripts/smoke_test.py --out {OUT}/smoke {extra}", check=False)
+    elif stage == "train-both":
+        rc = run_parallel([
+            (f"{py} scripts/train.py --set main --out {OUT}/main {extra}", g0, "train_main.log"),
+            (f"{py} scripts/train.py --set control --out {OUT}/control {extra}", g1, "train_control.log"),
+        ])
+    elif stage in ("eval-dev", "eval-test"):
+        split = stage.split("-")[1]
+        for needed in ("main", "control"):
+            if needed not in adapters:
+                raise SystemExit(f"adapter {needed!r} not found under /kaggle/input; attach the training kernel")
+        ev = f"{py} scripts/run_eval.py --split {split} {extra}"
+        rc = run_parallel([
+            (f"{ev} --system base --out {OUT}/eval/base_{split}", g0, f"eval_base_{split}.log"),
+            (f"{ev} --system adapter --adapter {adapters['main']} --out {OUT}/eval/main_{split}", g1, f"eval_main_{split}.log"),
+        ])
+        rc = max(rc, run_parallel([
+            (f"{ev} --system closed_book --out {OUT}/eval/closed_{split}", g0, f"eval_closed_{split}.log"),
+            (f"{ev} --system adapter --adapter {adapters['control']} --out {OUT}/eval/control_{split}", g1, f"eval_control_{split}.log"),
+        ]))
+    else:
+        raise SystemExit(f"unknown stage {stage!r}")
+    print("done; outputs in", OUT, "exit", rc)
 
 
 if __name__ == "__main__":

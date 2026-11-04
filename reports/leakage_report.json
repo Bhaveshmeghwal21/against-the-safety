@@ -18,7 +18,7 @@
     }
   },
   "control": {
-    "rows": 1703,
+    "rows": 1697,
     "distinct_chunks_seen": 3121,
     "dev": {
       "questions": 100,

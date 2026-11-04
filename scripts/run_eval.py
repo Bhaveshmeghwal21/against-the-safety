@@ -71,12 +71,13 @@ def main() -> None:
         generator_for = lambda job: rollout.ReplayGenerator(job.scripted_texts)
         model_name = "scripted-oracle"
     else:
-        from ragharness import generate
+        from ragharness import generate, modelref
 
-        model, tok = generate.load_model(MODEL, REVISION, adapter=args.adapter if args.system == "adapter" else None,
+        model_path, revision, source = modelref.resolve()
+        model, tok = generate.load_model(model_path, revision, adapter=args.adapter if args.system == "adapter" else None,
                                          quantize=not args.no_quantize)
         gen = generate.HFGenerator(model, tok)
-        model_name = f"{MODEL}@{REVISION[:8]}" + (f"+{Path(args.adapter).parent.name}" if args.system == "adapter" else "")
+        model_name = f"{MODEL}@{REVISION[:8]} ({source})" + (f"+{Path(args.adapter).parent.name}" if args.system == "adapter" else "")
         if args.system == "closed_book":
             extra = closed_book(jobs, gen, out)
             (out / "summary.json").write_text(json.dumps({"closed_book": extra, "model": model_name}, indent=2), encoding="utf-8")
@@ -91,7 +92,7 @@ def main() -> None:
     store.register_run(run_id, "eval", model_name, config={"top_k": tool.top_k, "budget": 3, "max_chars": tool.max_chars, "index_hash": corp.index_hash})
 
     results = evaluation.run_jobs(jobs, corp, tool, system, generator_for, 3, progress=25)
-    scored = evaluation.score_results(results, corp, store, run_id, model_name)
+    scored = evaluation.score_results(results, corp, store, run_id, model_name, [tool.to_schema()])
     scored["summary"]["model"] = model_name
     scored["summary"]["split"] = args.split
     scored["summary"]["index_hash"] = corp.index_hash

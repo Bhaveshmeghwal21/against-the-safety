@@ -25,10 +25,10 @@ import traceback
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-MODEL = "CohereLabs/tiny-aya-global"
-REVISION = "af89d219b53ed9b13b8a4645f9c8028973510324"
 STAND_IN = "hf-internal-testing/tiny-random-LlamaForCausalLM"
 REPORT: dict = {"stages": {}}
+
+from ragharness import modelref  # noqa: E402
 
 
 def stage(name):
@@ -73,6 +73,20 @@ def env_stage(args):
     return info
 
 
+@stage("model_source")
+def verify_stage(args):
+    from ragharness import modelref
+
+    path, revision, source = modelref.resolve()
+    if args.stand_in:
+        return {"source": "stand-in"}
+    out = {"source": source}
+    if revision is None:  # a local or Kaggle copy: it must be byte-identical to the pinned Hub revision
+        out["verification"] = modelref.verify_local(path, os.environ.get("HF_TOKEN"))
+        assert out["verification"]["identical_to_pinned_revision"], "local weights differ from the pinned Hugging Face revision"
+    return out
+
+
 @stage("tokens")
 def tokens_stage(args, tok):
     from ragharness import rows as rowmod
@@ -106,6 +120,7 @@ def fp16_stage(args):
 
     if not torch.cuda.is_available():
         return {"skipped": "no CUDA"}
+    MODEL, REVISION, _ = modelref.resolve()
     tok = AutoTokenizer.from_pretrained(MODEL, revision=REVISION)
     text = tok.apply_chat_template([{"role": "user", "content": "Name the capital of France."}], add_generation_prompt=True, tokenize=False)
     ids = tok(text, return_tensors="pt", add_special_tokens=False)["input_ids"]
@@ -140,7 +155,7 @@ def train_stage(args, out: Path):
     import torch
     from agenttune.agentic.distill_trainer import create_distill_trainer
 
-    from ragharness import mixture, qlora, training
+    from ragharness import mixture, modelref, qlora, training
 
     rows = mixture.annotate(read_rows("main"))
     keys = pick_smoke_keys(rows, args.longest, args.train_rows)
@@ -150,7 +165,7 @@ def train_stage(args, out: Path):
     cuda = torch.cuda.is_available() and not args.stand_in
     template = (ROOT / "tests" / "fixtures" / "tiny_aya_global_chat_template.jinja").read_text(encoding="utf-8") if args.stand_in else None
     factory = qlora.QLoraFactory(
-        system, quantize=cuda, dtype="float16" if cuda else "float32", revision=None if args.stand_in else REVISION,
+        system, quantize=cuda, dtype="float16" if cuda else "float32", revision=None if args.stand_in else modelref.resolve()[1],
         lora_targets="all-linear" if cuda else ["q_proj", "v_proj"], max_length=args.cap_tokens, use_cpu=not cuda,
         gradient_checkpointing=cuda, chat_template=template, metas=metas, keep=keys,
     )
@@ -159,6 +174,7 @@ def train_stage(args, out: Path):
     if cuda:
         kwargs["optim"] = "paged_adamw_8bit"
         torch.cuda.reset_peak_memory_stats()
+    MODEL, REVISION, _ = modelref.resolve()
     trainer = create_distill_trainer(STAND_IN if args.stand_in else MODEL, trajectories=logs, trainer_factory=factory, **kwargs)
     t0 = time.time()
     result = trainer.train()
@@ -183,9 +199,10 @@ def train_stage(args, out: Path):
 
 
 def load_generation_model(args, adapter: Path | None):
-    from ragharness import generate
+    from ragharness import generate, modelref
 
     cuda = not args.stand_in
+    MODEL, REVISION, _ = modelref.resolve()
     return generate.load_model(STAND_IN if args.stand_in else MODEL, None if args.stand_in else REVISION,
                                adapter=str(adapter) if adapter else None, quantize=cuda, dtype="float16" if cuda else "float32")
 
@@ -254,7 +271,7 @@ VLLM_CHILD = """
 import json, sys, time
 from vllm import LLM, SamplingParams
 t0 = time.time()
-llm = LLM(model=sys.argv[1], revision=sys.argv[2], dtype="float16", max_model_len=4096, gpu_memory_utilization=0.85, enforce_eager=True)
+llm = LLM(model=sys.argv[1], revision=sys.argv[2] or None, dtype="float16", max_model_len=4096, gpu_memory_utilization=0.85, enforce_eager=True)
 load = time.time() - t0
 t1 = time.time()
 out = llm.generate(["Name the capital of France."] * 8, SamplingParams(temperature=0, max_tokens=32))
@@ -266,7 +283,8 @@ print(json.dumps({"load_seconds": round(load, 1), "gen_seconds_8_prompts": round
 def vllm_stage(args):
     if args.stand_in:
         return {"skipped": "stand-in mode"}
-    p = subprocess.run([sys.executable, "-c", VLLM_CHILD, MODEL, REVISION], capture_output=True, text=True, timeout=1500)
+    MODEL, REVISION, _ = modelref.resolve()
+    p = subprocess.run([sys.executable, "-c", VLLM_CHILD, MODEL, REVISION or ""], capture_output=True, text=True, timeout=1500)
     last = (p.stdout.strip().splitlines() or [""])[-1]
     if p.returncode != 0 or not last.startswith("{"):
         return {"ok_child": False, "returncode": p.returncode, "stderr_tail": p.stderr[-900:]}
@@ -277,7 +295,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="runs/smoke")
     ap.add_argument("--stand-in", action="store_true", help="CPU glue-code check with a tiny public model")
-    ap.add_argument("--cap-tokens", type=int, default=3072)
+    ap.add_argument("--cap-tokens", type=int, default=2560)
     ap.add_argument("--longest", type=int, default=6)
     ap.add_argument("--train-rows", type=int, default=24)
     ap.add_argument("--steps", type=int, default=10)
@@ -292,9 +310,11 @@ def main() -> None:
 
     from transformers import AutoTokenizer
 
-    from ragharness import rows as rowmod
+    from ragharness import modelref, rows as rowmod
 
     env_stage(args)
+    verify_stage(args)
+    MODEL, REVISION, _ = modelref.resolve()
     tok = AutoTokenizer.from_pretrained(STAND_IN) if args.stand_in else AutoTokenizer.from_pretrained(MODEL, revision=REVISION)
     if args.stand_in:
         rowmod.fetch_template() if not rowmod.FIXTURE.exists() else None

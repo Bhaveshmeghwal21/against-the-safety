@@ -1,6 +1,6 @@
 """Select the main and control training sets and the dev set from the built rows.
 
-Run (after build_episodes.py):  python scripts/make_training_set.py [--cap-tokens 3072] [--max-ratio 1.0]
+Run (after build_episodes.py):  python scripts/make_training_set.py [--tokenizer .cache/tiny-aya-global] [--cap-tokens 2560] [--max-ratio 1.0]
 Writes data/processed/training/{main,control,dev}.jsonl (git-ignored) and reports/training_sets.json (committed).
 """
 
@@ -28,7 +28,7 @@ def write(path: Path, rows: list[dict]) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--cap-tokens", type=int, default=3072)
+    ap.add_argument("--cap-tokens", type=int, default=2560)
     ap.add_argument("--max-ratio", type=float, default=1.0)
     ap.add_argument("--tokenizer", default=None, help="HF id or path of the Tiny Aya tokenizer; counts become exact (needs the gate)")
     args = ap.parse_args()

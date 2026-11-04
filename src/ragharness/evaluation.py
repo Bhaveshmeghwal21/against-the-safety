@@ -44,6 +44,10 @@ def make_jobs(qs: list[Question], split: str, corp: Corpus, tool: CorpusSearchTo
         for variant, b in accepted.items():
             if variant in HEADLINE or reachable <= extra_questions:
                 jobs.append(Job(q, variant, specs[variant], [s.text for s in b.episode.steps]))
+        if reachable <= extra_questions and "prefill_clean" in specs and "prefill_sufficient" in accepted:
+            # same scripted answer as the distractor variant: nothing to search, answer from the supplied evidence
+            texts = [s.text for s in accepted["prefill_sufficient"].episode.steps]
+            jobs.append(Job(q, "prefill_clean", specs["prefill_clean"], texts))
     return jobs
 
 
@@ -70,7 +74,11 @@ def run_jobs(jobs: list[Job], corp: Corpus, tool: CorpusSearchTool, system: str,
     return results
 
 
-def score_results(results, corp: Corpus, store: TrajectoryStore | None = None, run_id: str = "eval", model: str = "") -> dict:
+def score_results(
+    results, corp: Corpus, store: TrajectoryStore | None = None, run_id: str = "eval", model: str = "", tool_schemas: list | None = None
+) -> dict:
+    """`tool_schemas` ([tool.to_schema()]) switches on AuditKIT's tool-call metrics (validity, redundancy, loops)."""
+    audit.TOOL_SCHEMAS = list(tool_schemas or [])
     chunks = audit.ChunkLookup(corp)
     scores, samples = [], {"all": []}
     for job, ep, cost in results:
@@ -93,7 +101,7 @@ def score_results(results, corp: Corpus, store: TrajectoryStore | None = None, r
             continue
         res = audit.evaluate(ss, f"{model}-{v}")
         summary["auditkit"][v] = {
-            **{n: (None if res.stats.get(n) is None else round(res.stats[n].mean, 3)) for n in audit.SCORERS},
+            **{n: (None if res.stats.get(n) is None else round(res.stats[n].mean, 3)) for n in (audit.ALL_SCORERS if audit.TOOL_SCHEMAS else audit.SCORERS)},
             "not_scored": res.unscored,
         }
     summary["cost"] = {
