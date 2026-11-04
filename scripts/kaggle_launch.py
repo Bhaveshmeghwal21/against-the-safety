@@ -50,7 +50,8 @@ def make_dataset() -> None:
     subprocess.run([sys.executable, str(ROOT / "scripts" / "bundle_for_kaggle.py")], check=True, env={**os.environ, "PYTHONUTF8": "1"})
     meta = {"title": "against-the-safety-bundle", "id": f"{username()}/{SLUG}", "licenses": [{"name": "CC-BY-SA-4.0"}]}
     (BUNDLE / "dataset-metadata.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
-    exists = SLUG in kaggle("datasets", "list", "--mine", "-s", SLUG, check=False)
+    status = kaggle("datasets", "status", f"{username()}/{SLUG}", check=False).lower()  # `datasets list -s` is a search index and can lag
+    exists = any(w in status for w in ("ready", "pending", "processing", "error"))
     if exists:
         print(kaggle("datasets", "version", "-p", str(BUNDLE), "-m", f"bundle {time.strftime('%Y-%m-%d %H:%M')}", "--dir-mode", "zip"))
     else:

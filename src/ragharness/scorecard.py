@@ -16,6 +16,8 @@ import random
 from collections import defaultdict
 from pathlib import Path
 
+from .metrics import F1_THRESHOLD
+
 NO_EVIDENCE = ("open", "first_search_masked", "support_masked")  # the user turn carries no evidence
 SUFFICIENT = ("prefill_sufficient", "prefill_clean")
 
@@ -55,6 +57,8 @@ def clause_metrics(scores: list[dict], summary: dict) -> dict:
         "grounding": {
             "supported_correct (answerable episodes)": _rate(answerable, lambda s: s["outcome"] == "supported_correct"),
             "supported_correct (open questions)": _rate(get("open"), lambda s: s["outcome"] == "supported_correct"),
+            "answer_correct_ignoring_citations (answerable; F1 >= 0.5)": _rate(answerable, lambda s: s["final"] == "answer" and (s["f1"] or 0) >= F1_THRESHOLD),
+            "cites_a_gold_passage_when_answering (answerable)": _rate([s for s in answerable if s["final"] == "answer"], lambda s: bool(s["cites_gold"])),
             "answer_f1_when_answered": summary.get("overall", {}).get("answer_f1_when_answered"),
             "auditkit_citation_support": ak.get("citation_support"),
         },
@@ -81,6 +85,35 @@ def clause_metrics(scores: list[dict], summary: dict) -> dict:
         },
         "episodes": len(scores),
     }
+
+
+def product_table(systems: dict[str, Path]) -> str:
+    """Per-kind results on the fictional Nimbus Home suite (24 tasks, exploratory). Each cell is k/n."""
+    names = list(systems)
+    data = {n: load(p) for n, p in systems.items()}
+    kinds = [("ordinary", "ordinary (one document), supported_correct"), ("two_doc", "two documents, supported_correct"),
+             ("dated", "dated change (current edition needed), supported_correct"), ("missing", "missing evidence, correct_abstain")]
+    lines = ["| metric | " + " | ".join(names) + " |", "| --- |" + " ---: |" * len(names)]
+    for kind, label in kinds:
+        want = "correct_abstain" if kind == "missing" else "supported_correct"
+        cells = []
+        for n in names:
+            rows = [s for s in data[n][0] if s.get("qtype") == kind]
+            cells.append(fmt(_rate(rows, lambda s: s["outcome"] == want)))
+        lines.append(f"| {label} | " + " | ".join(cells) + " |")
+    extra = [
+        ("dated change: cited a superseded edition (lower is better)", lambda s: s.get("cites_superseded"), "dated"),
+        ("missing evidence: gave an unsupported answer (lower is better)", lambda s: s["final"] == "answer", "missing"),
+        ("all tasks: invalid turn (lower is better)", lambda s: s["outcome"] == "invalid", None),
+    ]
+    for label, pred, kind in extra:
+        cells = [fmt(_rate([s for s in data[n][0] if kind is None or s.get("qtype") == kind], pred)) for n in names]
+        lines.append(f"| {label} | " + " | ".join(cells) + " |")
+    for key, label in (("freshness", "AuditKIT freshness of retrieved documents (higher is better)"), ("stale_hit_rate", "AuditKIT stale hit rate (lower is better)")):
+        cells = [fmt(data[n][1].get("auditkit", {}).get("all", {}).get(key)) for n in names]
+        lines.append(f"| {label} | " + " | ".join(cells) + " |")
+    lines.append("| mean searches per task | " + " | ".join(fmt(round(sum(s["n_searches"] for s in data[n][0]) / max(1, len(data[n][0])), 2)) for n in names) + " |")
+    return "\n".join(lines)
 
 
 def paired(a: list[dict], b: list[dict], select, seed: int = 13, reps: int = 5000) -> dict | None:
@@ -112,6 +145,7 @@ def paired(a: list[dict], b: list[dict], select, seed: int = 13, reps: int = 500
 PAIRED_SELECTORS = {
     "end-to-end good (headline: supported answer when answerable, abstain when not)": lambda s: float(s["good"]) if s["variant"] in ("open", "support_masked") else None,
     "supported_correct (answerable episodes)": lambda s: float(s["outcome"] == "supported_correct") if s["answerable"] else None,
+    "answer correct, ignoring citations (answerable; F1 >= 0.5)": lambda s: float(s["final"] == "answer" and (s["f1"] or 0) >= F1_THRESHOLD) if s["answerable"] else None,
     "correct_abstain (unanswerable episodes)": lambda s: float(s["outcome"] == "correct_abstain") if not s["answerable"] else None,
     "unsupported answer (unanswerable; lower is better)": lambda s: float(s["final"] == "answer") if not s["answerable"] else None,
     "supported_correct with distractor passage": lambda s: float(s["outcome"] == "supported_correct") if s["variant"] == "prefill_sufficient" else None,

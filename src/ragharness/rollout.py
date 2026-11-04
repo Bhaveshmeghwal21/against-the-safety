@@ -34,10 +34,12 @@ def rollout_steps(
     first_search_masked: frozenset[str] = frozenset(),
     prefill: list[Hit] | None = None,
     budget: int = 3,
+    lenient: bool = False,
 ):
     """The episode loop as a coroutine: yields the message list for the next model call, receives the model's text,
     returns the finished Episode. A scheduler can interleave many of these and batch their model calls;
-    `rollout` below drives one of them with a plain `generate(messages) -> str`."""
+    `rollout` below drives one of them with a plain `generate(messages) -> str`.
+    `lenient` reads the first valid action (see `protocol.parse_turn_lenient`); the default is the strict protocol."""
     support = corpus.support_chunks(q)
     tool.start_episode(masked, first_search_masked, frozenset(h.chunk_id for h in (prefill or [])))
     ep = Episode(q.qid, q.question, condition, masked, first_search_masked, list(prefill or []), max_chars=tool.max_chars)
@@ -46,8 +48,11 @@ def rollout_steps(
     messages = [{"role": "system", "content": system}, {"role": "user", "content": ep.user_text}]
 
     for _ in range(budget + 1):
-        text = yield messages
-        turn = protocol.parse_turn(text)
+        raw = yield messages
+        if lenient:
+            turn, text = protocol.parse_turn_lenient(raw)
+        else:
+            turn, text = protocol.parse_turn(raw), raw
         if turn.kind == "search":
             key = _norm(turn.query)
             if key in used:
@@ -84,8 +89,9 @@ def rollout(
     first_search_masked: frozenset[str] = frozenset(),
     prefill: list[Hit] | None = None,
     budget: int = 3,
+    lenient: bool = False,
 ) -> Episode:
-    co = rollout_steps(q, corpus, tool, system, condition, masked, first_search_masked, prefill, budget)
+    co = rollout_steps(q, corpus, tool, system, condition, masked, first_search_masked, prefill, budget, lenient)
     try:
         messages = next(co)
         while True:

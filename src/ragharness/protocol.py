@@ -63,6 +63,46 @@ class Turn:
     error: str | None = None
 
 
+def parse_turn_lenient(text: str) -> tuple[Turn, str]:
+    """First-action parser, as a tool-calling harness reads a model that does not stop where it should.
+
+    Returns the turn and the text that stands as the assistant's message. Strictly valid turns pass through unchanged.
+    Otherwise the earliest of these wins: a valid `search_corpus` call anywhere in the text (everything after it is
+    dropped, as if generation had stopped at the end of the call; the message becomes the normalized call), an
+    `<abstain>` tag, or an `<answer>` tag whose chunk ids are whatever `c12345` ids appear in `<citations>`
+    (possibly none). Used for the fair baseline row; the strict parser stays the protocol-compliance measure.
+    """
+    strict = parse_turn(text)
+    if strict.kind != "invalid":
+        return strict, text
+    found: list[tuple[int, Turn, str]] = []
+    decoder = json.JSONDecoder()
+    for m in re.finditer(r"\[\s*\{", text):
+        try:
+            obj, _ = decoder.raw_decode(text[m.start():])
+        except ValueError:
+            continue
+        calls = obj if isinstance(obj, list) else None
+        if calls and len(calls) >= 1 and isinstance(calls[0], dict) and calls[0].get("tool_name") == TOOL_NAME:
+            params = calls[0].get("parameters")
+            query = params.get("query") if isinstance(params, dict) else None
+            if isinstance(query, str) and query.strip():
+                found.append((m.start(), Turn("search", query=query.strip()), format_search(query.strip())))
+                break
+    m = re.search(r"<abstain>(.*?)</abstain>", text, re.DOTALL | re.IGNORECASE)
+    if m and m.group(1).strip():
+        found.append((m.start(), Turn("abstain", missing=m.group(1).strip()), text))
+    m = re.search(r"<answer>(.*?)</answer>", text, re.DOTALL | re.IGNORECASE)
+    if m and m.group(1).strip():
+        cites = re.search(r"<citations>(.*?)</citations>", text, re.DOTALL | re.IGNORECASE)
+        ids = re.findall(r"\bc\d{5}\b", cites.group(1)) if cites else []
+        found.append((m.start(), Turn("answer", answer=m.group(1).strip(), citations=ids), text))
+    if not found:
+        return strict, text
+    _, turn, message = min(found, key=lambda f: f[0])
+    return turn, message
+
+
 def parse_turn(text: str) -> Turn:
     """Strict parser. Anything that is not exactly one valid action is `invalid` (never an abstention)."""
     m = _ANSWER.match(text)

@@ -1,0 +1,15 @@
+{
+  "suite": "Nimbus Home (fictional)",
+  "as_of": "2026-10-15",
+  "documents": 24,
+  "tasks": 24,
+  "by_kind": {
+    "ordinary": 6,
+    "two_doc": 6,
+    "dated": 6,
+    "missing": 6
+  },
+  "superseded_documents": 5,
+  "index_hash": "eccf01acedef1a35f4f0aff31ddb05be9a7e9c132c5d043c26e9e29f3ffa2956",
+  "chunks": 24
+}

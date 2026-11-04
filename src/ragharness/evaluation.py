@@ -76,7 +76,7 @@ def run_jobs(jobs: list[Job], corp: Corpus, tool: CorpusSearchTool, system: str,
 
 def run_jobs_batched(
     jobs: list[Job], corp: Corpus, tool_factory: Callable[[], CorpusSearchTool], system: str, gen, budget: int = 3,
-    concurrency: int = 24, progress: int = 0,
+    concurrency: int = 24, progress: int = 0, lenient: bool = False,
 ):
     """Same episodes as `run_jobs`, with up to `concurrency` of them in flight so their model calls share one batch.
 
@@ -91,7 +91,7 @@ def run_jobs_batched(
 
     def start(i: int) -> None:
         job = jobs[i]
-        co = rollout_mod.rollout_steps(job.q, corp, tool_factory(), system, job.variant, job.spec.masked, job.spec.first_search_masked, job.spec.prefill, budget)
+        co = rollout_mod.rollout_steps(job.q, corp, tool_factory(), system, job.variant, job.spec.masked, job.spec.first_search_masked, job.spec.prefill, budget, lenient)
         active[i] = {"co": co, "messages": next(co), "seconds": 0.0, "calls": 0, "in": 0, "out": 0}
 
     while queue or active:
@@ -128,6 +128,10 @@ def score_results(
     scores, samples = [], {"all": []}
     for job, ep, cost in results:
         s = metrics.score_episode(ep, job.q, corp, job.spec.answerable)
+        s["qtype"] = job.q.qtype
+        if audit.CHUNK_META and audit.DECISION_DATE:  # dated documents: did the answer cite an edition that was already superseded?
+            cited = ep.final.turn.citations if ep.final.turn.kind == "answer" else []
+            s["cites_superseded"] = any((audit.CHUNK_META.get(c, {}).get("superseded_date") or "9999") <= audit.DECISION_DATE for c in cited)
         s.update(cost)
         scores.append(s)
         sample = audit.to_sample(ep, job.q, corp, chunks, job.spec.answerable)
@@ -146,7 +150,7 @@ def score_results(
             continue
         res = audit.evaluate(ss, f"{model}-{v}")
         summary["auditkit"][v] = {
-            **{n: (None if res.stats.get(n) is None else round(res.stats[n].mean, 3)) for n in (audit.ALL_SCORERS if audit.TOOL_SCHEMAS else audit.SCORERS)},
+            **{n: (None if res.stats.get(n) is None else round(res.stats[n].mean, 3)) for n in dict.fromkeys(audit.active_scorers() + (["stale_hit_rate"] if audit.DECISION_DATE and audit.CHUNK_META else []))},
             "not_scored": res.unscored,
         }
     summary["cost"] = {

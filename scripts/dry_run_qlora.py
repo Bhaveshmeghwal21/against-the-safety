@@ -1,4 +1,4 @@
-﻿"""CPU dry run of the whole training path with a tiny stand-in model (no GPU, no gated files).
+"""CPU dry run of the whole training path with a tiny stand-in model (no GPU, no gated files).
 
 AgentTune EventLogs -> create_distill_trainer -> Project.distill -> QLoraFactory -> TRL SFTTrainer -> a few steps.
 Checks that (1) rows reach the trainer, (2) the loss is applied to completion tokens only, (3) the adapter saves and
@@ -10,12 +10,16 @@ Run (after build_episodes.py):  python scripts/dry_run_qlora.py
 
 import json
 import shutil
+import sys
 from pathlib import Path
 
 from agenttune.agentic.events import Event, EventKind, EventLog
 from agenttune.agentic.distill_trainer import create_distill_trainer
 
 from ragharness import protocol, qlora, rows
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import train as train_script  # noqa: E402  (EpochSnapshots)
 
 ROOT = Path(__file__).resolve().parents[1]
 STAND_IN = "hf-internal-testing/tiny-random-LlamaForCausalLM"
@@ -41,18 +45,21 @@ def main() -> None:
 
     factory = qlora.QLoraFactory(
         system, quantize=False, dtype="float32", lora_targets=["q_proj", "v_proj"], max_length=4096, use_cpu=True,
-        gradient_checkpointing=False, chat_template=rows.FIXTURE.read_text(encoding="utf-8") if rows.FIXTURE.exists() else rows.fetch_template().read_text(encoding="utf-8"),
+        gradient_checkpointing=False, callbacks=[train_script.EpochSnapshots(ROOT / "runs" / "dry_run", 2)], chat_template=rows.FIXTURE.read_text(encoding="utf-8") if rows.FIXTURE.exists() else rows.fetch_template().read_text(encoding="utf-8"),
     )
     out = ROOT / "runs" / "dry_run"
     shutil.rmtree(out, ignore_errors=True)
     trainer = create_distill_trainer(
         STAND_IN, trajectories=logs, trainer_factory=factory, output_dir=str(out),
-        max_steps=3, per_device_train_batch_size=1, gradient_accumulation_steps=2, learning_rate=1e-3,
+        num_train_epochs=2, per_device_train_batch_size=1, gradient_accumulation_steps=8, learning_rate=1e-3,
     )
     preview = trainer.sft_dataset()
     print("AgentTune episodes:", len(preview))
     result = trainer.train()
     print("train result keys:", sorted(result.metrics) if hasattr(result, "metrics") else type(result))
+    snap = ROOT / "runs" / "dry_run" / "adapter_ep1"
+    assert (snap / "adapter_config.json").exists() and (snap / "tokenizer.json").exists(), "the epoch-1 snapshot was not saved with its tokenizer"
+    print("epoch snapshot saved:", sorted(p.name for p in snap.iterdir()))
     assert result.training_loss > 1.0, f"loss {result.training_loss}: no supervised tokens reached the loss (truncation?)"
 
     # loss mask: only completion tokens carry labels

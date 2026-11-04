@@ -17,9 +17,17 @@ from .data import Question
 from .episodes import Episode
 
 SCORERS = ["evidence_set_recall", "citation_support", "abstention"]
+FRESHNESS = ["freshness"]
 AGENT_SCORERS = ["tool_call_validity", "redundant_tool_calls", "agent_loop_detection"]
 ALL_SCORERS = SCORERS + AGENT_SCORERS
 TOOL_SCHEMAS: list[dict] = []  # set by the caller from the AgentTune tool: [tool.to_schema()]
+DECISION_DATE: str | None = None  # ISO "as of" date; with CHUNK_META it switches on AuditKIT freshness (dated documents only)
+CHUNK_META: dict[str, dict] = {}  # chunk_id -> {"effective_date", "superseded_date"}
+
+
+def active_scorers() -> list[str]:
+    names = ALL_SCORERS if TOOL_SCHEMAS else SCORERS
+    return names + (FRESHNESS if DECISION_DATE and CHUNK_META else [])
 
 
 class ChunkLookup:
@@ -31,15 +39,17 @@ class ChunkLookup:
         return c["text"] if c else None
 
 
-def _doc(text: str) -> dict:
-    return make_doc(content=text, spans=[{"start": 0, "end": len(text), "page": 1}])
+def _doc(text: str, chunk_id: str | None = None) -> dict:
+    meta = CHUNK_META.get(chunk_id or "", {})
+    return make_doc(content=text, spans=[{"start": 0, "end": len(text), "page": 1}],
+                    effective_date=meta.get("effective_date"), superseded_date=meta.get("superseded_date"))
 
 
 def rag_case(q: Question, corpus: Corpus, chunks: ChunkLookup, answerable: bool) -> RAGCase:
     support_ids = list(corpus.support_chunks(q).values())
     if not answerable:  # support was masked: nothing can be retrieved or cited, so only abstention is tested
-        return RAGCase(case_id=q.qid, question=q.question, answerability="unanswerable", expected_action="abstain")
-    docs = {c: _doc(chunks.text(c)) for c in support_ids}
+        return RAGCase(case_id=q.qid, question=q.question, answerability="unanswerable", expected_action="abstain", decision_date=DECISION_DATE)
+    docs = {c: _doc(chunks.text(c), c) for c in support_ids}
     return RAGCase(
         case_id=q.qid,
         question=q.question,
@@ -49,6 +59,7 @@ def rag_case(q: Question, corpus: Corpus, chunks: ChunkLookup, answerable: bool)
         sufficient_evidence_sets=[sorted(support_ids)],
         evidence_digests={c: d["digest"] for c, d in docs.items()},
         gold_citations=[{"doc_id": c, "start": 0, "end": len(chunks.text(c))} for c in support_ids],
+        decision_date=DECISION_DATE,
     )
 
 
@@ -100,7 +111,7 @@ def to_sample(ep: Episode, q: Question, corpus: Corpus, chunks: ChunkLookup, ans
     trace = {**rag_trace(ep, chunks).to_dict(), **agent_trace(ep)}
     needed = set(corpus.support_chunks(q).values()) | {h.chunk_id for h in ep.retrieved_chunks()}
     needed |= {c for c in ep.final.turn.citations if chunks.text(c) is not None}
-    snapshot = CorpusSnapshot(documents={c: _doc(chunks.text(c)) for c in needed}, chunker_version="paragraph-1")
+    snapshot = CorpusSnapshot(documents={c: _doc(chunks.text(c), c) for c in needed}, chunker_version="paragraph-1")
     return ak.Sample(
         input=q.question,
         target=q.answer,
@@ -129,4 +140,4 @@ def answer_scores(ep: Episode, q: Question) -> dict:
 
 
 def evaluate(samples: list[ak.Sample], name: str):
-    return ak.evaluate(dataset=samples, model="precomputed", scorers=ALL_SCORERS if TOOL_SCHEMAS else SCORERS, experiment_name=name)
+    return ak.evaluate(dataset=samples, model="precomputed", scorers=active_scorers(), experiment_name=name)

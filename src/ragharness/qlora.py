@@ -105,9 +105,11 @@ class QLoraFactory:
         metas: list[dict] | None = None,
         keep: set | None = None,
         eval_rows: list[dict] | None = None,
+        callbacks: list | None = None,
     ):
         self.system = system
         self.metas, self.keep, self.eval_rows = metas, keep, eval_rows
+        self.callbacks = list(callbacks or [])
         self.n_train_rows = 0
         self.chat_template = chat_template  # only for stand-in models in dry runs; the real tokenizer ships the template
         self.quantize = quantize
@@ -168,7 +170,7 @@ class QLoraFactory:
             train_dataset=data,
             eval_dataset=eval_data,
             processing_class=self.tokenizer,
-            callbacks=[make_dtype_guard(self.dtype_info, cast=bool(cfg_kwargs.get("fp16")))],
+            callbacks=[make_dtype_guard(self.dtype_info, cast=bool(cfg_kwargs.get("fp16"))), *self.callbacks],
             peft_config=LoraConfig(
                 r=self.lora_r, lora_alpha=self.lora_alpha, lora_dropout=self.lora_dropout,
                 target_modules=self.lora_targets, task_type="CAUSAL_LM", bias="none",

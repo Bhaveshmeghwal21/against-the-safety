@@ -28,11 +28,28 @@ def git_commit() -> str:
         return "unknown"
 
 
+class EpochSnapshots:
+    """Saves the adapter at the end of every epoch but the last (adapter_ep1, ...), so the epoch count can be chosen on dev."""
+
+    def __new__(cls, out, total):
+        from transformers import TrainerCallback
+
+        class _Cb(TrainerCallback):
+            def on_epoch_end(self, args, state, control, model=None, **kwargs):
+                ep = int(round(state.epoch))
+                if ep < total:
+                    model.save_pretrained(str(out / f"adapter_ep{ep}"))
+                    kwargs["processing_class"].save_pretrained(str(out / f"adapter_ep{ep}"))
+                    print(f"saved adapter_ep{ep} at step {state.global_step}", flush=True)
+
+        return _Cb()
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--set", choices=["main", "control"], required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--epochs", type=float, default=1.0)
+    ap.add_argument("--epochs", type=float, default=2.0)
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--grad-accum", type=int, default=16)
     ap.add_argument("--max-length", type=int, default=2560)
@@ -65,6 +82,7 @@ def main() -> None:
     factory = qlora.QLoraFactory(
         system, quantize=True, dtype="float16", lora_r=args.lora_r, lora_alpha=2 * args.lora_r, revision=model_revision,
         max_length=args.max_length, metas=metas, keep=keys,
+        callbacks=[EpochSnapshots(out, int(args.epochs))] if float(args.epochs).is_integer() and args.epochs > 1 else [],
     )
     trainer = create_distill_trainer(
         model_path, trajectories=logs, trainer_factory=factory, output_dir=str(out),

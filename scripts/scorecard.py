@@ -1,9 +1,9 @@
 """Build the before-and-after scorecard from run_eval outputs.
 
-  python scripts/scorecard.py --split test --before base --after main --control control --closed closed \
-      --run base=runs/eval/base_test --run main=runs/eval/main_test --run control=runs/eval/control_test
+  python scripts/scorecard.py --split test --tag lenient --before base --after main --control control \
+      --run base=runs/eval/base_test/lenient --run main=runs/eval/main_test/lenient --run control=runs/eval/control_test/lenient
 
-Writes reports/scorecard_<split>.json and reports/scorecard_<split>.md. Use dev numbers for choices and test only once.
+Writes reports/scorecard_<split>[_<tag>].json and .md. Run once per parse mode (lenient = first valid action, strict = protocol compliance). Use dev numbers for choices and test only once.
 """
 
 import argparse
@@ -22,17 +22,26 @@ def main() -> None:
     ap.add_argument("--before", default="base")
     ap.add_argument("--after", default="main")
     ap.add_argument("--control", action="append", default=[])
+    ap.add_argument("--product", action="store_true", help="the --run directories are product-suite runs: print the per-kind table instead")
+    ap.add_argument("--tag", default="", help="suffix for the output files, e.g. lenient or strict")
     args = ap.parse_args()
     systems = {}
     for item in args.run:
         name, path = item.split("=", 1)
         systems[name] = Path(path)
+    if args.product:
+        md = "# Nimbus Home support suite (fictional, 24 tasks, exploratory)\n\n" + scorecard.product_table(systems) + "\n"
+        tag = args.tag or "all"
+        (ROOT / "reports" / f"scorecard_product_{tag}.md").write_text(md, encoding="utf-8", newline="\n")
+        print(md)
+        return
     card = scorecard.build(systems, args.before, args.after, args.control)
     card["split"] = args.split
+    suffix = f"_{args.tag}" if args.tag else ""
     out = ROOT / "reports"
-    (out / f"scorecard_{args.split}.json").write_text(json.dumps(card, indent=2), encoding="utf-8", newline="\n")
+    (out / f"scorecard_{args.split}{suffix}.json").write_text(json.dumps(card, indent=2), encoding="utf-8", newline="\n")
     md = scorecard.markdown(card, f"Scorecard ({args.split}): {args.after} against {args.before}")
-    (out / f"scorecard_{args.split}.md").write_text(md, encoding="utf-8", newline="\n")
+    (out / f"scorecard_{args.split}{suffix}.md").write_text(md, encoding="utf-8", newline="\n")
     print(md)
 
 
