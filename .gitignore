@@ -1,0 +1,33 @@
+# Secrets and credentials
+.env
+*.env
+*.key
+.mcp-auth/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Experiment outputs (publish through Hugging Face, not git)
+runs/
+outputs/
+checkpoints/
+wandb/
+*.safetensors
+*.bin
+*.gguf
+*.pt
+
+# Local data and indexes (rebuild from scripts and pinned manifests)
+data/raw/
+*.sqlite
+*.db
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
