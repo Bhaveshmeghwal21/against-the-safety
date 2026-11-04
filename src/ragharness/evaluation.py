@@ -74,6 +74,51 @@ def run_jobs(jobs: list[Job], corp: Corpus, tool: CorpusSearchTool, system: str,
     return results
 
 
+def run_jobs_batched(
+    jobs: list[Job], corp: Corpus, tool_factory: Callable[[], CorpusSearchTool], system: str, gen, budget: int = 3,
+    concurrency: int = 24, progress: int = 0,
+):
+    """Same episodes as `run_jobs`, with up to `concurrency` of them in flight so their model calls share one batch.
+
+    `gen.generate_batch(list of message lists) -> list[GenOut]`. Each in-flight episode has its own tool instance
+    (the tool keeps per-episode mask and shown-passage state). Per-episode `seconds` is amortized: each model call
+    is charged its batch's wall time divided by the batch size. Results come back in job order.
+    """
+    results: list = [None] * len(jobs)
+    queue = list(range(len(jobs)))[::-1]
+    active: dict[int, dict] = {}
+    t_all, done = time.time(), 0
+
+    def start(i: int) -> None:
+        job = jobs[i]
+        co = rollout_mod.rollout_steps(job.q, corp, tool_factory(), system, job.variant, job.spec.masked, job.spec.first_search_masked, job.spec.prefill, budget)
+        active[i] = {"co": co, "messages": next(co), "seconds": 0.0, "calls": 0, "in": 0, "out": 0}
+
+    while queue or active:
+        while queue and len(active) < concurrency:
+            start(queue.pop())
+        ids = list(active)
+        t0 = time.time()
+        outs = gen.generate_batch([active[i]["messages"] for i in ids])
+        share = (time.time() - t0) / len(ids)
+        for i, out in zip(ids, outs):
+            st = active[i]
+            st["seconds"] += share
+            st["calls"] += 1
+            st["in"] += out.input_tokens
+            st["out"] += out.output_tokens
+            try:
+                st["messages"] = st["co"].send(out.text)
+            except StopIteration as stop:
+                cost = {"seconds": round(st["seconds"], 3), "model_calls": st["calls"], "input_tokens": st["in"], "output_tokens": st["out"]}
+                results[i] = (jobs[i], stop.value, cost)
+                del active[i]
+                done += 1
+                if progress and done % progress == 0:
+                    print(f"  {done}/{len(jobs)} episodes, {time.time() - t_all:.0f}s", flush=True)
+    return results
+
+
 def score_results(
     results, corp: Corpus, store: TrajectoryStore | None = None, run_id: str = "eval", model: str = "", tool_schemas: list | None = None
 ) -> dict:

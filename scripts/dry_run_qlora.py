@@ -1,4 +1,4 @@
-"""CPU dry run of the whole training path with a tiny stand-in model (no GPU, no gated files).
+﻿"""CPU dry run of the whole training path with a tiny stand-in model (no GPU, no gated files).
 
 AgentTune EventLogs -> create_distill_trainer -> Project.distill -> QLoraFactory -> TRL SFTTrainer -> a few steps.
 Checks that (1) rows reach the trainer, (2) the loss is applied to completion tokens only, (3) the adapter saves and
@@ -40,7 +40,7 @@ def main() -> None:
     logs = load_logs(24)
 
     factory = qlora.QLoraFactory(
-        system, quantize=False, dtype="float32", lora_targets=["q_proj", "v_proj"], max_length=1024, use_cpu=True,
+        system, quantize=False, dtype="float32", lora_targets=["q_proj", "v_proj"], max_length=4096, use_cpu=True,
         gradient_checkpointing=False, chat_template=rows.FIXTURE.read_text(encoding="utf-8") if rows.FIXTURE.exists() else rows.fetch_template().read_text(encoding="utf-8"),
     )
     out = ROOT / "runs" / "dry_run"
@@ -53,6 +53,7 @@ def main() -> None:
     print("AgentTune episodes:", len(preview))
     result = trainer.train()
     print("train result keys:", sorted(result.metrics) if hasattr(result, "metrics") else type(result))
+    assert result.training_loss > 1.0, f"loss {result.training_loss}: no supervised tokens reached the loss (truncation?)"
 
     # loss mask: only completion tokens carry labels
     sft = factory.sft_trainer

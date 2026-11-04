@@ -79,10 +79,10 @@ def main() -> None:
 
     sft = factory.sft_trainer
     ds = sft.train_dataset
+    sft.model.save_pretrained(str(out / "adapter"))  # save first: nothing below may lose the trained adapter
+    factory.tokenizer.save_pretrained(str(out / "adapter"))
     processed = int(sum(len(x) for x in ds["input_ids"]))
     supervised = int(sum(sum(m) for m in ds["completion_mask"]))
-    sft.model.save_pretrained(str(out / "adapter"))
-    factory.tokenizer.save_pretrained(str(out / "adapter"))
 
     import peft, transformers, trl
 
@@ -93,6 +93,7 @@ def main() -> None:
         "wall_seconds": round(wall, 1), "processed_tokens_per_second": round(processed * args.epochs / wall, 1),
         "peak_gpu_memory_gb": round(torch.cuda.max_memory_allocated() / 2**30, 2),
         "optimizer_steps": getattr(result, "global_step", None),
+        "dtype_info": factory.dtype_info,
         "train_loss": getattr(result, "training_loss", None) or getattr(result, "metrics", {}).get("train_loss"),
         "args": vars(args),
         "versions": {"torch": torch.__version__, "transformers": transformers.__version__, "trl": trl.__version__, "peft": peft.__version__,

@@ -44,6 +44,47 @@ def to_hf_rows(
     return out
 
 
+def dtype_report(model) -> dict[str, int]:
+    """Parameter count per (trainable|frozen, dtype)."""
+    counts: dict[str, int] = {}
+    for _, p in model.named_parameters():
+        key = f"{'trainable' if p.requires_grad else 'frozen'}:{str(p.dtype).replace('torch.', '')}"
+        counts[key] = counts.get(key, 0) + p.numel()
+    return counts
+
+
+def cast_trainable_to_fp32(model) -> list[str]:
+    """fp16 AMP's GradScaler cannot unscale bf16 gradients; keep every trainable parameter in float32 (names changed)."""
+    import torch
+
+    changed = []
+    for name, p in model.named_parameters():
+        if p.requires_grad and p.dtype != torch.float32:
+            p.data = p.data.to(torch.float32)
+            changed.append(name)
+    return changed
+
+
+def make_dtype_guard(sink: dict, cast: bool):
+    """Trainer callback run once the trainer has prepared the model: log parameter dtypes, optionally force float32."""
+    import json
+    from pathlib import Path
+
+    from transformers import TrainerCallback
+
+    class DtypeGuard(TrainerCallback):
+        def on_train_begin(self, args, state, control, model=None, **kwargs):
+            before = dtype_report(model)
+            changed = cast_trainable_to_fp32(model) if cast else []
+            sink.update(before=before, n_cast=len(changed), cast_examples=changed[:8], after=dtype_report(model))
+            print("[dtype-guard]", json.dumps(sink), flush=True)
+            if args.output_dir:
+                Path(args.output_dir).mkdir(parents=True, exist_ok=True)
+                (Path(args.output_dir) / "dtype_guard.json").write_text(json.dumps(sink, indent=2), encoding="utf-8")
+
+    return DtypeGuard()
+
+
 class QLoraFactory:
     def __init__(
         self,
@@ -120,15 +161,21 @@ class QLoraFactory:
             "logging_steps": 1,
         }
         cfg_kwargs.update(kwargs)  # AgentTune forwards output_dir and any SFT knobs
+        self.dtype_info: dict = {}
         self.sft_trainer = SFTTrainer(
             model=self.model,
             args=SFTConfig(**cfg_kwargs),
             train_dataset=data,
             eval_dataset=eval_data,
             processing_class=self.tokenizer,
+            callbacks=[make_dtype_guard(self.dtype_info, cast=bool(cfg_kwargs.get("fp16")))],
             peft_config=LoraConfig(
                 r=self.lora_r, lora_alpha=self.lora_alpha, lora_dropout=self.lora_dropout,
                 target_modules=self.lora_targets, task_type="CAUSAL_LM", bias="none",
             ),
         )
+        if cfg_kwargs.get("fp16"):
+            # TRL 1.7.1 casts every trainable parameter of a quantized model to bfloat16 (sft_trainer.py, QLoRA block).
+            # The T4 has no bf16 and fp16 AMP's GradScaler rejects bf16 gradients, so put the adapter back in float32.
+            self.dtype_info["cast_after_trl"] = len(cast_trainable_to_fp32(self.sft_trainer.model))
         return self.sft_trainer

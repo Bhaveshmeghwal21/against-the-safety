@@ -26,8 +26,13 @@ def main() -> None:
         files += [p for p in (ROOT / d).rglob("*") if p.is_file()]
     files = [p for p in files if not any(s in p.as_posix() for s in SKIP)]
     with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
+        content = hashlib.sha256()
         for p in sorted(files):
-            z.write(p, p.relative_to(ROOT).as_posix())
+            rel = p.relative_to(ROOT).as_posix()
+            z.write(p, rel)
+            content.update(rel.encode() + b"\0" + hashlib.sha256(p.read_bytes()).digest())
+        # the kernel compares this id with the one it was launched with, so a stale dataset mount fails fast
+        z.writestr("BUNDLE_ID", content.hexdigest()[:20])
     digest = hashlib.sha256(zpath.read_bytes()).hexdigest()
     index = json.loads((ROOT / "data" / "manifests" / "index_manifest.json").read_text(encoding="utf-8"))
     (OUT / "dataset-metadata.json").write_text(json.dumps({

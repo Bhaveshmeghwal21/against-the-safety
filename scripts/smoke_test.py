@@ -70,6 +70,17 @@ def env_stage(args):
     if torch.cuda.is_available():
         info["gpus"] = [torch.cuda.get_device_name(i) for i in range(torch.cuda.device_count())]
         info["bf16_supported"] = torch.cuda.is_bf16_supported()
+    import sqlite3
+
+    info["sqlite"] = {"version": sqlite3.sqlite_version, "executable": sys.executable}
+    try:
+        con = sqlite3.connect(":memory:")
+        con.execute("CREATE VIRTUAL TABLE t USING fts5(a)")
+        con.execute("INSERT INTO t VALUES ('khan kluay')")
+        info["sqlite"]["fts5_match"] = con.execute("SELECT count(*) FROM t WHERE t MATCH '\"khan\"'").fetchone()[0]
+        info["sqlite"]["bm25"] = con.execute("SELECT bm25(t) FROM t WHERE t MATCH '\"khan\"'").fetchone() is not None
+    except sqlite3.Error as e:
+        info["sqlite"]["fts5_error"] = f"{type(e).__name__}: {e}"
     return info
 
 
@@ -194,6 +205,7 @@ def train_stage(args, out: Path):
         "tokens_per_second": round(tokens / len(ds) * seen / wall, 1),
         "peak_gpu_memory_gb": round(torch.cuda.max_memory_allocated() / 2**30, 2) if cuda else None,
         "train_loss": getattr(result, "training_loss", None),
+        "dtype_info": factory.dtype_info,
         "loss_finite": bool(getattr(result, "training_loss", 0) == getattr(result, "training_loss", 0)),
     }
 
@@ -209,19 +221,19 @@ def load_generation_model(args, adapter: Path | None):
 
 @stage("generate")
 def generate_stage(args, out: Path):
-    from agenttune.rag.retrieval.sqlite_fts import SQLiteFTSBackend
-
     from ragharness import corpus as corpus_mod, data, evaluation, generate, protocol, rollout, rows as rowmod
-    from ragharness.retrieval import MaskedSearch
+    from ragharness.retrieval import MaskedSearch, open_verified_backend
     from ragharness.tools import CorpusSearchTool
 
     man = json.loads((ROOT / "data" / "manifests" / "split_manifest.json").read_text(encoding="utf-8"))
     splits = {n: data.read_questions(ROOT / "data" / "processed" / f"questions_{n}.jsonl") for n in ("train", "dev", "test")}
     corp = corpus_mod.build_corpus([q for n in splits for q in splits[n]], seed=man["seed"])
-    backend = SQLiteFTSBackend(str(ROOT / "data" / "index" / "corpus.sqlite"), match_all=False)
+    backend = open_verified_backend(ROOT / "data" / "index" / "corpus.sqlite", corp)
     tool, search = CorpusSearchTool(backend, top_k=3), MaskedSearch(backend)
     system = protocol.system_prompt(tool)
     jobs = evaluation.make_jobs(splits["dev"][: args.gen_questions], "dev", corp, tool, search, extra_questions=0)
+    if not jobs:
+        raise RuntimeError(f"make_jobs returned no episodes for {args.gen_questions} dev questions")
     template = rowmod.FIXTURE.read_text(encoding="utf-8") if args.stand_in else None
     result = {}
     for label, adapter in (("base", None), ("adapter", out / "adapter")):
@@ -229,15 +241,22 @@ def generate_stage(args, out: Path):
             result[label] = {"skipped": "no adapter (train stage failed)"}
             continue
         model, tok = load_generation_model(args, adapter)
-        gen = generate.HFGenerator(model, tok, chat_template=template)
+        gen = generate.HFGenerator(model, tok, chat_template=template, batch_size=args.gen_batch)
+        probe = [[{"role": "system", "content": system}, {"role": "user", "content": j.q.question}] for j in jobs[:6]]
+        singles = [gen(m) for m in probe]
+        batched = [o.text for o in gen.generate_batch(probe)]
         t0 = time.time()
-        res = evaluation.run_jobs(jobs, corp, tool, system, lambda job: gen, 3)
+        res = evaluation.run_jobs_batched(jobs, corp, lambda: CorpusSearchTool(backend, top_k=3), system, gen, 3, args.gen_concurrency)
+        wall = time.time() - t0
         scored = evaluation.score_results(res, corp, None, label, label)["summary"]
         kinds = [ep.final.turn.kind for _, ep, _ in res]
         result[label] = {
             "episodes": len(res), "final_kinds": {k: kinds.count(k) for k in set(kinds)}, "headline": scored["headline"],
-            "mean_seconds_per_episode": round((time.time() - t0) / len(res), 2),
+            "batch_matches_single": f"{sum(a == b for a, b in zip(singles, batched))}/{len(probe)}",
+            "wall_seconds": round(wall, 1), "wall_seconds_per_episode": round(wall / len(res), 2),
+            "model_calls": gen.n_calls, "output_tokens": gen.output_tokens, "truncated_inputs": gen.truncated_inputs,
             "mean_model_calls": scored["cost"]["mean_model_calls"], "mean_output_tokens": scored["cost"]["mean_output_tokens"],
+            "peak_gpu_memory_gb": round(__import__("torch").cuda.max_memory_allocated() / 2**30, 2) if not args.stand_in else None,
             "first_outputs": [res[i][1].steps[0].text[:160] for i in range(min(3, len(res)))],
         }
         del model
@@ -300,7 +319,9 @@ def main() -> None:
     ap.add_argument("--train-rows", type=int, default=24)
     ap.add_argument("--steps", type=int, default=10)
     ap.add_argument("--grad-accum", type=int, default=2)
-    ap.add_argument("--gen-questions", type=int, default=8)
+    ap.add_argument("--gen-questions", type=int, default=16)
+    ap.add_argument("--gen-batch", type=int, default=12)
+    ap.add_argument("--gen-concurrency", type=int, default=24)
     ap.add_argument("--skip", default="", help="comma-separated stage names to skip")
     args = ap.parse_args()
     skip = set(args.skip.split(","))

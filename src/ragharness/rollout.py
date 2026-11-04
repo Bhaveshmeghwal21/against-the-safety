@@ -24,18 +24,20 @@ def _norm(query: str) -> str:
     return " ".join(query.lower().split())
 
 
-def rollout(
+def rollout_steps(
     q: Question,
     corpus: Corpus,
     tool: CorpusSearchTool,
-    generate: Generator,
     system: str,
     condition: str,
     masked: frozenset[str] = frozenset(),
     first_search_masked: frozenset[str] = frozenset(),
     prefill: list[Hit] | None = None,
     budget: int = 3,
-) -> Episode:
+):
+    """The episode loop as a coroutine: yields the message list for the next model call, receives the model's text,
+    returns the finished Episode. A scheduler can interleave many of these and batch their model calls;
+    `rollout` below drives one of them with a plain `generate(messages) -> str`."""
     support = corpus.support_chunks(q)
     tool.start_episode(masked, first_search_masked, frozenset(h.chunk_id for h in (prefill or [])))
     ep = Episode(q.qid, q.question, condition, masked, first_search_masked, list(prefill or []), max_chars=tool.max_chars)
@@ -44,7 +46,7 @@ def rollout(
     messages = [{"role": "system", "content": system}, {"role": "user", "content": ep.user_text}]
 
     for _ in range(budget + 1):
-        text = generate(messages)
+        text = yield messages
         turn = protocol.parse_turn(text)
         if turn.kind == "search":
             key = _norm(turn.query)
@@ -69,6 +71,27 @@ def rollout(
 
     ep.complete = all(c in observed for c in support.values())
     return ep
+
+
+def rollout(
+    q: Question,
+    corpus: Corpus,
+    tool: CorpusSearchTool,
+    generate: Generator,
+    system: str,
+    condition: str,
+    masked: frozenset[str] = frozenset(),
+    first_search_masked: frozenset[str] = frozenset(),
+    prefill: list[Hit] | None = None,
+    budget: int = 3,
+) -> Episode:
+    co = rollout_steps(q, corpus, tool, system, condition, masked, first_search_masked, prefill, budget)
+    try:
+        messages = next(co)
+        while True:
+            messages = co.send(generate(messages))
+    except StopIteration as done:
+        return done.value
 
 
 class ReplayGenerator:

@@ -68,15 +68,28 @@ def find_model() -> str:
     raise SystemExit("attach the model cohere-labs/tiny-aya/transformers/global/1 to this kernel")
 
 
+def has_fts5(py: str) -> bool:
+    code = "import sqlite3; sqlite3.connect(':memory:').execute('create virtual table t using fts5(a)')"
+    return subprocess.run([py, "-c", code], capture_output=True).returncode == 0
+
+
 def python_for_env() -> str:
-    """AgentTune needs Python 3.12+. Use the kernel's interpreter if it qualifies, otherwise build a 3.12 venv with uv."""
-    if sys.version_info >= (3, 12):
-        return sys.executable
+    """AgentTune needs Python 3.12+ and its retrieval backend needs SQLite FTS5.
+
+    Kaggle's /usr/bin/python3 (3.13) passes a fresh-process FTS5 check, yet inside the training process (after torch and
+    the other libraries are imported) its sqlite3 reports "no such module: fts5", presumably because another shared
+    library supplies libsqlite3. AgentTune's backend turns that error into "no results", so every question looked
+    unreachable. A uv-managed Python 3.12 (python-build-standalone) links SQLite with FTS5 statically, and it is the same
+    minor version as the local environment, so the kernel always uses it.
+    """
     venv = TMP / "venv312"
     if not (venv / "bin" / "python").exists():
         sh("pip install -q uv")
         sh(f"uv venv --python 3.12 --seed {venv}")
-    return str(venv / "bin" / "python")
+    py = str(venv / "bin" / "python")
+    if not has_fts5(py):
+        raise SystemExit(f"{py} has no SQLite FTS5; retrieval would silently return nothing")
+    return py
 
 
 def install(py: str) -> None:

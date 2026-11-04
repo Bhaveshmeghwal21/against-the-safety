@@ -55,15 +55,54 @@ def make_dataset() -> None:
         print(kaggle("datasets", "version", "-p", str(BUNDLE), "-m", f"bundle {time.strftime('%Y-%m-%d %H:%M')}", "--dir-mode", "zip"))
     else:
         print(kaggle("datasets", "create", "-p", str(BUNDLE), "--dir-mode", "zip"))  # private by default
+    wait_until_served()
+
+
+def bundle_id() -> str:
+    """Content id of the local bundle (written into the zip by bundle_for_kaggle.py)."""
+    import zipfile
+
+    with zipfile.ZipFile(BUNDLE / "against-the-safety.zip") as z:
+        return z.read("BUNDLE_ID").decode().strip()
+
+
+def served_bundle_id() -> str:
+    """The BUNDLE_ID Kaggle currently serves for the dataset ('' if it cannot be read yet)."""
+    import shutil
+
+    tmp = ROOT / ".cache" / "kaggle_probe"
+    shutil.rmtree(tmp, ignore_errors=True)
+    tmp.mkdir(parents=True)
+    kaggle("datasets", "download", f"{username()}/{SLUG}", "-f", "BUNDLE_ID", "-p", str(tmp), "--unzip", "--force", check=False)
+    f = tmp / "BUNDLE_ID"
+    return f.read_text(encoding="utf-8").strip() if f.exists() else ""
+
+
+def wait_until_served(timeout: int = 900) -> None:
+    """`datasets status` says "ready" for the previous version while a new one is still processing; compare content ids."""
+    want, t0 = bundle_id(), time.time()
+    while time.time() - t0 < timeout:
+        if served_bundle_id() == want:
+            print(f"dataset serves bundle {want}")
+            return
+        time.sleep(10)
+    raise SystemExit(f"dataset still does not serve bundle {want} after {timeout}s")
 
 
 def run_stage(stage: str, adapters_from: str | None, extra: str) -> str:
+    if served_bundle_id() != bundle_id():
+        raise SystemExit("the dataset on Kaggle is not the local bundle; run `kaggle_launch.py dataset` first (it waits until the new version is served)")
     slug = f"ats-{stage}"
     kdir = ROOT / "runs" / "kaggle" / f"push-{slug}"
     kdir.mkdir(parents=True, exist_ok=True)
     code = (
-        "import subprocess, sys, pathlib\n"
+        "import pathlib, subprocess, sys\n"
         "p = next(pathlib.Path('/kaggle/input').rglob('bootstrap.py'))\n"
+        f"expect = {bundle_id()!r}\n"
+        "idf = p.parent.parent / 'BUNDLE_ID'\n"
+        "got = idf.read_text().strip() if idf.exists() else 'missing'\n"
+        "if got != expect:\n"
+        "    raise SystemExit(f'stale dataset mount: this kernel was launched for bundle {expect}, the mounted one is {got}')\n"
         "raise SystemExit(subprocess.call([sys.executable, str(p), " + repr(stage) + (", " + repr(extra) if extra else "") + "]))\n"
     )
     (kdir / "run.py").write_text(code, encoding="utf-8")
