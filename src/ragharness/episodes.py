@@ -1,7 +1,7 @@
 """Episodes run through AgentTune's tool and recorded as AgentTune trajectories.
 
-`run_scripted` drives the scripted oracle policy (ceiling.choose_query) through `CorpusSearchTool`. It is a
-reference policy used to check the plumbing and report the retrieval ceiling; it is not a trained model.
+`run_scripted` drives the scripted oracle policy (policy.next_query) through `CorpusSearchTool`. It is a reference
+policy used to build verified training episodes and to report the retrieval ceiling; it is not a trained model.
 `to_eventlog` records an episode as an AgentTune full-tier `EventLog` (no logprobs are invented), and
 `to_record` stores the same episode in AgentTune's `TrajectoryStore` schema.
 """
@@ -16,11 +16,13 @@ from agenttune.agentic.events import Event, EventKind, EventLog
 from agenttune.rag.storage.trajectory_store import TrajectoryRecord
 
 from . import protocol
-from .ceiling import choose_query
 from .corpus import Corpus
 from .data import Question
-from .retrieval import Hit
+from .policy import next_query
+from .retrieval import Hit, render_observation
 from .tools import CorpusSearchTool
+
+ABSTAIN_TEXT = 'The accessible passages do not contain the evidence needed to answer: {question}'
 
 
 @dataclass
@@ -37,7 +39,18 @@ class Episode:
     question: str
     condition: str
     masked: frozenset[str]
+    first_search_masked: frozenset[str] = frozenset()
+    prefill: list[Hit] = field(default_factory=list)
     steps: list[Step] = field(default_factory=list)
+    complete: bool = False  # every gold support chunk was observed or pre-supplied
+    stop_reason: str | None = None
+    max_chars: int | None = None  # per-passage display limit used for this episode
+
+    @property
+    def user_text(self) -> str:
+        if not self.prefill:
+            return self.question
+        return f"{self.question}\n\nEvidence already provided:\n{render_observation(self.prefill, max_chars=self.max_chars)}"
 
     @property
     def final(self) -> Step:
@@ -48,8 +61,8 @@ class Episode:
         return sum(s.turn.kind == "search" for s in self.steps)
 
     def retrieved_chunks(self) -> list[Hit]:
-        """Distinct hits in the order first seen across searches."""
-        seen: dict[str, Hit] = {}
+        """Distinct hits (pre-supplied first, then searches) in the order first seen."""
+        seen: dict[str, Hit] = {h.chunk_id: h for h in self.prefill}
         for s in self.steps:
             for h in s.hits:
                 seen.setdefault(h.chunk_id, h)
@@ -57,16 +70,34 @@ class Episode:
 
 
 def run_scripted(
-    q: Question, corpus: Corpus, tool: CorpusSearchTool, condition: str, masked: frozenset[str] = frozenset(), budget: int = 3
+    q: Question,
+    corpus: Corpus,
+    tool: CorpusSearchTool,
+    condition: str,
+    masked: frozenset[str] = frozenset(),
+    budget: int = 3,
+    first_search_masked: frozenset[str] = frozenset(),
+    prefill: list[Hit] | None = None,
+    finish: str = "auto",
 ) -> Episode:
+    """Run the oracle searches, then add the final turn.
+
+    finish="auto": answer if the full support set was observed, otherwise abstain (used by the slice check).
+    finish="answer_if_complete": answer if complete, otherwise leave the episode without a final turn
+        (the builder marks it unreachable and never trains on it).
+    finish="abstain": always abstain (designed missing-support episodes).
+    """
     support = corpus.support_chunks(q)
-    tool.start_episode(masked)
-    ep = Episode(q.qid, q.question, condition, masked)
-    observed: dict[str, Hit] = {}
-    for step in range(budget):
-        query, _ = choose_query(q, support, observed, step)
+    tool.start_episode(masked, first_search_masked, frozenset(h.chunk_id for h in (prefill or [])))
+    ep = Episode(q.qid, q.question, condition, masked, first_search_masked, list(prefill or []), max_chars=tool.max_chars)
+    observed: dict[str, Hit] = {h.chunk_id: h for h in ep.prefill}
+    used: set[str] = set()
+    for n in range(budget):
+        query, stop = next_query(q, support, observed, used, n, prefilled=bool(ep.prefill))
         if query is None:
+            ep.stop_reason = stop
             break
+        used.add(" ".join(query.lower().split()))
         text = protocol.format_search(query)
         turn = protocol.parse_turn(text)
         assert turn.kind == "search" and turn.query == query.strip()
@@ -74,10 +105,16 @@ def run_scripted(
         for h in tool.last_hits:
             observed.setdefault(h.chunk_id, h)
         ep.steps.append(Step(text, turn, result.output, list(tool.last_hits)))
-    if all(c in observed for c in support.values()):
+    else:
+        ep.stop_reason = "budget"
+    ep.complete = all(c in observed for c in support.values())
+
+    if finish == "abstain" or (finish == "auto" and not ep.complete):
+        text = protocol.format_abstain(ABSTAIN_TEXT.format(question=q.question))
+    elif ep.complete:
         text = protocol.format_answer(q.answer, list(support.values()))
     else:
-        text = protocol.format_abstain("The accessible passages do not contain the needed evidence.")
+        return ep  # answer_if_complete and not complete: no final turn
     ep.steps.append(Step(text, protocol.parse_turn(text)))
     return ep
 
@@ -85,7 +122,7 @@ def run_scripted(
 def to_eventlog(ep: Episode) -> EventLog:
     """Full-tier EventLog. The exact assistant string is kept in `payload['raw']` so training rows reproduce it."""
     log = EventLog(tier="full")
-    log.append(Event(EventKind.OBSERVATION, {"text": ep.question}))
+    log.append(Event(EventKind.OBSERVATION, {"text": ep.user_text}))
     for i, s in enumerate(ep.steps):
         if s.turn.kind == "search":
             log.append(
@@ -116,7 +153,7 @@ def write_eventlogs(path: Path, logs: list[EventLog]) -> None:
             f.write(json.dumps(eventlog_to_dict(log), ensure_ascii=False) + "\n")
 
 
-def to_record(ep: Episode, q: Question, run_id: str, model: str) -> TrajectoryRecord:
+def to_record(ep: Episode, q: Question, run_id: str, model: str, extra: dict | None = None) -> TrajectoryRecord:
     steps = []
     for i, s in enumerate(ep.steps):
         is_search = s.turn.kind == "search"
@@ -140,6 +177,6 @@ def to_record(ep: Episode, q: Question, run_id: str, model: str) -> TrajectoryRe
         has_answer_tag="<answer>" in ep.final.text.lower(),
         condition=ep.condition,
         model=model,
-        metadata={"qid": ep.qid, "masked": sorted(ep.masked), "final_kind": ep.final.turn.kind},
+        metadata={"qid": ep.qid, "masked": sorted(ep.masked), "final_kind": ep.final.turn.kind, **(extra or {})},
         steps=steps,
     )

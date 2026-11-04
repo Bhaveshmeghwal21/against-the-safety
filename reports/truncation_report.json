@@ -1,0 +1,131 @@
+{
+  "train": {
+    "questions": 600,
+    "support_paragraphs": 1200,
+    "paragraph_chars_mean": 544,
+    "paragraph_chars_p90": 938,
+    "limits": {
+      "350": {
+        "questions_all_support_visible": 401,
+        "support_paragraphs_cut": 227,
+        "share_questions_kept": 0.668
+      },
+      "400": {
+        "questions_all_support_visible": 446,
+        "support_paragraphs_cut": 171,
+        "share_questions_kept": 0.743
+      },
+      "500": {
+        "questions_all_support_visible": 502,
+        "support_paragraphs_cut": 105,
+        "share_questions_kept": 0.837
+      },
+      "600": {
+        "questions_all_support_visible": 548,
+        "support_paragraphs_cut": 55,
+        "share_questions_kept": 0.913
+      },
+      "800": {
+        "questions_all_support_visible": 584,
+        "support_paragraphs_cut": 16,
+        "share_questions_kept": 0.973
+      },
+      "1000": {
+        "questions_all_support_visible": 596,
+        "support_paragraphs_cut": 4,
+        "share_questions_kept": 0.993
+      },
+      "None": {
+        "questions_all_support_visible": 600,
+        "support_paragraphs_cut": 0,
+        "share_questions_kept": 1.0
+      }
+    }
+  },
+  "dev": {
+    "questions": 100,
+    "support_paragraphs": 200,
+    "paragraph_chars_mean": 556,
+    "paragraph_chars_p90": 951,
+    "limits": {
+      "350": {
+        "questions_all_support_visible": 59,
+        "support_paragraphs_cut": 47,
+        "share_questions_kept": 0.59
+      },
+      "400": {
+        "questions_all_support_visible": 69,
+        "support_paragraphs_cut": 34,
+        "share_questions_kept": 0.69
+      },
+      "500": {
+        "questions_all_support_visible": 86,
+        "support_paragraphs_cut": 16,
+        "share_questions_kept": 0.86
+      },
+      "600": {
+        "questions_all_support_visible": 93,
+        "support_paragraphs_cut": 7,
+        "share_questions_kept": 0.93
+      },
+      "800": {
+        "questions_all_support_visible": 97,
+        "support_paragraphs_cut": 3,
+        "share_questions_kept": 0.97
+      },
+      "1000": {
+        "questions_all_support_visible": 99,
+        "support_paragraphs_cut": 1,
+        "share_questions_kept": 0.99
+      },
+      "None": {
+        "questions_all_support_visible": 100,
+        "support_paragraphs_cut": 0,
+        "share_questions_kept": 1.0
+      }
+    }
+  },
+  "test": {
+    "questions": 100,
+    "support_paragraphs": 200,
+    "paragraph_chars_mean": 568,
+    "paragraph_chars_p90": 961,
+    "limits": {
+      "350": {
+        "questions_all_support_visible": 63,
+        "support_paragraphs_cut": 45,
+        "share_questions_kept": 0.63
+      },
+      "400": {
+        "questions_all_support_visible": 69,
+        "support_paragraphs_cut": 35,
+        "share_questions_kept": 0.69
+      },
+      "500": {
+        "questions_all_support_visible": 82,
+        "support_paragraphs_cut": 20,
+        "share_questions_kept": 0.82
+      },
+      "600": {
+        "questions_all_support_visible": 87,
+        "support_paragraphs_cut": 13,
+        "share_questions_kept": 0.87
+      },
+      "800": {
+        "questions_all_support_visible": 99,
+        "support_paragraphs_cut": 1,
+        "share_questions_kept": 0.99
+      },
+      "1000": {
+        "questions_all_support_visible": 100,
+        "support_paragraphs_cut": 0,
+        "share_questions_kept": 1.0
+      },
+      "None": {
+        "questions_all_support_visible": 100,
+        "support_paragraphs_cut": 0,
+        "share_questions_kept": 1.0
+      }
+    }
+  }
+}

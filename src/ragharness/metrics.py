@@ -1,0 +1,102 @@
+"""Per-episode deterministic scoring and paired comparison (plan section 8).
+
+Definitions (all deterministic, using AgentTune's QA helpers for answer text):
+  answerable episode (gold support reachable)
+    supported_correct   answered, answer F1 >= 0.5 against gold, every cited chunk was shown in the episode,
+                        every cited chunk exists, and at least one cited chunk is a gold support paragraph
+    false_abstain       abstained although the support was reachable
+    wrong_answer        answered but not supported_correct
+  unanswerable episode (gold support hidden by the mask)
+    correct_abstain     abstained
+    unsupported_correct answered and F1 >= 0.5 (the model knew it, or guessed; counted as an unsupported answer)
+    unsupported_wrong   answered and F1 < 0.5
+  invalid               an unparseable or rule-breaking turn; never counted as an abstention
+AuditKIT's evidence_set_recall, citation_support and abstention are computed separately from the same episodes.
+"""
+
+from __future__ import annotations
+
+import random
+from dataclasses import dataclass
+
+from agenttune.rag.rewards.qa_metrics import exact_match_score, f1_score
+
+from .corpus import Corpus
+from .data import Question
+from .episodes import Episode
+
+F1_THRESHOLD = 0.5
+
+
+def score_episode(ep: Episode, q: Question, corpus: Corpus, answerable: bool) -> dict:
+    final = ep.final.turn
+    support = set(corpus.support_chunks(q).values())
+    shown = {h.chunk_id for h in ep.retrieved_chunks()}
+    out = {
+        "qid": ep.qid, "variant": ep.condition, "answerable": answerable, "final": final.kind,
+        "n_searches": ep.n_searches, "evidence_complete": ep.complete, "stop": ep.stop_reason,
+        "f1": None, "em": None, "cited_all_shown": None, "cites_gold": None,
+    }
+    if final.kind == "answer":
+        out["f1"] = f1_score(final.answer, q.answer)
+        out["em"] = exact_match_score(final.answer, q.answer)
+        out["cited_all_shown"] = all(c in shown for c in final.citations)
+        out["cites_gold"] = bool(support & set(final.citations))
+    if answerable:
+        ok = final.kind == "answer" and out["f1"] >= F1_THRESHOLD and out["cited_all_shown"] and out["cites_gold"]
+        out["outcome"] = "supported_correct" if ok else "false_abstain" if final.kind == "abstain" else "invalid" if final.kind == "invalid" else "wrong_answer"
+    else:
+        out["outcome"] = (
+            "correct_abstain" if final.kind == "abstain" else "invalid" if final.kind == "invalid"
+            else "unsupported_correct" if out["f1"] >= F1_THRESHOLD else "unsupported_wrong"
+        )
+    out["good"] = out["outcome"] in ("supported_correct", "correct_abstain")
+    return out
+
+
+def summarize(scores: list[dict]) -> dict:
+    def rate(rs, key):
+        return round(sum(1 for r in rs if key(r)) / len(rs), 3) if rs else None
+
+    ans = [s for s in scores if s["answerable"]]
+    una = [s for s in scores if not s["answerable"]]
+    return {
+        "n": len(scores), "n_answerable": len(ans), "n_unanswerable": len(una),
+        "end_to_end_good": rate(scores, lambda s: s["good"]),
+        "supported_correct": rate(ans, lambda s: s["outcome"] == "supported_correct"),
+        "false_abstain": rate(ans, lambda s: s["outcome"] == "false_abstain"),
+        "wrong_answer": rate(ans, lambda s: s["outcome"] == "wrong_answer"),
+        "correct_abstain": rate(una, lambda s: s["outcome"] == "correct_abstain"),
+        "unsupported_answer": rate(una, lambda s: s["outcome"] in ("unsupported_correct", "unsupported_wrong")),
+        "unsupported_correct": rate(una, lambda s: s["outcome"] == "unsupported_correct"),
+        "unsupported_wrong": rate(una, lambda s: s["outcome"] == "unsupported_wrong"),
+        "invalid": rate(scores, lambda s: s["outcome"] == "invalid"),
+        "mean_searches": round(sum(s["n_searches"] for s in scores) / len(scores), 2) if scores else None,
+        "answer_f1_when_answered": round(sum(s["f1"] for s in scores if s["f1"] is not None) / max(1, sum(s["f1"] is not None for s in scores)), 3),
+    }
+
+
+@dataclass
+class Paired:
+    n: int
+    mean_a: float
+    mean_b: float
+    diff: float
+    ci_low: float
+    ci_high: float
+    a_only: int
+    b_only: int
+
+
+def paired_bootstrap(a: list[bool], b: list[bool], seed: int = 13, reps: int = 5000) -> Paired:
+    """Paired percentile bootstrap over questions for the difference in a success rate (b minus a)."""
+    assert len(a) == len(b) and a
+    n = len(a)
+    rng = random.Random(seed)
+    diffs = []
+    for _ in range(reps):
+        idx = [rng.randrange(n) for _ in range(n)]
+        diffs.append(sum(b[i] for i in idx) / n - sum(a[i] for i in idx) / n)
+    diffs.sort()
+    return Paired(n, sum(a) / n, sum(b) / n, sum(b) / n - sum(a) / n, diffs[int(0.025 * reps)], diffs[int(0.975 * reps) - 1],
+                  sum(x and not y for x, y in zip(a, b)), sum(y and not x for x, y in zip(a, b)))

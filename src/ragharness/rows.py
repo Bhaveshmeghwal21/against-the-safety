@@ -112,3 +112,33 @@ def check_row(row: dict) -> dict:
     kind = protocol.parse_turn(completion[0]["content"]).kind
     assert kind in {"search", "answer", "abstain"}, f"completion is not a valid action: {kind}"
     return {"prompt_text": prompt_text, "completion_text": completion_text, "kind": kind}
+
+
+CHARS_PER_TOKEN = 3.5  # conservative English estimate; replace with real Tiny Aya token counts once the tokenizer is available
+
+
+def rendered_chars(row: dict) -> tuple[int, int]:
+    """(prompt chars, completion chars) of the exact string the model is trained on."""
+    prompt = render(row["prompt"], add_generation_prompt=True)
+    return len(prompt), len(row["completion"][0]["content"]) + len(COMPLETION_END)
+
+
+def est_tokens(row: dict) -> tuple[int, int]:
+    """(processed tokens, supervised tokens) estimated from characters. Processed = prompt + completion."""
+    p, c = rendered_chars(row)
+    return round((p + c) / CHARS_PER_TOKEN), round(c / CHARS_PER_TOKEN)
+
+
+def real_tokens(row: dict, tokenizer, strict: bool = True) -> tuple[int, int]:
+    """(processed tokens, supervised tokens) with the real tokenizer and the chat template it ships.
+
+    Uses the same two renders as TRL: the prompt with the generation marker, then prompt + completion. The completion
+    tokens are the difference, so the count matches what the loss will cover. `strict` raises if the prompt tokens are
+    not a prefix of the full tokens (TRL only warns); keep it on with the real tokenizer, where the markers are single
+    special tokens.
+    """
+    prompt_ids = tokenizer.apply_chat_template(row["prompt"], add_generation_prompt=True, tokenize=True, return_dict=True)["input_ids"]
+    full_ids = tokenizer.apply_chat_template(row["prompt"] + row["completion"], tokenize=True, return_dict=True)["input_ids"]
+    if strict and list(full_ids[: len(prompt_ids)]) != list(prompt_ids):
+        raise ValueError("prompt tokens are not a prefix of prompt+completion tokens")
+    return len(full_ids), len(full_ids) - len(prompt_ids)

@@ -18,7 +18,7 @@ The demo is a ZeroGPU Space if our Hugging Face account qualifies (free accounts
 
 ## Status
 
-The project is at the CPU-harness stage: the data sampler, shared retrieval index, masked search, AgentTune-to-AuditKIT evaluation slice and Tiny Aya row builder run and pass their checks (section 16 of the plan). No GPU run or training has happened yet. The [current paper review and plan](research/2026-11-04-fine-tuning-for-rag.md), rechecked twice on 4 November 2026, covers the literature, rules and judging, datasets, retrieval harness, training, evaluation, compute and submission milestones. Compute comes from the Kaggle T4 ×2 weekly quota, which should reset around Nov 7 and Nov 14, plus the $20 HF credit if it arrives. Final sample sizes depend on the throughput pilot; the allocation is not a measured runtime guarantee. The [earlier distillation note](research/2026-11-03-agentic-distillation.md) records the previous direction.
+The CPU side is built and tested: data sampler, shared retrieval index, six-state matched episode builder, AgentTune-to-AuditKIT evaluation, QLoRA training path (rehearsed on CPU), baselines and Kaggle scripts (section 16 and 17 of the plan). The GPU smoke test is the next step and needs a Hugging Face token that has accepted the Tiny Aya gate. No GPU run or real training has happened yet.
 
 ## Run the CPU harness
 
@@ -32,7 +32,15 @@ python -m pip install --no-deps -e .
 python scripts/prepare_data.py           # sample HotpotQA splits, write manifests
 python scripts/build_index.py            # shared SQLite FTS index
 python scripts/retrieval_ceiling.py      # oracle retrieval ceiling on dev
-python scripts/audit_slice.py            # AgentTune tool and trajectories -> AuditKIT metrics
-python scripts/check_rows.py             # AgentTune distill hook -> Tiny Aya rows, template-checked
+python scripts/build_episodes.py         # six-state matched episodes, AgentTune trajectories, Tiny Aya rows
+python scripts/make_training_set.py      # main, control and dev sets
+python scripts/leakage_report.py         # dev/test overlap with SFT rows
+python scripts/shortcut_report.py        # label-leak checks on training episodes
+python scripts/gate_baseline.py          # retrieval-score gate baseline
+python scripts/run_eval.py --system oracle --split test --out runs/eval/oracle_test
+python scripts/dry_run_qlora.py          # whole training path on CPU with a tiny stand-in model
+python scripts/smoke_test.py --stand-in --out runs/smoke_cpu --skip fp16,vllm
 python -m pytest tests -q
 ```
+
+GPU steps (smoke test, training, evaluation) are in [kaggle/README.md](kaggle/README.md).

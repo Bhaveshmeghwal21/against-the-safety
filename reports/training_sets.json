@@ -1,0 +1,77 @@
+{
+  "cap_tokens": 3072,
+  "token_counts": "estimated from characters at 3.5 chars/token",
+  "train_rows_total": 6697,
+  "train_rows_dropped_for_showing_dev_or_test_support": 264,
+  "train_rows_after_drop": 6433,
+  "train_rows_over_cap": 0,
+  "train_rows_over_cap_by_kind": {
+    "search": 0,
+    "answer": 0,
+    "abstain": 0
+  },
+  "main": {
+    "rows": 1611,
+    "parents": 488,
+    "by_kind": {
+      "abstain": 537,
+      "answer": 537,
+      "search": 537
+    },
+    "by_state": {
+      "S1": 91,
+      "S2": 32,
+      "S3": 127,
+      "S4": 733,
+      "S5": 356,
+      "S6": 272
+    },
+    "processed_tokens_est": 2816053,
+    "supervised_tokens_est": 75598
+  },
+  "control": {
+    "rows": 1703,
+    "parents": 488,
+    "by_kind": {
+      "answer": 1135,
+      "search": 568
+    },
+    "by_state": {
+      "S1": 162,
+      "S2": 65,
+      "S3": 251,
+      "S5": 724,
+      "S6": 501
+    },
+    "processed_tokens_est": 2747011,
+    "supervised_tokens_est": 58967,
+    "target_tokens": 2816053,
+    "control_tokens": 2747011,
+    "relative_difference": -0.0245,
+    "resampled_rows": 0,
+    "pool_rows": {
+      "search": 2457,
+      "answer": 1822
+    }
+  },
+  "dev": {
+    "rows": 1256,
+    "parents": 86,
+    "by_kind": {
+      "abstain": 119,
+      "answer": 337,
+      "search": 800
+    },
+    "by_state": {
+      "S1": 46,
+      "S2": 18,
+      "S3": 150,
+      "S4": 459,
+      "S5": 261,
+      "S6": 322
+    },
+    "processed_tokens_est": 1993098,
+    "supervised_tokens_est": 51136
+  },
+  "supervised_token_difference_control_vs_main": -16631
+}

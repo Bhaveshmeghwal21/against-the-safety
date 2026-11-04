@@ -1,0 +1,103 @@
+{
+  "note": "decision baseline with an oracle reader; threshold fit on dev, applied to test",
+  "top1": {
+    "dev": {
+      "tau": 32.24,
+      "abstain_when_unanswerable": 0.588,
+      "false_abstain_when_answerable": 0.433,
+      "balanced_accuracy": 0.578,
+      "n_unanswerable": 119,
+      "n_answerable": 337
+    },
+    "test": {
+      "tau": 32.24,
+      "abstain_when_unanswerable": 0.633,
+      "false_abstain_when_answerable": 0.474,
+      "balanced_accuracy": 0.58,
+      "n_unanswerable": 109,
+      "n_answerable": 340
+    },
+    "test_abstain_rate_by_variant": {
+      "first_search_masked": {
+        "n": 82,
+        "answerable": true,
+        "abstain_rate": 0.793
+      },
+      "open": {
+        "n": 86,
+        "answerable": true,
+        "abstain_rate": 0.372
+      },
+      "prefill_partial": {
+        "n": 86,
+        "answerable": true,
+        "abstain_rate": 0.372
+      },
+      "prefill_partial_masked": {
+        "n": 44,
+        "answerable": false,
+        "abstain_rate": 0.386
+      },
+      "prefill_sufficient": {
+        "n": 86,
+        "answerable": true,
+        "abstain_rate": 0.372
+      },
+      "support_masked": {
+        "n": 65,
+        "answerable": false,
+        "abstain_rate": 0.8
+      }
+    }
+  },
+  "top1_best_of_searches": {
+    "dev": {
+      "tau": 32.24,
+      "abstain_when_unanswerable": 0.58,
+      "false_abstain_when_answerable": 0.401,
+      "balanced_accuracy": 0.59,
+      "n_unanswerable": 119,
+      "n_answerable": 337
+    },
+    "test": {
+      "tau": 32.24,
+      "abstain_when_unanswerable": 0.633,
+      "false_abstain_when_answerable": 0.432,
+      "balanced_accuracy": 0.6,
+      "n_unanswerable": 109,
+      "n_answerable": 340
+    },
+    "test_abstain_rate_by_variant": {
+      "first_search_masked": {
+        "n": 82,
+        "answerable": true,
+        "abstain_rate": 0.671
+      },
+      "open": {
+        "n": 86,
+        "answerable": true,
+        "abstain_rate": 0.349
+      },
+      "prefill_partial": {
+        "n": 86,
+        "answerable": true,
+        "abstain_rate": 0.349
+      },
+      "prefill_partial_masked": {
+        "n": 44,
+        "answerable": false,
+        "abstain_rate": 0.386
+      },
+      "prefill_sufficient": {
+        "n": 86,
+        "answerable": true,
+        "abstain_rate": 0.372
+      },
+      "support_masked": {
+        "n": 65,
+        "answerable": false,
+        "abstain_rate": 0.8
+      }
+    }
+  }
+}

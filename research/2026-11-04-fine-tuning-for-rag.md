@@ -485,50 +485,72 @@ Re-read the official PS 4 text, rules, submit page and credit terms; re-extracte
 | Pretraining likely covers HotpotQA's Wikipedia facts. | Added the closed-book diagnostic and split unsupported answers into correct and wrong (§5.1, §8.1). |
 | License discussion was longer than the Article checklist needs. | Reduced license content to the one list the checklist asks for (§5.4). |
 
+
 ## 16. CPU harness record - 4 November 2026
 
-What was built and measured on CPU. No GPU job, model download or training has run. Code is in `src/ragharness`, scripts in `scripts/`, tests in `tests/`. All caches, temp files and the venv live inside the workspace (`scripts/env.ps1`); nothing was written to C: after the user's instruction.
+What was built and measured on CPU. No GPU job, gated-model download or real training has run. Code is in `src/ragharness`, scripts in `scripts/`, tests in `tests/` (36 pass), Kaggle files in `kaggle/`. All caches, temp files and the venv live inside the workspace (`scripts/env.ps1`).
 
-**Pinned stack (local CPU venv):** Python 3.12, `agenttune==1.1.3`, `auditkit==1.1.3`, `torch==2.11.0+cpu`, `transformers==5.22.1`. `trl==1.7.1`, `wandb` and `torchvision` are AgentTune requirements that the CPU harness does not install; the GPU environment must.
+**Pinned stack (local venv):** Python 3.12, `agenttune==1.1.3`, `auditkit==1.1.3`, `torch==2.11.0+cpu`, `transformers==5.22.1`, `trl==1.7.1`, `peft==0.21.2`. `requirements-cpu.lock.txt` and `requirements-gpu.lock.txt` reproduce them.
 
-**Data and index.** HotpotQA distractor revision `1908d6af...`. Seed 13. 600 train questions (484 bridge, 116 comparison; 372 medium, 124 easy, 104 hard), 100 dev (80/20, all hard) and 100 test from the official dev partition (81/19, all hard). Dev is drawn from `hard` only because the test partition is entirely `hard`. Later splits skip any question that shares a supporting title with an earlier split. The shared index holds 7,820 chunks (from 7,919 paragraphs) with hash `169443742963...`; it is rebuilt from the manifests, not committed.
+**Data and index.** HotpotQA distractor revision `1908d6af...`, seed 13. 600 train questions (484 bridge, 116 comparison; 372 medium, 124 easy, 104 hard), 100 dev (80/20, all hard) and 100 test from the official dev partition (81/19, all hard). Dev is drawn from `hard` only because the test partition is entirely `hard`. A later split skips any question that shares a supporting title with an earlier split. The shared index holds 7,820 chunks (from 7,919 paragraphs), hash `169443742963...`, rebuilt from the manifests rather than committed.
 
-**Retrieval ceiling on dev (n = 100), scripted oracle queries, complete support-set recall.**
+**Retrieval ceiling on dev (n = 100), complete support-set recall** (`reports/retrieval_ceiling_dev.json`). The oracle queries the question, then a title mentioned in the question or in an observed gold passage, then a keyword reformulation. It never repeats a query.
 
 | top_k | after 1 search | after 2 | after 3 |
 | --- | --- | --- | --- |
-| 3 | 0.32 | 0.83 | 0.87 |
-| 5 | 0.41 | 0.87 | 0.89 |
-| 8 | 0.56 | 0.95 | 0.95 |
+| 3 | 0.32 | 0.85 | 0.89 |
+| 5 | 0.41 | 0.88 | 0.91 |
+| 8 | 0.56 | 0.96 | 0.96 |
 
-The bridge query is the bridge title alone. Adding the question text to it lowered recall (0.77 at top_k 3 after 3 searches), so it is not used. At top_k 3 the oracle cannot reach the full support set for 13% of dev questions, and 9 of those stop because no missing title is mentioned in visible text. Those questions are not answerable within the budget, so the episode builder must label them separately rather than as clean answerable examples. The first search alone reaches the full set for only about a third of questions, so the second hop carries most of the task. Full output: `reports/retrieval_ceiling_dev.json`.
+The settings are `top_k` 3 and three searches. The oracle reaches the full support set for 89% of dev questions, so about 11% are unreachable and are never trained on as answers. After one search the full set is found for about a third of questions, so the second hop carries most of the task.
 
 **How AgentTune and AuditKIT are used.**
 
 | Step | Library component |
 | --- | --- |
-| Search tool | `CorpusSearchTool`, a subclass of AgentTune's `SearchCorpusTool`. Same name and schema; adds per-episode masks, drops the `score=` field and the 350-character cut, and keeps the `[chunk_id=...]` marker that AgentTune's rollout parses. |
-| Action text | AgentTune's `DEFAULT_TOOLS_FALLBACK_PROMPT` and `_extract_tool_calls` read our search string, quotes included. |
-| Trajectories | AgentTune `EventLog` (full tier, no invented log-probabilities) plus `TrajectoryStore`, exported to JSONL for the trace dataset. |
-| Training entry | `create_distill_trainer(..., trajectories=..., trainer_factory=...)`. The rows it hands over become Tiny Aya prompt/completion rows. A CPU stand-in factory has been verified; the 4-bit QLoRA factory is still to write and smoke-test on T4. |
+| Search tool | `CorpusSearchTool`, a subclass of AgentTune's `SearchCorpusTool`. Same name and schema. It adds per-episode and first-search masks, drops the `score=` field, shows each passage once per episode and applies one uniform 800-character display limit (see below). It keeps the `[chunk_id=...]` marker that AgentTune's rollout parses. |
+| Action text | AgentTune's `DEFAULT_TOOLS_FALLBACK_PROMPT` and `_extract_tool_calls` read our search string, quotes included. `search_grounding_reward` parses no citation tag, so `<citations>` and `<abstain>` are ours. |
+| Trajectories | AgentTune `EventLog` (full tier, no invented log-probabilities) plus `TrajectoryStore`, exported to JSONL as the trace dataset. |
+| Training entry | `create_distill_trainer(..., trajectories=..., trainer_factory=QLoraFactory)`. AgentTune 1.1.3 on PyPI ships `backends/trl/sft/__init__.py` without `sft.py`, so `TRLSFTTrainer` cannot be imported and its default factory loads bf16 with `device_map="auto"`; the QLoRA factory replaces it. |
 | Answer scoring | AgentTune's `qa_metrics` F1 and exact match. |
-| Evaluation | AuditKIT `episodes_from_agenttune` reads the EventLog file (search counts match ours), and `ak.evaluate(..., model="precomputed")` runs `evidence_set_recall`, `citation_support` and `abstention` on a `RAGCase`, `CorpusSnapshot` and `RAGTrace` built per episode, with `abstained` set explicitly. |
+| Evaluation | AuditKIT `episodes_from_agenttune` reads the EventLog file, and `ak.evaluate(..., model="precomputed")` runs `evidence_set_recall`, `citation_support` and `abstention` on a per-episode `RAGCase`, `CorpusSnapshot` and `RAGTrace`, with `abstained` set explicitly. |
 
-AgentTune 1.1.3 on PyPI ships `backends/trl/sft/__init__.py` without `sft.py`, so `TRLSFTTrainer` cannot be imported from the wheel. Training therefore goes through `create_distill_trainer` with our own factory, as above. Its default factory loads bf16 with `device_map="auto"` and trains on all `messages`, which is why it is replaced.
+**Slice check (dev, scripted oracle, not a model).** Open: `evidence_set_recall` 0.89 (equal to the independent ceiling), abstention 0.89 (89 answered, 11 false abstentions). Support masked: abstention 1.00, recall and citation not tested. `citation_support` counts an answerable case with no citation as 0, so the 11 false abstentions lower it; read it next to the answered-only rate.
 
-**Slice check (dev, scripted oracle policy, not a model).** `reports/audit_slice_dev.json`.
+## 17. Episode builder, training path and GPU readiness - 4 November 2026
 
-| Condition | evidence_set_recall | citation_support | abstention | Answered / abstained |
-| --- | --- | --- | --- | --- |
-| open | 0.87 | 0.87 | 0.87 | 87 / 13 |
-| support_masked | not tested (100) | not tested (100) | 1.00 | 0 / 100 |
+**Six states, built under real search** (`builder.py`; one scripted policy for every variant, so a label can only come from what is visible at a turn). Counts are accepted episodes on the 600 train questions.
 
-The open-condition recall equals the separately computed ceiling at top_k 3 after 3 searches, which cross-checks the tool, the masks and the AuditKIT adapter against each other. `citation_support` is 0.87 because AuditKIT scores an answerable case with no citations as 0, so the 13 false abstentions count as zero; report it next to the answered-only rate. Answer F1 is 1.0 on the 87 answers because the scripted policy copies the gold answer, so it says nothing about a model.
+| State | Construction | Train episodes |
+| --- | --- | --- |
+| S1 clean | full support after one search, support ranked above all non-support | 168 |
+| S2 distractors | full support after one search, some non-support outranks support | 70 |
+| S3 second hop | first search returns part of the support, a visible-text query recovers the rest | 236 |
+| S4 missing | all support copies masked (375), or only the hop-2 page masked while hop 1 is supplied (230); search within budget, then abstain | 605 |
+| S5 evidence given | support supplied in the user turn: answer with no search (488), or partial evidence then search (488) | 976 |
+| S6 look-alike | first search returns no support, a reformulated query recovers it: support masked for the first search only (428), or naturally weak (14) | 442 |
 
-**Row checks.** 100 dev episodes became 267 prompt/completion rows (167 search, 87 answer, 13 abstain). Every row passes the template assertions in §6.1 against the pinned Tiny Aya Global template (revision `af89d219...`): the prompt ends at `<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|><|START_RESPONSE|>`, the completion is content + `<|END_RESPONSE|><|END_OF_TURN_TOKEN|>`, and every observation survives as a user turn. The template is fetched from the public Hub API on first use (`tests/fixtures/` is git-ignored).
+Rejections and exclusions: 95 questions unreachable within three searches; 17 skipped because the display limit would cut a gold supporting sentence; 113 + 258 missing-support episodes rejected because the answer text appears in a visible passage (an alternate evidence path); 46 first-search-mask episodes not recovered; 14 identical to the open episode. All answerable rows keep the gold answer text inside the cited passages (1,760 of 1,760 checked; yes/no answers skipped).
 
-**Context length.** The fixed prefix (Tiny Aya's default preamble plus our system prompt) is 3,238 characters, about 800 tokens at 4 characters per token. Rendered rows reach about 950 tokens with no observation, 1,800 with one, 2,300 with two and 2,400 with three. By that rough estimate 12 of 267 rows exceed the 2,048-token cap. Real token counts need the gated tokenizer. Options once measured: shorten the system prompt, cap passage length, or lift the cap to 2,560 for the longest rows.
+**Shortcut checks** (`reports/shortcut_report_train.json`). Found and fixed: provided evidence appeared only in answer episodes, so a matched variant now supplies the same partial evidence with the missing hop masked and ends in an abstention (230 episodes). Both prefill variants show the same number of passages. Residual correlates, to keep in mind when reading results: 60 of 1,701 abstain-episode observations are "No results found" against none in answer episodes (an artifact of rare entity queries hitting only masked pages), and keyword-style queries make up 14% of abstain-episode searches against 2% in answer episodes. The fictional product corpus has neither artifact and is the check on both.
 
-**Parser decisions.** A search is exactly one `search_corpus` call with a non-empty query and no other keys. An answer needs non-empty text and chunk IDs of the form `c00012`. An abstention needs non-empty text. Anything else is `invalid` and is counted separately, never as an abstention.
+**Passage display.** AgentTune's stock tool cuts passages at 350 characters, which removes the supporting sentence in 33-41% of questions (`reports/truncation_report.json`). One uniform 800-character limit keeps 97-99%, and applying it to every passage means length does not reveal support. A passage already shown earlier in the episode appears as marker, title and "(shown above)".
 
-**Still open.** The six-state episode builder, answer-reachability labels, the leakage report for training observations that contain test support paragraphs, the QLoRA factory, and every GPU measurement (§7). Real token counts need the Tiny Aya gate accepted on Hugging Face.
+**Training sets** (`reports/training_sets.json`; token counts are character estimates at 3.5 characters per token until the tokenizer is available).
+
+- Context cap: 3,072 tokens. Rows reach about 3,000 estimated tokens and 56% of abstain rows exceed 2,048, so a 2,048 cap would bias the rare class toward short prompts. The smoke test measures memory at 3,072; the fallback is `make_training_set.py --cap-tokens 2048` with the dropped abstain rows reported.
+- Rows whose prompt shows any dev or test support passage are removed: 264 of 6,697. Afterwards none of the 100 dev or 100 test questions has any support passage in an SFT row (`reports/leakage_report.json`), so document-level transfer holds for all of them. No dev or test question text appears in training.
+- Main: 1,611 rows, balanced 537 search / 537 answer / 537 abstain, from 488 parent questions, all six states.
+- Control (supported-only tool-episode SFT, same parent questions): 1,703 rows (568 search, 1,135 answer), no abstain rows and no missing-evidence episodes. Processed tokens are 2.45% below main; supervised tokens differ by 16,631 (control lower), to be reported with the results.
+- Dev: 1,256 rows (800 search, 337 answer, 119 abstain) for checkpoint selection.
+
+**Training path, verified on CPU with a tiny stand-in model:** EventLog -> `create_distill_trainer` -> `Project.distill` -> `QLoraFactory` -> TRL `SFTTrainer`. The loss covers exactly the completion tokens, which end with `<|END_RESPONSE|><|END_OF_TURN_TOKEN|>`; the adapter saves and reloads; the selected rows equal `main.jsonl`/`control.jsonl` exactly (`tests/test_selection.py`). The CPU rehearsal of the smoke test caught one real bug before any GPU time was spent: `warmup_ratio` no longer exists in transformers 5.22 (use `warmup_steps` below 1 as a ratio). TRL truncates over-long rows from the left, which would silently cut the prompt, so the smoke test reports rows at or above `max_length`.
+
+**Evaluation tooling** (`scripts/run_eval.py`): one rollout loop (`rollout.py`) for the scripted oracle, the base model, adapters and the closed-book diagnostic, with explicit terminal labels for unparseable turns, repeated queries and searches past the budget. Replaying scripted episodes through it reproduces them exactly. Metrics (`metrics.py`) separate supported-correct, false abstain, wrong answer, correct abstain, unsupported-correct, unsupported-wrong and invalid; AuditKIT metrics and a paired bootstrap are included. The scripted oracle scores 1.0 on all of them, and trivial policies (always abstain, garbage output) score as expected. **Retrieval-score gate baseline** (threshold fit on dev, applied to test): balanced accuracy 0.58-0.60, and the abstain rate is 37% with or without the missing hop (39% for the masked variant), which supports the plan's point that score gates are weak on in-topic gaps.
+
+**Not done, and why.**
+
+- No Tiny Aya token counts, FP16 agreement, 4-bit memory, speed, vLLM or generation results: they need a T4 and an HF token that has accepted the Tiny Aya gate. `kaggle/bootstrap.py smoke` runs all of it and writes `smoke_report.json`; `scripts/bundle_for_kaggle.py` builds the upload. The CPU rehearsal (`scripts/smoke_test.py --stand-in`) passes every stage that can run without a GPU.
+- Section 7's compute table is still planning estimates until the smoke report replaces it.
+- The fictional product-support corpus and its 20-30 held-out tasks are not built; the AuditKIT freshness check applies only there.
+- Aya Expanse query rewriting, the closed-model proxy baseline and the judge calibration set (about 50 hand-labelled cases) are not built.

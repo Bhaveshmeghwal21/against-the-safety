@@ -29,8 +29,28 @@ class Corpus:
     by_question: dict[str, dict[str, str]]  # qid -> paragraph title -> chunk_id
     index_hash: str
 
+    def __post_init__(self):
+        self._by_id = {c["chunk_id"]: c for c in self.chunks}
+        self._by_title: dict[str, list[str]] = {}
+        for c in self.chunks:
+            self._by_title.setdefault(c["title"].casefold(), []).append(c["chunk_id"])
+
+    def chunk(self, chunk_id: str) -> dict:
+        return self._by_id[chunk_id]
+
     def support_chunks(self, q: Question) -> dict[str, str]:
         return {t: self.by_question[q.qid][t] for t in q.support_titles}
+
+    def support_copies(self, q: Question) -> frozenset[str]:
+        """Every chunk that could stand in for a gold support paragraph: the chunk itself plus any other chunk
+        carrying the same title (e.g. a differently worded copy of the same page)."""
+        out: set[str] = set()
+        for title, cid in self.support_chunks(q).items():
+            out.update(self.title_copies(title, cid))
+        return frozenset(out)
+
+    def title_copies(self, title: str, chunk_id: str) -> frozenset[str]:
+        return frozenset({chunk_id, *self._by_title.get(title.casefold(), [])})
 
 
 def build_corpus(questions: list[Question], seed: int) -> Corpus:

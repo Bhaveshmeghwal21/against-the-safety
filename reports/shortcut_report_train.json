@@ -1,0 +1,83 @@
+{
+  "n_episodes": 2497,
+  "observation_passage_count_by_final": {
+    "answer": {
+      "1": 68,
+      "2": 89,
+      "3": 2342
+    },
+    "abstain": {
+      "0": 60,
+      "1": 27,
+      "2": 22,
+      "3": 1592
+    }
+  },
+  "query_kind_by_final": {
+    "answer": {
+      "question": 1024,
+      "mention": 1427,
+      "keywords": 48
+    },
+    "abstain": {
+      "question": 605,
+      "mention": 861,
+      "keywords": 235
+    }
+  },
+  "searches_by_state_variant": {
+    "S1/open": {
+      "1": 168
+    },
+    "S2/open": {
+      "1": 70
+    },
+    "S3/open": {
+      "2": 235,
+      "3": 1
+    },
+    "S4/prefill_partial_masked": {
+      "2": 45,
+      "3": 185
+    },
+    "S4/support_masked": {
+      "2": 69,
+      "3": 306
+    },
+    "S5/prefill_partial": {
+      "1": 471,
+      "2": 16,
+      "3": 1
+    },
+    "S5/prefill_sufficient": {
+      "0": 488
+    },
+    "S6/first_search_masked": {
+      "2": 44,
+      "3": 384
+    },
+    "S6/open": {
+      "3": 14
+    }
+  },
+  "answer_text_in_cited_passages": {
+    "present": 1760,
+    "checked": 1760,
+    "skipped_yes_no_or_short": 132
+  },
+  "mask_prefill_by_final": {
+    "answer": {
+      "support_masked": 0,
+      "first_search_masked": 428,
+      "prefill": 976,
+      "total": 1892
+    },
+    "abstain": {
+      "support_masked": 605,
+      "first_search_masked": 0,
+      "prefill": 230,
+      "total": 605
+    }
+  },
+  "distinct_abstain_texts": 377
+}

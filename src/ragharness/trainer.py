@@ -3,7 +3,7 @@
 `build_trainer` calls AgentTune's `create_distill_trainer` (EventLog -> `Project.distill` -> `trainer_factory`).
 The factory here is `RowCollector`, a GPU-free stand-in that turns AgentTune's SFT rows into Tiny Aya
 prompt/completion rows and verifies each against the pinned chat template. The QLoRA factory used for the real
-run plugs into the same `trainer_factory` hook and receives the same rows.
+run (`qlora.QLoraFactory`) plugs into the same `trainer_factory` hook and receives the same rows.
 """
 
 from __future__ import annotations
@@ -23,16 +23,26 @@ class _NoTrain:
 
 
 class RowCollector:
-    def __init__(self, system: str):
+    """`metas[i]` describes `logs[i]`; it is copied onto every row that episode produces."""
+
+    def __init__(self, system: str, metas: list[dict] | None = None):
         self.system = system
+        self.metas = metas
         self.rows: list[dict] = []
         self.checked: list[dict] = []
 
     def __call__(self, *, model, train_dataset, **kwargs):
         self.student = model
         self.agenttune_rows = list(train_dataset)
-        self.rows = [d for r in self.agenttune_rows for d in rows.decisions(r, self.system)]
-        self.checked = [rows.check_row(d) for d in self.rows]
+        if self.metas is not None and len(self.metas) != len(self.agenttune_rows):
+            raise ValueError("metas must align one-to-one with the trajectories")
+        self.rows, self.checked = [], []
+        for i, sft_row in enumerate(self.agenttune_rows):
+            for j, d in enumerate(rows.decisions(sft_row, self.system)):
+                checked = rows.check_row(d)
+                d["meta"] = {**(self.metas[i] if self.metas else {}), "step": j, "kind": checked["kind"]}
+                self.rows.append(d)
+                self.checked.append(checked)
         return _NoTrain(self)
 
     def by_kind(self) -> dict[str, int]:

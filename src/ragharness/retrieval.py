@@ -32,11 +32,27 @@ class MaskedSearch:
         return hits[:top_k]
 
 
-def render_observation(hits: list[Hit]) -> str:
+def render_observation(hits: list[Hit], shown: frozenset[str] = frozenset(), max_chars: int | None = None) -> str:
     """Neutral tool result: chunk ID, title and passage text. No scores or ranks.
 
+    `shown` holds chunk IDs already printed earlier in the episode; they appear as marker + title only, so the same
+    passage is never paid for twice. `max_chars` is one uniform limit for every passage (support or not).
     The `[chunk_id=...]` marker matches the pattern AgentTune's rollout parses to collect `retrieved_chunk_ids`.
     """
     if not hits:
         return "No results found."
-    return "\n\n".join(f"[chunk_id={h.chunk_id}] {h.title}\n{h.text}" for h in hits)
+    parts = []
+    for h in hits:
+        if h.chunk_id in shown:
+            parts.append(f"[chunk_id={h.chunk_id}] {h.title} (shown above)")
+        else:
+            parts.append(f"[chunk_id={h.chunk_id}] {h.title}\n{visible_text(h.text, max_chars)}")
+    return "\n\n".join(parts)
+
+
+def visible_text(text: str, max_chars: int | None) -> str:
+    """The passage as the model sees it: cut at `max_chars` on a word boundary and marked with an ellipsis."""
+    if max_chars is None or len(text) <= max_chars:
+        return text
+    cut = text[:max_chars].rsplit(" ", 1)[0]
+    return cut + " ..."

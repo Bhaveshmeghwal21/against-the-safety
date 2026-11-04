@@ -8,17 +8,17 @@
     "open": {
       "n": 100,
       "auditkit": {
-        "evidence_set_recall": 0.87,
-        "citation_support": 0.87,
-        "abstention": 0.87
+        "evidence_set_recall": 0.89,
+        "citation_support": 0.89,
+        "abstention": 0.89
       },
       "unscored": {},
-      "answered": 87,
-      "abstained": 13,
+      "answered": 89,
+      "abstained": 11,
       "invalid": 0,
       "answer_f1_when_answered": 1.0,
       "cited_not_observed": 0,
-      "mean_searches": 1.67
+      "mean_searches": 1.76
     },
     "support_masked": {
       "n": 100,
@@ -42,7 +42,7 @@
       "invalid": 0,
       "answer_f1_when_answered": null,
       "cited_not_observed": 0,
-      "mean_searches": 2.6
+      "mean_searches": 2.8
     }
   }
 }

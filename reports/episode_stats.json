@@ -1,0 +1,163 @@
+{
+  "index_hash": "169443742963e9a39511fceb13f37cef91540c67593a6c5db30fd90ae3f6cd96",
+  "top_k": 3,
+  "budget": 3,
+  "splits": {
+    "train": {
+      "questions": 600,
+      "unreachable_open": 95,
+      "accepted_episodes": 2497,
+      "by_state": {
+        "S1": 168,
+        "S2": 70,
+        "S3": 236,
+        "S4": 605,
+        "S5": 976,
+        "S6": 442,
+        "rejected": 402,
+        "unreachable": 141
+      },
+      "by_variant_and_state": {
+        "first_search_masked:S6": 428,
+        "first_search_masked:rejected": 14,
+        "first_search_masked:unreachable": 46,
+        "open:S1": 168,
+        "open:S2": 70,
+        "open:S3": 236,
+        "open:S6": 14,
+        "open:rejected": 17,
+        "open:unreachable": 95,
+        "prefill_partial:S5": 488,
+        "prefill_partial_masked:S4": 230,
+        "prefill_partial_masked:rejected": 258,
+        "prefill_sufficient:S5": 488,
+        "support_masked:S4": 375,
+        "support_masked:rejected": 113
+      },
+      "reject_reasons": {
+        "not_recovered_after_first_search_mask": 46,
+        "alternate_evidence_path:answer_text_in_observed_passage": 113,
+        "alternate_evidence_path:answer_text_in_visible_passage": 258,
+        "support_not_reached_within_budget": 95,
+        "identical_to_open_episode": 14,
+        "support_sentence_cut_by_display_limit": 17
+      },
+      "rows": 6697,
+      "rows_by_kind": {
+        "search": 4200,
+        "answer": 1892,
+        "abstain": 605
+      },
+      "searches_per_episode": {
+        "0": 488,
+        "1": 709,
+        "2": 409,
+        "3": 891
+      }
+    },
+    "dev": {
+      "questions": 100,
+      "unreachable_open": 11,
+      "accepted_episodes": 456,
+      "by_state": {
+        "S1": 23,
+        "S2": 9,
+        "S3": 50,
+        "S4": 119,
+        "S5": 172,
+        "S6": 83,
+        "rejected": 60,
+        "unreachable": 14
+      },
+      "by_variant_and_state": {
+        "first_search_masked:S6": 79,
+        "first_search_masked:rejected": 4,
+        "first_search_masked:unreachable": 3,
+        "open:S1": 23,
+        "open:S2": 9,
+        "open:S3": 50,
+        "open:S6": 4,
+        "open:rejected": 3,
+        "open:unreachable": 11,
+        "prefill_partial:S5": 86,
+        "prefill_partial_masked:S4": 46,
+        "prefill_partial_masked:rejected": 40,
+        "prefill_sufficient:S5": 86,
+        "support_masked:S4": 73,
+        "support_masked:rejected": 13
+      },
+      "reject_reasons": {
+        "alternate_evidence_path:answer_text_in_visible_passage": 40,
+        "alternate_evidence_path:answer_text_in_observed_passage": 13,
+        "support_not_reached_within_budget": 11,
+        "support_sentence_cut_by_display_limit": 3,
+        "identical_to_open_episode": 4,
+        "not_recovered_after_first_search_mask": 3
+      },
+      "rows": 1256,
+      "rows_by_kind": {
+        "search": 800,
+        "answer": 337,
+        "abstain": 119
+      },
+      "searches_per_episode": {
+        "0": 86,
+        "1": 115,
+        "2": 80,
+        "3": 175
+      }
+    },
+    "test": {
+      "questions": 100,
+      "unreachable_open": 13,
+      "accepted_episodes": 449,
+      "by_state": {
+        "S1": 23,
+        "S2": 12,
+        "S3": 50,
+        "S4": 109,
+        "S5": 172,
+        "S6": 83,
+        "rejected": 65,
+        "unreachable": 16
+      },
+      "by_variant_and_state": {
+        "first_search_masked:S6": 82,
+        "first_search_masked:rejected": 1,
+        "first_search_masked:unreachable": 3,
+        "open:S1": 23,
+        "open:S2": 12,
+        "open:S3": 50,
+        "open:S6": 1,
+        "open:rejected": 1,
+        "open:unreachable": 13,
+        "prefill_partial:S5": 86,
+        "prefill_partial_masked:S4": 44,
+        "prefill_partial_masked:rejected": 42,
+        "prefill_sufficient:S5": 86,
+        "support_masked:S4": 65,
+        "support_masked:rejected": 21
+      },
+      "reject_reasons": {
+        "support_not_reached_within_budget": 13,
+        "alternate_evidence_path:answer_text_in_observed_passage": 21,
+        "alternate_evidence_path:answer_text_in_visible_passage": 42,
+        "not_recovered_after_first_search_mask": 3,
+        "support_sentence_cut_by_display_limit": 1,
+        "identical_to_open_episode": 1
+      },
+      "rows": 1222,
+      "rows_by_kind": {
+        "search": 773,
+        "answer": 340,
+        "abstain": 109
+      },
+      "searches_per_episode": {
+        "0": 86,
+        "1": 120,
+        "2": 76,
+        "3": 167
+      }
+    }
+  }
+}
