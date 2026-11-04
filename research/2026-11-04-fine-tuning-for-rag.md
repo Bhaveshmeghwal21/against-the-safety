@@ -55,6 +55,16 @@ Also retain these requirements in the submission checklist: develop the project 
 
 Prepare the Article around the slides' checklist: problem and approach, hackathon repositories and features used, models and licenses, datasets and licenses, model collection, data/trace collection, experiments and findings, what additional credits would enable, and teammate tags. The submit page requires every repository in both HF collections, and the collections themselves, to be public and un-gated. Publish the adapter as its own un-gated repository; it loads the gated Tiny Aya base, which each user accepts on the model page. [Submit requirements](https://hackathon.lexsi.ai/), [kickoff checklist](https://hackathon.lexsi.ai/kickoff-slides/).
 
+### 2.1 Are AgentTune and AuditKIT compulsory? — rule clarification, Nov 4
+
+Using Lexsi's track repositories as functioning parts of the project is a requirement. The website's Project Requirements apply to all submissions, and its separate minimum-repository rule explicitly exempts Track 3. The FAQ repeats that exception. It is an exception to the two-repository count, not an express permission to build the whole entry without the track stack. [Official rules and FAQ](https://hackathon.lexsi.ai/).
+
+The website does not explicitly name both AgentTune and AuditKIT as individually mandatory for every Track 3 submission. AgentTune is the framework presented for the agentic track. The kickoff slides show AgentTune and AuditKIT together for Track 3 and give a general two-repository rule without repeating the website exception. Distinguish that difference in wording from an organizer-confirmed exemption for either specific library. [Track description](https://hackathon.lexsi.ai/), [kickoff track map and rules](https://hackathon.lexsi.ai/kickoff-slides/).
+
+**Our project decision is to use both in a connected pipeline.** AgentTune supplies real retrieval/tool episodes and training integration; AuditKIT evaluates the original and fine-tuned agent on the same cases and produces inspectable reports. These roles match their documented capabilities. Installing, importing or mentioning a repository alone does not demonstrate its role in the required pipeline. Supporting Transformers, PEFT and TRL components can remain part of that implementation; AgentTune itself uses TRL. [AgentTune README and AuditKIT handoff](https://github.com/Lexsi-Labs/AgentTune#hand-the-run-to-auditkit), [AuditKIT README](https://github.com/Lexsi-Labs/AuditKIT).
+
+Therefore, describe use of the Lexsi stack as compulsory, the Track 3 two-repository minimum as explicitly waived on the website, and our use of AgentTune plus AuditKIT as the selected implementation that fits both published descriptions. Do not assert that the website unambiguously makes both named repositories compulsory, or that the Track 3 exception makes all Lexsi tooling optional.
+
 ## 3. Literature review completed before selecting the plan
 
 Discovery used Exa across paper, data and implementation workstreams. The researchers requested 85 candidate results in aggregate, including duplicates, and then read original papers, author repositories and official documentation. This count describes search-result slots, not 85 fully read papers. The studies below were read beyond their abstracts, focusing on methods, evaluation and relevant limitations. Publication claims apply to the named models and settings. None establishes a Tiny Aya result for our project.
@@ -121,7 +131,7 @@ flowchart LR
 
 Use a single real tool, `search_corpus(query)`, built from AgentTune's `SearchCorpusTool` with `top_k` fixed by the harness. Wrap its output so the model sees neutral chunk IDs, titles and passage text but not BM25 scores. Under matched variants a visible score is a cheap shortcut, and the edge-RAG study in §3.3 found score gates weak on in-topic gaps. Start with `top_k` 3 and at most three searches, then choose the smallest settings that reach the retrieval ceiling in §4.3 on development data. Cap the total rendered context at a benchmarked 1,024–2,048 tokens, counting Tiny Aya's fixed system preamble, which the template always inserts. These are starting settings. Store stable document, chunk and sentence IDs, source revision, title and source text. Reconcile token truncation with gold-support labels before accepting an example.
 
-The assistant emits one action per turn. Use AgentTune's documented Tiny Aya fallback so AgentTune rollouts, its RAG rewards and the AuditKIT importers read the same text without custom glue. A search is the fallback tool-call list. A final turn uses the `<answer>` tags that AgentTune's default RAG prompt and `answer_correctness_reward` expect, plus citation and abstention tags. Check the exact citation pattern that `search_grounding_reward` parses before freezing the format. Plain text tags avoid vocabulary extension. [AgentTune Tiny Aya tool-calling notes](https://github.com/Lexsi-Labs/AgentTune#tool-calling-with-cohere-models-tiny-aya), [RAG trainer defaults](https://raw.githubusercontent.com/Lexsi-Labs/AgentTune/main/src/agenttune/rag/trainer.py).
+The assistant emits one action per turn. Use AgentTune's documented Tiny Aya fallback so AgentTune rollouts, its RAG rewards and the AuditKIT importers read the same text without custom glue. A search is the fallback tool-call list. A final turn uses the `<answer>` tags that AgentTune's default RAG prompt and `answer_correctness_reward` expect, plus citation and abstention tags. AgentTune's `search_grounding_reward` only rewards search use and parses no citation tag, so the `<citations>` and `<abstain>` tags are ours; the harness hands cited chunk IDs to AuditKIT as `cited_spans` (§16). Plain text tags avoid vocabulary extension. [AgentTune Tiny Aya tool-calling notes](https://github.com/Lexsi-Labs/AgentTune#tool-calling-with-cohere-models-tiny-aya), [RAG trainer defaults](https://raw.githubusercontent.com/Lexsi-Labs/AgentTune/main/src/agenttune/rag/trainer.py).
 
 ```text
 [{"tool_name": "search_corpus", "parameters": {"query": "Aster device warranty battery coverage"}}]
@@ -474,3 +484,51 @@ Re-read the official PS 4 text, rules, submit page and credit terms; re-extracte
 | HF now requires PRO for CPU Gradio/Docker Spaces; free accounts older than 30 days can host two ZeroGPU Spaces. | Rewrote §9 with a live ZeroGPU option and a static trace-viewer fallback, removed Azure, and priced ROI from published GPU and token rates. |
 | Pretraining likely covers HotpotQA's Wikipedia facts. | Added the closed-book diagnostic and split unsupported answers into correct and wrong (§5.1, §8.1). |
 | License discussion was longer than the Article checklist needs. | Reduced license content to the one list the checklist asks for (§5.4). |
+
+## 16. CPU harness record - 4 November 2026
+
+What was built and measured on CPU. No GPU job, model download or training has run. Code is in `src/ragharness`, scripts in `scripts/`, tests in `tests/`. All caches, temp files and the venv live inside the workspace (`scripts/env.ps1`); nothing was written to C: after the user's instruction.
+
+**Pinned stack (local CPU venv):** Python 3.12, `agenttune==1.1.3`, `auditkit==1.1.3`, `torch==2.11.0+cpu`, `transformers==5.22.1`. `trl==1.7.1`, `wandb` and `torchvision` are AgentTune requirements that the CPU harness does not install; the GPU environment must.
+
+**Data and index.** HotpotQA distractor revision `1908d6af...`. Seed 13. 600 train questions (484 bridge, 116 comparison; 372 medium, 124 easy, 104 hard), 100 dev (80/20, all hard) and 100 test from the official dev partition (81/19, all hard). Dev is drawn from `hard` only because the test partition is entirely `hard`. Later splits skip any question that shares a supporting title with an earlier split. The shared index holds 7,820 chunks (from 7,919 paragraphs) with hash `169443742963...`; it is rebuilt from the manifests, not committed.
+
+**Retrieval ceiling on dev (n = 100), scripted oracle queries, complete support-set recall.**
+
+| top_k | after 1 search | after 2 | after 3 |
+| --- | --- | --- | --- |
+| 3 | 0.32 | 0.83 | 0.87 |
+| 5 | 0.41 | 0.87 | 0.89 |
+| 8 | 0.56 | 0.95 | 0.95 |
+
+The bridge query is the bridge title alone. Adding the question text to it lowered recall (0.77 at top_k 3 after 3 searches), so it is not used. At top_k 3 the oracle cannot reach the full support set for 13% of dev questions, and 9 of those stop because no missing title is mentioned in visible text. Those questions are not answerable within the budget, so the episode builder must label them separately rather than as clean answerable examples. The first search alone reaches the full set for only about a third of questions, so the second hop carries most of the task. Full output: `reports/retrieval_ceiling_dev.json`.
+
+**How AgentTune and AuditKIT are used.**
+
+| Step | Library component |
+| --- | --- |
+| Search tool | `CorpusSearchTool`, a subclass of AgentTune's `SearchCorpusTool`. Same name and schema; adds per-episode masks, drops the `score=` field and the 350-character cut, and keeps the `[chunk_id=...]` marker that AgentTune's rollout parses. |
+| Action text | AgentTune's `DEFAULT_TOOLS_FALLBACK_PROMPT` and `_extract_tool_calls` read our search string, quotes included. |
+| Trajectories | AgentTune `EventLog` (full tier, no invented log-probabilities) plus `TrajectoryStore`, exported to JSONL for the trace dataset. |
+| Training entry | `create_distill_trainer(..., trajectories=..., trainer_factory=...)`. The rows it hands over become Tiny Aya prompt/completion rows. A CPU stand-in factory has been verified; the 4-bit QLoRA factory is still to write and smoke-test on T4. |
+| Answer scoring | AgentTune's `qa_metrics` F1 and exact match. |
+| Evaluation | AuditKIT `episodes_from_agenttune` reads the EventLog file (search counts match ours), and `ak.evaluate(..., model="precomputed")` runs `evidence_set_recall`, `citation_support` and `abstention` on a `RAGCase`, `CorpusSnapshot` and `RAGTrace` built per episode, with `abstained` set explicitly. |
+
+AgentTune 1.1.3 on PyPI ships `backends/trl/sft/__init__.py` without `sft.py`, so `TRLSFTTrainer` cannot be imported from the wheel. Training therefore goes through `create_distill_trainer` with our own factory, as above. Its default factory loads bf16 with `device_map="auto"` and trains on all `messages`, which is why it is replaced.
+
+**Slice check (dev, scripted oracle policy, not a model).** `reports/audit_slice_dev.json`.
+
+| Condition | evidence_set_recall | citation_support | abstention | Answered / abstained |
+| --- | --- | --- | --- | --- |
+| open | 0.87 | 0.87 | 0.87 | 87 / 13 |
+| support_masked | not tested (100) | not tested (100) | 1.00 | 0 / 100 |
+
+The open-condition recall equals the separately computed ceiling at top_k 3 after 3 searches, which cross-checks the tool, the masks and the AuditKIT adapter against each other. `citation_support` is 0.87 because AuditKIT scores an answerable case with no citations as 0, so the 13 false abstentions count as zero; report it next to the answered-only rate. Answer F1 is 1.0 on the 87 answers because the scripted policy copies the gold answer, so it says nothing about a model.
+
+**Row checks.** 100 dev episodes became 267 prompt/completion rows (167 search, 87 answer, 13 abstain). Every row passes the template assertions in §6.1 against the pinned Tiny Aya Global template (revision `af89d219...`): the prompt ends at `<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|><|START_RESPONSE|>`, the completion is content + `<|END_RESPONSE|><|END_OF_TURN_TOKEN|>`, and every observation survives as a user turn. The template is fetched from the public Hub API on first use (`tests/fixtures/` is git-ignored).
+
+**Context length.** The fixed prefix (Tiny Aya's default preamble plus our system prompt) is 3,238 characters, about 800 tokens at 4 characters per token. Rendered rows reach about 950 tokens with no observation, 1,800 with one, 2,300 with two and 2,400 with three. By that rough estimate 12 of 267 rows exceed the 2,048-token cap. Real token counts need the gated tokenizer. Options once measured: shorten the system prompt, cap passage length, or lift the cap to 2,560 for the longest rows.
+
+**Parser decisions.** A search is exactly one `search_corpus` call with a non-empty query and no other keys. An answer needs non-empty text and chunk IDs of the form `c00012`. An abstention needs non-empty text. Anything else is `invalid` and is counted separately, never as an abstention.
+
+**Still open.** The six-state episode builder, answer-reachability labels, the leakage report for training observations that contain test support paragraphs, the QLoRA factory, and every GPU measurement (§7). Real token counts need the Tiny Aya gate accepted on Hugging Face.

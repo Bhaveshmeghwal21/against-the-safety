@@ -18,4 +18,21 @@ The demo is a ZeroGPU Space if our Hugging Face account qualifies (free accounts
 
 ## Status
 
-The project is in the research and planning stage. The [current paper review and plan](research/2026-11-04-fine-tuning-for-rag.md), rechecked twice on 4 November 2026, covers the literature, rules and judging, datasets, retrieval harness, training, evaluation, compute and submission milestones. Compute comes from the Kaggle T4 ×2 weekly quota, which should reset around Nov 7 and Nov 14, plus the $20 HF credit if it arrives. Final sample sizes depend on the throughput pilot; the allocation is not a measured runtime guarantee. The [earlier distillation note](research/2026-11-03-agentic-distillation.md) records the previous direction.
+The project is at the CPU-harness stage: the data sampler, shared retrieval index, masked search, AgentTune-to-AuditKIT evaluation slice and Tiny Aya row builder run and pass their checks (section 16 of the plan). No GPU run or training has happened yet. The [current paper review and plan](research/2026-11-04-fine-tuning-for-rag.md), rechecked twice on 4 November 2026, covers the literature, rules and judging, datasets, retrieval harness, training, evaluation, compute and submission milestones. Compute comes from the Kaggle T4 ×2 weekly quota, which should reset around Nov 7 and Nov 14, plus the $20 HF credit if it arrives. Final sample sizes depend on the throughput pilot; the allocation is not a measured runtime guarantee. The [earlier distillation note](research/2026-11-03-agentic-distillation.md) records the previous direction.
+
+## Run the CPU harness
+
+Python 3.12. Everything, including caches and temp files, stays inside this folder.
+
+```powershell
+py -3.12 -m venv .venv
+. .\scripts\env.ps1                      # redirects every cache and temp path into .cache/
+python -m pip install --no-deps -r requirements-cpu.lock.txt
+python -m pip install --no-deps -e .
+python scripts/prepare_data.py           # sample HotpotQA splits, write manifests
+python scripts/build_index.py            # shared SQLite FTS index
+python scripts/retrieval_ceiling.py      # oracle retrieval ceiling on dev
+python scripts/audit_slice.py            # AgentTune tool and trajectories -> AuditKIT metrics
+python scripts/check_rows.py             # AgentTune distill hook -> Tiny Aya rows, template-checked
+python -m pytest tests -q
+```

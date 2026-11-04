@@ -1,0 +1,48 @@
+{
+  "index_hash": "169443742963e9a39511fceb13f37cef91540c67593a6c5db30fd90ae3f6cd96",
+  "split": "dev",
+  "top_k": 3,
+  "budget": 3,
+  "policy": "scripted oracle (not a model)",
+  "conditions": {
+    "open": {
+      "n": 100,
+      "auditkit": {
+        "evidence_set_recall": 0.87,
+        "citation_support": 0.87,
+        "abstention": 0.87
+      },
+      "unscored": {},
+      "answered": 87,
+      "abstained": 13,
+      "invalid": 0,
+      "answer_f1_when_answered": 1.0,
+      "cited_not_observed": 0,
+      "mean_searches": 1.67
+    },
+    "support_masked": {
+      "n": 100,
+      "auditkit": {
+        "evidence_set_recall": null,
+        "citation_support": null,
+        "abstention": 1.0
+      },
+      "unscored": {
+        "evidence_set_recall": {
+          "unknown": 0,
+          "not_tested": 100
+        },
+        "citation_support": {
+          "unknown": 0,
+          "not_tested": 100
+        }
+      },
+      "answered": 0,
+      "abstained": 100,
+      "invalid": 0,
+      "answer_f1_when_answered": null,
+      "cited_not_observed": 0,
+      "mean_searches": 2.6
+    }
+  }
+}

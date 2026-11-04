@@ -4,6 +4,9 @@
 *.key
 .mcp-auth/
 
+# Workspace-local caches and temp (see scripts/env.ps1)
+.cache/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -23,6 +26,10 @@ wandb/
 
 # Local data and indexes (rebuild from scripts and pinned manifests)
 data/raw/
+data/processed/
+data/index/
+tests/fixtures/
+*.egg-info/
 *.sqlite
 *.db
 

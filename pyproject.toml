@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ragharness"
+version = "0.1.0"
+description = "CPU data, retrieval and episode harness for the PS 4 RAG fine-tuning entry"
+requires-python = ">=3.12"
+dependencies = [
+    "agenttune==1.1.3",
+    "auditkit==1.1.3",
+    "evaluate",
+    "huggingface_hub",
+    "jinja2",
+    "pyarrow",
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
