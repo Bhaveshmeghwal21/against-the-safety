@@ -93,6 +93,8 @@ declines some questions it could have answered. The control answers more of the 
 The full tables, both readings of the base model's output (lenient first-valid-action and strict protocol), per-state breakdowns and
 paired intervals are in the repository (`reports/`) and in the dataset repository.
 
+{"A decoding-time sweep on the development split (`reports/bias_sweep.md`) added a bias to the logit of `abstain` after `<`: from 0 to -3 the results barely change; at -6 false abstains on answerable questions halve (20 to 10 of 86) but unsupported answers on unanswerable ones rise from 2 to 26 of 73; from -9 it never abstains, as with the control. No setting removed the false abstains without losing the correct ones." if is_main else ""}
+
 ## Use
 
 Needs access to the gated base model (accept its terms on its model page) and a GPU for 4-bit loading.

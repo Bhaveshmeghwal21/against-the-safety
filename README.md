@@ -38,7 +38,7 @@ Further numbers (all in [`reports/`](reports/)):
 - Strict reading of the output format (exactly the trained protocol; the base model breaks it on 279 of 287 episodes): [`scorecard_test_strict.md`](reports/scorecard_test_strict.md).
 - Cost per good outcome and break-even against the training cost: [`roi_test_lenient.md`](reports/roi_test_lenient.md).
 - Epoch choice on the development split: [`dev_epoch_selection.md`](reports/dev_epoch_selection.md).
-- Decoding-time abstention sweep: [`bias_sweep.md`](reports/bias_sweep.md).
+- Decoding-time abstention sweep, development split only (the test split was not re-run at other settings): [`bias_sweep.md`](reports/bias_sweep.md). Lowering the abstain logit by 6 halves the false abstains (20 to 10 of 86 answerable) but raises unsupported answers on unanswerable episodes from 2 to 26 of 73; at −9 and below the adapter never abstains. No setting keeps the abstentions and drops the false abstains.
 - A 24-task practical check on a fictional product's documents (Nimbus Home): [`scorecard_product_lenient.md`](reports/scorecard_product_lenient.md).
 
 ## What PS 4 asks for, and where each part is measured
@@ -98,6 +98,8 @@ Both readings and the choice of primary were fixed before the test split was ope
 
 | | link |
 | --- | --- |
+| Model collection | https://huggingface.co/collections/BMEscanor/against-the-safety-tiny-aya-rag-adapters-6aec1fda812ed14d9f60bfbc |
+| Data collection | https://huggingface.co/collections/BMEscanor/against-the-safety-rag-episodes-traces-and-demo-6aec1fdb994e3b036c6c958d |
 | Adapter, main | https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-main |
 | Adapter, control | https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-control |
 | Episodes, evaluation traces, reports | https://huggingface.co/datasets/BMEscanor/against-the-safety-rag-episodes |
