@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="770" height="270" viewBox="0 0 770 270" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="770" height="270" fill="#ffffff"/>
+<text x="140" y="26" font-size="16" font-weight="600" fill="#1f2328">How each test episode ends</text>
+<text x="140" y="45" font-size="12" fill="#57606a">Each bar is the same 151 test episodes. Green is a good outcome.</text>
+<text x="128" y="80.0" font-size="14" font-weight="600" text-anchor="end" fill="#1f2328">Tiny Aya base</text>
+<rect x="140.0" y="58" width="4.0" height="34" fill="#2e7d32"/>
+<rect x="144.0" y="58" width="7.9" height="34" fill="#81c784"/>
+<rect x="151.9" y="58" width="496.7" height="34" fill="#c62828"/>
+<text x="400.3" y="80.0" font-size="13" text-anchor="middle" fill="#ffffff">125</text>
+<rect x="648.6" y="58" width="91.4" height="34" fill="#9e9e9e"/>
+<text x="694.3" y="80.0" font-size="13" text-anchor="middle" fill="#ffffff">23</text>
+<text x="128" y="132.0" font-size="14" font-weight="600" text-anchor="end" fill="#1f2328">main adapter</text>
+<rect x="140.0" y="110" width="151.0" height="34" fill="#2e7d32"/>
+<text x="215.5" y="132.0" font-size="13" text-anchor="middle" fill="#ffffff">38</text>
+<rect x="291.0" y="110" width="198.7" height="34" fill="#81c784"/>
+<text x="390.3" y="132.0" font-size="13" text-anchor="middle" fill="#1f2328">50</text>
+<rect x="489.7" y="110" width="99.3" height="34" fill="#f9a825"/>
+<text x="539.3" y="132.0" font-size="13" text-anchor="middle" fill="#1f2328">25</text>
+<rect x="589.0" y="110" width="95.4" height="34" fill="#c62828"/>
+<text x="636.7" y="132.0" font-size="13" text-anchor="middle" fill="#ffffff">24</text>
+<rect x="684.4" y="110" width="55.6" height="34" fill="#9e9e9e"/>
+<text x="712.2" y="132.0" font-size="13" text-anchor="middle" fill="#ffffff">14</text>
+<text x="128" y="184.0" font-size="14" font-weight="600" text-anchor="end" fill="#1f2328">control adapter</text>
+<rect x="140.0" y="162" width="242.4" height="34" fill="#2e7d32"/>
+<text x="261.2" y="184.0" font-size="13" text-anchor="middle" fill="#ffffff">61</text>
+<rect x="382.4" y="162" width="95.4" height="34" fill="#c62828"/>
+<text x="430.1" y="184.0" font-size="13" text-anchor="middle" fill="#ffffff">24</text>
+<rect x="477.7" y="162" width="262.3" height="34" fill="#9e9e9e"/>
+<text x="608.9" y="184.0" font-size="13" text-anchor="middle" fill="#ffffff">66</text>
+<rect x="140" y="222" width="12" height="12" fill="#2e7d32"/>
+<text x="157" y="233" font-size="12" fill="#1f2328">supported answer</text>
+<rect x="287" y="222" width="12" height="12" fill="#81c784"/>
+<text x="304" y="233" font-size="12" fill="#1f2328">correct abstain</text>
+<rect x="427" y="222" width="12" height="12" fill="#f9a825"/>
+<text x="444" y="233" font-size="12" fill="#1f2328">false abstain</text>
+<rect x="140" y="244" width="12" height="12" fill="#c62828"/>
+<text x="157" y="255" font-size="12" fill="#1f2328">wrong or unsupported answer</text>
+<rect x="364" y="244" width="12" height="12" fill="#9e9e9e"/>
+<text x="381" y="255" font-size="12" fill="#1f2328">no valid final turn</text>
+</svg>
