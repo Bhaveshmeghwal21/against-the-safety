@@ -25,6 +25,7 @@ REPOS = [  # (kind, name, local folder)
     ("dataset", "nimbus-home-support-suite", "dataset_nimbus"),
     ("space", "against-the-safety-trace-viewer", "space"),
     ("model", "against-the-safety-tiny-aya-rag-cand-a", "model_cand_a"),  # round 2, not the selected model (plan section 21)
+    ("dataset", "against-the-safety-benchmark-traces", "dataset_benchmarks"),  # external benchmarks (plan sections 22 and 23)
 ]
 
 COLLECTIONS = {
@@ -36,7 +37,7 @@ COLLECTIONS = {
     "data": {
         "title": "Against-the-safety: RAG episodes, traces and demo",
         "description": "Training episodes, AuditKIT evaluation traces, the Nimbus Home suite and a static trace viewer (PS 4).",
-        "items": [("dataset", 2), ("dataset", 3), ("space", 4)],
+        "items": [("dataset", 2), ("dataset", 3), ("space", 4), ("dataset", 6)],
     },
 }
 

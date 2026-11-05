@@ -764,3 +764,53 @@ The strict reading gives the same adapter numbers. The base model breaks the for
 **Compute.** 1,131 episodes per system at about 4 to 5 s each. Two kernels:
 - base and main on two GPUs, about 1.5 h;
 - then candA, control and closed book, about 1.5 h.
+
+## 23. External benchmark results - 6 November 2026
+
+**Runs.**
+- `ats-eval-bench-a`: base and main, one per GPU, 10,174 s.
+- `ats-eval-bench-b`: candA and control, then closed book, 8,830 s.
+- Together that is 5.3 notebook hours against the 3 h planned. Generation alone took 4,000 to 5,000 s per system; RGB's prompt settings, with five passages in the user turn, were the slowest set.
+- All 40 scored runs and 5 closed-book runs completed without errors.
+- Report: `scripts/bench_report.py` writes `reports/benchmarks_lenient.md` and `reports/benchmarks_strict.md` (with `.json`), and `docs/figures/benchmarks.svg`.
+
+**Primary result (lenient reading; "ends well" over every scored episode of the benchmark).**
+
+| benchmark | base | main | candA | control | main minus base, 95% CI | main minus candA, 95% CI | closed book |
+| --- | ---: | ---: | ---: | ---: | --- | --- | ---: |
+| 2WikiMultihopQA (166) | 0.018 | 0.566 | 0.620 | 0.241 | +0.548 [+0.479, +0.619] | −0.054 [−0.113, +0.000] | 0.276 |
+| MuSiQue 2-hop (168) | 0.018 | 0.536 | 0.577 | 0.250 | +0.518 [+0.455, +0.581] | −0.042 [−0.098, +0.012] | 0.045 |
+| SQuAD 2.0 (202) | 0.010 | 0.475 | 0.559 | 0.040 | +0.465 [+0.404, +0.528] | −0.084 [−0.150, −0.015] | 0.137 |
+| RGB (453) | 0.157 | 0.618 | 0.660 | 0.530 | +0.461 [+0.406, +0.518] | −0.042 [−0.081, −0.004] | 0.180 |
+| RGB integration (142) | 0.070 | 0.028 | 0.049 | 0.007 | −0.042 [−0.097, +0.008] | −0.021 [−0.056, +0.014] | 0.100 |
+| all five, pooled (1,131) | 0.079 | 0.499 | 0.547 | 0.293 | +0.420 [+0.386, +0.453] | −0.049 [−0.072, −0.026] | |
+
+The strict reading gives the same adapter numbers (main pooled 0.498). The base model's numbers fall further (pooled 0.019), because it breaks the format.
+
+**Reading.**
+1. *The PS 4 behaviour transfers to four of the five benchmarks.* Main beats the base model by 0.46 to 0.55 on 2WikiMultihopQA, MuSiQue, SQuAD 2.0 and RGB, and every interval is far from zero. The gain comes mostly from abstention:
+   - With the support masked, main abstains on 0.85, 0.85, 0.71 and 0.52 of episodes; the base model abstains on 0.04 or less.
+   - On SQuAD 2.0's 80 human-written unanswerable questions, which we did not construct, main abstains on 57 (0.713) and the base model on none.
+   - Unsupported answers fall from 0.80 to 0.91 for the base model to 0.01 to 0.04 for main on 2WikiMultihopQA, MuSiQue and SQuAD 2.0.
+2. *Failure 1: single-hop questions.* On SQuAD 2.0 open search, main gives a supported answer on only 4 of 73 questions and abstains on 54. The gold paragraph had already been shown in all 54 of those episodes (in each, the answer text is in the results of the first search), and 48 of them end after the third search.
+   - Example: the first search for "What is the mayor of Warsaw called?" returns "The mayor of Warsaw is called President." Main searches twice more and abstains.
+   - CandA behaves the same way (55 of 73).
+   - Every training question was a two-passage HotpotQA question, and the adapters appear to have learned that one passage is never enough. On HotpotQA test2, by comparison, 16 of main's 30 false abstentions had the full evidence on screen.
+3. *Failure 2: answers with two parts.* RGB integration asks for two facts from different passages. Main and candA answer with the first part only and cite both passages, for example "Wyndham Clark" for "Who won the U.S. Open golf tournament 2023 and the 2023 Open Championship?".
+   - Accuracy at noise 0 falls from 0.383 for the base model to 0.017 for main and 0.000 for candA.
+   - The training answers were single HotpotQA spans, so the adapters learned a single-span answer format.
+   - Part of the base model's score comes from long answers that happen to contain both parts.
+4. *Failure 3: on-topic passages supplied in the prompt.* At RGB noise 1, five passages are on topic but do not hold the answer (often the same event in another year). Main abstains on 26 of 100, candA on 15, the base model on 1 and the control on none. With the same answers masked from search instead, main abstains on 0.52.
+   - At noise 0, main's accuracy rises from 0.77 to 0.91 over the base model.
+   - At noise 0.8, it is 0.80 against the base model's 0.85.
+5. *CandA transfers better than main.* Pooled over the five sets, candA is ahead by 0.049 [0.026, 0.072], with the interval excluding zero; per set, the interval excludes zero on SQuAD 2.0 and RGB.
+   - The trade-off is the same as on dev and test2. Pooled supported answers on open search are 133 of 346 for candA and 105 for main; unsupported answers are 128 of 465 for candA and 102 for main.
+   - As pre-registered, main stays the project's model. This is now the third set on which candA's lower refusal rate pays off, so the README and the cards point users who prefer answers over caution to candA.
+6. *The control answers more open questions but never abstains, and it loops.* The control has the highest supported-correct rate on four of the five open sets (for example, 0.477 against 0.250 for main on MuSiQue). It has no correct abstentions anywhere. On the three Wikipedia sets, 0.43 to 0.83 of its episodes break the protocol, most of them by repeating a query.
+
+**What a third round would target (not run; this week's GPU quota is nearly used):**
+- one-passage questions, so that an answer after one sufficient search is in the training data;
+- answers with several parts;
+- refusals when the supplied passages are on topic but stale.
+
+None of these sets would be usable for selection afterwards, because all five have now been opened.

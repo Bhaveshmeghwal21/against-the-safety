@@ -8,7 +8,7 @@ Code: https://github.com/Bhaveshmeghwal21/against-the-safety
 
 A document assistant is only useful if it answers from its documents and stops when they do not contain the answer. We fine-tuned Tiny Aya Global (3.35B, a Cohere model) with QLoRA, through AgentTune, to run a three-search retrieval loop and then either answer with citations to the passages it saw or abstain and say what is missing. Training used 600 HotpotQA questions turned into scripted episodes in six evidence states (clean support, distractors, second hop, missing evidence, evidence already supplied, weak first search), 1,611 rows in total. We trained two adapters under an identical recipe: a main adapter on the full mixture and a control on supported tool episodes only. We evaluated on a held-out test split, opened once, with the same retrieval index, call budget and decoding for every system. Scoring was deterministic code plus AuditKIT's RAG and agent metrics.
 
-On the test split the end-to-end good rate (a supported answer when the documents hold it, an abstention when they do not) went from 0.020 for the base model to 0.583 for the main adapter (+0.563, 95% interval +0.490 to +0.636), and from 0.404 for the control to 0.583 (+0.179, +0.103 to +0.252). The base model answered from missing evidence in 78% of unanswerable episodes; main does so in 9.8%, the control in 26.8%. Citations to a gold passage when answering rose from 12.6% to 99.4%. The improvement has a price: the main adapter abstains on 19% of answerable episodes, and its supported-answer rate on answerable questions (0.527) is lower than the control's (0.707). The control never abstains and, when evidence is missing, mostly loops until it runs out of searches. We report both and do not merge them into one score. In a pre-registered second round we drew 100 fresh questions (test2) that no training row or choice had touched. Main replicated there: 0.028 to 0.601, +0.573 (+0.503 to +0.643). A re-trained variant with fewer abstention examples cut the refusals (15% against 22%), at the cost of more unsupported answers (8% against 4%). The selection rule kept main, and both adapters are published. A 24-task check on a fictional product's documents shows the same pattern and weaker results on two-document questions and on choosing the current edition of a policy. Training cost 3.9 T4 GPU-hours on the free Kaggle quota (about 1.36 USD at a reference price).
+On the test split the end-to-end good rate (a supported answer when the documents hold it, an abstention when they do not) went from 0.020 for the base model to 0.583 for the main adapter (+0.563, 95% interval +0.490 to +0.636), and from 0.404 for the control to 0.583 (+0.179, +0.103 to +0.252). The base model answered from missing evidence in 78% of unanswerable episodes; main does so in 9.8%, the control in 26.8%. Citations to a gold passage when answering rose from 12.6% to 99.4%. The improvement has a price: the main adapter abstains on 19% of answerable episodes, and its supported-answer rate on answerable questions (0.527) is lower than the control's (0.707). The control never abstains and, when evidence is missing, mostly loops until it runs out of searches. We report both and do not merge them into one score. In a pre-registered second round we drew 100 fresh questions (test2) that no training row or choice had touched. Main replicated there: 0.028 to 0.601, +0.573 (+0.503 to +0.643). A re-trained variant with fewer abstention examples cut the refusals (15% against 22%), at the cost of more unsupported answers (8% against 4%). The selection rule kept main, and both adapters are published. On five external benchmarks never used for training or selection (2WikiMultihopQA, MuSiQue, SQuAD 2.0, RGB and RGB integration; 1,131 episodes), main went from 0.079 to 0.499 (+0.420, +0.386 to +0.453) and improved on four of the five. It fails on two-part answers, and it declines most single-passage SQuAD questions even with the answer shown; neither question type was in its training data. A 24-task check on a fictional product's documents shows the same pattern and weaker results on two-document questions and on choosing the current edition of a policy. Training cost 3.9 T4 GPU-hours on the free Kaggle quota (about 1.36 USD at a reference price).
 
 ## 1. Problem and approach
 
@@ -47,7 +47,12 @@ Two integration problems we hit and documented in the repository: TRL casts LoRA
 | --- | --- | --- |
 | [against-the-safety-rag-episodes](https://huggingface.co/datasets/BMEscanor/against-the-safety-rag-episodes) | training rows (main, control, round-2 candidates), AgentTune event logs, dev, test and test2 evaluation traces, reports | CC BY-SA 4.0 (derived from HotpotQA) |
 | [nimbus-home-support-suite](https://huggingface.co/datasets/BMEscanor/nimbus-home-support-suite) | 24 fictional product documents, 24 tasks, evaluation traces | CC BY 4.0 |
+| [against-the-safety-benchmark-traces](https://huggingface.co/datasets/BMEscanor/against-the-safety-benchmark-traces) | evaluation traces and reports on the five external benchmarks | per folder, as the source benchmark (below) |
 | HotpotQA (distractor) | source of questions and passages | CC BY-SA 4.0 |
+| 2WikiMultihopQA (dev) | external benchmark | Apache-2.0 |
+| MuSiQue-Ans (dev, 2-hop) | external benchmark | CC BY 4.0 |
+| SQuAD 2.0 (dev) | external benchmark | CC BY-SA 4.0 |
+| RGB (English refined and integration sets) | external benchmark | CC BY-NC-SA 4.0 |
 
 ## 5. Collections
 
@@ -146,16 +151,49 @@ What round 2 established:
 - **Re-weighting the existing examples did not improve retrieval.** The model's own queries reached the full evidence in 56, 58 and 59 of 86 open dev questions (main, candA, candB).
 - **Cost:** about 4 T4-hours of training for both candidates together, and about 2.5 more hours of evaluation.
 
+### External benchmarks
+
+We then asked whether the behaviour holds on data we neither built nor used for any choice. Five public sets were fixed before any model ran on them, with their settings and metrics (plan section 22 in the repository). Each benchmark gets its own index and the same harness as HotpotQA: three searches, three passages, 800 characters. The scores therefore compare our systems with each other and are not comparable with official leaderboards, which hand the model the gold paragraphs.
+
+- **2WikiMultihopQA** (Apache-2.0): 100 dev questions, 87 reachable within three searches.
+- **MuSiQue-Ans 2-hop** (CC BY 4.0): 200 dev questions, 88 reachable.
+- **SQuAD 2.0** (CC BY-SA 4.0): 80 answerable dev questions and 80 human-written unanswerable ones.
+- **RGB** (CC BY-NC-SA 4.0): 100 questions, run with search and also in RGB's own settings with five passages in the prompt (noise 0, 0.8 and 1).
+- **RGB integration:** 60 questions whose answer has two parts in different passages.
+
+The RGB counterfactual set was left out, because it rewards overriding the documents.
+
+| ends well | base | **main** | candA | control | main minus base (95% interval) |
+| --- | ---: | ---: | ---: | ---: | --- |
+| 2WikiMultihopQA (166) | 0.018 | **0.566** | 0.620 | 0.241 | +0.548 (+0.479 to +0.619) |
+| MuSiQue 2-hop (168) | 0.018 | **0.536** | 0.577 | 0.250 | +0.518 (+0.455 to +0.581) |
+| SQuAD 2.0 (202) | 0.010 | **0.475** | 0.559 | 0.040 | +0.465 (+0.404 to +0.528) |
+| RGB (453) | 0.157 | **0.618** | 0.660 | 0.530 | +0.461 (+0.406 to +0.518) |
+| RGB integration (142) | 0.070 | **0.028** | 0.049 | 0.007 | −0.042 (−0.097 to +0.008) |
+| pooled (1,131) | 0.079 | **0.499** | 0.547 | 0.293 | +0.420 (+0.386 to +0.453) |
+
+What transfers and what does not:
+- **Abstention transfers.** With the support hidden, main abstains in 85%, 85%, 71% and 52% of episodes on the first four sets; the base model in 4% or fewer. It declines 57 of SQuAD 2.0's 80 human-written unanswerable questions (base: 0).
+- **Two-part answers do not.** On RGB integration, main cites both passages but answers with the first part only ("Wyndham Clark" for the winners of two golf majors). Accuracy with clean passages falls from 0.383 for the base model to 0.017. All training answers were single HotpotQA spans.
+- **Single-passage questions are refused.** On SQuAD 2.0, main declines 54 of 73 answerable questions, and in every one of those 54 episodes the answer text was already in the results of its first search. Every training question needed two passages, and the adapter appears to have learned that one passage is never enough. On HotpotQA test2, by comparison, 16 of its 30 false abstentions had the evidence on screen.
+- **On-topic passages that don't answer, supplied in the prompt, are often trusted.** At RGB noise 1, main declines 26 of 100 times; when the same answers are hidden from search instead, it abstains on 52%.
+- **CandA transfers better than main.** It is ahead on all five sets, by 0.049 pooled (0.026 to 0.072), with more supported answers (133 against 105 of 346) and more unsupported ones (128 against 102 of 465). Main stays the selected model by the pre-registered rule, and candA is the better choice when an answer matters more than caution.
+- **Cost:** two kernels of 2.8 and 2.5 hours on T4 x2.
+
 ### Limits
 
-Small evaluation sets (86 answerable questions per split); differences of a few points are not established. A second fresh split (test2, round 2) confirms the main result. F1 ≥ 0.5 against the gold answer can credit near-misses on short answers, so exact-match rates are in the reports (main 0.424, control 0.571, base 0.020 on answerable episodes). English, short factual questions. The check that masked episodes lack the answer is a text match, not a proof that no other passage could answer.
+Small evaluation sets (86 answerable questions per split); differences of a few points are not established. A second fresh split (test2, round 2) confirms the main result. F1 ≥ 0.5 against the gold answer can credit near-misses on short answers, so exact-match rates are in the reports (main 0.424, control 0.571, base 0.020 on answerable episodes). English, short factual questions; the external benchmarks show that the adapters do not handle two-part answers or single-passage questions. The check that masked episodes lack the answer is a text match, not a proof that no other passage could answer.
 
 ## 7. What more credits would enable
 
 More than two T4 GPUs and a longer quota window would let us do four things:
 1. Train the same recipe on all of HotpotQA's training set instead of 600 questions.
 2. Run several seeds, so that main and candA, which swap places between dev and test2 within their intervals, can actually be ranked.
-3. Generate new training episodes for the failure that re-weighting could not fix: follow-up searches that fail to reach the second document. The model's own queries find the full evidence in only about 70% of open questions.
+3. Generate new training episodes for the failures that re-weighting could not fix:
+   - follow-up searches that fail to reach the second document (the model's own queries find the full evidence in only about 70% of open questions);
+   - questions that one passage answers;
+   - answers with several parts.
+   The external benchmarks show the last two as the largest gaps.
 4. Evaluate on a document set from a real deployment with several editions of the same policy, which is where our 24-task check was weakest.
 
 ## 8. Team

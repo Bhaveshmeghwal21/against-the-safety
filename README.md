@@ -21,6 +21,7 @@ Lexsi AI Safety and Alignment Hackathon · Track 3: Agentic fine-tuning · PS 4:
 - **Lexsi tools:** [AgentTune](https://github.com/Lexsi-Labs/AgentTune) supplies the retrieval backend, the search tool, the episode logs and the trainer. [AuditKIT](https://github.com/Lexsi-Labs/AuditKIT) supplies the RAG and agent metrics.
 - **Result:** on a held-out test split, opened once, the share of episodes that end well rose from **2.0% to 58.3%**. An episode ends well with a cited, supported answer when the documents hold the answer, or with an abstention when they don't.
 - **Replicated:** in a second round, on 100 fresh questions that no choice had seen, the same adapter went from **2.8% to 60.1%**.
+- **Five external benchmarks:** on 2WikiMultihopQA, MuSiQue, SQuAD 2.0, RGB and RGB integration (1,131 episodes, never trained on or used for any choice), the rate went from **7.9% to 49.9%**. It rose on four of the five. The adapter fails on questions that need a two-part answer, and it often refuses single-passage questions.
 - **The price:** the adapter declines about one answerable question in five. A second-round variant (candA) halves that on dev, at the cost of more answers when the evidence is missing. A control adapter trained without abstention examples answers more, but it never abstains.
 
 <p align="center">
@@ -110,6 +111,7 @@ This is the typical pattern; the counts are in the figure above. Every test epis
 | [`training_sets_round2.json`](reports/training_sets_round2.json) | round 2: composition of the two candidate training sets |
 | [`round2_selection.md`](reports/round2_selection.md) | round 2: candidate selection on the development split |
 | [`scorecard_test2_lenient.md`](reports/scorecard_test2_lenient.md), [`scorecard_test2_strict.md`](reports/scorecard_test2_strict.md), [`tradeoff_test2_lenient.md`](reports/tradeoff_test2_lenient.md) | round 2: the fresh test split |
+| [`benchmarks_lenient.md`](reports/benchmarks_lenient.md), [`benchmarks_strict.md`](reports/benchmarks_strict.md) | five external benchmarks: every metric, paired intervals, AuditKIT rows, closed book |
 
 ## Round 2: a fresh test split, and an attempt to cut the refusals
 
@@ -150,6 +152,45 @@ CandA was the better candidate but scored below main, so under the rule **main s
 - **Fewer abstentions in training means fewer refusals.** On both splits candA refuses less and gives more supported answers. It also answers more often when the evidence is missing. CandA was behind main on dev and ahead on test2, and neither gap is outside its interval, so the two cannot be ranked on "ends well" with about 85 questions. They are two operating points, and both are published.
 - **The search-count pattern was not the cause.** CandB removed the depth pattern from its training labels, yet it still abstains mostly after many searches, and its refusals barely changed (34 against 36 on dev). Unanswerable episodes simply use up more searches.
 - **Retrieval did not improve.** The model's own queries found the full evidence in 56, 58 and 59 of 86 open dev questions for main, candA and candB. Better follow-up search needs new training data, not a re-weighting of the old data.
+
+## External benchmarks
+
+Does the behaviour learned on HotpotQA hold on data we did not build, train on or choose anything with? We ran every system on five public benchmarks under the same harness. The sets, settings and metrics were fixed and pushed ([plan section 22](research/2026-11-04-fine-tuning-for-rag.md)) before any model ran on them.
+
+| benchmark | what it tests | episodes |
+| --- | --- | ---: |
+| [2WikiMultihopQA](https://github.com/Alab-NII/2wikimultihop) | multi-hop over Wikipedia, with question templates HotpotQA lacks | 166 |
+| [MuSiQue](https://github.com/StonyBrookNLP/musique) (2-hop) | multi-hop built so that single-hop shortcuts fail | 168 |
+| [SQuAD 2.0](https://rajpurkar.github.io/SQuAD-explorer/) | single-passage questions, plus 80 human-written questions the paragraph cannot answer | 202 |
+| [RGB](https://github.com/chen700564/RGB) | 2022 news; RGB's noise-robustness and rejection settings, with passages supplied in the prompt | 453 |
+| RGB integration | answers with two parts, found in different passages | 142 |
+
+<p align="center">
+  <img src="docs/figures/benchmarks.svg" alt="Ends-well rate on five external benchmarks for the base model, main, candA and the control" width="760">
+</p>
+
+| ends well | Tiny Aya base | **main adapter** | candA adapter | control adapter | main minus base, 95% CI |
+| --- | ---: | ---: | ---: | ---: | --- |
+| 2WikiMultihopQA (166) | 0.018 | **0.566** | 0.620 | 0.241 | +0.548 [+0.479, +0.619] |
+| MuSiQue 2-hop (168) | 0.018 | **0.536** | 0.577 | 0.250 | +0.518 [+0.455, +0.581] |
+| SQuAD 2.0 (202) | 0.010 | **0.475** | 0.559 | 0.040 | +0.465 [+0.404, +0.528] |
+| RGB (453) | 0.157 | **0.618** | 0.660 | 0.530 | +0.461 [+0.406, +0.518] |
+| RGB integration (142) | 0.070 | **0.028** | 0.049 | 0.007 | −0.042 [−0.097, +0.008] |
+| **all five, pooled (1,131)** | 0.079 | **0.499** | 0.547 | 0.293 | +0.420 [+0.386, +0.453] |
+
+<sub>Same index-per-benchmark harness as HotpotQA: three searches, top 3, 800 characters shown, greedy decoding. These numbers compare our systems with each other. They are not comparable with official leaderboards, which give the model the gold paragraphs. Full tables: <a href="reports/benchmarks_lenient.md"><code>reports/benchmarks_lenient.md</code></a>.</sub>
+
+**What transfers.**
+- **Abstention:** with the supporting passages hidden, main abstains in 52% to 85% of episodes on the first four benchmarks; the base model abstains in 4% or fewer.
+- **Natural unanswerables:** of SQuAD 2.0's 80 human-written unanswerable questions, which we did not construct, main declines 57 and the base model none.
+- **Unsupported answers:** on 2WikiMultihopQA, MuSiQue and SQuAD 2.0 they fall from 80–91% of hidden-evidence episodes for the base model to 1–4% for main.
+
+**What does not transfer.**
+- **Two-part answers.** RGB integration asks, for example, *"Who won the U.S. Open golf tournament 2023 and the 2023 Open Championship?"*. Main cites both passages but answers only *"Wyndham Clark"*. Its accuracy is 0.017, against the base model's 0.383. Every training answer was a single HotpotQA span.
+- **Single-passage questions.** On SQuAD 2.0, main declines 54 of 73 answerable questions, and in all 54 the answer text was already in the results of its first search. Example: the first search for *"What is the mayor of Warsaw called?"* returns *"The mayor of Warsaw is called President."*; main searches twice more and abstains. Every training question needed two passages.
+- **On-topic passages that don't answer.** When five on-topic passages without the answer are put in the prompt (RGB, noise 1), main declines only 26 of 100 times.
+
+**Main against candA.** CandA is ahead on all five, by 0.049 [0.026, 0.072] pooled. It gives more supported answers (133 against 105 of 346 open questions) and more unsupported ones (128 against 102 of 465 hidden-evidence episodes), the same trade-off as on dev and test2. Main stays the project's model, as pre-registered. If you prefer answers over caution, use candA.
 
 ## How it works
 
@@ -229,6 +270,7 @@ Both readings, and the choice of lenient as primary, were fixed before the test 
 | candA adapter (round 2, fewer refusals; not the selected model) | [against-the-safety-tiny-aya-rag-cand-a](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-cand-a) |
 | Episodes, evaluation traces, reports | [against-the-safety-rag-episodes](https://huggingface.co/datasets/BMEscanor/against-the-safety-rag-episodes) |
 | Nimbus Home suite | [nimbus-home-support-suite](https://huggingface.co/datasets/BMEscanor/nimbus-home-support-suite) |
+| External benchmark traces | [against-the-safety-benchmark-traces](https://huggingface.co/datasets/BMEscanor/against-the-safety-benchmark-traces) |
 | Trace viewer (static, no model runs) | [against-the-safety-trace-viewer](https://huggingface.co/spaces/BMEscanor/against-the-safety-trace-viewer) |
 | Write-up | [`article/ARTICLE.md`](article/ARTICLE.md) |
 
@@ -317,12 +359,25 @@ python scripts/kaggle_launch.py run eval-test2 --adapters-from "ats-train-both,a
 
 Measured on a T4: training takes 8 s per row (about 1,640 tokens) at 5.8 GB peak memory. Evaluation takes about 20 minutes per system per split with batching, at 9.3 GB peak.
 
+**5. External benchmarks (optional).** The raw sets are downloaded from the Hugging Face Hub and from the RGB repository into `.cache/`.
+
+```powershell
+python scripts/prepare_benchmarks.py     # questions, per-benchmark indexes, RGB prompt settings; checked with the scripted policy
+python scripts/kaggle_launch.py dataset
+python scripts/kaggle_launch.py run eval-bench --adapters-from "ats-train-both,ats-train-cands" --tag a "--extra=--systems base,main"
+python scripts/kaggle_launch.py run eval-bench --adapters-from "ats-train-both,ats-train-cands" --tag b "--extra=--systems candA,control,closed"
+python scripts/bench_report.py --eval runs/kaggle/ats-eval-bench-a/out/eval --eval runs/kaggle/ats-eval-bench-b/out/eval
+```
+
+The two benchmark kernels took 2.8 h and 2.5 h.
+
 ## Limits
 
 - **False abstains.** The main adapter declines 19% of answerable test episodes (22% on test2, 18% on dev). The candA adapter lowers this to 15% on test2, but answers in 8% of test2 episodes whose evidence is missing (main: 4%).
 - **Small evaluation sets.** There are 86 answerable test questions and 65 headline episodes with masked evidence, so differences of a few points are not established. Every report gives intervals.
 - **Near-miss credit.** An answer counts as supported at F1 ≥ 0.5 against the gold answer, plus a cited gold passage. F1 can credit near misses on short answers, so exact-match rates are reported too: main 0.424, control 0.571, base 0.020 on answerable episodes.
 - **Narrow coverage.** Everything is English, with short HotpotQA-style factual questions. The Nimbus Home suite has only 24 tasks.
+- **Single-span, two-passage habits.** On the external benchmarks the adapters answer only the first part of two-part questions (RGB integration), and they decline most single-passage SQuAD 2.0 questions even with the answer on screen. The training data had neither kind of question. A third round with such episodes was not run, because this week's GPU quota is nearly used, and all five benchmarks have now been opened.
 - **Nimbus run 1 was flawed.** F1 could not tell "30 days" from "45 days". We shortened the gold answers, fixed one question and re-ran every system. Traces from both runs are published.
 - **Masking check.** The test that a masked episode lacks the answer is a text match. It does not prove that no other passage could support a different valid answer.
 - **One more training round, judged on fresh data.** Choosing a new mixture after the first test split was opened needed a new split. Round 2 used test2, so the first test split was never used for selection.
@@ -337,10 +392,10 @@ scripts/          data and index build, training, evaluation, reports, figure, K
                   Hugging Face release builder and publisher
 kaggle/           notes for the Kaggle runs and the kernel entry point (bootstrap.py)
 reports/          every table cited on this page (markdown and json)
-docs/figures/     the figure on this page
+docs/figures/     the figures on this page
 demo/             static trace viewer, also published as a Hugging Face Space
 article/          write-up and submission abstract
-research/         planning record with the pre-registered choices (sections 18 to 21)
+research/         planning record with the pre-registered choices (sections 18 to 23)
 tests/            harness tests
 ```
 
@@ -354,6 +409,7 @@ tests/            harness tests
 | Adapters | CC BY-NC 4.0, inherited from Tiny Aya (the base model is gated; accept its terms to use it) |
 | HotpotQA-derived episodes and traces | CC BY-SA 4.0, as HotpotQA |
 | Nimbus Home suite | CC BY 4.0 (written by us, fictional) |
+| Benchmark traces | per benchmark, as the source: 2WikiMultihopQA Apache-2.0, MuSiQue CC BY 4.0, SQuAD 2.0 CC BY-SA 4.0, RGB CC BY-NC-SA 4.0 |
 | AgentTune (LSAL v1.1), AuditKIT (LSAL v1.2) | source-available, used as dependencies, not redistributed |
 
 ---

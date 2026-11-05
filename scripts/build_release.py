@@ -7,6 +7,7 @@ release/
   model_control/     LoRA adapter, 2 epochs, supported-only control
   dataset_episodes/  training rows, AgentTune EventLogs, evaluation traces, manifests, scorecards (HotpotQA-derived: CC BY-SA 4.0)
   dataset_nimbus/    the fictional Nimbus Home support suite and its evaluation traces (CC BY 4.0)
+  dataset_benchmarks/ traces on five external benchmarks (each folder keeps its source license; RGB is CC BY-NC-SA 4.0)
   space/             static trace viewer
 
 The adapters' adapter_config.json is rewritten so that anyone can load them: the Kaggle path to the base model becomes
@@ -36,6 +37,8 @@ EVALS = {  # label -> (split, directory holding <system>_<split>/<parse>/)
     "test2": ("test2", RUNS / "ats-eval-test2" / "out" / "eval"),  # second round: fresh split
 }
 TRAIN_ROUND2 = RUNS / "ats-train-cands" / "out"
+BENCH_EVALS = [RUNS / "ats-eval-bench-a" / "out" / "eval", RUNS / "ats-eval-bench-b" / "out" / "eval"]  # plan sections 22 and 23
+BENCHES = ["2wiki", "musique", "squad2", "rgb", "rgb_int"]
 
 
 def copy(src: Path, dst: Path) -> None:
@@ -109,6 +112,15 @@ def main() -> None:
     copy(ROOT / "reports" / "scorecard_product_lenient.md", nb / "scorecard_lenient.md")
     copy(ROOT / "reports" / "scorecard_product_strict.md", nb / "scorecard_strict.md")
     (nb / "README.md").write_text(cards.nimbus_card(args.user), encoding="utf-8", newline="\n")
+
+    bt = out / "dataset_benchmarks"
+    shutil.rmtree(bt, ignore_errors=True)
+    for b in BENCHES:
+        counts[f"bench_{b}"] = sum(copy_traces(b, f"bench_{b}", root, bt) for root in BENCH_EVALS)
+        copy(ROOT / "data" / "bench" / b / "manifest.json", bt / "manifests" / f"{b}.json")
+    for f in sorted((ROOT / "reports").glob("benchmarks_*")):
+        copy(f, bt / "reports" / f.name)
+    (bt / "README.md").write_text(cards.bench_card(args.user), encoding="utf-8", newline="\n")
 
     sp = out / "space"
     shutil.rmtree(sp, ignore_errors=True)

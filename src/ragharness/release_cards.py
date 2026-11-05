@@ -53,6 +53,34 @@ def results_table(split: str = "test", names: tuple[str, ...] = ("base", "main",
     return "\n".join(lines)
 
 
+BENCH_NAMES = [("2wiki", "2WikiMultihopQA"), ("musique", "MuSiQue 2-hop"), ("squad2", "SQuAD 2.0"), ("rgb", "RGB"), ("rgb_int", "RGB integration")]
+
+
+def bench_table(bold: str = "main") -> str:
+    """Ends-well table on the five external benchmarks, read from reports/benchmarks_lenient.json (plan sections 22 and 23)."""
+    rep = json.loads((ROOT / "reports" / "benchmarks_lenient.json").read_text(encoding="utf-8"))
+    names = ("base", "main", "candA", "control")
+    label = {"base": "Tiny Aya base", "main": "main", "candA": "candA", "control": "control"}
+    key = "ends well (all scored episodes)"
+    fmt = lambda p: f"{p['difference']:+.3f} [{p['ci95'][0]:+.3f}, {p['ci95'][1]:+.3f}]"
+    head = " | ".join(f"**{label[n]}**" if n == bold else label[n] for n in names)
+    lines = [f"| ends well (episodes) | {head} | main minus base, 95% CI |", "| --- |" + " ---: |" * len(names) + " --- |"]
+    for b, title in BENCH_NAMES:
+        m = rep["benchmarks"][b]["metrics"]
+        n = m["main"][key]["n"]
+        lines.append(f"| {title} ({n}) | " + " | ".join(f"{m[s][key]['value']:.3f}" for s in names) + f" | {fmt(rep['benchmarks'][b]['paired_ends_well']['main vs base'])} |")
+    pooled = rep["pooled"]
+    lines.append(f"| all five, pooled ({pooled['ends_well']['main']['n']:,}) | " + " | ".join(f"{pooled['ends_well'][s]['value']:.3f}" for s in names)
+                 + f" | {fmt(pooled['paired']['main vs base'])} |")
+    return "\n".join(lines)
+
+
+BENCH_NOTE = ("Same harness as HotpotQA (an index per benchmark, three searches, top 3, 800 characters), fixed before any model ran on these sets; "
+              "not comparable with official leaderboards. The adapters were trained only on two-passage HotpotQA questions with single-span answers, and it shows: "
+              "on RGB integration they answer only the first part of two-part questions, and on SQuAD 2.0 they decline most single-passage questions even with the answer on screen. "
+              "Per-benchmark tables: `reports/benchmarks_lenient.md` in the code repository.")
+
+
 def _headline_sentence() -> str:
     card = _card("test", "lenient")
     return (f"End-to-end good (a supported correct answer when the documents hold the answer, an abstention when they do not), "
@@ -96,6 +124,12 @@ Read it as a second operating point: fewer refusals and more supported answers, 
 
 End-to-end good, candA against main on the 143 headline episodes: {e2e['before']:.3f} against {e2e['after']:.3f} (main minus candA {e2e['difference']:+.3f}, 95% CI {e2e['ci95'][0]:+.3f} to {e2e['ci95'][1]:+.3f}).
 On the development split the order was the other way. The two adapters cannot be ranked on that rate with these sample sizes; they differ consistently in how often they refuse.
+
+## Five external benchmarks (never trained on or used for any choice)
+
+{bench_table("candA")}
+
+{BENCH_NOTE} On these five sets candA is ahead of main on every one; main stays the selected model because the selection rule was fixed beforehand.
 
 ## Use
 
@@ -152,6 +186,12 @@ paired intervals are in the repository (`reports/`) and in the dataset repositor
 
 {"A decoding-time sweep on the development split (`reports/bias_sweep.md`) added a bias to the logit of `abstain` after `<`: from 0 to -3 the results barely change; at -6 false abstains on answerable questions halve (20 to 10 of 86) but unsupported answers on unanswerable ones rise from 2 to 26 of 73; from -9 it never abstains, as with the control. No setting removed the false abstains without losing the correct ones." if is_main else ""}
 
+## Five external benchmarks (never trained on or used for any choice)
+
+{bench_table(name)}
+
+{BENCH_NOTE}
+
 ## Use
 
 Needs access to the gated base model (accept its terms on its model page) and a GPU for 4-bit loading.
@@ -186,6 +226,7 @@ The epoch count was chosen on the development split before the test split was op
 - Fine-tuned on one language (English) and one question style (HotpotQA-like, short factual answers); the 24-task Nimbus Home check shows weaker results on two-document questions and on choosing the current edition of a policy.
 - The main adapter declines roughly one in five answerable questions on the test split.
 - Evaluation sets are small (86 test questions with evidence states). Intervals are in the repository; differences of a few points are not established.
+- On the external benchmarks above, two-part answers (RGB integration) and single-passage questions (SQuAD 2.0) fail; neither kind was in the training data.
 - Not for safety-critical or legal use. The base model's license (CC BY-NC 4.0) applies to this adapter.
 
 ## License
@@ -253,4 +294,63 @@ no oracle search surfaces text that answers a missing-evidence task. This is a s
 first run showed the F1 rule crediting "30 days" for "45 days"; all systems were rescored in a second run with the corrected suite, and both runs are described in the repository plan.
 
 Code: [{REPO_URL}]({REPO_URL}).
+"""
+
+
+BENCH_SOURCES = {  # folder -> (benchmark, license, citation)
+    "2wiki": ("2WikiMultihopQA, dev", "Apache-2.0", "Ho et al., 2020, Constructing A Multi-hop QA Dataset for Comprehensive Evaluation of Reasoning Steps"),
+    "musique": ("MuSiQue-Ans v1.0, dev, 2-hop", "CC BY 4.0", "Trivedi et al., 2022, MuSiQue: Multihop Questions via Single-hop Question Composition"),
+    "squad2": ("SQuAD 2.0, dev", "CC BY-SA 4.0", "Rajpurkar et al., 2018, Know What You Don't Know: Unanswerable Questions for SQuAD"),
+    "rgb": ("RGB, English refined set", "CC BY-NC-SA 4.0", "Chen et al., 2024, Benchmarking Large Language Models in Retrieval-Augmented Generation"),
+    "rgb_int": ("RGB, English integration set", "CC BY-NC-SA 4.0", "Chen et al., 2024 (as above)"),
+}
+
+
+def bench_card(user: str) -> str:
+    rows = "\n".join(f"| `traces/{k}/`, `manifests/{k}.json` | {v[0]} | {v[1]} | {v[2]} |" for k, v in BENCH_SOURCES.items())
+    return f"""---
+license: [apache-2.0, cc-by-4.0, cc-by-sa-4.0, cc-by-nc-sa-4.0]
+language: [en]
+pretty_name: Against-the-safety external benchmark traces
+tags: [rag, retrieval, abstention, agent-traces, 2wikimultihopqa, musique, squad2, rgb, tiny-aya, lexsi-hackathon]
+---
+
+# Against-the-safety: evaluation traces on five external benchmarks
+
+Every evaluated episode of the base model (Tiny Aya Global), the [main adapter](https://huggingface.co/{user}/against-the-safety-tiny-aya-rag-main),
+the [candA adapter](https://huggingface.co/{user}/against-the-safety-tiny-aya-rag-cand-a) and the
+[control adapter](https://huggingface.co/{user}/against-the-safety-tiny-aya-rag-control) on 2WikiMultihopQA, MuSiQue, SQuAD 2.0, RGB and RGB integration,
+1,131 episodes per system, plus the closed-book baseline. Nothing here was used for training or for any choice.
+The sets, settings and metrics were fixed before any model ran on them (plan section 22, results in section 23): [{REPO_URL}]({REPO_URL}).
+
+## Results (ends well: a supported answer when the documents hold the answer, an abstention when they do not)
+
+{bench_table()}
+
+{BENCH_NOTE}
+
+## Licenses: each folder keeps the license of its source benchmark
+
+| files | source | license | please cite |
+| --- | --- | --- | --- |
+{rows}
+| `reports/` | aggregate numbers only | CC BY 4.0 | this project |
+
+The RGB folders are non-commercial (CC BY-NC-SA 4.0), as RGB. The traces contain passages and questions from the source benchmarks, model outputs, and scores.
+
+## Contents
+
+- `traces/<benchmark>/<system>__<lenient|strict>__{{transcripts,scores,trajectories}}.jsonl` and `__summary.json`: `transcripts` are readable conversations, `scores` hold the deterministic
+  outcome of each episode, `trajectories` is AgentTune's TrajectoryStore export, `summary` holds the aggregate and AuditKIT metrics. Systems: `base`, `main`, `candA`, `control`.
+- `traces/<benchmark>/closed__summary.json`: the base model answering from memory, question only.
+- `manifests/<benchmark>.json`: source file, question ids, sampling seed, index hash and counts, written by `scripts/prepare_benchmarks.py`.
+- `reports/benchmarks_lenient.md`, `reports/benchmarks_strict.md` (and `.json`): every metric with denominators, paired intervals, AuditKIT rows.
+
+## Protocol, in short
+
+Each benchmark gets its own SQLite FTS5 index (AgentTune `SQLiteFTSBackend`). The model may search three times (top 3, 800 characters shown) and must then answer with
+citations or abstain. Variants: open search, and the support masked from search (correct ending: abstain), on questions whose support a scripted policy reaches within three
+searches. SQuAD 2.0's natural unanswerable questions are run as open search. RGB is also run in its own settings, with five passages in the prompt (noise 0, 0.8 and 1; at noise 1
+the positives are also masked from search). An answer is correct at F1 >= 0.5 against the gold answer or an alias, or, for RGB, when every answer part is contained;
+it is supported when it is correct, every cited chunk was shown, and a cited chunk holds the answer. The numbers are not comparable with official leaderboards.
 """
