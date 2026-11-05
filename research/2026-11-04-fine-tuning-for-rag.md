@@ -599,3 +599,59 @@ The scorecard adds `answer_correct_ignoring_citations` and `cites_a_gold_passage
 **What would change the conclusion.** A mixture with fewer abstention episodes, or more answerable examples near the decision boundary, might lower the false-abstain rate; it was not tried because it would have required a second test evaluation.
 
 **Publication.** Two adapters, two datasets (HotpotQA-derived episodes and traces, CC BY-SA 4.0; Nimbus suite, CC BY 4.0), a static trace-viewer Space, two collections, all public and un-gated (the base model stays gated by its owner). Built by `scripts/build_release.py`, uploaded by `scripts/publish_release.py`, which also checks anonymously that every repository answers without a token.
+
+## 20. Second round: fixing the search-depth shortcut, judged on a fresh test split - 5 November 2026 (written before any second-round training)
+
+**Why a second round is allowed.** The first test split has been opened, so it cannot choose a second model. A new split (test2) that no choice has seen can. The first-round test numbers stay as they are and are reported as the first round's result.
+
+**Diagnosis (from saved first-round data only: training sets, dev outputs).**
+
+1. *The main mixture lets the label be read off the search count.* Of its final rows after three searches, 81% are abstentions (429 of 531), after two 58% (108 of 187), after zero or one 0%. The scripted policy only abstains after searching, and the action-balanced cap (537 per kind) kept almost every abstention while sampling answers from all depths.
+2. *The adapter learned that rule.* On dev it abstains on 54 of its 63 final turns after three searches and 59 of 114 after two, and never after zero or one. Of its 36 false abstentions on dev, 16 came after all the support was on screen (11 after two searches, 5 after three).
+3. *It also stops searching early.* 23 of the 36 dev false abstentions happened after two searches with one search left. Its own queries reach the full evidence in 56 of 86 open dev questions (control: about 71 of 86 on test).
+4. *Abstentions are half of its final decisions* (537 of 1,074); on the test split, unanswerable episodes are 29% of all episodes.
+5. *Not fixed by data selection:* of 56 open dev episodes with complete evidence, 15 got a wrong answer, mostly the bridge entity instead of the final answer. This is a reading limit of a 3B model, and the second round does not target it.
+6. *Not fixed by decoding* (section 19): lowering the abstain logit trades correct abstentions for unsupported answers.
+
+**Candidates.** Both use the main recipe unchanged: QLoRA r=16, alpha 32, dropout 0.05, all linear layers, lr 2e-4 cosine with 3% warmup, effective batch 16, 2 epochs, seed 13, context 2,560. Both use the same processed-token budget as main, within 0.1%, and are drawn from the same 6,433 train decisions that main was drawn from. No new episodes are generated. `scripts/make_candidates.py` → `reports/training_sets_round2.json`.
+
+| | main (round 1) | candA | candB |
+| --- | ---: | ---: | ---: |
+| rows | 1,611 | 1,668 | 1,525 |
+| search / answer / abstain | 537 / 537 / 537 | 556 / 778 / 334 | 508 / 712 / 305 |
+| abstentions among final decisions | 0.50 | 0.30 | 0.30 |
+| abstain rate after 2 searches | 0.578 | 0.391 | 0.399 |
+| abstain rate after 3 searches | 0.808 | 0.650 | 0.400 |
+| answers with no search (evidence given) | 139 | 231 | 137 |
+| search rows at 1st / 2nd / 3rd search | 271 / 170 / 96 | proportional | 170 / 169 / 169 |
+
+- **candA** tests the obvious fix: fewer abstentions, everything else sampled as in main.
+- **candB** tests the diagnosis. It has the same abstain share, but:
+  - the abstain rate is equal (0.40) after two and after three searches;
+  - answers after two or three searches come first from questions whose abstention is also in the set (304 such rows), so the same question appears once with its evidence reachable and once with it missing;
+  - search rows are spread evenly over the first, second and third search, to teach the follow-up query.
+
+The comparison of A and B therefore measures whether removing the depth signal matters beyond lowering the share.
+
+**Fresh split.** `scripts/prepare_test2.py` builds test2 from 100 HotpotQA validation questions: 80 bridge and 20 comparison, all hard, the same type-stratified procedure with order seed 17.
+- **Sampling rule (stricter than round 1):** a question is skipped if any support title is the title of any paragraph already in the corpus, so no test2 support passage can appear in any training row of either round.
+- **Index:** the first-round corpus plus test2's 957 new paragraphs. No existing chunk ID changes. The base index hash (`169443…`) is asserted, and test2 has its own index and hash (`dbee2d…`, 8,777 chunks).
+- **Systems on test2:** base, closed book, control, main (round 1) and the dev-selected candidate.
+
+**Selection, on dev only (lenient reading, 159 headline episodes).**
+1. A candidate is eligible if:
+   - its unsupported answers on unanswerable headline episodes are at most 11 of 73 (0.15; main: 2 of 73), and
+   - its headline episodes without a valid final turn are at most 0.10 (main: 0.025).
+2. The best candidate is the eligible one of candA and candB with the higher end-to-end good rate. Ties go to the higher supported-correct rate on answerable episodes, then to candA (the simpler change).
+3. The second-round model is the best candidate if its dev end-to-end good rate is at least main's (107 of 159); otherwise it is main.
+4. Whatever is selected, the best candidate and main are both evaluated on test2, so the comparison on fresh data is reported either way.
+5. The second-round epoch is the last (epoch 2), as in round 1; epoch-1 snapshots are kept but not evaluated.
+
+**Reported on test2.**
+- **Primary:** end-to-end good, best candidate minus main, with a paired 95% interval from resampling whole questions.
+- **Secondary:** supported correct, false abstain, correct abstain, unsupported answers, invalid turns, the AuditKIT rows, the PS 4 table, and "ends well" with exact match in place of F1 ≥ 0.5 (the stricter reading of correctness).
+- **Strict reading:** reported beside the primary, as in round 1.
+
+**Expected effect (a hypothesis, not a result).** Fewer false abstentions and more supported answers than main, with some increase in unsupported answers. If candB beats candA, the search-depth shortcut was a real cause. If neither beats main on dev, round 2 is reported as a negative result and main stays the model.
+
+**Compute.** About 4 h to train both candidates on T4 x2, about 1 h of development evaluation, and about 1.5 h for test2: 6 to 7 notebook hours. The first round used about 12 h of logged kernel time this week.

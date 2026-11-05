@@ -111,7 +111,7 @@ def run_stage(stage: str, adapters_from: str | None, extra: str, tag: str = "") 
         "id": f"{username()}/{slug}", "title": slug, "code_file": "run.py", "language": "python", "kernel_type": "script",
         "is_private": True, "enable_gpu": True, "enable_internet": True, "machine_shape": "NvidiaTeslaT4",
         "dataset_sources": [f"{username()}/{SLUG}"], "competition_sources": [],
-        "kernel_sources": [f"{username()}/{adapters_from}"] if adapters_from else [],
+        "kernel_sources": [f"{username()}/{s}" for s in adapters_from.split(",")] if adapters_from else [],
         "model_sources": [MODEL_SOURCE],
     }
     (kdir / "kernel-metadata.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
@@ -125,7 +125,7 @@ def main() -> None:
     sub.add_parser("dataset")
     r = sub.add_parser("run")
     r.add_argument("stage")
-    r.add_argument("--adapters-from", default=None)
+    r.add_argument("--adapters-from", default=None, help="training kernel slug(s) whose outputs are attached, comma separated")
     r.add_argument("--extra", default="")
     r.add_argument("--tag", default="", help="suffix for the kernel slug, so two runs of one stage do not overwrite each other")
     s = sub.add_parser("status")

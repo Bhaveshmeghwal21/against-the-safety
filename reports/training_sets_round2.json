@@ -1,0 +1,166 @@
+{
+  "token_counts": "exact (Tiny Aya tokenizer)",
+  "pool_rows_after_drop": 6433,
+  "pool_rows_dropped_for_showing_dev_test_or_test2_support": 264,
+  "target_processed_tokens (main)": 2330132,
+  "main": {
+    "rows": 1611,
+    "parents": 488,
+    "by_kind": {
+      "abstain": 537,
+      "answer": 537,
+      "search": 537
+    },
+    "by_state": {
+      "S1": 91,
+      "S2": 32,
+      "S3": 127,
+      "S4": 733,
+      "S5": 356,
+      "S6": 272
+    },
+    "processed_tokens_est": 2330132,
+    "supervised_tokens_est": 61171,
+    "finals_by_searches_before": {
+      "0": {
+        "answer": 139,
+        "abstain": 0,
+        "abstain_rate": 0.0
+      },
+      "1": {
+        "answer": 217,
+        "abstain": 0,
+        "abstain_rate": 0.0
+      },
+      "2": {
+        "answer": 79,
+        "abstain": 108,
+        "abstain_rate": 0.578
+      },
+      "3": {
+        "answer": 102,
+        "abstain": 429,
+        "abstain_rate": 0.808
+      }
+    },
+    "search_rows_by_step": {
+      "0": 271,
+      "1": 170,
+      "2": 96
+    }
+  },
+  "candA": {
+    "rows": 1668,
+    "parents": 488,
+    "by_kind": {
+      "abstain": 334,
+      "answer": 778,
+      "search": 556
+    },
+    "by_state": {
+      "S1": 94,
+      "S2": 50,
+      "S3": 144,
+      "S4": 524,
+      "S5": 513,
+      "S6": 343
+    },
+    "processed_tokens_est": 2331411,
+    "supervised_tokens_est": 60949,
+    "finals_by_searches_before": {
+      "0": {
+        "answer": 231,
+        "abstain": 0,
+        "abstain_rate": 0.0
+      },
+      "1": {
+        "answer": 298,
+        "abstain": 0,
+        "abstain_rate": 0.0
+      },
+      "2": {
+        "answer": 106,
+        "abstain": 68,
+        "abstain_rate": 0.391
+      },
+      "3": {
+        "answer": 143,
+        "abstain": 266,
+        "abstain_rate": 0.65
+      }
+    },
+    "fill": {
+      "taken": {
+        "search": 556,
+        "answer": 778,
+        "abstain": 334
+      },
+      "tokens": 2331411,
+      "groups_short_of_target": {}
+    },
+    "relative_token_difference_vs_main": 0.0005
+  },
+  "candB": {
+    "rows": 1525,
+    "parents": 474,
+    "by_kind": {
+      "abstain": 305,
+      "answer": 712,
+      "search": 508
+    },
+    "by_state": {
+      "S1": 34,
+      "S2": 16,
+      "S3": 127,
+      "S4": 483,
+      "S5": 287,
+      "S6": 578
+    },
+    "processed_tokens_est": 2332186,
+    "supervised_tokens_est": 53882,
+    "finals_by_searches_before": {
+      "0": {
+        "answer": 137,
+        "abstain": 0,
+        "abstain_rate": 0.0
+      },
+      "1": {
+        "answer": 117,
+        "abstain": 0,
+        "abstain_rate": 0.0
+      },
+      "2": {
+        "answer": 92,
+        "abstain": 61,
+        "abstain_rate": 0.399
+      },
+      "3": {
+        "answer": 366,
+        "abstain": 244,
+        "abstain_rate": 0.4
+      }
+    },
+    "fill": {
+      "taken": {
+        "search_1st": 170,
+        "search_2nd": 169,
+        "search_3rd": 169,
+        "abstain_d2": 61,
+        "abstain_d3": 244,
+        "answer_d2": 92,
+        "answer_d3": 366,
+        "answer_d0": 137,
+        "answer_d1": 117
+      },
+      "tokens": 2332186,
+      "groups_short_of_target": {},
+      "answer_rows_after_2_or_3_searches_paired_with_an_abstention": 304
+    },
+    "relative_token_difference_vs_main": 0.0009,
+    "search_rows_by_step": {
+      "0": 170,
+      "1": 169,
+      "2": 169
+    }
+  }
+}

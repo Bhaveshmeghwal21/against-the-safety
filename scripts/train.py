@@ -47,7 +47,7 @@ class EpochSnapshots:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--set", choices=["main", "control"], required=True)
+    ap.add_argument("--set", choices=["main", "control", "candA", "candB"], required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--epochs", type=float, default=2.0)
     ap.add_argument("--lr", type=float, default=2e-4)

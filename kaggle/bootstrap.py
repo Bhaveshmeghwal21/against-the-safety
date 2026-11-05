@@ -9,8 +9,11 @@ No Hugging Face token is needed or used: the weights come from Kaggle Models and
 Stages
   smoke                  compatibility test (one T4): environment, tokens, QLoRA step, batched generation, adapter reload
   train-both             main on GPU 0 and control on GPU 1 at the same time
-  eval-dev | eval-test | eval-product   base (GPU 0) and main adapter (GPU 1), then closed-book (GPU 0) and control adapter (GPU 1);
-                         options in --extra: --ckpt adapter_ep1 (which saved adapter), --systems main,control (subset)
+  train-cands            second round (plan section 20): candA on GPU 0 and candB on GPU 1
+  eval-dev | eval-test | eval-test2 | eval-product
+                         systems two at a time over GPU 0 and GPU 1; default base + main, then closed-book + control;
+                         options in --extra: --ckpt adapter_ep1 (which saved adapter), --systems a,b,c (which systems, in this
+                         order; any adapter name from an attached training kernel, e.g. candA), --bias b1,b2 (main adapter sweep)
 
 The repo and the Python environment live in /kaggle/temp so they are not saved as notebook output; only /kaggle/working/out is.
 """
@@ -147,15 +150,20 @@ def main() -> None:
             (f"{py} scripts/train.py --set main --out {OUT}/main {extra}", g0, "train_main.log"),
             (f"{py} scripts/train.py --set control --out {OUT}/control {extra}", g1, "train_control.log"),
         ])
-    elif stage in ("eval-dev", "eval-test", "eval-product"):
+    elif stage == "train-cands":  # second round (plan section 20): candA on GPU 0, candB on GPU 1
+        rc = run_parallel([
+            (f"{py} scripts/train.py --set candA --out {OUT}/candA {extra}", g0, "train_candA.log"),
+            (f"{py} scripts/train.py --set candB --out {OUT}/candB {extra}", g1, "train_candB.log"),
+        ])
+    elif stage in ("eval-dev", "eval-test", "eval-test2", "eval-product"):
         split = stage.split("-")[1]
         ckpt, wanted, rest = "adapter", ["base", "main", "control"] + ([] if split == "product" else ["closed"]), extra
         m = re.search(r"--ckpt\s+(\S+)", rest)
         if m:  # which saved adapter of each training run to evaluate: adapter (final) or adapter_ep1, ...
             ckpt, rest = m.group(1), rest.replace(m.group(0), "")
-        m = re.search(r"--systems\s+(\S+)", rest)
-        if m:
-            wanted, rest = m.group(1).split(","), rest.replace(m.group(0), "")
+        m_systems = re.search(r"--systems\s+(\S+)", rest)
+        if m_systems:
+            wanted, rest = m_systems.group(1).split(","), rest.replace(m_systems.group(0), "")
         tag = "" if ckpt == "adapter" else f"_{ckpt}"
         ev = f"{py} scripts/run_eval.py --split {split} {rest}"
 
@@ -175,21 +183,19 @@ def main() -> None:
             rc = run_parallel([(" && ".join(c), {"CUDA_VISIBLE_DEVICES": str(g)}, f"eval_main{tag}_bias_gpu{g}_{split}.log") for g, c in chains.items() if c])
             wanted = []
 
-        waves = [
-            [("base", g0, f"{ev} --system base --out {OUT}/eval/base_{split}"),
-             ("main", g1, f"{ev} --system adapter --adapter {{main}} --out {OUT}/eval/main{tag}_{split}")],
-            [("closed", g0, f"{ev} --system closed_book --out {OUT}/eval/closed_{split}"),
-             ("control", g1, f"{ev} --system adapter --adapter {{control}} --out {OUT}/eval/control{tag}_{split}")],
-        ]
-        for wave in waves:
-            jobs = []
-            for name, env, cmd in wave:
-                if name in wanted:
-                    if name in ("main", "control"):
-                        cmd = cmd.replace("{" + name + "}", adapter_for(name))
-                    jobs.append((cmd, env, f"eval_{name}{tag}_{split}.log"))
-            if jobs:
-                rc = max(rc, run_parallel(jobs))
+        # Systems run two at a time (GPU 0, GPU 1) in the order given; default order keeps the first round's pairing.
+        def command(name: str) -> str:
+            if name == "base":
+                return f"{ev} --system base --out {OUT}/eval/base_{split}"
+            if name == "closed":
+                return f"{ev} --system closed_book --out {OUT}/eval/closed_{split}"
+            return f"{ev} --system adapter --adapter {adapter_for(name)} --out {OUT}/eval/{name}{tag}_{split}"
+
+        order = [n for n in ("base", "main", "closed", "control") if n in wanted] if not m_systems else wanted
+        jobs_all = [(command(n), f"eval_{n}{tag}_{split}.log") for n in order]
+        for i in range(0, len(jobs_all), 2):
+            wave = [(cmd, env, log) for (cmd, log), env in zip(jobs_all[i:i + 2], (g0, g1))]
+            rc = max(rc, run_parallel(wave))
     else:
         raise SystemExit(f"unknown stage {stage!r}")
     print("done; outputs in", OUT, "exit", rc)

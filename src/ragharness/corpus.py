@@ -84,3 +84,33 @@ def build_index(corpus: Corpus, db_path: Path):
     backend = SQLiteFTSBackend(str(db_path), match_all=False)
     backend.index(corpus.chunks)
     return backend
+
+
+def extend_corpus(base: Corpus, questions: list[Question], seed: int = 20261105) -> Corpus:
+    """The base corpus plus the paragraphs of new questions, without renumbering anything (plan section 20).
+
+    Paragraphs already in the base keep their chunk ID; new ones get IDs after the last base ID, in a seeded shuffle among
+    themselves. Every training row, citation and index hash built on the base therefore stays valid.
+    """
+    known = {_key(c["title"], c["text"]): c["chunk_id"] for c in base.chunks}
+    new: dict[str, tuple[str, str]] = {}
+    for q in questions:
+        for p in q.paragraphs:
+            k = _key(p.title, p.text)
+            if k not in known:
+                new.setdefault(k, (p.title, p.text))
+    keys = sorted(new)
+    random.Random(seed).shuffle(keys)
+    start = max(int(c["chunk_id"][1:]) for c in base.chunks)
+    assert start + len(keys) <= 99999, "chunk IDs are five digits"
+    ids = dict(known)
+    ids.update({k: f"c{start + i + 1:05d}" for i, k in enumerate(keys)})
+    chunks = list(base.chunks) + [
+        {"chunk_id": ids[k], "doc_id": ids[k], "title": new[k][0], "text": new[k][1], "chunk_index": 0} for k in keys
+    ]
+    by_question = dict(base.by_question)
+    by_question.update({q.qid: {p.title: ids[_key(p.title, p.text)] for p in q.paragraphs} for q in questions})
+    digest = hashlib.sha256()
+    for c in chunks:
+        digest.update(f"{c['chunk_id']}\t{c['title']}\t{c['text']}\n".encode("utf-8"))
+    return Corpus(chunks=chunks, by_question=by_question, index_hash=digest.hexdigest())

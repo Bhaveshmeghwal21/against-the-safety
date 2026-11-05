@@ -48,7 +48,8 @@ def closed_book(jobs, gen, out: Path) -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--system", choices=["oracle", "base", "adapter", "closed_book"], required=True)
-    ap.add_argument("--split", choices=["dev", "test", "product"], required=True, help="product = the fictional Nimbus Home suite (exploratory)")
+    ap.add_argument("--split", choices=["dev", "test", "test2", "product"], required=True,
+                    help="test2 = the fresh second-round split, on the first-round corpus plus its own paragraphs; product = the fictional Nimbus Home suite (exploratory)")
     ap.add_argument("--out", required=True)
     ap.add_argument("--adapter", default=None)
     ap.add_argument("--extra-questions", type=int, default=30)
@@ -70,7 +71,12 @@ def main() -> None:
         audit.DECISION_DATE, audit.CHUNK_META = product.AS_OF, suite.meta
     else:
         corp = corpus_mod.build_corpus([q for n in splits for q in splits[n]], seed=man["seed"])
-        backend = open_verified_backend(ROOT / "data" / "index" / "corpus.sqlite", corp)
+        db = ROOT / "data" / "index" / "corpus.sqlite"
+        if args.split == "test2":
+            splits["test2"] = data.read_questions(ROOT / "data" / "processed" / "questions_test2.jsonl")
+            corp = corpus_mod.extend_corpus(corp, splits["test2"])
+            db = ROOT / "data" / "index" / "corpus_test2.sqlite"
+        backend = open_verified_backend(db, corp)
     tool, search = CorpusSearchTool(backend, top_k=3), MaskedSearch(backend)
     system = protocol.system_prompt(tool)
 

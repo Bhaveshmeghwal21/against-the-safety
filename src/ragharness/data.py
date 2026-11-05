@@ -155,6 +155,17 @@ def sample_splits(
     return {"train": train, "dev": dev, "test": test}
 
 
+def sample_test2(val_rows: list[Question], existing: dict[str, list[Question]], n: int, seed: int) -> list[Question]:
+    """A second, fresh test split from the same pool as test (plan section 20).
+
+    Stricter than the first round's rule: a question is skipped if any of its support titles is the title of ANY paragraph
+    already in the corpus (support or distractor of train, dev or test), so no support passage of test2 can have been shown
+    in a training row. Questions already in test are skipped by id."""
+    blocked = {p.title for qs in existing.values() for q in qs for p in q.paragraphs}
+    used = {q.qid for qs in existing.values() for q in qs}
+    return take_disjoint(stratified_order(val_rows, seed + 4), n, blocked, used)
+
+
 def manifest(splits: dict[str, list[Question]], seed: int, rejected: dict[str, Counter]) -> dict:
     return {
         "dataset": DATASET,
