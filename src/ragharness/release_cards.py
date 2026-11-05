@@ -157,7 +157,7 @@ Passages are Wikipedia text through HotpotQA. Please attribute HotpotQA (Yang et
 
 - `training/main.jsonl`, `training/control.jsonl`, `training/dev.jsonl`: one prompt/completion row per assistant decision (search, answer or abstain). `main` is balanced 537 / 537 / 537; `control` has supported tool episodes only.
 - `episodes/eventlogs_train.jsonl`: the AgentTune full-tier EventLogs the training rows were built from.
-- `traces/<run>/<system>__<lenient|strict>__{{transcripts,scores,trajectories}}.jsonl`: every evaluated episode of the base model, the main adapter and the control adapter on dev and test. `transcripts` are readable, `scores` hold the deterministic outcome per episode, `trajectories` is AgentTune's TrajectoryStore export. `dev_epoch1` holds the epoch-1 adapters used to choose the epoch.
+- `traces/<run>/<system>__<lenient|strict>__{{transcripts,scores,trajectories}}.jsonl`: every evaluated episode of the base model, the main adapter and the control adapter on dev and test. `transcripts` are readable, `scores` hold the deterministic outcome per episode, `trajectories` is AgentTune's TrajectoryStore export. `dev_epoch1` holds the epoch-1 adapters used to choose the epoch. `dev_bias` and `dev_bias2` hold the main adapter decoded with an abstain-logit bias (systems `main_b<bias>`; see `reports/bias_sweep.md`; development split only).
 - `manifests/`: split manifest (question ids), index manifest (hash of the shared 7,820-passage index), leakage and shortcut reports. `reports/`: scorecards, trade-off tables, ROI.
 
 ## How it was built

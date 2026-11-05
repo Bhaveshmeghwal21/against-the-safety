@@ -148,6 +148,7 @@ python scripts/scorecard.py --help       # scorecards with paired bootstrap inte
 python scripts/tradeoff.py --help        # five-outcome accuracy and coverage tables
 python scripts/roi.py --help             # cost per good outcome
 python scripts/epoch_table.py --help     # development epoch comparison
+python scripts/bias_sweep.py --help      # development abstain-bias sweep
 ```
 
 Measured on a T4: training 8 s per row (about 1,640 tokens), 5.8 GB peak; evaluation about 20 minutes per system per split with batching, 9.3 GB peak.
