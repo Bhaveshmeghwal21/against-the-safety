@@ -61,16 +61,16 @@ def copy_traces(label: str, split: str, root: Path, dst: Path) -> int:
     return n
 
 
-def build_model(name: str, out: Path, card: str) -> None:
-    src = TRAIN / name / "adapter"
-    dst = out / f"model_{name}"
+def build_model(name: str, out: Path, card: str, train: Path = TRAIN, dst_name: str | None = None) -> None:
+    src = train / name / "adapter"
+    dst = out / f"model_{dst_name or name}"
     shutil.rmtree(dst, ignore_errors=True)
     dst.mkdir(parents=True)
     cfg = json.loads((src / "adapter_config.json").read_text(encoding="utf-8"))
     cfg["base_model_name_or_path"], cfg["revision"] = BASE, REVISION
     (dst / "adapter_config.json").write_text(json.dumps(cfg, indent=2), encoding="utf-8", newline="\n")
     copy(src / "adapter_model.safetensors", dst / "adapter_model.safetensors")
-    copy(TRAIN / name / "train_report.json", dst / "train_report.json")
+    copy(train / name / "train_report.json", dst / "train_report.json")
     (dst / "README.md").write_text(card, encoding="utf-8", newline="\n")
 
 
@@ -85,10 +85,11 @@ def main() -> None:
     out.mkdir(exist_ok=True)
     for name in ("main", "control"):
         build_model(name, out, cards.model_card(name, args.user))
+    build_model("candA", out, cards.cand_a_card(args.user), train=TRAIN_ROUND2, dst_name="cand_a")
 
     ds = out / "dataset_episodes"
     shutil.rmtree(ds, ignore_errors=True)
-    for name in ("main", "control", "dev"):
+    for name in ("main", "control", "dev", "candA", "candB"):
         copy(ROOT / "data" / "processed" / "training" / f"{name}.jsonl", ds / "training" / f"{name}.jsonl")
     copy(ROOT / "data" / "processed" / "episodes" / "eventlogs_train.jsonl", ds / "episodes" / "eventlogs_train.jsonl")
     for f in (ROOT / "data" / "manifests").glob("*.json"):

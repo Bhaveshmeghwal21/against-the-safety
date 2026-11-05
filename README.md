@@ -6,7 +6,7 @@
 
 Lexsi AI Safety and Alignment Hackathon · Track 3: Agentic fine-tuning · PS 4: Fine-tuning for RAG
 
-[![Models](https://img.shields.io/badge/%F0%9F%A4%97%20Models-2%20LoRA%20adapters-ffcc4d)](https://huggingface.co/collections/BMEscanor/against-the-safety-tiny-aya-rag-adapters-6aec1fda812ed14d9f60bfbc)
+[![Models](https://img.shields.io/badge/%F0%9F%A4%97%20Models-3%20LoRA%20adapters-ffcc4d)](https://huggingface.co/collections/BMEscanor/against-the-safety-tiny-aya-rag-adapters-6aec1fda812ed14d9f60bfbc)
 [![Data](https://img.shields.io/badge/%F0%9F%A4%97%20Data-episodes%20%26%20traces-ffcc4d)](https://huggingface.co/collections/BMEscanor/against-the-safety-rag-episodes-traces-and-demo-6aec1fdb994e3b036c6c958d)
 [![Demo](https://img.shields.io/badge/%F0%9F%A4%97%20Demo-trace%20viewer-ffcc4d)](https://huggingface.co/spaces/BMEscanor/against-the-safety-trace-viewer)
 [![Base model](https://img.shields.io/badge/base-Tiny%20Aya%20Global%20%28Cohere%29-39594d)](https://huggingface.co/CohereLabs/tiny-aya-global)
@@ -20,7 +20,8 @@ Lexsi AI Safety and Alignment Hackathon · Track 3: Agentic fine-tuning · PS 4:
 - **Model:** [Tiny Aya Global](https://huggingface.co/CohereLabs/tiny-aya-global) (Cohere, 3.35B parameters) with a QLoRA adapter, trained for 2 epochs on one Kaggle T4 (3.9 GPU-hours on the free quota).
 - **Lexsi tools:** [AgentTune](https://github.com/Lexsi-Labs/AgentTune) supplies the retrieval backend, the search tool, the episode logs and the trainer. [AuditKIT](https://github.com/Lexsi-Labs/AuditKIT) supplies the RAG and agent metrics.
 - **Result:** on a held-out test split, opened once, the share of episodes that end well rose from **2.0% to 58.3%**. An episode ends well with a cited, supported answer when the documents hold the answer, or with an abstention when they don't.
-- **The price:** the adapter declines 19% of answerable questions. A control adapter trained without abstention examples answers more of them, but it never abstains.
+- **Replicated:** in a second round, on 100 fresh questions that no choice had seen, the same adapter went from **2.8% to 60.1%**.
+- **The price:** the adapter declines about one answerable question in five. A second-round variant (candA) halves that on dev, at the cost of more answers when the evidence is missing. A control adapter trained without abstention examples answers more, but it never abstains.
 
 <p align="center">
   <img src="docs/figures/outcomes_test.svg" alt="How each of the 151 headline test episodes ends, for the base model, the main adapter and the control adapter" width="760">
@@ -106,6 +107,49 @@ This is the typical pattern; the counts are in the figure above. Every test epis
 | [`dev_epoch_selection.md`](reports/dev_epoch_selection.md) | epoch choice on the development split |
 | [`bias_sweep.md`](reports/bias_sweep.md) | decoding-time abstention sweep (development split only) |
 | [`scorecard_product_lenient.md`](reports/scorecard_product_lenient.md) | Nimbus Home suite |
+| [`training_sets_round2.json`](reports/training_sets_round2.json) | round 2: composition of the two candidate training sets |
+| [`round2_selection.md`](reports/round2_selection.md) | round 2: candidate selection on the development split |
+| [`scorecard_test2_lenient.md`](reports/scorecard_test2_lenient.md), [`scorecard_test2_strict.md`](reports/scorecard_test2_strict.md), [`tradeoff_test2_lenient.md`](reports/tradeoff_test2_lenient.md) | round 2: the fresh test split |
+
+## Round 2: a fresh test split, and an attempt to cut the refusals
+
+The first round left one clear weakness: main declines about one answerable question in five. We tried to fix it with a second training round. Every rule was fixed and pushed ([plan section 20](research/2026-11-04-fine-tuning-for-rag.md)) before any training, and the result was judged on **test2**: 100 new HotpotQA questions whose supporting passages appear in no training row of either round.
+
+**What the data suggested.** In main's training set, abstentions are half of all final decisions, and 81% of final decisions after three searches are abstentions. The adapter copied both patterns.
+
+**Two candidates.** Both keep main's recipe, questions and token budget. Only the selection of existing training decisions changes.
+- **candA:** abstentions cut from 50% to 30% of final decisions.
+- **candB:** the same cut, plus an equal abstain rate after two and after three searches, matched answer/abstain pairs from the same question, and more follow-up-search examples.
+
+**Selection on dev, rule fixed in advance.**
+
+| dev split | main | candA | candB |
+| --- | ---: | ---: | ---: |
+| ends well (159) | **0.673** | 0.629 | 0.604 |
+| abstains although the evidence was there (205) ↓ | 0.176 | **0.088** | 0.166 |
+| answers anyway when the evidence is missing (73) ↓ | **2** | 9 | 5 |
+
+CandA was the better candidate but scored below main, so under the rule **main stays the project's model**. Main and candA then each ran once on test2.
+
+<p align="center">
+  <img src="docs/figures/outcomes_test2.svg" alt="How each of the 143 headline test2 episodes ends, for the base model, main, candA and the control" width="760">
+</p>
+
+| test2 (fresh split) | Tiny Aya base | **main adapter** | candA adapter | control adapter |
+| --- | ---: | ---: | ---: | ---: |
+| **ends well** (143) | 0.028 | **0.601** | 0.657 | 0.280 |
+| supported correct answer, answerable episodes (199) | 0.025 | 0.462 | 0.528 | **0.598** |
+| answers anyway when the evidence is missing (74) ↓ | 0.878 | **0.041** | 0.081 | 0.189 |
+| abstains although the evidence was there (199) ↓ | **0.000** | 0.221 | 0.146 | **0.000** |
+| invalid or rule-breaking turns (273) ↓ | 0.205 | 0.037 | **0.011** | 0.293 |
+
+<sub>Paired 95% intervals for "ends well", resampling whole questions: main minus base <b>+0.573 [+0.503, +0.643]</b>; main minus control <b>+0.322 [+0.246, +0.392]</b>; main minus candA <b>−0.056 [−0.122, +0.007]</b>. The strict format reading gives the same adapter numbers.</sub>
+
+**What round 2 showed.**
+- **The first-round result replicates.** On questions no choice had seen, main ends well 60.1% of the time (58.3% on the first test split), with the same margins over the base model and the control.
+- **Fewer abstentions in training means fewer refusals.** On both splits candA refuses less and gives more supported answers. It also answers more often when the evidence is missing. CandA was behind main on dev and ahead on test2, and neither gap is outside its interval, so the two cannot be ranked on "ends well" with about 85 questions. They are two operating points, and both are published.
+- **The search-count pattern was not the cause.** CandB removed the depth pattern from its training labels, yet it still abstains mostly after many searches, and its refusals barely changed (34 against 36 on dev). Unanswerable episodes simply use up more searches.
+- **Retrieval did not improve.** The model's own queries found the full evidence in 56, 58 and 59 of 86 open dev questions for main, candA and candB. Better follow-up search needs new training data, not a re-weighting of the old data.
 
 ## How it works
 
@@ -182,6 +226,7 @@ Both readings, and the choice of lenient as primary, were fixed before the test 
 | Data collection | [BMEscanor / against-the-safety-rag-episodes-traces-and-demo](https://huggingface.co/collections/BMEscanor/against-the-safety-rag-episodes-traces-and-demo-6aec1fdb994e3b036c6c958d) |
 | Main adapter | [against-the-safety-tiny-aya-rag-main](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-main) |
 | Control adapter | [against-the-safety-tiny-aya-rag-control](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-control) |
+| candA adapter (round 2, fewer refusals; not the selected model) | [against-the-safety-tiny-aya-rag-cand-a](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-cand-a) |
 | Episodes, evaluation traces, reports | [against-the-safety-rag-episodes](https://huggingface.co/datasets/BMEscanor/against-the-safety-rag-episodes) |
 | Nimbus Home suite | [nimbus-home-support-suite](https://huggingface.co/datasets/BMEscanor/nimbus-home-support-suite) |
 | Trace viewer (static, no model runs) | [against-the-safety-trace-viewer](https://huggingface.co/spaces/BMEscanor/against-the-safety-trace-viewer) |
@@ -258,17 +303,29 @@ python scripts/bias_sweep.py --help      # decoding-time abstention sweep
 python scripts/make_figure.py --help     # the figure at the top of this page
 ```
 
+**4. Round 2 (optional).**
+
+```powershell
+python scripts/prepare_test2.py          # fresh split and its extended index; the first-round corpus keeps every chunk id
+python scripts/make_candidates.py        # candA and candB training sets, same token budget as main
+python scripts/kaggle_launch.py dataset
+python scripts/kaggle_launch.py run train-cands                                                    # candA on GPU 0, candB on GPU 1
+python scripts/kaggle_launch.py run eval-dev --adapters-from ats-train-cands --tag cands "--extra=--systems candA,candB"
+python scripts/select_round2.py --help   # applies the pre-registered selection rule
+python scripts/kaggle_launch.py run eval-test2 --adapters-from "ats-train-both,ats-train-cands" "--extra=--systems main,candA,base,control,closed"
+```
+
 Measured on a T4: training takes 8 s per row (about 1,640 tokens) at 5.8 GB peak memory. Evaluation takes about 20 minutes per system per split with batching, at 9.3 GB peak.
 
 ## Limits
 
-- **False abstains.** The main adapter declines 19% of answerable test episodes (23% on dev).
+- **False abstains.** The main adapter declines 19% of answerable test episodes (22% on test2, 18% on dev). The candA adapter lowers this to 15% on test2, but answers in 8% of test2 episodes whose evidence is missing (main: 4%).
 - **Small evaluation sets.** There are 86 answerable test questions and 65 headline episodes with masked evidence, so differences of a few points are not established. Every report gives intervals.
 - **Near-miss credit.** An answer counts as supported at F1 ≥ 0.5 against the gold answer, plus a cited gold passage. F1 can credit near misses on short answers, so exact-match rates are reported too: main 0.424, control 0.571, base 0.020 on answerable episodes.
 - **Narrow coverage.** Everything is English, with short HotpotQA-style factual questions. The Nimbus Home suite has only 24 tasks.
 - **Nimbus run 1 was flawed.** F1 could not tell "30 days" from "45 days". We shortened the gold answers, fixed one question and re-ran every system. Traces from both runs are published.
 - **Masking check.** The test that a masked episode lacks the answer is a text match. It does not prove that no other passage could support a different valid answer.
-- **One training round.** Retraining with a different mixture would have meant opening the test split a second time.
+- **One more training round, judged on fresh data.** Choosing a new mixture after the first test split was opened needed a new split. Round 2 used test2, so the first test split was never used for selection.
 
 <details>
 <summary><b>Repository layout</b></summary>
@@ -283,7 +340,7 @@ reports/          every table cited on this page (markdown and json)
 docs/figures/     the figure on this page
 demo/             static trace viewer, also published as a Hugging Face Space
 article/          write-up and submission abstract
-research/         planning record with the pre-registered choices (sections 18 and 19)
+research/         planning record with the pre-registered choices (sections 18 to 21)
 tests/            harness tests
 ```
 

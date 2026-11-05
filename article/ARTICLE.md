@@ -8,7 +8,7 @@ Code: https://github.com/Bhaveshmeghwal21/against-the-safety
 
 A document assistant is only useful if it answers from its documents and stops when they do not contain the answer. We fine-tuned Tiny Aya Global (3.35B, a Cohere model) with QLoRA, through AgentTune, to run a three-search retrieval loop and then either answer with citations to the passages it saw or abstain and say what is missing. Training used 600 HotpotQA questions turned into scripted episodes in six evidence states (clean support, distractors, second hop, missing evidence, evidence already supplied, weak first search), 1,611 rows in total. We trained two adapters under an identical recipe: a main adapter on the full mixture and a control on supported tool episodes only. We evaluated on a held-out test split, opened once, with the same retrieval index, call budget and decoding for every system. Scoring was deterministic code plus AuditKIT's RAG and agent metrics.
 
-On the test split the end-to-end good rate (a supported answer when the documents hold it, an abstention when they do not) went from 0.020 for the base model to 0.583 for the main adapter (+0.563, 95% interval +0.490 to +0.636), and from 0.404 for the control to 0.583 (+0.179, +0.103 to +0.252). The base model answered from missing evidence in 78% of unanswerable episodes; main does so in 9.8%, the control in 26.8%. Citations to a gold passage when answering rose from 12.6% to 99.4%. The improvement has a price: the main adapter abstains on 19% of answerable episodes, and its supported-answer rate on answerable questions (0.527) is lower than the control's (0.707). The control never abstains and, when evidence is missing, mostly loops until it runs out of searches. We report both and do not merge them into one score. A 24-task check on a fictional product's documents shows the same pattern and weaker results on two-document questions and on choosing the current edition of a policy. Training cost 3.9 T4 GPU-hours on the free Kaggle quota (about 1.36 USD at a reference price).
+On the test split the end-to-end good rate (a supported answer when the documents hold it, an abstention when they do not) went from 0.020 for the base model to 0.583 for the main adapter (+0.563, 95% interval +0.490 to +0.636), and from 0.404 for the control to 0.583 (+0.179, +0.103 to +0.252). The base model answered from missing evidence in 78% of unanswerable episodes; main does so in 9.8%, the control in 26.8%. Citations to a gold passage when answering rose from 12.6% to 99.4%. The improvement has a price: the main adapter abstains on 19% of answerable episodes, and its supported-answer rate on answerable questions (0.527) is lower than the control's (0.707). The control never abstains and, when evidence is missing, mostly loops until it runs out of searches. We report both and do not merge them into one score. In a pre-registered second round we drew 100 fresh questions (test2) that no training row or choice had touched. Main replicated there: 0.028 to 0.601, +0.573 (+0.503 to +0.643). A re-trained variant with fewer abstention examples cut the refusals (15% against 22%), at the cost of more unsupported answers (8% against 4%). The selection rule kept main, and both adapters are published. A 24-task check on a fictional product's documents shows the same pattern and weaker results on two-document questions and on choosing the current edition of a policy. Training cost 3.9 T4 GPU-hours on the free Kaggle quota (about 1.36 USD at a reference price).
 
 ## 1. Problem and approach
 
@@ -39,12 +39,13 @@ Two integration problems we hit and documented in the repository: TRL casts LoRA
 | [Tiny Aya Global](https://huggingface.co/CohereLabs/tiny-aya-global) (revision `af89d219`) | base and student model, Cohere | CC BY-NC 4.0, gated |
 | [against-the-safety-tiny-aya-rag-main](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-main) | LoRA adapter, full mixture | CC BY-NC 4.0 (inherited) |
 | [against-the-safety-tiny-aya-rag-control](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-control) | LoRA adapter, supported-only control | CC BY-NC 4.0 (inherited) |
+| [against-the-safety-tiny-aya-rag-cand-a](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-cand-a) | LoRA adapter, round 2, 30% abstentions (fewer refusals; not the selected model) | CC BY-NC 4.0 (inherited) |
 
 ## 4. Datasets and benchmarks, with licenses
 
 | dataset | contents | license |
 | --- | --- | --- |
-| [against-the-safety-rag-episodes](https://huggingface.co/datasets/BMEscanor/against-the-safety-rag-episodes) | training rows, AgentTune event logs, dev and test evaluation traces, reports | CC BY-SA 4.0 (derived from HotpotQA) |
+| [against-the-safety-rag-episodes](https://huggingface.co/datasets/BMEscanor/against-the-safety-rag-episodes) | training rows (main, control, round-2 candidates), AgentTune event logs, dev, test and test2 evaluation traces, reports | CC BY-SA 4.0 (derived from HotpotQA) |
 | [nimbus-home-support-suite](https://huggingface.co/datasets/BMEscanor/nimbus-home-support-suite) | 24 fictional product documents, 24 tasks, evaluation traces | CC BY 4.0 |
 | HotpotQA (distractor) | source of questions and passages | CC BY-SA 4.0 |
 
@@ -94,19 +95,68 @@ We tried the one lever that needs no retraining and no second look at the test s
 | 0 (selected) | 0.673 | 0.233 | 0.959 | 0.027 |
 | +1 | 0.673 | 0.256 | 0.959 | 0.027 |
 
-Moving from 0 to −6 halves the false abstains but turns most of the correct abstentions into unsupported answers; at −9 abstaining is switched off. Between 0 and −3 almost nothing changes, which says the abstain decision is nearly all-or-nothing in this adapter, not a confidence that can be thresholded. Reducing the 19% false-abstain rate probably needs different training data (a smaller share of abstention episodes, or harder answerable examples); we did not test that.
+Moving from 0 to −6 halves the false abstains but turns most of the correct abstentions into unsupported answers; at −9 abstaining is switched off. Between 0 and −3 almost nothing changes, which says the abstain decision is nearly all-or-nothing in this adapter, not a confidence that can be thresholded. Reducing the 19% false-abstain rate needs different training data, not a decoding setting; round 2 below tests a smaller share of abstention episodes.
 
 ### Alternatives we considered and did not run
 
-An Aya Expanse teacher and distillation, and reinforcement learning as the core method: SFT on matched states was the smallest change that could test the abstention question. A second training round with a different mixture: that would have meant opening the test split again, so the decoding-time sweep above is the only post-hoc lever we examined.
+An Aya Expanse teacher and distillation, and reinforcement learning as the core method: SFT on matched states was the smallest change that could test the abstention question.
+
+### Round 2: a fresh test split and an attempt to cut the refusals
+
+Choosing a new training mixture after opening the test split would have turned the test split into a selection set. So round 2 drew **test2**, 100 new HotpotQA questions (80 bridge, 20 comparison, all hard). The sampling rule skipped any question whose supporting title is the title of any passage already in the corpus, so no test2 support passage appears in any training row. The test2 passages were appended to the index without renumbering anything. Every rule below was written and pushed before training.
+
+**Diagnosis from saved data.**
+- In main's training set, abstentions are half of the final decisions, and 81% of the final decisions after three searches are abstentions.
+- On dev, main copies this: it abstains on 86% of its final turns after three searches. 16 of its 36 false abstentions come after all the support was on screen.
+
+**Two candidates.** Both use main's recipe, questions and token budget (within 0.1%).
+- **candA** lowers abstentions to 30% of final decisions.
+- **candB** does the same, and also:
+  - sets an equal 40% abstain rate after two and after three searches;
+  - pairs answers and abstentions from the same question;
+  - spreads search examples evenly over the first, second and third search.
+
+**Selection on dev, by the pre-registered rule.**
+- Eligible candidates: at most 11 of 73 unsupported answers, and at most 10% of episodes without a valid final turn.
+- Among the eligible, the higher end-to-end good rate wins.
+- The winner replaces main only if it is at least as good as main.
+
+| dev | main | candA | candB |
+| --- | ---: | ---: | ---: |
+| end-to-end good (159) | **0.673** | 0.629 | 0.604 |
+| false abstain (205) | 0.176 | **0.088** | 0.166 |
+| unsupported answers (73) | **2** | 9 | 5 |
+
+CandA won the candidate comparison but scored below main, so main stayed the model. Main and candA then each ran once on test2:
+
+| test2 | base | **main** | candA | control |
+| --- | ---: | ---: | ---: | ---: |
+| end-to-end good (143) | 0.028 | **0.601** | 0.657 | 0.280 |
+| supported correct (199) | 0.025 | 0.462 | 0.528 | **0.598** |
+| false abstain (199) ↓ | **0.000** | 0.221 | 0.146 | **0.000** |
+| unsupported answer (74) ↓ | 0.878 | **0.041** | 0.081 | 0.189 |
+| invalid turns (273) ↓ | 0.205 | 0.037 | **0.011** | 0.293 |
+
+Main minus base: +0.573 (95% interval +0.503 to +0.643). Main minus control: +0.322 (+0.246 to +0.392). Main minus candA: −0.056 (−0.122 to +0.007).
+
+What round 2 established:
+- **The first-round result replicates on fresh questions.** Main's end-to-end good rate is 0.601, against 0.583 on the first test split.
+- **Fewer abstentions in training lowers refusals on both splits.** CandA refuses less and gives more supported answers, and it answers somewhat more often from missing evidence. Its end-to-end rank against main flips between dev and test2 within the intervals. At this sample size, the two are different operating points rather than better and worse models, and both are published.
+- **The search-count pattern was a symptom, not the cause.** CandB was trained without it, yet it still abstains mostly after many searches, and its refusals did not fall (34 against 36 on dev). Unanswerable episodes use up more searches.
+- **Re-weighting the existing examples did not improve retrieval.** The model's own queries reached the full evidence in 56, 58 and 59 of 86 open dev questions (main, candA, candB).
+- **Cost:** about 4 T4-hours of training for both candidates together, and about 2.5 more hours of evaluation.
 
 ### Limits
 
-Small evaluation sets (86 answerable questions); differences of a few points are not established. F1 ≥ 0.5 against the gold answer can credit near-misses on short answers, so exact-match rates are in the reports (main 0.424, control 0.571, base 0.020 on answerable episodes). English, short factual questions. The check that masked episodes lack the answer is a text match, not a proof that no other passage could answer.
+Small evaluation sets (86 answerable questions per split); differences of a few points are not established. A second fresh split (test2, round 2) confirms the main result. F1 ≥ 0.5 against the gold answer can credit near-misses on short answers, so exact-match rates are in the reports (main 0.424, control 0.571, base 0.020 on answerable episodes). English, short factual questions. The check that masked episodes lack the answer is a text match, not a proof that no other passage could answer.
 
 ## 7. What more credits would enable
 
-More than two T4 GPUs and a longer quota window would let us (1) train the same recipe on all of HotpotQA's training set instead of 600 questions, (2) run several seeds and give variance for the 19% false-abstain rate, (3) add a mixture between main and control (a smaller share of abstention episodes) and select it on the development split to move along the accuracy-coverage curve, and (4) evaluate on a document set from a real deployment, with several editions of the same policy, which is where our 24-task check was weakest.
+More than two T4 GPUs and a longer quota window would let us do four things:
+1. Train the same recipe on all of HotpotQA's training set instead of 600 questions.
+2. Run several seeds, so that main and candA, which swap places between dev and test2 within their intervals, can actually be ranked.
+3. Generate new training episodes for the failure that re-weighting could not fix: follow-up searches that fail to reach the second document. The model's own queries find the full evidence in only about 70% of open questions.
+4. Evaluate on a document set from a real deployment with several editions of the same policy, which is where our 24-task check was weakest.
 
 ## 8. Team
 

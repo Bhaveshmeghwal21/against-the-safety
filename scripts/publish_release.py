@@ -24,13 +24,14 @@ REPOS = [  # (kind, name, local folder)
     ("dataset", "against-the-safety-rag-episodes", "dataset_episodes"),
     ("dataset", "nimbus-home-support-suite", "dataset_nimbus"),
     ("space", "against-the-safety-trace-viewer", "space"),
+    ("model", "against-the-safety-tiny-aya-rag-cand-a", "model_cand_a"),  # round 2, not the selected model (plan section 21)
 ]
 
 COLLECTIONS = {
     "models": {
         "title": "Against-the-safety: Tiny Aya RAG adapters",
         "description": "LoRA adapters for Tiny Aya Global trained with AgentTune on search-cite-abstain episodes (PS 4).",
-        "items": [("model", 0), ("model", 1)],
+        "items": [("model", 0), ("model", 1), ("model", 5)],
     },
     "data": {
         "title": "Against-the-safety: RAG episodes, traces and demo",

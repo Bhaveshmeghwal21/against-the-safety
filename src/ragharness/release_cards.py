@@ -43,12 +43,13 @@ ROWS = [
 ]
 
 
-def results_table() -> str:
-    card = _card("test", "lenient")
-    names = ["base", "main", "control"]
-    lines = ["| on the 86 test questions (with evidence masked or supplied in other states) | Tiny Aya base | **main adapter** | control adapter |", "| --- | ---: | ---: | ---: |"]
-    for label, section, metric in ROWS:
-        lines.append(f"| {label} | " + " | ".join(_cell(card["systems"][n], section, metric) for n in names) + " |")
+def results_table(split: str = "test", names: tuple[str, ...] = ("base", "main", "control"), bold: str = "main") -> str:
+    card = _card(split, "lenient")
+    label = {"base": "Tiny Aya base", "main": "main adapter", "control": "control adapter", "candA": "candA adapter"}
+    head = " | ".join(f"**{label[n]}**" if n == bold else label[n] for n in names)
+    lines = [f"| on the {split} split (questions with evidence masked or supplied in other states) | {head} |", "| --- |" + " ---: |" * len(names)]
+    for row_label, section, metric in ROWS:
+        lines.append(f"| {row_label} | " + " | ".join(_cell(card["systems"][n], section, metric) for n in names) + " |")
     return "\n".join(lines)
 
 
@@ -56,6 +57,60 @@ def _headline_sentence() -> str:
     card = _card("test", "lenient")
     return (f"End-to-end good (a supported correct answer when the documents hold the answer, an abstention when they do not), "
             f"headline episodes: base to main {_paired(card, 'main vs base', 'end-to-end good')}; control to main {_paired(card, 'main vs control', 'end-to-end good')}.")
+
+
+def _test2_sentence() -> str:
+    card = _card("test2", "lenient")
+    return (f"On a second, fresh split of 100 questions (test2, opened once in round 2), end-to-end good went from base to main "
+            f"{_paired(card, 'main vs base', 'end-to-end good (headline')}, and from control to main {_paired(card, 'main vs control', 'end-to-end good (headline')}.")
+
+
+def cand_a_card(user: str) -> str:
+    card = _card("test2", "lenient")
+    vs = card["paired"]["main vs candA"]
+    e2e = next(r for n, r in vs.items() if n.startswith("end-to-end good (headline"))
+    return f"""---
+license: cc-by-nc-4.0
+base_model: {BASE}
+library_name: peft
+pipeline_tag: text-generation
+language: [en]
+tags: [lora, qlora, peft, rag, retrieval, abstention, citations, agent, tiny-aya, lexsi-hackathon, agenttune, auditkit]
+datasets: [{user}/against-the-safety-rag-episodes]
+---
+
+# against-the-safety-tiny-aya-rag-cand-a
+
+A LoRA adapter for [Tiny Aya Global]({"https://huggingface.co/" + BASE}) (revision `{REVISION[:8]}`) from the project's second round: the same recipe, questions and token budget as
+[the main adapter](https://huggingface.co/{user}/against-the-safety-tiny-aya-rag-main), with abstentions at 30% of final decisions instead of 50%
+(1,668 rows: 556 search, 778 answer, 334 abstain). Built for the Lexsi AI Safety and Alignment Hackathon, Track 3, problem statement 4. Team **Against-the-safety**.
+Code and plan: [{REPO_URL}]({REPO_URL}) (plan sections 20 and 21).
+
+**Status: not the selected model.** The selection rule, fixed before training, chose between candidates on the development split, and there this adapter's
+end-to-end good rate was below main's (100 against 107 of 159), so main stayed the project's model. Both were then evaluated once on a fresh split (test2).
+Read it as a second operating point: fewer refusals and more supported answers, at the price of more answers when the evidence is missing.
+
+## Results on test2 (100 fresh questions, scored by deterministic code)
+
+{results_table("test2", ("base", "main", "candA", "control"), "candA")}
+
+End-to-end good, candA against main on the 143 headline episodes: {e2e['before']:.3f} against {e2e['after']:.3f} (main minus candA {e2e['difference']:+.3f}, 95% CI {e2e['ci95'][0]:+.3f} to {e2e['ci95'][1]:+.3f}).
+On the development split the order was the other way. The two adapters cannot be ranked on that rate with these sample sizes; they differ consistently in how often they refuse.
+
+## Use
+
+Loading is the same as for the main adapter (see its card); replace the adapter id with `{user}/against-the-safety-tiny-aya-rag-cand-a`.
+It expects the same system prompt and tool loop (`ragharness.protocol.system_prompt`, `ragharness.rollout`).
+
+## Limits
+
+The main adapter's limits apply. In addition, this adapter answers on {_cell(card["systems"]["candA"], "abstention (documents-only requirement)", "unsupported_answer_rate (unanswerable; lower is better)")} of test2 episodes whose evidence is missing (main: {_cell(card["systems"]["main"], "abstention (documents-only requirement)", "unsupported_answer_rate (unanswerable; lower is better)")}).
+Not for safety-critical or legal use.
+
+## License
+
+CC BY-NC 4.0, inherited from the base model. Cohere Labs' terms for Tiny Aya apply.
+"""
 
 
 def model_card(name: str, user: str) -> str:
@@ -87,6 +142,8 @@ The adapter teaches the model a small search protocol: emit a `search_corpus` ca
 {results_table()}
 
 {_headline_sentence()}
+
+{_test2_sentence() if is_main else ""}
 
 Read this as a trade-off, not a free improvement. The main adapter stops answering from missing or incomplete evidence, and it also
 declines some questions it could have answered. The control answers more of the answerable questions and never abstains.
@@ -159,6 +216,7 @@ Passages are Wikipedia text through HotpotQA. Please attribute HotpotQA (Yang et
 - `episodes/eventlogs_train.jsonl`: the AgentTune full-tier EventLogs the training rows were built from.
 - `traces/<run>/<system>__<lenient|strict>__{{transcripts,scores,trajectories}}.jsonl`: every evaluated episode of the base model, the main adapter and the control adapter on dev and test. `transcripts` are readable, `scores` hold the deterministic outcome per episode, `trajectories` is AgentTune's TrajectoryStore export. `dev_epoch1` holds the epoch-1 adapters used to choose the epoch. `dev_bias` and `dev_bias2` hold the main adapter decoded with an abstain-logit bias (systems `main_b<bias>`; see `reports/bias_sweep.md`; development split only).
 - `manifests/`: split manifest (question ids), index manifest (hash of the shared 7,820-passage index), leakage and shortcut reports. `reports/`: scorecards, trade-off tables, ROI.
+- Second round (plan sections 20 and 21 in the code repository): `training/candA.jsonl` and `training/candB.jsonl` (two re-weighted selections of the same train decisions), `traces/dev_round2/` (both candidates on dev, used for selection), `traces/test2/` (base, closed book, main, control and candA on the fresh split), `manifests/test2_manifest.json` (question ids, sampling rule, and the hash of the extended 8,777-passage index).
 
 ## How it was built
 
@@ -169,7 +227,7 @@ The scripted policy is a reference used to build verified episodes; it is not a 
 ## Caveats
 
 - Two readings of each model run are provided (lenient: first valid action; strict: exact protocol). The strict reading is the protocol-compliance measure.
-- Small evaluation sets: 100 development and 100 test questions, of which 86 each had their evidence reachable within three searches for the scripted reference policy and form the headline episodes.
+- Small evaluation sets: 100 development, 100 test and 100 test2 questions, of which 86, 86 and 83 had their evidence reachable within three searches for the scripted reference policy and form the headline episodes.
 """
 
 

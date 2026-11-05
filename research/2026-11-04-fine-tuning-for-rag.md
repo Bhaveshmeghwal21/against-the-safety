@@ -681,3 +681,29 @@ Both candidates are eligible, and candA is the best candidate. Its end-to-end go
 - *Lowering the abstain share works as expected.* CandA halves the false abstentions (36 to 18, and 16 to 6 with all the support on screen) and gains 10 supported answers. The price is 8 correct abstentions and 7 more unsupported answers. On the headline set, where 73 of 159 episodes are unanswerable, the end-to-end rate falls.
 - *Removing the search-depth signal from the training labels did not remove it from the behaviour.* CandB was trained with a 0.40 abstain rate after both two and three searches, yet it still abstains on 59% and 71% of its final turns after two and three searches (main: 52% and 86%; candA: 58% and 66%), and its false abstentions barely move (34 against 36). The depth pattern in the adapters' behaviour mostly follows the evidence itself: unanswerable episodes use up more searches. The mixture artifact was not the main cause.
 - *Retrieval barely changes.* Full evidence is found by the model's own queries in 56, 58 and 59 of 86 open dev questions for main, candA and candB. Spreading the search rows over later searches (candB) did not improve the follow-up query.
+
+**Fresh test split (`ats-eval-test2`, opened once; lenient reading, 143 headline episodes = 83 answerable + 60 masked).**
+
+| | base | main | control | candA |
+| --- | ---: | ---: | ---: | ---: |
+| end-to-end good (143) | 0.028 | 0.601 | 0.280 | 0.657 |
+| end-to-end good, exact match (143) | 0.021 | 0.559 | 0.238 | 0.615 |
+| supported correct (199) | 0.025 | 0.462 | 0.598 | 0.528 |
+| false abstain (199) | 0.000 | 0.221 | 0.000 | 0.146 |
+| correct abstain (74) | 0.014 | 0.905 | 0.000 | 0.878 |
+| unsupported answer (74) | 0.878 | 0.041 | 0.189 | 0.081 |
+| invalid turns (273) | 0.205 | 0.037 | 0.293 | 0.011 |
+| closed book | 0.145 | | | |
+
+**Paired differences on end-to-end good:**
+- main minus base: +0.573 [+0.503, +0.643];
+- main minus control: +0.322 [+0.246, +0.392];
+- main minus candA: −0.056 [−0.122, +0.007].
+
+The strict reading gives the same adapter numbers. The base model breaks the format in 267 of 273 episodes.
+
+**Reading.**
+1. *The first-round result replicates on questions no choice had seen.* Main's end-to-end good rate is 0.601 on test2 against 0.583 on the first test split, and its margins over the base model and the control are of the same size or larger.
+2. *CandA and main swap places between dev and test2.* On dev, main was ahead by 7 of 159 episodes; on test2, candA is ahead by 8 of 143. Neither difference is outside its 95% interval (dev was not bootstrapped; test2 −0.056 [−0.122, +0.007]). With 83 to 86 questions per split, the two adapters cannot be ranked on end-to-end good.
+3. *What does separate them is the operating point, and it is consistent on both splits.* CandA has fewer false abstentions (dev 0.088 against 0.176, test2 0.146 against 0.221) and more supported answers (0.517 against 0.468, 0.528 against 0.462). It also has more unsupported answers (9 against 2 of 73, 6 against 3 of 74) and slightly fewer correct abstentions.
+4. *The pre-registered rule stands.* Main stays the second-round model, because the rule was fixed on dev, and switching after seeing test2 would make test2 a selection set. CandA is published as a second adapter with a lower refusal rate, labelled as not selected, with its test2 numbers.
