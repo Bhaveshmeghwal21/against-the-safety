@@ -58,6 +58,7 @@ def clause_metrics(scores: list[dict], summary: dict) -> dict:
             "supported_correct (answerable episodes)": _rate(answerable, lambda s: s["outcome"] == "supported_correct"),
             "supported_correct (open questions)": _rate(get("open"), lambda s: s["outcome"] == "supported_correct"),
             "answer_correct_ignoring_citations (answerable; F1 >= 0.5)": _rate(answerable, lambda s: s["final"] == "answer" and (s["f1"] or 0) >= F1_THRESHOLD),
+            "supported_exact_match (answerable; exact match instead of F1 >= 0.5)": _rate(answerable, lambda s: s["final"] == "answer" and bool(s["em"]) and bool(s["cited_all_shown"]) and bool(s["cites_gold"])),
             "cites_a_gold_passage_when_answering (answerable)": _rate([s for s in answerable if s["final"] == "answer"], lambda s: bool(s["cites_gold"])),
             "answer_f1_when_answered": summary.get("overall", {}).get("answer_f1_when_answered"),
             "auditkit_citation_support": ak.get("citation_support"),

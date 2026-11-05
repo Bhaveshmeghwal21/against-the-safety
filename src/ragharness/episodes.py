@@ -135,6 +135,24 @@ def to_eventlog(ep: Episode) -> EventLog:
     return log
 
 
+def to_transcript(ep: Episode, q: Question, score: dict) -> dict:
+    """A readable, self-contained record of one evaluated episode (for the trace viewer and the published trace dataset)."""
+    steps = []
+    for s in ep.steps:
+        steps.append({
+            "assistant": s.text, "kind": s.turn.kind, "query": s.turn.query, "observation": s.observation,
+            "retrieved": [{"chunk_id": h.chunk_id, "title": h.title} for h in s.hits], "error": s.turn.error,
+        })
+    final = ep.final.turn
+    return {
+        "qid": ep.qid, "variant": ep.condition, "question": ep.question, "gold_answer": q.answer, "answerable": score.get("answerable"),
+        "provided_evidence": [{"chunk_id": h.chunk_id, "title": h.title} for h in ep.prefill],
+        "steps": steps,
+        "final": {"kind": final.kind, "answer": final.answer, "citations": final.citations, "missing": final.missing, "error": final.error},
+        "outcome": score.get("outcome"), "f1": score.get("f1"), "n_searches": ep.n_searches, "stop": ep.stop_reason,
+    }
+
+
 def eventlog_to_dict(log: EventLog) -> dict:
     return {
         "id": log.id,

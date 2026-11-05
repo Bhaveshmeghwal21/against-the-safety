@@ -26,9 +26,20 @@ def clean(text: str) -> str:
     return text.replace("<|START_RESPONSE|>", "").strip()
 
 
+def abstain_ids(tokenizer) -> tuple[int, int]:
+    """Token ids that decide a final turn: both `<answer>` and `<abstain>` start with `<`, then diverge at "answer" / "abst"."""
+    a, b = tokenizer.encode("<answer>", add_special_tokens=False), tokenizer.encode("<abstain>", add_special_tokens=False)
+    assert a[0] == b[0] and a[1] != b[1], "the two final-turn tags must diverge at their second token"
+    return a[0], b[1]
+
+
 class HFGenerator:
+    """`abstain_bias` is a decoding-time knob, not a trained weight: it is added to the logit of the token that starts
+    `<abstain>` right after the opening `<` of a final turn. 0 leaves the model untouched; negative values make it
+    abstain less, positive values more. It moves the model along its accuracy-coverage curve."""
+
     def __init__(self, model, tokenizer, max_new_tokens: int = 160, max_input_tokens: int = 4096, chat_template: str | None = None,
-                 batch_size: int = 12, max_batch_tokens: int = 32768):
+                 batch_size: int = 12, max_batch_tokens: int = 32768, abstain_bias: float = 0.0):
         import torch
 
         self.torch = torch
@@ -37,6 +48,8 @@ class HFGenerator:
             self.tokenizer.chat_template = chat_template
         self.max_new_tokens, self.max_input_tokens = max_new_tokens, max_input_tokens
         self.batch_size, self.max_batch_tokens = batch_size, max_batch_tokens
+        self.abstain_bias = abstain_bias
+        self.lt_id, self.abst_id = abstain_ids(tokenizer) if abstain_bias else (None, None)
         stop_ids = []
         for m in STOP_MARKERS:
             ids = tokenizer.convert_tokens_to_ids(m)
@@ -70,10 +83,23 @@ class HFGenerator:
         for i, ids in enumerate(id_lists):  # left padding: the new tokens of every row start at the same column
             input_ids[i, width - len(ids) :] = torch.tensor(ids)
             attention[i, width - len(ids) :] = 1
+        extra = {}
+        if self.abstain_bias:
+            from transformers import LogitsProcessor, LogitsProcessorList
+
+            lt, abst, bias = self.lt_id, self.abst_id, self.abstain_bias
+
+            class _Bias(LogitsProcessor):
+                def __call__(self, ids, scores):
+                    if ids.shape[1] == width + 1:  # exactly one token generated so far
+                        scores[ids[:, -1] == lt, abst] += bias
+                    return scores
+
+            extra["logits_processor"] = LogitsProcessorList([_Bias()])
         with torch.no_grad():
             out = self.model.generate(
                 input_ids=input_ids.to(self.model.device), attention_mask=attention.to(self.model.device), do_sample=False,
-                max_new_tokens=self.max_new_tokens, eos_token_id=self.stop_ids, pad_token_id=self.pad_id,
+                max_new_tokens=self.max_new_tokens, eos_token_id=self.stop_ids, pad_token_id=self.pad_id, **extra,
             )
         results = []
         for i, ids in enumerate(id_lists):

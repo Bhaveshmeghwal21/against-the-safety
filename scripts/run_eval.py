@@ -56,6 +56,7 @@ def main() -> None:
     ap.add_argument("--no-quantize", action="store_true")
     ap.add_argument("--concurrency", type=int, default=24, help="episodes in flight; their model calls are batched")
     ap.add_argument("--batch-size", type=int, default=12, help="prompts per generate() call")
+    ap.add_argument("--abstain-bias", type=float, default=0.0, help="logit bias on the token that starts <abstain>; 0 = the model as trained")
     ap.add_argument("--parse", default="lenient,strict", help="comma list: lenient (first valid action, the fair baseline reading) and/or strict (protocol compliance)")
     args = ap.parse_args()
     t_start = time.time()
@@ -95,7 +96,7 @@ def main() -> None:
         model_path, revision, source = modelref.resolve()
         model, tok = generate.load_model(model_path, revision, adapter=args.adapter if args.system == "adapter" else None,
                                          quantize=not args.no_quantize)
-        gen = generate.HFGenerator(model, tok, batch_size=args.batch_size)
+        gen = generate.HFGenerator(model, tok, batch_size=args.batch_size, abstain_bias=args.abstain_bias)
         model_name = f"{MODEL}@{REVISION[:8]} ({source})" + (f"+{Path(args.adapter).parent.name}/{Path(args.adapter).name}" if args.system == "adapter" else "")
         if args.system == "closed_book":
             extra = closed_book(jobs, gen, out)
@@ -126,11 +127,14 @@ def main() -> None:
         scored["summary"]["index_hash"] = corp.index_hash
         if gen is not None:
             scored["summary"]["generation"] = {"batch_size": args.batch_size, "concurrency": args.concurrency, "max_new_tokens": gen.max_new_tokens,
-                                               "truncated_inputs": gen.truncated_inputs, "wall_seconds": round(time.time() - t_mode, 1)}
+                                               "truncated_inputs": gen.truncated_inputs, "abstain_bias": args.abstain_bias, "wall_seconds": round(time.time() - t_mode, 1)}
 
         with (mdir / "scores.jsonl").open("w", encoding="utf-8", newline="\n") as f:
             for s in scored["scores"]:
                 f.write(json.dumps(s) + "\n")
+        with (mdir / "transcripts.jsonl").open("w", encoding="utf-8", newline="\n") as f:
+            for (job, ep, _), s in zip(results, scored["scores"]):
+                f.write(json.dumps(episodes.to_transcript(ep, job.q, s), ensure_ascii=False) + "\n")
         episodes.write_eventlogs(mdir / "eventlogs.jsonl", [episodes.to_eventlog(ep) for _, ep, _ in results])
         store.export_jsonl(str(mdir / "trajectories.jsonl"), run_id=run_id)
         (mdir / "summary.json").write_text(json.dumps(scored["summary"], indent=2), encoding="utf-8", newline="\n")

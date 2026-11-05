@@ -90,10 +90,10 @@ def wait_until_served(timeout: int = 900) -> None:
     raise SystemExit(f"dataset still does not serve bundle {want} after {timeout}s")
 
 
-def run_stage(stage: str, adapters_from: str | None, extra: str) -> str:
+def run_stage(stage: str, adapters_from: str | None, extra: str, tag: str = "") -> str:
     if served_bundle_id() != bundle_id():
         raise SystemExit("the dataset on Kaggle is not the local bundle; run `kaggle_launch.py dataset` first (it waits until the new version is served)")
-    slug = f"ats-{stage}"
+    slug = f"ats-{stage}" + (f"-{tag}" if tag else "")
     kdir = ROOT / "runs" / "kaggle" / f"push-{slug}"
     kdir.mkdir(parents=True, exist_ok=True)
     code = (
@@ -127,6 +127,7 @@ def main() -> None:
     r.add_argument("stage")
     r.add_argument("--adapters-from", default=None)
     r.add_argument("--extra", default="")
+    r.add_argument("--tag", default="", help="suffix for the kernel slug, so two runs of one stage do not overwrite each other")
     s = sub.add_parser("status")
     s.add_argument("slug")
     o = sub.add_parser("output")
@@ -135,7 +136,7 @@ def main() -> None:
     if a.cmd == "dataset":
         make_dataset()
     elif a.cmd == "run":
-        print("kernel slug:", run_stage(a.stage, a.adapters_from, a.extra))
+        print("kernel slug:", run_stage(a.stage, a.adapters_from, a.extra, a.tag))
     elif a.cmd == "status":
         print(kaggle("kernels", "status", f"{username()}/{a.slug}"))
     elif a.cmd == "output":

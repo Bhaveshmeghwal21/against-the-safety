@@ -165,6 +165,16 @@ def main() -> None:
                 raise SystemExit(f"adapter {key!r} not found under /kaggle/input (have {sorted(adapters)}); attach the training kernel")
             return adapters[key]
 
+        m = re.search(r"--bias\s+(\S+)", rest)
+        if m:  # accuracy-coverage sweep: the main adapter at several abstain biases, split over both GPUs
+            biases = m.group(1).split(",")
+            ev = f"{py} scripts/run_eval.py --split {split} {rest.replace(m.group(0), '')}"
+            chains: dict[int, list[str]] = {0: [], 1: []}
+            for i, b in enumerate(biases):
+                chains[i % 2].append(f"{ev} --system adapter --adapter {adapter_for('main')} --abstain-bias {b} --out {OUT}/eval/main{tag}_b{b}_{split}")
+            rc = run_parallel([(" && ".join(c), {"CUDA_VISIBLE_DEVICES": str(g)}, f"eval_main{tag}_bias_gpu{g}_{split}.log") for g, c in chains.items() if c])
+            wanted = []
+
         waves = [
             [("base", g0, f"{ev} --system base --out {OUT}/eval/base_{split}"),
              ("main", g1, f"{ev} --system adapter --adapter {{main}} --out {OUT}/eval/main{tag}_{split}")],

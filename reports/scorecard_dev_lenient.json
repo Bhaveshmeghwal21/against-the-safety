@@ -1,0 +1,473 @@
+{
+  "systems": {
+    "base": {
+      "when_to_retrieve": {
+        "missed_search_rate (no evidence supplied; lower is better)": {
+          "value": 0.043,
+          "k": 8,
+          "n": 188
+        },
+        "unnecessary_search_rate (sufficient evidence supplied; lower is better)": {
+          "value": 0.983,
+          "k": 59,
+          "n": 60
+        },
+        "search_when_evidence_partial (higher is better)": {
+          "value": 0.967,
+          "k": 29,
+          "n": 30
+        }
+      },
+      "what_to_retrieve": {
+        "full_support_found_by_own_queries (open questions)": {
+          "value": 0.267,
+          "k": 23,
+          "n": 86
+        },
+        "second_hop_recovery (partial or weak first result)": {
+          "value": 0.186,
+          "k": 11,
+          "n": 59
+        },
+        "auditkit_evidence_set_recall": 0.459
+      },
+      "grounding": {
+        "supported_correct (answerable episodes)": {
+          "value": 0.044,
+          "k": 9,
+          "n": 205
+        },
+        "supported_correct (open questions)": {
+          "value": 0.023,
+          "k": 2,
+          "n": 86
+        },
+        "answer_correct_ignoring_citations (answerable; F1 >= 0.5)": {
+          "value": 0.098,
+          "k": 20,
+          "n": 205
+        },
+        "cites_a_gold_passage_when_answering (answerable)": {
+          "value": 0.203,
+          "k": 36,
+          "n": 177
+        },
+        "answer_f1_when_answered": 0.132,
+        "auditkit_citation_support": 0.38
+      },
+      "ignores_distractors": {
+        "supported_correct with distractor passage": {
+          "value": 0.067,
+          "k": 2,
+          "n": 30
+        },
+        "supported_correct, same evidence without distractor": {
+          "value": 0.1,
+          "k": 3,
+          "n": 30
+        }
+      },
+      "abstention (documents-only requirement)": {
+        "correct_abstain (unanswerable episodes)": {
+          "value": 0.0,
+          "k": 0,
+          "n": 88
+        },
+        "unsupported_answer_rate (unanswerable; lower is better)": {
+          "value": 0.898,
+          "k": 79,
+          "n": 88
+        },
+        "false_abstain (answerable; lower is better)": {
+          "value": 0.0,
+          "k": 0,
+          "n": 205
+        },
+        "auditkit_abstention": 0.7
+      },
+      "tool_call_reliability (AuditKIT, Track 3)": {
+        "tool_call_validity": 1.0,
+        "redundant_tool_calls (lower is better)": 0.027,
+        "agent_loop_detection (1.0 = loop-free)": 0.949,
+        "invalid_turn_rate (unparseable or rule-breaking; lower is better)": {
+          "value": 0.126,
+          "k": 37,
+          "n": 293
+        }
+      },
+      "efficiency": {
+        "mean_searches_per_episode": 0.97,
+        "mean_input_tokens_per_episode": 2081.2,
+        "mean_seconds_per_episode": 2.854
+      },
+      "episodes": 293
+    },
+    "main": {
+      "when_to_retrieve": {
+        "missed_search_rate (no evidence supplied; lower is better)": {
+          "value": 0.0,
+          "k": 0,
+          "n": 188
+        },
+        "unnecessary_search_rate (sufficient evidence supplied; lower is better)": {
+          "value": 0.2,
+          "k": 12,
+          "n": 60
+        },
+        "search_when_evidence_partial (higher is better)": {
+          "value": 0.667,
+          "k": 20,
+          "n": 30
+        }
+      },
+      "what_to_retrieve": {
+        "full_support_found_by_own_queries (open questions)": {
+          "value": 0.651,
+          "k": 56,
+          "n": 86
+        },
+        "second_hop_recovery (partial or weak first result)": {
+          "value": 0.339,
+          "k": 20,
+          "n": 59
+        },
+        "auditkit_evidence_set_recall": 0.663
+      },
+      "grounding": {
+        "supported_correct (answerable episodes)": {
+          "value": 0.468,
+          "k": 96,
+          "n": 205
+        },
+        "supported_correct (open questions)": {
+          "value": 0.43,
+          "k": 37,
+          "n": 86
+        },
+        "answer_correct_ignoring_citations (answerable; F1 >= 0.5)": {
+          "value": 0.468,
+          "k": 96,
+          "n": 205
+        },
+        "cites_a_gold_passage_when_answering (answerable)": {
+          "value": 0.994,
+          "k": 164,
+          "n": 165
+        },
+        "answer_f1_when_answered": 0.537,
+        "auditkit_citation_support": 0.805
+      },
+      "ignores_distractors": {
+        "supported_correct with distractor passage": {
+          "value": 0.6,
+          "k": 18,
+          "n": 30
+        },
+        "supported_correct, same evidence without distractor": {
+          "value": 0.633,
+          "k": 19,
+          "n": 30
+        }
+      },
+      "abstention (documents-only requirement)": {
+        "correct_abstain (unanswerable episodes)": {
+          "value": 0.875,
+          "k": 77,
+          "n": 88
+        },
+        "unsupported_answer_rate (unanswerable; lower is better)": {
+          "value": 0.114,
+          "k": 10,
+          "n": 88
+        },
+        "false_abstain (answerable; lower is better)": {
+          "value": 0.176,
+          "k": 36,
+          "n": 205
+        },
+        "auditkit_abstention": 0.84
+      },
+      "tool_call_reliability (AuditKIT, Track 3)": {
+        "tool_call_validity": 1.0,
+        "redundant_tool_calls (lower is better)": 0.008,
+        "agent_loop_detection (1.0 = loop-free)": 0.983,
+        "invalid_turn_rate (unparseable or rule-breaking; lower is better)": {
+          "value": 0.017,
+          "k": 5,
+          "n": 293
+        }
+      },
+      "efficiency": {
+        "mean_searches_per_episode": 1.62,
+        "mean_input_tokens_per_episode": 3128.2,
+        "mean_seconds_per_episode": 4.244
+      },
+      "episodes": 293
+    },
+    "control": {
+      "when_to_retrieve": {
+        "missed_search_rate (no evidence supplied; lower is better)": {
+          "value": 0.0,
+          "k": 0,
+          "n": 188
+        },
+        "unnecessary_search_rate (sufficient evidence supplied; lower is better)": {
+          "value": 0.067,
+          "k": 4,
+          "n": 60
+        },
+        "search_when_evidence_partial (higher is better)": {
+          "value": 0.633,
+          "k": 19,
+          "n": 30
+        }
+      },
+      "what_to_retrieve": {
+        "full_support_found_by_own_queries (open questions)": {
+          "value": 0.709,
+          "k": 61,
+          "n": 86
+        },
+        "second_hop_recovery (partial or weak first result)": {
+          "value": 0.424,
+          "k": 25,
+          "n": 59
+        },
+        "auditkit_evidence_set_recall": 0.712
+      },
+      "grounding": {
+        "supported_correct (answerable episodes)": {
+          "value": 0.532,
+          "k": 109,
+          "n": 205
+        },
+        "supported_correct (open questions)": {
+          "value": 0.512,
+          "k": 44,
+          "n": 86
+        },
+        "answer_correct_ignoring_citations (answerable; F1 >= 0.5)": {
+          "value": 0.532,
+          "k": 109,
+          "n": 205
+        },
+        "cites_a_gold_passage_when_answering (answerable)": {
+          "value": 0.99,
+          "k": 189,
+          "n": 191
+        },
+        "answer_f1_when_answered": 0.511,
+        "auditkit_citation_support": 0.932
+      },
+      "ignores_distractors": {
+        "supported_correct with distractor passage": {
+          "value": 0.667,
+          "k": 20,
+          "n": 30
+        },
+        "supported_correct, same evidence without distractor": {
+          "value": 0.7,
+          "k": 21,
+          "n": 30
+        }
+      },
+      "abstention (documents-only requirement)": {
+        "correct_abstain (unanswerable episodes)": {
+          "value": 0.0,
+          "k": 0,
+          "n": 88
+        },
+        "unsupported_answer_rate (unanswerable; lower is better)": {
+          "value": 0.284,
+          "k": 25,
+          "n": 88
+        },
+        "false_abstain (answerable; lower is better)": {
+          "value": 0.0,
+          "k": 0,
+          "n": 205
+        },
+        "auditkit_abstention": 0.7
+      },
+      "tool_call_reliability (AuditKIT, Track 3)": {
+        "tool_call_validity": 1.0,
+        "redundant_tool_calls (lower is better)": 0.101,
+        "agent_loop_detection (1.0 = loop-free)": 0.761,
+        "invalid_turn_rate (unparseable or rule-breaking; lower is better)": {
+          "value": 0.263,
+          "k": 77,
+          "n": 293
+        }
+      },
+      "efficiency": {
+        "mean_searches_per_episode": 1.44,
+        "mean_input_tokens_per_episode": 2889.8,
+        "mean_seconds_per_episode": 3.808
+      },
+      "episodes": 293
+    }
+  },
+  "paired": {
+    "main vs base": {
+      "end-to-end good (headline: supported answer when answerable, abstain when not)": {
+        "n_episodes": 159,
+        "n_questions": 86,
+        "before": 0.013,
+        "after": 0.673,
+        "difference": 0.66,
+        "ci95": [
+          0.594,
+          0.725
+        ],
+        "after_only_good": 106,
+        "before_only_good": 1
+      },
+      "supported_correct (answerable episodes)": {
+        "n_episodes": 205,
+        "n_questions": 86,
+        "before": 0.044,
+        "after": 0.468,
+        "difference": 0.424,
+        "ci95": [
+          0.324,
+          0.52
+        ],
+        "after_only_good": 89,
+        "before_only_good": 2
+      },
+      "answer correct, ignoring citations (answerable; F1 >= 0.5)": {
+        "n_episodes": 205,
+        "n_questions": 86,
+        "before": 0.098,
+        "after": 0.468,
+        "difference": 0.371,
+        "ci95": [
+          0.267,
+          0.472
+        ],
+        "after_only_good": 82,
+        "before_only_good": 6
+      },
+      "correct_abstain (unanswerable episodes)": {
+        "n_episodes": 88,
+        "n_questions": 73,
+        "before": 0.0,
+        "after": 0.875,
+        "difference": 0.875,
+        "ci95": [
+          0.805,
+          0.942
+        ],
+        "after_only_good": 77,
+        "before_only_good": 0
+      },
+      "unsupported answer (unanswerable; lower is better)": {
+        "n_episodes": 88,
+        "n_questions": 73,
+        "before": 0.898,
+        "after": 0.114,
+        "difference": -0.784,
+        "ci95": [
+          -0.869,
+          -0.693
+        ],
+        "after_only_good": 0,
+        "before_only_good": 69
+      },
+      "supported_correct with distractor passage": {
+        "n_episodes": 30,
+        "n_questions": 30,
+        "before": 0.067,
+        "after": 0.6,
+        "difference": 0.533,
+        "ci95": [
+          0.367,
+          0.7
+        ],
+        "after_only_good": 16,
+        "before_only_good": 0
+      }
+    },
+    "main vs control": {
+      "end-to-end good (headline: supported answer when answerable, abstain when not)": {
+        "n_episodes": 159,
+        "n_questions": 86,
+        "before": 0.277,
+        "after": 0.673,
+        "difference": 0.396,
+        "ci95": [
+          0.335,
+          0.456
+        ],
+        "after_only_good": 75,
+        "before_only_good": 12
+      },
+      "supported_correct (answerable episodes)": {
+        "n_episodes": 205,
+        "n_questions": 86,
+        "before": 0.532,
+        "after": 0.468,
+        "difference": -0.063,
+        "ci95": [
+          -0.135,
+          0.005
+        ],
+        "after_only_good": 13,
+        "before_only_good": 26
+      },
+      "answer correct, ignoring citations (answerable; F1 >= 0.5)": {
+        "n_episodes": 205,
+        "n_questions": 86,
+        "before": 0.532,
+        "after": 0.468,
+        "difference": -0.063,
+        "ci95": [
+          -0.135,
+          0.005
+        ],
+        "after_only_good": 13,
+        "before_only_good": 26
+      },
+      "correct_abstain (unanswerable episodes)": {
+        "n_episodes": 88,
+        "n_questions": 73,
+        "before": 0.0,
+        "after": 0.875,
+        "difference": 0.875,
+        "ci95": [
+          0.805,
+          0.942
+        ],
+        "after_only_good": 77,
+        "before_only_good": 0
+      },
+      "unsupported answer (unanswerable; lower is better)": {
+        "n_episodes": 88,
+        "n_questions": 73,
+        "before": 0.284,
+        "after": 0.114,
+        "difference": -0.17,
+        "ci95": [
+          -0.247,
+          -0.099
+        ],
+        "after_only_good": 0,
+        "before_only_good": 15
+      },
+      "supported_correct with distractor passage": {
+        "n_episodes": 30,
+        "n_questions": 30,
+        "before": 0.667,
+        "after": 0.6,
+        "difference": -0.067,
+        "ci95": [
+          -0.233,
+          0.1
+        ],
+        "after_only_good": 2,
+        "before_only_good": 4
+      }
+    }
+  },
+  "split": "dev"
+}
