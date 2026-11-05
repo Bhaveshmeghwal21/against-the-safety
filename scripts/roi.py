@@ -76,7 +76,7 @@ def main() -> None:
                              "Illustration only, with an assumed cost per avoided bad outcome:")
                 lines += ["", "| assumed cost of one bad outcome (USD) | queries needed to recover the training cost |", "| ---: | ---: |"]
                 for c in (0.10, 1.00, 5.00):
-                    lines.append(f"| {c:.2f} | {cost / (c * gain):,.0f} |")
+                    lines.append(f"| {c:.2f} | {cost / (c * gain):,.1f} |")
             else:
                 lines.append("The tuned model did not improve the end-to-end good rate on these episodes; no break-even applies.")
     md = "\n".join(lines) + "\n"

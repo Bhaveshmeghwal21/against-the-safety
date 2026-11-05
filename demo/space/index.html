@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Against-the-safety: saved episodes, base vs fine-tuned Tiny Aya</title>
+<style>
+  :root { --bg:#fafafa; --fg:#1b1f23; --muted:#5b6570; --line:#d8dde3; --card:#fff; --good:#116329; --goodbg:#dafbe1; --bad:#82071e; --badbg:#ffebe9; --warn:#7d4e00; --warnbg:#fff8c5; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; background:var(--bg); color:var(--fg); }
+  header, main { max-width: 1280px; margin: 0 auto; padding: 16px 20px; }
+  h1 { font-size: 22px; margin: 8px 0 4px; }
+  p.note { color: var(--muted); margin: 4px 0 12px; max-width: 90ch; }
+  .controls { display:flex; flex-wrap:wrap; gap:12px; align-items:end; margin: 12px 0 16px; }
+  label { display:flex; flex-direction:column; font-size:12px; color:var(--muted); gap:4px; }
+  select { font: inherit; padding: 6px 8px; border:1px solid var(--line); border-radius:6px; background:#fff; min-width: 220px; max-width: 520px; }
+  table { border-collapse: collapse; width:100%; background:var(--card); border:1px solid var(--line); margin-bottom: 18px; }
+  th, td { border:1px solid var(--line); padding:6px 10px; text-align:right; font-size:13px; }
+  th:first-child, td:first-child { text-align:left; }
+  .question { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin-bottom: 14px; }
+  .question b { display:block; font-size:16px; margin-bottom: 6px; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; }
+  .sys { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px 14px; }
+  .sys h2 { font-size:15px; margin:0 0 8px; display:flex; justify-content:space-between; gap:8px; align-items:center; }
+  .badge { font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid; white-space:nowrap; }
+  .good { color:var(--good); background:var(--goodbg); border-color:#4ac26b; }
+  .bad { color:var(--bad); background:var(--badbg); border-color:#ff8182; }
+  .warn { color:var(--warn); background:var(--warnbg); border-color:#d4a72c; }
+  .step { border-left:3px solid var(--line); padding:2px 0 2px 10px; margin: 8px 0; }
+  .step .kind { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  .q { font-family: ui-monospace, Menlo, Consolas, monospace; font-size:13px; word-break: break-word; }
+  details { margin-top: 4px; } summary { cursor:pointer; color:var(--muted); font-size:13px; }
+  pre { white-space: pre-wrap; word-break: break-word; font-size:12px; background:#f3f5f7; padding:8px; border-radius:6px; margin: 6px 0 0; max-height: 260px; overflow:auto; }
+  .final { margin-top:8px; padding:8px 10px; border-radius:6px; background:#f3f5f7; }
+  footer { color: var(--muted); font-size:12px; padding: 12px 20px 40px; max-width:1280px; margin:0 auto; }
+  a { color:#0b57d0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Saved episodes: base vs fine-tuned Tiny Aya</h1>
+  <p class="note">These are recorded runs, not a live model. Every system saw the same question, the same documents and the same three-search budget. "Base" is Tiny Aya Global as released; "Tuned" and "Control" are QLoRA adapters (see the project README for what each was trained on). The outcome badge is computed by the project's deterministic scorer from the gold answer and gold supporting passages, never by a language model.</p>
+  <div class="controls">
+    <label>Suite <select id="suite"></select></label>
+    <label>Reading of the model output <select id="parse"></select></label>
+    <label>Episode <select id="episode"></select></label>
+  </div>
+  <div id="summary"></div>
+</header>
+<main>
+  <div id="question" class="question"></div>
+  <div id="grid" class="grid"></div>
+</main>
+<footer id="foot"></footer>
+<script src="data.js"></script>
+<script>
+(function () {
+  const D = window.DATA;
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
+  const GOOD = new Set(["supported_correct", "correct_abstain"]);
+  const WARN = new Set(["false_abstain"]);
+  const LABEL = { supported_correct: "supported and correct", correct_abstain: "correctly abstained", false_abstain: "abstained but evidence was available",
+    wrong_answer: "wrong or unsupported answer", unsupported_correct: "answered without evidence (right by luck or memory)", unsupported_wrong: "answered without evidence (wrong)", invalid: "invalid turn" };
+
+  function fill(sel, items, current) { sel.innerHTML = ""; items.forEach(([v, t]) => { const o = el("option", "", t); o.value = v; sel.appendChild(o); }); if (current !== undefined) sel.value = current; }
+  fill($("suite"), D.suites.map((s, i) => [String(i), s.title]));
+  const parses = [["lenient", "Lenient: first valid action (fair to the base model)"], ["strict", "Strict: exactly the trained format"]];
+  fill($("parse"), parses);
+
+  function cur() { return D.suites[+$("suite").value]; }
+  function episodes() { const s = cur(); const ids = []; const seen = new Set(); s.order.forEach((k) => { if (!seen.has(k)) { seen.add(k); ids.push(k); } }); return ids; }
+
+  function summary() {
+    const s = cur(), p = $("parse").value, box = $("summary"); box.innerHTML = "";
+    const t = el("table"); const head = el("tr"); ["system", "episodes", "supported and correct", "correctly abstained", "wrong or unsupported answer", "false abstain", "invalid"].forEach((h) => head.appendChild(el("th", "", h))); t.appendChild(head);
+    s.systems.forEach((sys) => {
+      const rows = (sys.runs[p] || []); const c = (f) => rows.filter(f).length;
+      const tr = el("tr"); tr.appendChild(el("td", "", sys.name)); [rows.length, c((r) => r.outcome === "supported_correct"), c((r) => r.outcome === "correct_abstain"),
+        c((r) => ["wrong_answer", "unsupported_correct", "unsupported_wrong"].includes(r.outcome)), c((r) => r.outcome === "false_abstain"), c((r) => r.outcome === "invalid")]
+        .forEach((v) => tr.appendChild(el("td", "", String(v)))); t.appendChild(tr);
+    });
+    box.appendChild(t);
+  }
+
+  function render() {
+    const s = cur(), p = $("parse").value, key = $("episode").value; const g = $("grid"); g.innerHTML = "";
+    const first = s.systems.map((x) => (x.runs[p] || []).find((r) => r.key === key)).find(Boolean);
+    const q = $("question"); q.innerHTML = "";
+    if (!first) return;
+    q.appendChild(el("b", "", first.question));
+    q.appendChild(el("div", "", (first.answerable ? "Expected: an answer supported by the documents. Gold answer: " + first.gold_answer : "Expected: abstain, because the documents do not contain the answer.") + "  (" + first.variant + ")"));
+    if (first.provided_evidence && first.provided_evidence.length) q.appendChild(el("div", "", "Evidence already provided: " + first.provided_evidence.map((e) => e.title).join("; ")));
+    s.systems.forEach((sys) => {
+      const r = (sys.runs[p] || []).find((x) => x.key === key); const card = el("div", "sys"); const h = el("h2"); h.appendChild(el("span", "", sys.name));
+      if (!r) { h.appendChild(el("span", "badge warn", "not run")); card.appendChild(h); g.appendChild(card); return; }
+      h.appendChild(el("span", "badge " + (GOOD.has(r.outcome) ? "good" : WARN.has(r.outcome) ? "warn" : "bad"), LABEL[r.outcome] || r.outcome)); card.appendChild(h);
+      r.steps.forEach((st) => {
+        const d = el("div", "step");
+        if (st.kind === "search") {
+          d.appendChild(el("div", "kind", "search")); d.appendChild(el("div", "q", st.query));
+          d.appendChild(el("div", "", "returned: " + (st.retrieved.length ? st.retrieved.map((x) => x.title).join("; ") : "nothing")));
+          if (st.observation) { const det = el("details"); det.appendChild(el("summary", "", "show passages")); det.appendChild(el("pre", "", st.observation)); d.appendChild(det); }
+        } else if (st.kind === "invalid") {
+          d.appendChild(el("div", "kind", "invalid turn: " + (st.error || ""))); d.appendChild(el("pre", "", st.assistant));
+        } else { d.appendChild(el("div", "kind", st.kind)); }
+        card.appendChild(d);
+      });
+      const f = el("div", "final"); const fin = r.final;
+      if (fin.kind === "answer") { f.appendChild(el("div", "", "Answer: " + fin.answer)); const titles = (fin.citations || []).map((c) => (D.titles[c] || c)); f.appendChild(el("div", "", "Cited: " + (titles.length ? titles.join("; ") : "nothing"))); }
+      else if (fin.kind === "abstain") { f.appendChild(el("div", "", "Abstained. Missing: " + fin.missing)); }
+      else { f.appendChild(el("div", "", "No valid final turn" + (r.stop ? " (" + r.stop + ")" : ""))); }
+      card.appendChild(f); g.appendChild(card);
+    });
+  }
+
+  function refreshEpisodes() {
+    const s = cur(); const ids = episodes(); const prev = $("episode").value;
+    fill($("episode"), ids.map((k) => [k, s.labels[k] || k]), ids.includes(prev) ? prev : ids[0]);
+    summary(); render();
+  }
+  $("suite").addEventListener("change", refreshEpisodes); $("parse").addEventListener("change", () => { summary(); render(); }); $("episode").addEventListener("change", render);
+  $("foot").textContent = D.footer;
+  refreshEpisodes();
+})();
+</script>
+</body>
+</html>

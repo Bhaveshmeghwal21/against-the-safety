@@ -18,6 +18,7 @@ venv/
 runs/
 outputs/
 checkpoints/
+release/
 wandb/
 *.safetensors
 *.bin
