@@ -71,6 +71,15 @@ def answer_in_text(answer: str, text: str) -> bool | None:
     return re.search(rf"(?<!\w){re.escape(a)}(?!\w)", text, flags=re.IGNORECASE) is not None
 
 
+def gold_forms(q: Question) -> list[str]:
+    """Every accepted form of the answer: just `q.answer` for HotpotQA; benchmarks add aliases and RGB answer parts."""
+    return [q.answer] + list(q.aliases) + [a for part in q.answer_parts for a in part]
+
+
+def answer_visible(q: Question, text: str) -> bool:
+    return any(answer_in_text(a, text) is True for a in gold_forms(q) if a)
+
+
 def make_specs(q: Question, corpus: Corpus, search: MaskedSearch) -> dict[str, Spec]:
     support = corpus.support_chunks(q)
     support_ids = set(support.values())
@@ -156,7 +165,7 @@ def build_question(
     assert not ep.complete, "a masked support chunk was still observed"
     seen = [h.text for h in ep.retrieved_chunks()]
     alt = [answer_in_text(q.answer, t) for t in seen]
-    if any(a is True for a in alt):
+    if any(a is True for a in alt) or any(answer_visible(q, t) for t in seen):
         out.append(Built(q.qid, split, "support_masked", "rejected", False, None, "alternate_evidence_path:answer_text_in_observed_passage"))
     else:
         out.append(Built(q.qid, split, "support_masked", "S4", False, ep,
@@ -192,7 +201,7 @@ def build_question(
         ep = run(specs["prefill_partial_masked"])
         assert not ep.complete, "a masked support chunk was still observed"
         seen = [h.text for h in ep.retrieved_chunks()]  # includes the pre-supplied passages
-        if any(answer_in_text(q.answer, t) is True for t in seen):
+        if any(answer_in_text(q.answer, t) is True for t in seen) or any(answer_visible(q, t) for t in seen):
             out.append(Built(q.qid, split, "prefill_partial_masked", "rejected", False, None, "alternate_evidence_path:answer_text_in_visible_passage"))
         elif ep.n_searches < 1:
             out.append(Built(q.qid, split, "prefill_partial_masked", "rejected", False, None, "no_search_before_abstain"))

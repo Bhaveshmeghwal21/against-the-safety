@@ -42,6 +42,10 @@ class Question:
     level: str
     paragraphs: list[Paragraph]
     support: dict[str, list[int]] = field(default_factory=dict)
+    # Benchmarks beyond HotpotQA (plan section 22). Empty / False for every HotpotQA question, so nothing above changes.
+    aliases: list[str] = field(default_factory=list)  # other accepted answers (F1 and EM take the best match)
+    answer_parts: list[list[str]] = field(default_factory=list)  # RGB: every part must appear (each part lists its accepted forms)
+    natural_unanswerable: bool = False  # SQuAD 2.0: written so the documents do not hold the answer; correct ending is abstain
 
     @property
     def support_titles(self) -> list[str]:

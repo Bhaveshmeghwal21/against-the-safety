@@ -28,19 +28,23 @@ CLOSED_BOOK_SYSTEM = "Answer the question with a short phrase. Reply with only <
 
 
 def closed_book(jobs, gen, out: Path) -> dict:
-    """Question only, no tool. Measures how much the model already knows (plan section 5.1)."""
-    from agenttune.rag.rewards.qa_metrics import extract_answer_tag, f1_score
+    """Question only, no tool. Measures how much the model already knows (plan section 5.1).
+    Questions with no answer in the documents (SQuAD 2.0's natural unanswerables) are skipped; answers are judged with
+    every accepted form (`metrics.judge_answer`), which is plain F1 >= 0.5 for HotpotQA."""
+    from agenttune.rag.rewards.qa_metrics import extract_answer_tag
+
+    from ragharness.metrics import judge_answer
 
     seen, rows, batch, qids = set(), [], [], []
     for job in jobs:
-        if job.q.qid in seen:
+        if job.q.qid in seen or job.q.natural_unanswerable:
             continue
         seen.add(job.q.qid)
         qids.append(job.q)
         batch.append([{"role": "system", "content": CLOSED_BOOK_SYSTEM}, {"role": "user", "content": job.q.question}])
     for q, res in zip(qids, gen.generate_batch(batch)):
-        f1 = f1_score(extract_answer_tag(res.text), q.answer)
-        rows.append({"qid": q.qid, "answer": res.text, "f1": f1, "correct": f1 >= F1_THRESHOLD})
+        f1, em, ok = judge_answer(extract_answer_tag(res.text), q)
+        rows.append({"qid": q.qid, "answer": res.text, "f1": f1, "correct": ok})
     (out / "closed_book.jsonl").write_text("\n".join(json.dumps(r) for r in rows), encoding="utf-8")
     return {"questions": len(rows), "closed_book_correct": round(sum(r["correct"] for r in rows) / len(rows), 3)}
 
@@ -48,8 +52,9 @@ def closed_book(jobs, gen, out: Path) -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--system", choices=["oracle", "base", "adapter", "closed_book"], required=True)
-    ap.add_argument("--split", choices=["dev", "test", "test2", "product"], required=True,
-                    help="test2 = the fresh second-round split, on the first-round corpus plus its own paragraphs; product = the fictional Nimbus Home suite (exploratory)")
+    ap.add_argument("--split", required=True,
+                    help="dev | test | test2 (the fresh second-round split) | product (fictional Nimbus Home suite) | "
+                         "bench_<name> (external benchmark built by scripts/prepare_benchmarks.py, e.g. bench_squad2)")
     ap.add_argument("--out", required=True)
     ap.add_argument("--adapter", default=None)
     ap.add_argument("--extra-questions", type=int, default=30)
@@ -60,11 +65,18 @@ def main() -> None:
     ap.add_argument("--abstain-bias", type=float, default=0.0, help="logit bias on the token that starts <abstain>; 0 = the model as trained")
     ap.add_argument("--parse", default="lenient,strict", help="comma list: lenient (first valid action, the fair baseline reading) and/or strict (protocol compliance)")
     args = ap.parse_args()
+    if args.split not in ("dev", "test", "test2", "product") and not args.split.startswith("bench_"):
+        raise SystemExit(f"unknown split {args.split!r}")
     t_start = time.time()
 
     man = json.loads((ROOT / "data" / "manifests" / "split_manifest.json").read_text(encoding="utf-8"))
     splits = {n: data.read_questions(ROOT / "data" / "processed" / f"questions_{n}.jsonl") for n in ("train", "dev", "test")}
-    if args.split == "product":
+    bench_dir = ROOT / "data" / "bench" / args.split[len("bench_"):] if args.split.startswith("bench_") else None
+    if bench_dir is not None:
+        corp = corpus_mod.load_corpus(bench_dir / "corpus.json")
+        backend = open_verified_backend(bench_dir / "corpus.sqlite", corp)
+        splits[args.split] = data.read_questions(bench_dir / "questions.jsonl")
+    elif args.split == "product":
         suite = product.build()
         corp = suite.corpus
         backend = open_verified_backend(ROOT / "data" / "product" / "corpus.sqlite", corp)
@@ -85,7 +97,10 @@ def main() -> None:
         qs = [j.q for j in jobs]
     else:
         qs = splits[args.split][: args.limit_questions or None]
-        jobs = evaluation.make_jobs(qs, args.split, corp, tool, search, args.extra_questions)
+        extra_q = 0 if bench_dir is not None else args.extra_questions  # benchmarks: headline episodes only (plan section 22)
+        jobs = evaluation.make_jobs(qs, args.split, corp, tool, search, extra_q)
+        if bench_dir is not None and (bench_dir / "prompt_variants.json").exists():
+            jobs += evaluation.prompt_jobs(qs, corp, tool, json.loads((bench_dir / "prompt_variants.json").read_text(encoding="utf-8")))
     if not jobs:
         raise SystemExit(f"no evaluation episodes for {len(qs)} {args.split} questions: retrieval returned nothing reachable")
     out = Path(args.out)

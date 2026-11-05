@@ -707,3 +707,60 @@ The strict reading gives the same adapter numbers. The base model breaks the for
 2. *CandA and main swap places between dev and test2.* On dev, main was ahead by 7 of 159 episodes; on test2, candA is ahead by 8 of 143. Neither difference is outside its 95% interval (dev was not bootstrapped; test2 −0.056 [−0.122, +0.007]). With 83 to 86 questions per split, the two adapters cannot be ranked on end-to-end good.
 3. *What does separate them is the operating point, and it is consistent on both splits.* CandA has fewer false abstentions (dev 0.088 against 0.176, test2 0.146 against 0.221) and more supported answers (0.517 against 0.468, 0.528 against 0.462). It also has more unsupported answers (9 against 2 of 73, 6 against 3 of 74) and slightly fewer correct abstentions.
 4. *The pre-registered rule stands.* Main stays the second-round model, because the rule was fixed on dev, and switching after seeing test2 would make test2 a selection set. CandA is published as a second adapter with a lower refusal rate, labelled as not selected, with its test2 numbers.
+
+## 22. External benchmarks - 5 November 2026 (written before any model was run on them)
+
+**Purpose.** Check whether the PS 4 behaviour learned on HotpotQA holds on data the project never trained on, selected nothing with, and did not construct itself. Every system and setting is fixed. Nothing is chosen on these sets, and main stays the project's model whatever they show.
+
+**Sets** (`scripts/prepare_benchmarks.py`, seed 22, `data/bench/<name>/manifest.json`).
+
+| benchmark | source and license | what it adds | evaluated | index |
+| --- | --- | --- | --- | --- |
+| 2WikiMultihopQA | dev, Ho et al. 2020, Apache-2.0 | multi-hop over Wikipedia with other templates (compositional, comparison, bridge-comparison, inference) | 100 questions (87 reachable) | 4,025 paragraphs of 600 questions |
+| MuSiQue-Ans | dev, 2-hop only, Trivedi et al. 2022, CC BY 4.0 | multi-hop built so that single-hop shortcuts fail | 200 questions (88 reachable) | 8,374 paragraphs of 600 questions |
+| SQuAD 2.0 | dev, Rajpurkar et al. 2018, CC BY-SA 4.0 | single-hop, and 80 human-written questions the paragraph cannot answer (natural unanswerables, no masking by us) | 80 answerable (73 reachable) + 80 unanswerable | all 1,204 dev paragraphs |
+| RGB | English refined set, Chen et al. 2024, CC BY-NC-SA 4.0 | 2022 news; RGB's noise robustness and negative rejection | 100 questions | 7,461 passages of all 300 questions |
+| RGB integration | English, same source | answers with two or more parts in different passages | 60 questions | 4,701 passages of all 100 questions |
+
+**Episodes per system: 1,131.**
+- Every set: open search and support masked (the headline variants) on reachable questions.
+- SQuAD 2.0: the natural unanswerables are run as open search, where the correct ending is to abstain.
+- RGB: also its own prompt settings, with five passages in the user turn:
+  - noise 0 (positives only);
+  - noise 0.8 (one positive, four negatives);
+  - noise 1 (five negatives, all positives also masked from search; correct ending: abstain).
+- RGB integration: noise 0 and noise 0.4.
+- No other extra variants are run.
+- The scripted reference policy scores 1.0 on every set and setting, which checks that jobs and scoring agree.
+
+**Answers.**
+- An answer is supported when it is correct, every cited chunk was shown, and at least one cited chunk holds the answer.
+- Correct means F1 ≥ 0.5 against the gold answer or any listed alias (MuSiQue and SQuAD give aliases).
+- For RGB, correct follows RGB's rule: every answer part has an accepted form inside the answer.
+- RGB passages that each hold the answer on their own all count as gold citations, and all are masked together.
+
+**Systems:** base, main, candA, control and closed book. The settings are those of the test runs (4-bit, greedy, three searches, top 3, 800 characters).
+
+**Reported.**
+- **Primary, per benchmark:** "ends well" over all its scored episodes, main minus base, with a paired 95% interval from resampling whole questions.
+- **Secondary:**
+  - main minus candA and main minus control;
+  - supported correct, false abstain, correct abstain and unsupported answers;
+  - SQuAD 2.0: correct abstain on natural unanswerables;
+  - RGB: accuracy at noise 0 and 0.8 (correct answer, citation not required, as in RGB) and rejection rate at noise 1;
+  - invalid turns, mean searches and AuditKIT rows;
+  - closed book.
+- Both readings (lenient and strict) are reported, as before.
+
+**Deviations from each benchmark's official protocol, chosen to keep one harness.**
+- Retrieval over a shared index with a three-search budget and an 800-character display, instead of each benchmark's gold paragraphs.
+- Subsets of the dev data, and our answer format.
+- RGB passages have no titles, so each is titled by its first nine words.
+- RGB's counterfactual set is excluded: it rewards overriding the documents with the model's own knowledge, the opposite of the documents-only requirement.
+- MuSiQue is 2-hop only, because of the search budget.
+- SQuAD paragraphs are titled "<article> (part n)", so that a mask hides one paragraph instead of a whole article.
+- These numbers are therefore not comparable with published leaderboard numbers. They compare our systems with each other under identical conditions.
+
+**Compute.** 1,131 episodes per system at about 4 to 5 s each. Two kernels:
+- base and main on two GPUs, about 1.5 h;
+- then candA, control and closed book, about 1.5 h.

@@ -29,6 +29,9 @@ wandb/
 data/raw/
 data/processed/
 data/index/
+data/bench/*/corpus.json
+data/bench/*/questions.jsonl
+data/bench/*/prompt_variants.json
 tests/fixtures/
 *.egg-info/
 *.sqlite

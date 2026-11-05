@@ -13,7 +13,7 @@ from typing import Callable
 
 from agenttune.rag.storage.trajectory_store import TrajectoryStore
 
-from . import audit, builder, episodes, metrics, rollout as rollout_mod
+from . import audit, builder, episodes, metrics, protocol, rollout as rollout_mod
 from .corpus import Corpus
 from .data import Question
 from .episodes import Episode
@@ -21,6 +21,7 @@ from .retrieval import MaskedSearch
 from .tools import CorpusSearchTool
 
 HEADLINE = ("open", "support_masked")
+NATURAL = "natural_unanswerable"  # benchmarks only (SQuAD 2.0): the question has no answer in the documents
 
 
 @dataclass
@@ -35,6 +36,12 @@ def make_jobs(qs: list[Question], split: str, corp: Corpus, tool: CorpusSearchTo
     jobs: list[Job] = []
     reachable = 0
     for q in qs:
+        if q.natural_unanswerable:
+            # No support to reach or mask: open search, and the correct ending is an abstention.
+            spec = builder.Spec(NATURAL, answerable=False, finish="abstain")
+            ep = episodes.run_scripted(q, corp, tool, NATURAL, budget=3, finish="abstain")
+            jobs.append(Job(q, NATURAL, spec, [s.text for s in ep.steps]))
+            continue
         built = builder.build_question(q, split, corp, tool, search)
         accepted = {b.variant: b for b in built if b.episode is not None}
         if "open" not in accepted:
@@ -48,6 +55,26 @@ def make_jobs(qs: list[Question], split: str, corp: Corpus, tool: CorpusSearchTo
             # same scripted answer as the distractor variant: nothing to search, answer from the supplied evidence
             texts = [s.text for s in accepted["prefill_sufficient"].episode.steps]
             jobs.append(Job(q, "prefill_clean", specs["prefill_clean"], texts))
+    return jobs
+
+
+def prompt_jobs(qs: list[Question], corp: Corpus, tool: CorpusSearchTool, variants: dict) -> list[Job]:
+    """RGB's own protocol inside the harness (plan section 22): five passages in the user turn at a fixed noise rate.
+    The model may still search. In rgb_noise_1 every positive passage is also masked from search, so nothing in reach holds
+    the answer and the correct ending is an abstention (RGB's negative rejection)."""
+    jobs: list[Job] = []
+    gold = lambda q: set(corp.support_chunks(q).values()) | set(corp.extra_copies.get(q.qid, ()))
+    for q in qs:
+        for variant, v in sorted(variants.get(q.qid, {}).items()):
+            prefill = [builder._hit(corp, c) for c in v["prefill"]]
+            spec = builder.Spec(variant, masked=frozenset(v["masked"]), prefill=prefill, answerable=v["answerable"],
+                                finish="answer_if_complete" if v["answerable"] else "abstain")
+            # reference answer for the oracle replay: cite the supplied positives (any positive holds the answer)
+            if v["answerable"]:
+                text = protocol.format_answer(q.answer, [h.chunk_id for h in prefill if h.chunk_id in gold(q)])
+            else:
+                text = protocol.format_abstain(episodes.ABSTAIN_TEXT.format(question=q.question))
+            jobs.append(Job(q, variant, spec, [text]))
     return jobs
 
 

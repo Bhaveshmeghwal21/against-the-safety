@@ -49,6 +49,9 @@ def rag_case(q: Question, corpus: Corpus, chunks: ChunkLookup, answerable: bool)
     support_ids = list(corpus.support_chunks(q).values())
     if not answerable:  # support was masked: nothing can be retrieved or cited, so only abstention is tested
         return RAGCase(case_id=q.qid, question=q.question, answerability="unanswerable", expected_action="abstain", decision_date=DECISION_DATE)
+    extra = sorted(set(corpus.extra_copies.get(q.qid, ())) - set(support_ids))
+    if extra:  # benchmarks with several passages that each hold the answer (RGB): any one of them is a sufficient set
+        support_ids = support_ids + extra
     docs = {c: _doc(chunks.text(c), c) for c in support_ids}
     return RAGCase(
         case_id=q.qid,

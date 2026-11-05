@@ -28,27 +28,55 @@ from .episodes import Episode
 F1_THRESHOLD = 0.5
 
 
+def _norm_text(s: str) -> str:
+    import re
+    import string
+
+    s = s.lower()
+    s = "".join(ch for ch in s if ch not in set(string.punctuation))
+    s = re.sub(r"\b(a|an|the)\b", " ", s)
+    return " ".join(s.split())
+
+
+def judge_answer(pred: str, q: Question) -> tuple[float, bool, bool]:
+    """(F1, exact match, answer counts as correct) against every accepted form of the gold answer.
+
+    HotpotQA questions have one gold string, so this is AgentTune's F1 / EM and the 0.5 threshold as before.
+    `aliases` (MuSiQue, SQuAD 2.0) add accepted strings; the best match counts. `answer_parts` (RGB) switch to RGB's own rule:
+    the answer is correct when every part has one of its accepted forms contained in it.
+    """
+    golds = [q.answer] + [a for a in q.aliases if a]
+    f1 = max(f1_score(pred, g) for g in golds)
+    em = max(float(exact_match_score(pred, g)) for g in golds)
+    if q.answer_parts:
+        p = _norm_text(pred)
+        ok = all(any(_norm_text(a) and _norm_text(a) in p for a in part) for part in q.answer_parts)
+    else:
+        ok = f1 >= F1_THRESHOLD
+    return f1, em, ok
+
+
 def score_episode(ep: Episode, q: Question, corpus: Corpus, answerable: bool) -> dict:
     final = ep.final.turn
-    support = set(corpus.support_chunks(q).values())
+    # Gold passages a citation may point to: the support chunks, plus (benchmarks only) other passages that each hold the answer
+    support = set(corpus.support_chunks(q).values()) | set(corpus.extra_copies.get(q.qid, ()))
     shown = {h.chunk_id for h in ep.retrieved_chunks()}
     out = {
         "qid": ep.qid, "variant": ep.condition, "answerable": answerable, "final": final.kind,
         "n_searches": ep.n_searches, "evidence_complete": ep.complete, "stop": ep.stop_reason,
-        "f1": None, "em": None, "cited_all_shown": None, "cites_gold": None,
+        "f1": None, "em": None, "answer_ok": None, "cited_all_shown": None, "cites_gold": None,
     }
     if final.kind == "answer":
-        out["f1"] = f1_score(final.answer, q.answer)
-        out["em"] = exact_match_score(final.answer, q.answer)
+        out["f1"], out["em"], out["answer_ok"] = judge_answer(final.answer, q)
         out["cited_all_shown"] = all(c in shown for c in final.citations)
         out["cites_gold"] = bool(support & set(final.citations))
     if answerable:
-        ok = final.kind == "answer" and out["f1"] >= F1_THRESHOLD and out["cited_all_shown"] and out["cites_gold"]
+        ok = final.kind == "answer" and out["answer_ok"] and out["cited_all_shown"] and out["cites_gold"]
         out["outcome"] = "supported_correct" if ok else "false_abstain" if final.kind == "abstain" else "invalid" if final.kind == "invalid" else "wrong_answer"
     else:
         out["outcome"] = (
             "correct_abstain" if final.kind == "abstain" else "invalid" if final.kind == "invalid"
-            else "unsupported_correct" if out["f1"] >= F1_THRESHOLD else "unsupported_wrong"
+            else "unsupported_correct" if out["answer_ok"] else "unsupported_wrong"
         )
     out["good"] = out["outcome"] in ("supported_correct", "correct_abstain")
     return out

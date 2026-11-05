@@ -155,6 +155,32 @@ def main() -> None:
             (f"{py} scripts/train.py --set candA --out {OUT}/candA {extra}", g0, "train_candA.log"),
             (f"{py} scripts/train.py --set candB --out {OUT}/candB {extra}", g1, "train_candB.log"),
         ])
+    elif stage == "eval-bench":  # external benchmarks (plan section 22): each system runs every benchmark in turn on one GPU
+        m = re.search(r"--benches\s+(\S+)", extra)
+        benches = m.group(1).split(",") if m else ["squad2", "rgb", "rgb_int", "2wiki", "musique"]
+        rest = extra.replace(m.group(0), "") if m else extra
+        m = re.search(r"--systems\s+(\S+)", rest)
+        systems = m.group(1).split(",") if m else ["base", "main"]
+        rest = rest.replace(m.group(0), "") if m else rest
+
+        def cmd(name: str, b: str) -> str:
+            ev = f"{py} scripts/run_eval.py --split bench_{b} {rest}"
+            if name == "base":
+                return f"{ev} --system base --out {OUT}/eval/base_bench_{b}"
+            if name == "closed":
+                return f"{ev} --system closed_book --out {OUT}/eval/closed_bench_{b}"
+            key = f"{name}/adapter"
+            if key not in adapters:
+                raise SystemExit(f"adapter {key!r} not found under /kaggle/input (have {sorted(adapters)})")
+            return f"{ev} --system adapter --adapter {adapters[key]} --out {OUT}/eval/{name}_bench_{b}"
+
+        load = {0: 0.0, 1: 0.0}
+        chains: dict[int, list[str]] = {0: [], 1: []}
+        for name in systems:  # greedy balance; closed book is short
+            g = min(load, key=lambda k: load[k])
+            chains[g] += [cmd(name, b) for b in benches]
+            load[g] += 0.1 if name == "closed" else 1.0
+        rc = run_parallel([(" ; ".join(c), {"CUDA_VISIBLE_DEVICES": str(g)}, f"eval_bench_gpu{g}.log") for g, c in chains.items() if c])
     elif stage in ("eval-dev", "eval-test", "eval-test2", "eval-product"):
         split = stage.split("-")[1]
         ckpt, wanted, rest = "adapter", ["base", "main", "control"] + ([] if split == "product" else ["closed"]), extra

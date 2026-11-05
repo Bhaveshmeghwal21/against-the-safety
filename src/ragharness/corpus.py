@@ -8,8 +8,9 @@ question information. One paragraph is one chunk.
 from __future__ import annotations
 
 import hashlib
+import json
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from .data import Question
@@ -28,6 +29,9 @@ class Corpus:
     chunks: list[dict]
     by_question: dict[str, dict[str, str]]  # qid -> paragraph title -> chunk_id
     index_hash: str
+    # Benchmarks only (plan section 22): qid -> other chunks that each hold the answer on their own (RGB's extra positive
+    # passages). They are masked with the support and count as gold citations. Empty for HotpotQA.
+    extra_copies: dict[str, list[str]] = field(default_factory=dict)
 
     def __post_init__(self):
         self._by_id = {c["chunk_id"]: c for c in self.chunks}
@@ -47,6 +51,7 @@ class Corpus:
         out: set[str] = set()
         for title, cid in self.support_chunks(q).items():
             out.update(self.title_copies(title, cid))
+        out.update(self.extra_copies.get(q.qid, ()))
         return frozenset(out)
 
     def title_copies(self, title: str, chunk_id: str) -> frozenset[str]:
@@ -114,3 +119,24 @@ def extend_corpus(base: Corpus, questions: list[Question], seed: int = 20261105)
     for c in chunks:
         digest.update(f"{c['chunk_id']}\t{c['title']}\t{c['text']}\n".encode("utf-8"))
     return Corpus(chunks=chunks, by_question=by_question, index_hash=digest.hexdigest())
+
+
+def corpus_hash(chunks: list[dict]) -> str:
+    digest = hashlib.sha256()
+    for c in chunks:
+        digest.update(f"{c['chunk_id']}\t{c['title']}\t{c['text']}\n".encode("utf-8"))
+    return digest.hexdigest()
+
+
+def save_corpus(path: Path, corpus: Corpus) -> None:
+    """Benchmarks (plan section 22) ship their corpus as one file instead of rebuilding it from source questions."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    blob = {"index_hash": corpus.index_hash, "chunks": corpus.chunks, "by_question": corpus.by_question, "extra_copies": corpus.extra_copies}
+    path.write_text(json.dumps(blob, ensure_ascii=False), encoding="utf-8", newline="\n")
+
+
+def load_corpus(path: Path) -> Corpus:
+    blob = json.loads(path.read_text(encoding="utf-8"))
+    if corpus_hash(blob["chunks"]) != blob["index_hash"]:
+        raise RuntimeError(f"{path}: chunks do not match the recorded index hash")
+    return Corpus(chunks=blob["chunks"], by_question=blob["by_question"], index_hash=blob["index_hash"], extra_copies=blob.get("extra_copies", {}))
