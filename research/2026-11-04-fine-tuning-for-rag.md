@@ -655,3 +655,29 @@ The comparison of A and B therefore measures whether removing the depth signal m
 **Expected effect (a hypothesis, not a result).** Fewer false abstentions and more supported answers than main, with some increase in unsupported answers. If candB beats candA, the search-depth shortcut was a real cause. If neither beats main on dev, round 2 is reported as a negative result and main stays the model.
 
 **Compute.** About 4 h to train both candidates on T4 x2, about 1 h of development evaluation, and about 1.5 h for test2: 6 to 7 notebook hours. The first round used about 12 h of logged kernel time this week.
+
+## 21. Second-round results - 5 November 2026
+
+**Training (`ats-train-cands`, T4 x2).**
+
+| run | rows | processed tokens | optimizer steps | final loss | wall time |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| candA | 1,668 | 2,331,411 | 210 | 0.096 | 14,153 s |
+| candB | 1,525 | 2,332,186 | 192 | 0.101 | 12,832 s |
+
+Both used exactly the planned rows, and both peaked at 5.8 GB.
+
+**Development split (`ats-eval-dev-cands`; rule from section 20, applied by `scripts/select_round2.py`, `reports/round2_selection.md`).**
+
+| system | end-to-end good (159) | supported correct (205) | false abstain (205) | correct abstain (73) | unsupported answers (73) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| main (round 1) | 0.673 (107) | 0.468 (96) | 0.176 (36) | 0.959 (70) | 2 |
+| candA | 0.629 (100) | 0.517 (106) | 0.088 (18) | 0.849 (62) | 9 |
+| candB | 0.604 (96) | 0.473 (97) | 0.166 (34) | 0.877 (64) | 5 |
+
+Both candidates are eligible, and candA is the best candidate. Its end-to-end good rate is below main's (100 against 107 of 159), so **the second-round model is main**. As pre-registered, candA and main both go to test2.
+
+**What the dev split says about the diagnosis.**
+- *Lowering the abstain share works as expected.* CandA halves the false abstentions (36 to 18, and 16 to 6 with all the support on screen) and gains 10 supported answers. The price is 8 correct abstentions and 7 more unsupported answers. On the headline set, where 73 of 159 episodes are unanswerable, the end-to-end rate falls.
+- *Removing the search-depth signal from the training labels did not remove it from the behaviour.* CandB was trained with a 0.40 abstain rate after both two and three searches, yet it still abstains on 59% and 71% of its final turns after two and three searches (main: 52% and 86%; candA: 58% and 66%), and its false abstentions barely move (34 against 36). The depth pattern in the adapters' behaviour mostly follows the evidence itself: unanswerable episodes use up more searches. The mixture artifact was not the main cause.
+- *Retrieval barely changes.* Full evidence is found by the model's own queries in 56, 58 and 59 of 86 open dev questions for main, candA and candB. Spreading the search rows over later searches (candB) did not improve the follow-up query.

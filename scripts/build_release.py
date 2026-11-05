@@ -32,7 +32,10 @@ EVALS = {  # label -> (split, directory holding <system>_<split>/<parse>/)
     "product_run1": ("product", RUNS / "ats-eval-product" / "out" / "eval"),  # first run, flawed gold answers; kept for disclosure
     "dev_bias": ("dev", RUNS / "ats-eval-dev-bias" / "out" / "eval"),
     "dev_bias2": ("dev", RUNS / "ats-eval-dev-bias2" / "out" / "eval"),
+    "dev_round2": ("dev", RUNS / "ats-eval-dev-cands" / "out" / "eval"),  # second round: candA and candB on dev (selection)
+    "test2": ("test2", RUNS / "ats-eval-test2" / "out" / "eval"),  # second round: fresh split
 }
+TRAIN_ROUND2 = RUNS / "ats-train-cands" / "out"
 
 
 def copy(src: Path, dst: Path) -> None:

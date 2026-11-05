@@ -1,0 +1,42 @@
+{
+  "stats": {
+    "main": {
+      "n": 159,
+      "good": 107,
+      "unsupported": 2,
+      "n_unanswerable": 73,
+      "invalid": 4,
+      "supported": 96,
+      "n_answerable": 205,
+      "false_abstain": 36,
+      "correct_abstain": 70,
+      "eligible": true
+    },
+    "candA": {
+      "n": 159,
+      "good": 100,
+      "unsupported": 9,
+      "n_unanswerable": 73,
+      "invalid": 4,
+      "supported": 106,
+      "n_answerable": 205,
+      "false_abstain": 18,
+      "correct_abstain": 62,
+      "eligible": true
+    },
+    "candB": {
+      "n": 159,
+      "good": 96,
+      "unsupported": 5,
+      "n_unanswerable": 73,
+      "invalid": 4,
+      "supported": 97,
+      "n_answerable": 205,
+      "false_abstain": 34,
+      "correct_abstain": 64,
+      "eligible": true
+    }
+  },
+  "best_candidate": "candA",
+  "round2_model": "main"
+}
