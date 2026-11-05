@@ -145,6 +145,9 @@ def paired(a: list[dict], b: list[dict], select, seed: int = 13, reps: int = 500
 
 PAIRED_SELECTORS = {
     "end-to-end good (headline: supported answer when answerable, abstain when not)": lambda s: float(s["good"]) if s["variant"] in ("open", "support_masked") else None,
+    "end-to-end good, exact match instead of F1 >= 0.5 (headline)": lambda s: float(
+        s["outcome"] == "correct_abstain" or (s["answerable"] and s["final"] == "answer" and bool(s["em"]) and bool(s["cited_all_shown"]) and bool(s["cites_gold"]))
+    ) if s["variant"] in ("open", "support_masked") else None,
     "supported_correct (answerable episodes)": lambda s: float(s["outcome"] == "supported_correct") if s["answerable"] else None,
     "answer correct, ignoring citations (answerable; F1 >= 0.5)": lambda s: float(s["final"] == "answer" and (s["f1"] or 0) >= F1_THRESHOLD) if s["answerable"] else None,
     "correct_abstain (unanswerable episodes)": lambda s: float(s["outcome"] == "correct_abstain") if not s["answerable"] else None,
