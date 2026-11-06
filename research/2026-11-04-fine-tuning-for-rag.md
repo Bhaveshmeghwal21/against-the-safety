@@ -965,3 +965,180 @@ G1 allows 25 unsupported answers out of 282 (main's 6.0% plus 3 points). Even al
 - No strict reading was run for round 3.
 - Compute used this week: 2.70 h (patch training and development evaluation) + 0.12 h (a failed first probe launch) + 1.12 h (probe) + 1.07 h (test, main and candD) + 0.50 h (candA) = 5.5 h of the 6 h available.
 - The test report's paired intervals use a seeded bootstrap over questions; a set-ordering detail made them differ in the third decimal between two runs until `report_round3.py` sorted its keys. The numbers above are from the sorted version.
+
+## 27. Round 5 plan: more correct answers and fewer unsupported ones, in priority order - 7 November 2026 (written before any round-5 work)
+
+**Where we stand.** Four rounds of supervised fine-tuning have not moved both numbers in the right direction at once. Every checkpoint that answered more also answered more often without support: round 3 (sections 24 to 26), and round 4, run on a second Kaggle account (`research/2026-11-06-round4-evidence-training.md`, `research/2026-11-06-round4-results.md`). In round 4 no checkpoint passed development selection. On its frozen final test, main scored 0.357 macro evidence success with 40 of 187 unsupported answers. The diagnostic candE1 scored 0.377 with 33 of 187, but neither difference is significant (macro +0.020 [−0.025, +0.064], unsupported rate −0.037 [−0.081, +0.010]), and it cannot be promoted. **Main stays the headline model until a round-5 system passes the rule below.**
+
+**Why the objective has to change.** Supervised fine-tuning only says "imitate this target". It cannot say that a wrong answer is worse than an abstention, so it rewards guessing. TruthRL shows exactly this: SFT and accuracy-only RL raise accuracy but suppress abstention and keep hallucination high ([TruthRL, 2025](https://arxiv.org/abs/2509.25760)). Round 5 therefore tries, in order: checks at inference time, then objectives that rank a supported answer above an abstention and an abstention above an unsupported answer.
+
+**Failure modes addressed** (from the round-3 and round-4 traces):
+- (a) Answering from on-topic passages that do not hold the answer.
+- (b) Answering one half of a two-part question and inventing the other half, or substituting a related fact (people for households).
+- (c) Invalid or looping turns.
+- (d) Declining answerable questions.
+
+### Priority 0: no GPU, done first
+
+- **0a. Score the pre-registered wrappers** (commit `00e1c25`, written before the round-4 test traces were downloaded): `scripts/wrapper_round4.py` on the main and candA `bench_r4test` traces.
+  - FB(main): if the model ends on an invalid or looping turn, abstain.
+  - G(main, candA): answer only if main and candA agree.
+  - If claim 1 holds (FB raises the score with no extra unsupported answers), FB becomes part of every round-5 system. Otherwise it is dropped. G is reported but is not a headline candidate, because it doubles the inference cost.
+- **0b. Size the evidence checks on development traces only** (`r4dev`, `r3dev`, HotpotQA dev; never a test set). For every answer given, count how many of main's unsupported answers and supported answers each deterministic check would block:
+  - The citation names a chunk that was never shown.
+  - The answer text (each part, for compound answers) appears in no cited passage.
+  - This bounds what priorities 1 and 4 can gain before any GPU is spent.
+- **0c. Fix the scorer before any round-5 result exists.** The round-4 trace audit found these problems. Each fix applies identically to every system, and every earlier trace is re-scored and reported under both versions.
+  - *Extra wrong items are accepted.* An answer counts as correct only if it also reaches token precision of at least 0.5 against the closest accepted gold form, after removing stop words, in addition to the existing match rule.
+  - *False "unsupported" labels.* A hidden-evidence episode where any shown, unmasked passage contains an accepted gold answer form is removed from the hidden-evidence denominator and listed by id.
+  - *Source-question inconsistencies* (for example George II against George III) stay as they are and are listed.
+- **0d. Build and seal the round-5 test set (`data/bench/r5test`) before any training.** Its hash is recorded here before round-5 training starts, and it is opened once, at the end. Sources, all disjoint from every earlier set (asserted):
+  - About 25 SQuAD training-split articles not used in rounds 3 or 4, with the round-4 variants (full, missing, partial, noisy evidence).
+  - About 60 unused HotpotQA validation questions.
+  - The unused remainder of RGB at noise 0, 0.8 and 1.
+  - Target size: about 700 episodes. The scripted oracle must score 1.0.
+  - The development set stays `r4dev` plus HotpotQA dev (480 episodes), the same as round 4.
+
+### Priority 1: check before answering, with Tiny Aya itself (about 0.5 GPU-hour, no training)
+
+- **Method.** After the agent gives its final answer, one more Tiny Aya call sees: the question, the passages it cited (exactly as they were shown), and the answer. Compound answers are checked one part at a time. The call replies SUPPORTED or NOT, and any NOT turns the answer into an abstention. The deterministic checks from 0b run first. This is the selective-generation idea of ["Sufficient Context", ICLR 2025](https://arxiv.org/abs/2411.06037), which reported 2 to 10 points higher accuracy among the questions a model answers, at the same coverage. It targets failures (a) and (b).
+- **Configurations:** checker = base Tiny Aya Global or main's adapter; 2 prompt wordings; 4 configurations in total, measured on existing development transcripts (only the checker calls are new).
+- **Gate, fixed now.** On development data the verifier must block at least 40% of main's unsupported answers and at most 10% of main's supported correct answers. Among the configurations that pass, the one with the largest (unsupported blocked minus supported blocked) wins.
+- **If it passes:** the verifier V is part of every round-5 system.
+- **If it fails:** V is dropped. [MiniCheck](https://github.com/Liyan06/MiniCheck) (770M) moves into priority 2, but only as a training-data filter. The rules allow other models as supplementary tools, such as a teacher or a judge. Inference-time use in the core system is a grey area and is not planned unless a Discord ticket confirms it is allowed.
+
+### Priority 2: preference training with a three-way ranking (about 4 hours on T4 x2) - the main training bet
+
+- **Data, from training splits only:**
+  - Sources: round-1 HotpotQA train, round-3 SQuAD train articles, round-4 training articles. Variants: open, support masked, part masked, noisy and negative passages supplied.
+  - Sample k = 4 runs per episode from main and from candA at temperature 0.8. The harness scores each final decision; the gold labels are known.
+  - Pairs at the final decision:
+    - Hidden evidence: abstain ≻ any answer.
+    - Answerable: supported, cited answer ≻ abstention or wrong answer. The chosen side is the teacher's target if no sample was correct.
+  - Pairs at invalid or looping turns: the teacher's valid action ≻ the sampled invalid action.
+  - Only episodes where a model actually erred produce pairs.
+  - Balance: answerable and hidden-evidence pairs in equal shares, drawn from the same questions wherever possible (the round-4 matched-pair idea), so the round-3 shortcut "evidence supplied, so answer" cannot pay. At most 4 pairs per question.
+  - **Near-miss negatives**, a new hidden-evidence variant borrowed from Bright-Pro's training corpus, RTriever-Synth (see the Bright-Pro subsection below). The support paragraph is shown with only its answer-bearing sentence deleted. The topic, entity and surrounding facts stay, but the asked fact is gone, and the other support copies are masked. Correct move: search, then abstain. For compound questions, only one part's sentence is deleted, and the correct move is to abstain.
+    - This is the hardest realistic form of failure (a), and of the people-for-households substitution in (b).
+    - Rejected if any accepted answer form still appears anywhere visible, or if the sentence split is ambiguous (fewer than two sentences left).
+    - Built for training articles only. Their share is capped at 25% of the hidden-evidence pairs.
+  - Target: 1,500 to 3,000 pairs. Optional filter: drop chosen answers that MiniCheck judges unsupported.
+- **Training:** AgentTune `TrlAgenticDPO` (TRL DPO).
+  - LoRA continues from the starting adapter. beta 0.1, learning rate 5e-6, 1 epoch, maximum length 2,560, seed 53.
+  - The reference policy must be the starting adapter, not the bare base. Use precomputed reference log-probabilities with the adapter active. Confirm this in a CPU dry run before launch.
+  - Candidates: candG from main (GPU 0) and candH from candA (GPU 1), on the same pairs.
+  - If DPO is unstable on unpaired leftovers, `TrlAgenticBCO` (unpaired, KTO-like) is the fallback with the same data.
+- **Development selection, fixed now.** Eligible only if all hold against main, after the 0c scorer fixes:
+  1. Strictly fewer unsupported answers on the new suite, pooled, and not more in either missing-evidence family.
+  2. HotpotQA dev unsupported answers not more than main's.
+  3. Supported correct answers at least main's.
+  4. Invalid turns at most main's plus 1 point.
+  5. HotpotQA dev success at least main's minus 3 points.
+  6. Macro success at least main's plus 3 points.
+  - Among eligible candidates, the highest macro wins; ties go to fewer unsupported answers, then candG.
+  - The verifier V and fail-closed FB, if adopted, are applied to every system on both sides of each comparison.
+- **If a candidate is eligible:** it goes to the final test. Priority 3 runs only if at least 5 GPU-hours remain and it is no later than 10 November.
+- **If none is eligible:** go to priority 3.
+
+### Priority 3: GRPO at the final decision with a ternary reward (about 4 hours on T4 x2)
+
+- **Method:** TruthRL's reward shape (+1 correct, 0 abstain, −1 wrong), which [reported](https://arxiv.org/abs/2509.25760) 28.9% less hallucination than accuracy-only RL on 7 to 8B models. It is applied to the final decision only, so there are no multi-turn rollouts and no vLLM.
+  - Prompt: a real trajectory from a training episode, up to the final decision.
+  - Completion: an answer with citations, or an abstention, up to 160 tokens.
+  - Group size 6, KL beta 0.04, AgentTune `TrlAgenticGrpo` in single-turn mode. A CPU dry run confirms that this mode works with the QLoRA factory before any launch.
+- **Reward, deterministic:**
+  - +1: answer matches gold (0c rule) and cites a shown support chunk.
+  - 0: abstain.
+  - −1: wrong answer, unsupported answer, a citation of a chunk that was never shown, or a malformed turn.
+- **Start point:** main, or the priority-2 candidate if one was close to eligible (named in advance as the one with the most of the six conditions met).
+- **Guards:**
+  - A 10-step timing smoke first. Abort if the projected time exceeds 3.5 hours.
+  - Watch the abstention rate on answerable prompts every 20 steps. Stop if it exceeds main's by 10 points: this is the answer-avoidance collapse reported for token-F1 rewards in ["How to Train Your Deep Research Agent?"](https://arxiv.org/abs/2602.19526). A [0.8B study](https://arxiv.org/abs/2609.28765) found that at small scale the reward shape decides the result.
+- **Selection:** same rule as priority 2.
+- **If none is eligible:** the final test runs with system-level changes only (main with FB and V, whichever were adopted). Priorities 2 and 3 are reported as negative results.
+
+### Priority 4 (lower): train the model to quote its evidence, RAFT-style
+
+- **Method.** The teacher's final answer gains a verbatim quote of the supporting sentence for each answer part ([RAFT, 2024](https://arxiv.org/abs/2403.10131)). The harness then abstains if a quote is not found in a shown passage, or does not contain the answer. An invented half has nothing to quote, which directly addresses failure (b).
+- **Cost:** a new SFT round (about 2 hours) plus data changes.
+- **Why it ranks lower:** it is SFT again, and most of its checking value is already available without training through 0b and priority 1.
+- **Runs only if:** priorities 2 and 3 are finished before 11 November with budget left. If it does run, it uses the priority-2 selection rule.
+
+### Priority 5 (low): a hallucination probe on Tiny Aya's hidden states
+
+- **Method.** Collect a middle-layer hidden state at the final answer token for training-split traces: one forward pass each, about 0.5 GPU-hour. Fit a logistic regression on CPU to predict "unsupported". Abstain when the probe fires, with the threshold chosen on development data.
+- **Evidence:** linear probes reached 0.90 to 1.00 AUROC on 4-bit 7 to 8B models (["Hallucination Is Linearly Decodable from Mid-Layer Hidden States in Quantized LLMs", 2026](https://arxiv.org/abs/2606.02628)), but on QA benchmarks, not RAG agents.
+- **Why it is worth doing at all:** it uses Tiny Aya only, stacks with everything above, and gives a safety angle judges will recognise.
+- **Runs only if:** time remains after priorities 1 to 3. It goes ahead of priority 4 if both cannot fit.
+
+### Lowest: sampling-based agreement
+
+- **What:** the two-adapter agreement gate G, or k-sample self-consistency from one adapter.
+- **Cost:** k times the inference. On the round-3 test, G cut unsupported answers by 42% but also cut supported answers by 13%.
+- **Use:** an optional high-safety mode in the demo only, never the headline.
+
+### Bright-Pro: what we take, and what we leave (checked 7 November)
+
+**What it is.** [Bright-Pro](https://github.com/yale-nlp/Bright-Pro) is an ACL 2026 benchmark ([paper](https://arxiv.org/abs/2605.04018)): an expert-annotated extension of BRIGHT for reasoning-intensive retrieval, released under MIT.
+- Queries are long, analytical StackExchange questions in 7 domains: biology, earth science, economics, psychology, robotics, Stack Overflow and sustainable living.
+- Each query comes with reasoning aspects weighted 1 to 5, gold documents per aspect, a reference response and rubrics.
+- Two protocols are provided:
+  - Static retrieval: α-nDCG@k and aspect recall.
+  - Agentic search on a fixed 175-query sample (25 per domain, seed 42), scored by a GPT-5 judge that rates each aspect 0, 0.5 or 1.
+- Released alongside it: a 4B retriever, RTriever-4B (a LoRA on Qwen3-Embedding-4B). Its training corpus, RTriever-Synth, is described in the paper but is not in the HF collection.
+- One finding bears on us: BM25 is weak in static retrieval but becomes competitive in the agentic protocol, because follow-up queries reduce vocabulary mismatch.
+
+**What we take.**
+1. *The aspect-coverage metric* (already used in round 4): each required fact of a compound answer is one aspect, and the primary success needs all of them cited. It stays the primary round-5 metric. It is labelled "Bright-Pro-inspired", not an official Bright-Pro score.
+2. *The near-miss negative idea* behind RTriever-Synth's "positive-conditioned hard negatives": passages built from the real support, with the needed fact removed. It is adapted without any generator model, as the deleted-sentence variant in the priority-2 data above.
+3. *A small transfer diagnostic*, at low priority, evaluation only, at the final test (about 0.3 GPU-hour):
+   - Same harness as the round-4 pilot (`scripts/run_brightpro_pilot.py`): the full robotics corpus (63,920 documents) at the frozen dataset revision `dbdc22ba…`, lexical search, three searches, 800-character display, deterministic weighted-aspect recall from document IDs, no judge.
+   - Query set: all 25 robotics IDs in the official agentic sample. Ten were already used in round 4 (4, 7, 8, 17, 18, 27, 29, 31, 33, 34). The other 15 (40, 41, 50, 51, 58, 63, 68, 71, 72, 82, 83, 87, 90, 94, 98) are unseen, and results are reported separately for the two groups.
+   - Systems: main, and the round-5 winner with its wrappers.
+   - It cannot select or veto a model. In round 4, main reached weighted aspect recall 0.170 and cited aspect recall 0.073 on the 10 queries, with 3 of 10 invalid. The aim is a transfer check on hard, long-form, out-of-domain questions, honestly reported, not a headline.
+
+**What we leave, and why.**
+- *Training on Bright-Pro:* no. It has no training split, so training on it would contaminate the only out-of-domain diagnostic we have. Its long-form analytical answers do not match our short cited answers or abstentions. It also has no unanswerable labels, so it cannot teach abstention.
+- *The official agentic protocol and its GPT-5 judge:* no. It needs an OpenAI key and long-form answers, and its agents are gpt-5-mini and Qwen3.5-122B, which are not comparable to a 3.35B model. The cost and the format change are not justified by one diagnostic.
+- *Swapping in RTriever-4B as our retriever:* no.
+  - It would change the retrieval stack, so before/after gains could no longer be credited to fine-tuning.
+  - It adds a 4B model to each T4.
+  - Bright-Pro's own agentic finding says BM25-style search stays competitive when the agent can issue follow-up queries.
+- *RTriever-Synth itself:* not available. If it is released before 9 November, only its near-miss idea applies, and that is already covered above.
+
+### Not planned, and why
+
+- **Full multi-turn GRPO** (Search-R1 style): too slow on T4s without vLLM in bf16, and risky at our scale.
+- **An external checker inside the deployed system:** the core-model rule (see above).
+- **NVIDIA Model Optimizer:** it targets speed and size, not answer quality (see the earlier judgment).
+- **Training on Bright-Pro, its GPT-5-judged agentic protocol, or the RTriever-4B retriever:** see the Bright-Pro subsection.
+
+### Final test (once, at the end; about 2.2 hours on T4 x2)
+
+- **When:** at the freeze, every choice is fixed: model, FB, V and its configuration, any probe threshold.
+- **Systems, opened on `r5test` together:**
+  - main
+  - main + adopted wrappers (FB, V)
+  - the round-5 winner + the same wrappers, if one exists
+  - candA, as a reference
+  - All of these are pre-registered here, so the ablation table is not test-driven.
+- **Recommendation rule.** The winning system replaces main as the headline only if all hold, with 95% intervals from resampling whole questions:
+  - The macro-success difference has an interval above zero.
+  - The unsupported-answer rate difference is below zero as a point estimate, with an upper bound of at most +0.02.
+  - Otherwise main stays, and every result is reported as it fell.
+
+### Budget and dates
+
+| step | GPU (T4 x2 wall time) | latest start |
+| --- | ---: | --- |
+| Priority 0 | 0 | 7 November |
+| Priority 1 | about 0.5 h | 8 November |
+| Priority 2 (sampling, training, development evaluation) | about 4 h | 9 November |
+| Priority 3 (only if needed) | about 4 h | 10 November |
+| Final test | about 2.2 h | 12 November |
+| Bright-Pro robotics diagnostic (25 queries; low priority, after the final test) | about 0.3 h | 12 November |
+| Priorities 4 and 5 (only if time remains) | about 2.5 h | 11 November |
+
+- Remaining quota on both Kaggle accounts is checked before each launch, and no step starts without enough quota to finish it.
+- **Hard freeze: 11 November, 23:59 IST.** No training after it. The final test runs by 12 November. 13 and 14 November are for the Article, the demo and the public repository. The submission deadline is 14 November, 23:59 AoE.
+- Every step above is committed before it runs, as in rounds 2 to 4. Any deviation is dated and labelled where it happens.
