@@ -23,10 +23,21 @@ python scripts/kaggle_launch.py output ats-train-both      # -> runs/kaggle/ats-
 python scripts/kaggle_launch.py run eval-dev  --adapters-from ats-train-both [--extra "--ckpt adapter_ep1 --systems main,control"]
 python scripts/kaggle_launch.py run eval-test --adapters-from ats-train-both
 python scripts/kaggle_launch.py run eval-product --adapters-from ats-train-both
+
+# round 2 (plan sections 20 and 21)
+python scripts/kaggle_launch.py run train-cands            # candA on GPU 0, candB on GPU 1
+python scripts/kaggle_launch.py run eval-dev --adapters-from ats-train-cands --tag cands "--extra=--systems candA,candB"
+python scripts/kaggle_launch.py run eval-test2 --adapters-from "ats-train-both,ats-train-cands" "--extra=--systems main,candA,base,control,closed"
+
+# external benchmarks (plan sections 22 and 23); two kernels, so the tags keep their slugs apart
+python scripts/kaggle_launch.py run eval-bench --adapters-from "ats-train-both,ats-train-cands" --tag a "--extra=--systems base,main"
+python scripts/kaggle_launch.py run eval-bench --adapters-from "ats-train-both,ats-train-cands" --tag b "--extra=--systems candA,control,closed"
 ```
 
 `--extra` is passed to the stage. For `eval-*`: `--ckpt` selects `adapter` (final, default) or `adapter_ep1`; `--systems` selects
-from `base,main,closed,control`; anything else goes to `scripts/run_eval.py` (for example `--limit-questions 6`).
+from `base,main,closed,control` (also `candA` and `candB` where their adapters are attached); anything else goes to
+`scripts/run_eval.py` (for example `--limit-questions 6`). `eval-bench` also takes `--benches` (default
+`squad2,rgb,rgb_int,2wiki,musique`). Each system runs the benchmarks in turn on one GPU, and the systems are spread over the two GPUs.
 
 ## What the launcher guards against (all found the hard way)
 
