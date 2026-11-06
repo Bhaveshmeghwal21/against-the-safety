@@ -60,3 +60,28 @@ Development selection is the section-27 rule, applied to the checkpoints above o
 | checkpoints | final | half and final | cheap guard against overshooting into over-abstention; four candidates, the same count as round 4 |
 | near-miss negatives (answer sentence deleted) | in the first pass | deferred to an optional second sampling pass | needs a doctored corpus and index; the round-4 hard-negative variants already put on-topic passages without the asked fact in front of the model |
 | MiniCheck filter on chosen answers | optional | not used | references are gold answers with real support ids |
+
+## Priority 0b, 0c and 1: fixed before the checker was run (7 November 2026, 01:10 IST)
+
+### 0b. Deterministic checks on the development traces (computed already, labels from scorer v2)
+
+`scripts/build_verifier_cases.py` on main's answered episodes in `r4dev` and HotpotQA dev: 183 answers (76 supported correct, 87 wrong, 20 unsupported on hidden evidence).
+
+| deterministic check | supported correct blocked | wrong answers blocked | unsupported blocked |
+| --- | ---: | ---: | ---: |
+| cited chunk was never shown | 0 / 76 | 0 / 87 | 0 / 20 |
+| some answer part (split at ";") absent from the cited passages | 1 / 76 | 10 / 87 | 3 / 20 |
+
+The deterministic checks alone cannot reach the 40% gate (15% of unsupported answers). Priority 1 therefore rests on the model-based check.
+
+### 0c. Scorer version 2 (`src/ragharness/rescore.py`, `scripts/rescore_round5.py`)
+
+Version 1 reproduces the stored scores exactly in all 12 development runs (0 mismatches). Version 2 adds the token-precision rule (at least 0.5 against the closest accepted gold form) and excludes a hidden-evidence episode only when the shown passages hold the whole answer, meaning every part of a compound answer. A first draft excluded an episode when any single part was visible; it removed 27 of 132 hidden episodes, almost all of them the designed "partial" family where one half is deliberately missing, so it was corrected before any result was used. With the corrected rule one hidden episode per system is excluded on `r4dev` (`5709b503200fba1400368289:support_masked`, where another passage holds the answer; `r4_missing_0` too for candA) and none on HotpotQA dev. `reports/round5_rescore_r4.{md,json}` list both versions for every development and final-test run of round 4. The precision rule lowers HotpotQA supported success for every system (main 0.314 to 0.256).
+
+### 1. The checker (Tiny Aya itself, no generation)
+
+- Cases: the 183 answered episodes above, with the cited passages rendered exactly as the tool rendered them (`data/processed/verifier/cases_dev.jsonl`, SHA256 `bc38c8ee2c0a6c596ff4bca09778b364068bb5f5b9697932f0f585f23ca5b47f`).
+- Configurations: checker = base Tiny Aya Global or main's adapter; wording A (reply SUPPORTED or NOT) or wording B (reply Yes or No). Four configurations, one forward pass per case, score = probability of the positive first token against the negative one. An answer is blocked when that probability is below 0.5. No threshold is tuned.
+- Gate on development data, unchanged from section 27: block at least 40% of main's 20 unsupported answers and at most 10% of its 76 supported-correct answers. V is the deterministic checks first, then the model check. Among configurations that pass, the one with the largest (unsupported blocked minus supported-correct blocked) wins. If none passes, V is dropped.
+- Also reported, not gated: the share of main's 87 wrong answers blocked, and the effect of V on macro success and false refusals with FB applied.
+- Cost: 366 forward passes per configuration of about 770 tokens, a few minutes on one T4. The run uses account 2 (`vibhutimeghwal`) alongside the sampling job.
