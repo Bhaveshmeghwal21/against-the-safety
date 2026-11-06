@@ -205,6 +205,21 @@ def main() -> None:
                 adapters[f"{n}/adapter"] = str(OUT / n / "adapter")
         if jobs_spec:
             rc = max(rc, eval_jobs(py, jobs_spec, eval_args, adapters))
+    elif stage == "interp":  # round 3 probe (plan section 25): blends of two adapters, evaluated at once
+        m = {k: re.search(rf"--{k}\s+(\S+)", extra) for k in ("from", "to", "alphas", "splits")}
+        if not all(m.values()):
+            raise SystemExit("interp needs --from NAME --to NAME --alphas a,b,c --splits split:weight,...")
+        src, dst, alphas, splits = (m[k].group(1) for k in ("from", "to", "alphas", "splits"))
+        rest = extra
+        for v in m.values():
+            rest = rest.replace(v.group(0), "")
+        jobs = []
+        for a in alphas.split(","):
+            name = f"{dst}_a{int(round(float(a) * 100)):02d}"
+            sh(f"{py} scripts/interp_adapters.py --a {adapters[f'{src}/adapter']} --b {adapters[f'{dst}/adapter']} --alpha {a} --out {OUT}/interp/{name}/adapter")
+            adapters[f"{name}/adapter"] = str(OUT / "interp" / name / "adapter")
+            jobs += [f"{name}:{s.split(':')[0]}:{s.split(':')[1]}" for s in splits.split(",")]
+        rc = eval_jobs(py, ",".join(jobs), rest.strip() or "--parse lenient --extra-questions 0", adapters)
     elif stage == "eval-jobs":  # round 3: any list of system:split[:weight] jobs
         m = re.search(r"--jobs\s+(\S+)", extra)
         if not m:
