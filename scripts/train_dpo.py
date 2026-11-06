@@ -35,54 +35,61 @@ def load_pairs(path: Path, limit: int) -> list[dict]:
     return pairs[:limit] if limit else pairs
 
 
-def probe_memory(model, lengths, budget_gb: float):
-    """Largest length whose worst-case step (2 sequences, forward + backward, fp32 log-softmax per row) stays under budget_gb."""
+def _probe_step(model, length: int) -> None:
+    """One worst-case DPO step in miniature: a pair (2 sequences) forward with a graph, a reference forward without one, and the backward."""
     import torch
     from trl.trainer.utils import selective_log_softmax
 
+    ids = torch.randint(1000, 9000, (2, length), device="cuda")
+    with torch.autocast("cuda", dtype=torch.float16):
+        logits = model(input_ids=ids, attention_mask=torch.ones_like(ids), use_cache=False).logits
+        logp = selective_log_softmax(logits[:, :-1], ids[:, 1:])
+        with torch.no_grad():
+            ref = model(input_ids=ids, attention_mask=torch.ones_like(ids), use_cache=False).logits
+            ref_logp = selective_log_softmax(ref[:, :-1], ids[:, 1:])
+    loss = -logp[:, -60:].sum() + 0.0 * ref_logp.sum()
+    loss.backward()
+
+
+def probe(model, length: int):
+    """(ok, peak GiB, seconds) of one probe step at `length`; an out-of-memory error is reported as not ok, and memory is released either way."""
+    import gc
+
+    import torch
+
+    gc.collect()
+    torch.cuda.empty_cache()
+    torch.cuda.reset_peak_memory_stats()
+    torch.cuda.synchronize()
+    t0, ok = time.time(), True
+    try:
+        _probe_step(model, length)
+        torch.cuda.synchronize()
+    except torch.cuda.OutOfMemoryError:
+        ok = False
+    seconds = time.time() - t0
+    model.zero_grad(set_to_none=True)
+    gc.collect()  # the exception's traceback has been cleared by now, so the failed attempt's tensors can go
+    torch.cuda.empty_cache()
+    return ok, torch.cuda.max_memory_allocated() / 2**30, seconds
+
+
+def probe_memory(model, lengths, budget_gb: float):
+    """Largest length whose probe step succeeds with a peak under budget_gb."""
     model.train()
     for length in lengths:
-        try:
-            torch.cuda.empty_cache()
-            torch.cuda.reset_peak_memory_stats()
-            ids = torch.randint(1000, 9000, (2, length), device="cuda")
-            with torch.autocast("cuda", dtype=torch.float16):
-                logits = model(input_ids=ids, attention_mask=torch.ones_like(ids), use_cache=False).logits
-                logp = selective_log_softmax(logits[:, :-1], ids[:, 1:])
-            loss = -logp[:, -60:].sum()
-            loss.backward()
-            peak = torch.cuda.max_memory_allocated() / 2**30
-            model.zero_grad(set_to_none=True)
-            del logits, logp, loss, ids
-            torch.cuda.empty_cache()
-            if peak <= budget_gb:
-                return length, round(peak, 2)
-        except torch.cuda.OutOfMemoryError:
-            model.zero_grad(set_to_none=True)
-            torch.cuda.empty_cache()
+        ok, peak, _ = probe(model, length)
+        print(f"[probe] length {length}: ok={ok} peak={peak:.2f} GiB", flush=True)
+        if ok and peak <= budget_gb:
+            return length, round(peak, 2)
     raise SystemExit("no tested sequence length fits in GPU memory")
 
 
 def probe_seconds_per_pair(model, length: int, repeats: int = 3) -> float:
-    """Wall seconds for one pair: two sequences of `length` forward + backward, plus a reference forward (about a third more)."""
-    import torch
-
+    """Wall seconds for one pair at `length` (policy forward and backward plus the reference forward): mean of the last `repeats` of repeats + 1 steps."""
     model.train()
-    times = []
-    for _ in range(repeats + 1):
-        torch.cuda.synchronize()
-        t0 = time.time()
-        ids = torch.randint(1000, 9000, (2, length), device="cuda")
-        with torch.autocast("cuda", dtype=torch.float16):
-            logits = model(input_ids=ids, attention_mask=torch.ones_like(ids), use_cache=False).logits
-        loss = logits[:, -60:].float().logsumexp(-1).sum()
-        loss.backward()
-        model.zero_grad(set_to_none=True)
-        torch.cuda.synchronize()
-        times.append(time.time() - t0)
-        del logits, loss, ids
-    return sum(times[1:]) / repeats * 1.33  # drop the warm-up call
-
+    times = [probe(model, length)[2] for _ in range(repeats + 1)]
+    return sum(times[1:]) / repeats
 
 def main() -> None:
     ap = argparse.ArgumentParser()
@@ -99,7 +106,7 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=53)
     ap.add_argument("--limit-pairs", type=int, default=0)
     ap.add_argument("--time-budget-h", type=float, default=1.7, help="training seconds the probe may spend on pairs (GPU only)")
-    ap.add_argument("--memory-gb", type=float, default=13.0)
+    ap.add_argument("--memory-gb", type=float, default=13.5)
     ap.add_argument("--stand-in", action="store_true", help="CPU plumbing check with a tiny public model")
     args = ap.parse_args()
 
