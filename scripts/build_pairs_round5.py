@@ -133,20 +133,24 @@ def main() -> None:
                            "rejected_outcome": r["outcome"], "tokens": max(n_c, n_r)}
             candidates.append(row)
 
-    # caps per (question, variant) and per question, in a seeded order that ignores length and outcome
+    # caps per (question, variant) and per question, in a seeded order that ignores length and outcome. The pre-registered caps are (2, 4);
+    # if they leave fewer than 450 balanced pairs, the next rule (3, 6) is used instead (fixed before any sample was read).
     rng.shuffle(candidates)
-    per_qv, per_q, capped = Counter(), Counter(), []
-    for row in candidates:
-        m = row["meta"]
-        if per_qv[(m["qid"], m["variant"])] >= 2 or per_q[m["qid"]] >= 4:
-            reasons["cap"] += 1
-            continue
-        per_qv[(m["qid"], m["variant"])] += 1
-        per_q[m["qid"]] += 1
-        capped.append(row)
-    pro_answer = [r for r in capped if r["meta"]["chosen_kind"] == "answer"]
-    pro_caution = [r for r in capped if r["meta"]["chosen_kind"] != "answer"]
-    small, large = sorted([pro_answer, pro_caution], key=len)
+    for cap_qv, cap_q in ((2, 4), (3, 6)):
+        per_qv, per_q, capped = Counter(), Counter(), []
+        for row in candidates:
+            m = row["meta"]
+            if per_qv[(m["qid"], m["variant"])] >= cap_qv or per_q[m["qid"]] >= cap_q:
+                continue
+            per_qv[(m["qid"], m["variant"])] += 1
+            per_q[m["qid"]] += 1
+            capped.append(row)
+        pro_answer = [r for r in capped if r["meta"]["chosen_kind"] == "answer"]
+        pro_caution = [r for r in capped if r["meta"]["chosen_kind"] != "answer"]
+        small, large = sorted([pro_answer, pro_caution], key=len)
+        if len(small) + min(len(large), int(1.25 * len(small))) >= 450:
+            break
+    reasons["caps_used"] = f"{cap_qv},{cap_q}"
     n_small, n_large = len(small), min(len(large), int(1.25 * len(small)))
     if n_small + n_large > args.max_pairs:
         scale = args.max_pairs / (n_small + n_large)

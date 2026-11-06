@@ -26,6 +26,33 @@ def fail_closed(rows):
     return out
 
 
+def load_v(cases_files, verdict_dirs):
+    """The answer checker V (priority 1): deterministic flags from the cases, main-adapter wording-A probabilities from the verdicts."""
+    cases, verdict = {}, {}
+    for f in cases_files:
+        for c in RS.read(f):
+            cases[(c["run"], c["qid"], c["variant"])] = c
+    for d in verdict_dirs:
+        for r in RS.read(Path(d) / "verdicts_A.jsonl"):
+            verdict[(r["run"], r["qid"], r["variant"])] = r["p_pos"]
+    return cases, verdict
+
+
+def apply_v(rows, run, cases, verdict):
+    """Every answer V blocks ends as an abstention (the repair is applied to every system alike)."""
+    out = []
+    for r in rows:
+        if r["final"] == "answer":
+            key = (run, r["qid"], r["variant"])
+            c = cases[key]
+            blocked = c["deterministic"]["cites_unshown"] or c["deterministic"]["answer_part_absent_from_cited"] or key not in verdict or verdict[key] < 0.5
+            if blocked:
+                r = {**r, "outcome_v2": "false_abstain" if r["answerable"] else "correct_abstain", "good_v2": not r["answerable"],
+                     "strong_v2": not r["answerable"], "final": "abstain"}
+        out.append(r)
+    return out
+
+
 def stats(bench, hotpot):
     v = "v2"
     bench = [r for r in bench if not r["excluded_v2"]]
@@ -53,7 +80,10 @@ def main():
     ap.add_argument("--references", default="main,candA")
     ap.add_argument("--out", default="reports/round5_selection")
     ap.add_argument("--no-fb", action="store_true")
+    ap.add_argument("--cases", action="append", default=[], help="verifier cases files; with --verdicts, V is applied to every system")
+    ap.add_argument("--verdicts", action="append", default=[], help="folders holding verdicts_A.jsonl from the main-adapter checker")
     args = ap.parse_args()
+    cases, verdict = load_v(args.cases, args.verdicts) if args.cases else ({}, {})
     runs = {}
     for root in args.eval:
         for folder in sorted(Path(root).rglob("lenient")):
@@ -69,6 +99,8 @@ def main():
         raw_invalid[name] = sum(r["final"] == "invalid" for r in bench) / len(bench)
         if not args.no_fb:
             bench, hotpot = fail_closed(bench), fail_closed(hotpot)
+        if cases:
+            bench, hotpot = apply_v(bench, f"{name}_bench_r4dev", cases, verdict), apply_v(hotpot, f"{name}_dev", cases, verdict)
         records[name] = stats(bench, hotpot)
         records[name]["invalid_before_fb"] = raw_invalid[name]
     base = records["main"]
@@ -94,7 +126,7 @@ def main():
         best = max(records[n]["macro"] for n in eligible)
         tied = [n for n in eligible if records[n]["macro"] >= best - 0.005]
         winner = min(tied, key=lambda n: (records[n]["unsupported"], n.startswith("candH"), n))
-    result = {"selected": winner, "fail_closed_applied": not args.no_fb, "scorer": "v2", "records": records,
+    result = {"selected": winner, "fail_closed_applied": not args.no_fb, "checker_applied": bool(cases), "scorer": "v2", "records": records,
               "note": "Development selection only; a winner goes to the sealed final test, nothing is promoted from here."}
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)

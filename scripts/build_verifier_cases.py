@@ -34,7 +34,7 @@ def contained(part: str, text: str) -> bool | None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--eval", action="append", required=True)
-    ap.add_argument("--system", default="main")
+    ap.add_argument("--system", default="main", help="one system or a comma list")
     ap.add_argument("--out", default="data/verifier/cases_dev.jsonl")
     args = ap.parse_args()
     cases, counts = [], {}
@@ -42,7 +42,7 @@ def main() -> None:
         for folder in sorted(Path(root).rglob("lenient")):
             run = folder.parent.name
             system, kind = RS.kind_of(run)
-            if system != args.system or not (folder / "transcripts.jsonl").exists():
+            if system not in args.system.split(",") or not (folder / "transcripts.jsonl").exists():
                 continue
             corp, qmap = RS.world(kind)
             for t in RS.read(folder / "transcripts.jsonl"):
