@@ -1,0 +1,44 @@
+{
+ "main": {
+  "unsupported": [
+   23,
+   39
+  ],
+  "supported_correct": [
+   7,
+   51
+  ],
+  "wrong_answer": [
+   55,
+   113
+  ]
+ },
+ "candA": {
+  "unsupported": [
+   36,
+   54
+  ],
+  "supported_correct": [
+   3,
+   64
+  ],
+  "wrong_answer": [
+   74,
+   137
+  ]
+ },
+ "candE1": {
+  "unsupported": [
+   21,
+   32
+  ],
+  "supported_correct": [
+   8,
+   85
+  ],
+  "wrong_answer": [
+   43,
+   86
+  ]
+ }
+}

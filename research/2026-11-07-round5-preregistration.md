@@ -121,3 +121,17 @@ Combined hash `cb368b0d1f917461015d446dee5aa054a012e9ef6e2623898043dd08c5cbba23`
 ## Amendment to the pair rules, still before any sample was read (7 November 2026, 01:50 IST)
 
 The per-question caps (2 per question and variant, 4 per question) bound the file at about 4 pairs for each of roughly 81 questions. If those caps leave fewer than 450 balanced pairs, the builder now applies the caps (3, 6) instead. This is a fixed fallback, applied mechanically (`caps_used` is written to `reports/round5_pairs.json`). A development look at main's saved traces explains why pro-answer pairs will be plentiful: on `r4dev`, with the full evidence shown, main abstains in 41 of 54 `open` episodes (and answers correctly and with support in 1), and across all variants it abstains in 70 of 165 complete-evidence episodes. Pairs that reject those abstentions are the accuracy side of the preference data; pairs that reject unsupported answers are the safety side.
+
+## Result of the out-of-sample check of V, and a widened candidate pool (7 November 2026, 02:00 IST)
+
+**V on the round-4 final-test traces** (`reports/round5_verifier_r4test.json`; kernel `ats-verify-main-r5-r4test`; same configuration as on development data, run once):
+
+| system | unsupported blocked | supported correct blocked | wrong answers blocked |
+| --- | ---: | ---: | ---: |
+| main | 23 / 39 (59%) | 7 / 51 (14%) | 55 / 113 (49%) |
+| candA | 36 / 54 (67%) | 3 / 64 (5%) | 74 / 137 (54%) |
+| candE1 | 21 / 32 (66%) | 8 / 85 (9%) | 43 / 86 (50%) |
+
+The effect holds out of sample: about 60 to 67% of unsupported answers are blocked at a cost of 5 to 14% of supported-correct ones (the development gate was 40% and 10%; main sits just above 10% here). `reports/round5_r4test_wrappers.md` reports the wrappers on these already-opened traces: main + FB + V against raw main, macro +0.111 [+0.076, +0.147], unsupported rate -0.127 [-0.178, -0.076], supported correct -0.027 [-0.030, -0.004].
+
+**Widened candidate pool, declared before any development verdict for these systems exists.** The same table shows candE1 with FB and V ahead of main with FB and V on all three measures (macro 0.555 against 0.461, unsupported 11 against 16, supported correct 0.294 against 0.168). That look was at the round-4 test traces, so it influenced this decision, and I am saying so. To keep the test out of the selection, the round-4 checkpoints (candE1, candE2, candF1, candF2) join the candidate pool for the development gates, which now has eight members: the four DPO checkpoints (candG1, candG2, candH1, candH2) and the four round-4 checkpoints. Their development traces already exist (`r4dev`, HotpotQA dev); only the checker has to be run on their answers (`data/processed/verifier/cases_dev_r4cands.jsonl`, 1,073 cases). The gates and the tie-break are the section-27 rules, unchanged, with FB and V on both sides and scorer v2. Selection uses development data only. The sealed `r5test` is opened once and decides by the section-27 recommendation rule, which is where the extra comparisons are paid for: a winner must show an interval above zero on fresh data. If a round-4 checkpoint wins, it is evaluated and, if it passes, released as a new adapter; main stays the default otherwise.
