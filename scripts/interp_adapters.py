@@ -25,7 +25,9 @@ def interpolate(a_dir: Path, b_dir: Path, alpha: float, out: Path) -> dict:
         mixed[k] = ((1 - alpha) * a[k].float() + alpha * b[k].float()).to(b[k].dtype).contiguous()
     out.mkdir(parents=True, exist_ok=True)
     save_file(mixed, str(out / "adapter_model.safetensors"), metadata={"format": "pt"})
-    shutil.copyfile(b_dir / "adapter_config.json", out / "adapter_config.json")
+    for f in b_dir.iterdir():  # config, tokenizer and chat template: the evaluation loads the tokenizer from the adapter folder
+        if f.is_file() and f.name != "adapter_model.safetensors":
+            shutil.copyfile(f, out / f.name)
     num = sum(float(((b[k].float() - a[k].float()) ** 2).sum()) for k in a) ** 0.5
     den = sum(float((a[k].float() ** 2).sum()) for k in a) ** 0.5
     info = {"alpha": alpha, "a": str(a_dir), "b": str(b_dir), "tensors": len(a), "relative_distance_b_from_a": round(num / den, 4)}
