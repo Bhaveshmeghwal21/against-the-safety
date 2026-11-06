@@ -1,0 +1,101 @@
+{
+  "groups": {
+    "unsupported": 20,
+    "supported_correct": 76,
+    "wrong_answer": 87
+  },
+  "configs": [
+    {
+      "config": "base-A",
+      "unsupported_blocked": 0.6,
+      "supported_correct_blocked": 0.23684210526315788,
+      "wrong_blocked": 0.5287356321839081,
+      "model_only_unsupported_blocked": 0.6,
+      "model_only_supported_correct_blocked": 0.23684210526315788,
+      "model_only_wrong_blocked": 0.4827586206896552,
+      "top1_is_candidate": 1.0,
+      "passes": false,
+      "score": 0.3631578947368421
+    },
+    {
+      "config": "base-B",
+      "unsupported_blocked": 0.75,
+      "supported_correct_blocked": 0.21052631578947367,
+      "wrong_blocked": 0.6206896551724138,
+      "model_only_unsupported_blocked": 0.75,
+      "model_only_supported_correct_blocked": 0.21052631578947367,
+      "model_only_wrong_blocked": 0.6206896551724138,
+      "top1_is_candidate": 1.0,
+      "passes": false,
+      "score": 0.5394736842105263
+    },
+    {
+      "config": "main-A",
+      "unsupported_blocked": 0.7,
+      "supported_correct_blocked": 0.07894736842105263,
+      "wrong_blocked": 0.47126436781609193,
+      "model_only_unsupported_blocked": 0.7,
+      "model_only_supported_correct_blocked": 0.07894736842105263,
+      "model_only_wrong_blocked": 0.4367816091954023,
+      "top1_is_candidate": 1.0,
+      "passes": true,
+      "score": 0.6210526315789473
+    },
+    {
+      "config": "main-B",
+      "unsupported_blocked": 1.0,
+      "supported_correct_blocked": 0.868421052631579,
+      "wrong_blocked": 0.9885057471264368,
+      "model_only_unsupported_blocked": 1.0,
+      "model_only_supported_correct_blocked": 0.868421052631579,
+      "model_only_wrong_blocked": 0.9885057471264368,
+      "top1_is_candidate": 1.0,
+      "passes": false,
+      "score": 0.13157894736842102
+    }
+  ],
+  "selected": "main-A",
+  "effect_on_main": {
+    "main_with_FB": {
+      "macro": 0.5146122921693924,
+      "single": 0.5933014354066986,
+      "compound": 0.3153153153153153,
+      "hotpot_success": 0.6352201257861635,
+      "supported_correct": 0.24338624338624337,
+      "unsupported": 18,
+      "hidden_n": 131,
+      "unsupported_rate": 0.13740458015267176,
+      "unsupported_by_family": {
+        "partial": 13,
+        "fully_missing": 5
+      },
+      "hotpot_unsupported": 2,
+      "false_abstain": 0.4708994708994709,
+      "n": 320,
+      "n_hotpot": 159
+    },
+    "main_with_FB_and_V": {
+      "macro": 0.5376332367394929,
+      "single": 0.6028708133971292,
+      "compound": 0.38738738738738737,
+      "hotpot_success": 0.6226415094339622,
+      "supported_correct": 0.2275132275132275,
+      "unsupported": 5,
+      "hidden_n": 131,
+      "unsupported_rate": 0.03816793893129771,
+      "unsupported_by_family": {
+        "partial": 5,
+        "fully_missing": 0
+      },
+      "hotpot_unsupported": 1,
+      "false_abstain": 0.6349206349206349,
+      "n": 320,
+      "n_hotpot": 159
+    },
+    "config": "main-A"
+  },
+  "gate": {
+    "unsupported_blocked_at_least": 0.4,
+    "supported_correct_blocked_at_most": 0.1
+  }
+}

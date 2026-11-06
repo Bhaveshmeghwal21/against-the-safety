@@ -316,6 +316,43 @@
       },
       "questions_sha256": "163a2c6e97509e3873787c6f73a442d2440530f25e88b11a2453fd860086a35e",
       "corpus_sha256": "678da92d476f015e90874cab80fc76b46b75d8d171b00ea873a4e2f855e38033"
+    },
+    "r5t_hotpot": {
+      "benchmark": "r5t_hotpot",
+      "dataset": "hotpotqa/hotpot_qa",
+      "revision": "1908d6afbbead072334abe2965f91bd2709910ab",
+      "file": "distractor/validation-00000-of-00001.parquet",
+      "license": "CC BY-SA 4.0",
+      "order_seed": 22,
+      "n_questions": 60,
+      "n_chunks": 9959,
+      "index_hash": "25e7b04c22283f356036fa13db4d42c785a7526a7e9f3e07375dabfc0f2c465f",
+      "load_rejections": {},
+      "questions_sha256": "fa6a10cc638ea39d5a0f43d205590cd0961185d9f5ff312d98a5baf71e2ad4e1",
+      "corpus_sha256": "00108da9032a6cc720cf5d1818cbfb7773c77040391cd02355d33507a52237c2"
+    },
+    "r5t_rgb": {
+      "benchmark": "rgb",
+      "url": "https://raw.githubusercontent.com/chen700564/RGB/master/data/en_refine.json",
+      "license": "CC BY-NC-SA 4.0",
+      "cite": "Chen et al., AAAI 2024",
+      "seed": 22,
+      "fresh": true,
+      "n_questions": 100,
+      "by_type": {
+        "single": 100
+      },
+      "natural_unanswerable": 0,
+      "corpus_questions": 300,
+      "n_chunks": 7461,
+      "index_hash": "17f055d9ccb446cff2f7902e4988d18ca3c15a6cb793c3ec2055defaa7478094",
+      "load_rejections": {},
+      "dropped_after_index": {
+        "too_few_usable_positives_or_negatives_for_the_prompt_settings": 2,
+        "no_positive_shows_the_answer_within_the_display_limit": 1
+      },
+      "questions_sha256": "3a5e5a2008c8f06d3cfd4944ca3ec578ef6c5fe491460d1ae4be5dcccbb4408d",
+      "corpus_sha256": "301a3bb2220bcdd09140b483553f7ddae9c0ddb6b67e6d53e552aedff54751b5"
     }
   }
 }

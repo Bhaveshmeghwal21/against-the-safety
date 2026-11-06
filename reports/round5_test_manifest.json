@@ -1,0 +1,49 @@
+{
+  "sealed_at": "2026-11-07 01:30 IST",
+  "note": "Opened once, at the final test, after every choice is fixed. Hashes are of the files bundled for Kaggle.",
+  "sets": {
+    "r5t_squad": {
+      "questions": 65,
+      "episodes": 385,
+      "hidden_episodes": 158,
+      "oracle_end_to_end_good": 1.0,
+      "oracle_headline_good": 1.0,
+      "index_hash": "d21f3b23b95409787ef8fd610a26ad5f2b53c68f9b8229c8b183caa50a684f07",
+      "file_sha256": {
+        "questions.jsonl": "163a2c6e97509e3873787c6f73a442d2440530f25e88b11a2453fd860086a35e",
+        "corpus.json": "678da92d476f015e90874cab80fc76b46b75d8d171b00ea873a4e2f855e38033",
+        "prompt_variants.json": "e81feffad02b88bc7687ea57008435300ba90735feba3986cdfd3297d7b34d9f",
+        "manifest.json": "dca7563aa2b21aac4dab1dc4816e4137f6716e85b47d021a38714184beade585"
+      }
+    },
+    "r5t_hotpot": {
+      "questions": 60,
+      "episodes": 82,
+      "hidden_episodes": 38,
+      "oracle_end_to_end_good": 1.0,
+      "oracle_headline_good": 1.0,
+      "index_hash": "25e7b04c22283f356036fa13db4d42c785a7526a7e9f3e07375dabfc0f2c465f",
+      "file_sha256": {
+        "questions.jsonl": "fa6a10cc638ea39d5a0f43d205590cd0961185d9f5ff312d98a5baf71e2ad4e1",
+        "corpus.json": "00108da9032a6cc720cf5d1818cbfb7773c77040391cd02355d33507a52237c2",
+        "manifest.json": "dce92517e214bd7f139413102ebacd4cb57e3ac30e18f6aed31b451e8812dda9"
+      }
+    },
+    "r5t_rgb": {
+      "questions": 100,
+      "episodes": 471,
+      "hidden_episodes": 179,
+      "oracle_end_to_end_good": 1.0,
+      "oracle_headline_good": 1.0,
+      "index_hash": "17f055d9ccb446cff2f7902e4988d18ca3c15a6cb793c3ec2055defaa7478094",
+      "file_sha256": {
+        "questions.jsonl": "3a5e5a2008c8f06d3cfd4944ca3ec578ef6c5fe491460d1ae4be5dcccbb4408d",
+        "corpus.json": "301a3bb2220bcdd09140b483553f7ddae9c0ddb6b67e6d53e552aedff54751b5",
+        "prompt_variants.json": "38535609f80854467b2a8785ebefbca9f2ac815ae1f065fb86038d53b764f523",
+        "manifest.json": "89b16898092d6fb0e7a808f2460f3d500941170d04db205f95b4641fc51c6d1b"
+      }
+    }
+  },
+  "total_episodes": 938,
+  "combined_sha256": "cb368b0d1f917461015d446dee5aa054a012e9ef6e2623898043dd08c5cbba23"
+}

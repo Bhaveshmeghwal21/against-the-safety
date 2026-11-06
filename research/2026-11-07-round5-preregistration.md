@@ -85,3 +85,28 @@ Version 1 reproduces the stored scores exactly in all 12 development runs (0 mis
 - Gate on development data, unchanged from section 27: block at least 40% of main's 20 unsupported answers and at most 10% of its 76 supported-correct answers. V is the deterministic checks first, then the model check. Among configurations that pass, the one with the largest (unsupported blocked minus supported-correct blocked) wins. If none passes, V is dropped.
 - Also reported, not gated: the share of main's 87 wrong answers blocked, and the effect of V on macro success and false refusals with FB applied.
 - Cost: 366 forward passes per configuration of about 770 tokens, a few minutes on one T4. The run uses account 2 (`vibhutimeghwal`) alongside the sampling job.
+
+## Result of priority 1 (7 November 2026, 01:20 IST)
+
+Kaggle kernel `vibhutimeghwal/ats-verify-r5-dev` (about 4 minutes of GPU time per configuration). Full table: `reports/round5_verifier.md`.
+
+| configuration | unsupported blocked (of 20) | supported correct blocked (of 76) | wrong answers blocked (of 87) | passes the gate |
+| --- | ---: | ---: | ---: | --- |
+| base, wording A | 60% | 24% | 53% | no |
+| base, wording B | 75% | 21% | 62% | no |
+| main adapter, wording A | 70% | 8% | 47% | **yes** |
+| main adapter, wording B | 100% | 87% | 99% | no (blocks nearly everything) |
+
+**V = the deterministic checks, then main's adapter with wording A, is adopted** and joins every round-5 system. On main's development traces (scorer v2, FB applied on both sides) it changes unsupported answers from 18 to 5 of 131 hidden-evidence episodes, supported-correct from 0.243 to 0.228, macro from 0.515 to 0.538, and false refusals from 0.471 to 0.635. The false-refusal rise is mostly wrong answers that become abstentions, which were failures already. The sample is small (20 unsupported answers), so the 70% is a development-set estimate only; the sealed final test decides.
+
+## Priority 0d: sealed final test (7 November 2026, 01:30 IST, before any training)
+
+`reports/round5_test_manifest.json` holds the file hashes. Three parts, all disjoint from every earlier set (asserted at build time), the scripted oracle scoring 1.0 on each:
+
+| part | questions | episodes | hidden-evidence episodes |
+| --- | ---: | ---: | ---: |
+| `r5t_squad` (25 unused SQuAD training-split articles, round-4 variants) | 65 | 385 | 158 |
+| `r5t_hotpot` (unused HotpotQA validation questions) | 60 (44 reachable) | 82 | 38 |
+| `r5t_rgb` (RGB questions no earlier set used, noise 0, 0.8 and 1) | 100 | 471 | 179 |
+
+Combined hash `cb368b0d1f917461015d446dee5aa054a012e9ef6e2623898043dd08c5cbba23`, 938 episodes (the plan said about 700; RGB's three noise settings and the round-4 variants made it larger). The set is opened once, at the final test.
