@@ -928,3 +928,40 @@ New rows split over families as single 40%, compound 30%, HotpotQA prompt varian
 | candD (alpha 1) | 0.629 | 0.730 | 0.570 | 0.601 | 0.633 | 72/282 | 4/578 | no (G1) |
 
 G1 allows 25 unsupported answers out of 282 (main's 6.0% plus 3 points). Even alpha = 0.20 doubles main's count, and the count rises steadily with alpha, so there is no point on this path that gains single-passage ability while staying inside the guard. **No winner; main stays the headline model.** In line with the rule written above, main and candD now run once on the fresh test set (kernel `ats-eval-jobs-r3test`), only to describe the trade-off on questions no choice has seen.
+
+## 26. Round 3 on the fresh test set - 6 November 2026
+
+**Runs (lenient reading only; 739 episodes per system; `ats-eval-jobs-r3test` for main and candD, `ats-eval-jobs-r3testA` for candA).** The test set was opened once. Per section 25, main and candD were run although no candidate was eligible, to describe the trade-off on questions no choice had seen. Section 24 allowed candA "as a reference if budget allows", and it was run for that reason.
+
+| ends well (episodes) | main | candD (round-3 patch) | candA (round 2) | candD minus main, 95% CI |
+| --- | ---: | ---: | ---: | --- |
+| HotpotQA, fresh (88) | 0.602 | 0.716 | 0.727 | +0.114 [+0.011, +0.212] |
+| 2WikiMultihopQA, fresh (86) | 0.651 | 0.570 | 0.640 | −0.081 [−0.167, +0.000] |
+| MuSiQue 2-hop, fresh (67) | 0.478 | 0.582 | 0.627 | +0.104 [+0.000, +0.206] |
+| SQuAD 2.0, fresh questions (166) | 0.512 | 0.645 | 0.614 | +0.133 [+0.031, +0.235] |
+| RGB, fresh (266) | 0.628 | 0.665 | 0.658 | +0.038 [−0.008, +0.087] |
+| RGB integration, fresh (66) | 0.061 | 0.152 | 0.030 | +0.091 [+0.000, +0.197] |
+| **macro average of six sets** | 0.489 | 0.555 | 0.549 | **+0.066 [+0.031, +0.103]** |
+
+| pooled over the six sets | main | candD | candA |
+| --- | ---: | ---: | ---: |
+| answers when no passage in reach holds the answer (326 episodes; lower is better) | 0.203 | 0.322 | 0.233 |
+| difference from main, 95% CI | | +0.120 [+0.076, +0.163] | +0.031 [−0.003, +0.064] |
+| false abstentions on open search (239 episodes; lower is better) | 0.406 | 0.264 | 0.368 |
+
+**Section 24 criteria for candD.** The primary difference has a 95% interval above zero (met). The pooled unsupported-answer rate is 0.120 above main's, against a limit of 0.05 (not met). **candD is not recommended as the default; it is published as a higher-answering variant. Main stays the headline model.**
+
+**Reading.**
+1. *The patch did what it was built to do.* On fresh SQuAD questions, supported answers on open search went from 4 of 57 (main) to 32 of 57 (candD), false abstentions from 42 to 18, and invalid turns from 30 to 3 of 166. On RGB integration, accuracy with clean passages went from 0 of 27 to 4 of 27: the compound-question skill transfers only weakly. Searches per episode fell from 2.49 to 1.61 on SQuAD.
+2. *It costs safety, mostly on two sets.* Answers where no passage in reach holds the answer: SQuAD 6 of 109 (main) against 31 of 109 (candD), including natural unanswerable questions (46 of 60 correctly declined by main, 37 of 60 by candD); RGB 51 of 97 against 64 of 97. On fresh HotpotQA the direction is the opposite (6 of 40 against 3 of 40), but with 40 episodes that is not a finding.
+3. *Main is itself weak on on-topic distractors.* Its pooled rate of 0.203 is driven by RGB's noise-1 setting (it abstains on 14 of 60) and RGB integration, not by the Wikipedia sets (0 to 15% there). Section 23 had the same pattern on the first RGB set.
+4. *candA reaches the same macro score as candD, with less of the cost.* candA is +0.061 [+0.028, +0.093] over main with unsupported answers +0.031 [−0.003, +0.064]. Applied post hoc, the section 24 criteria would be met (candA was not a pre-registered candidate, and its section 21 status is unchanged). The two gain in different ways: candA through more correct abstentions (SQuAD natural unanswerables 52 of 60) and fewer invalid turns, but it still declines 44 of 57 single-passage questions; candD through answering them.
+5. *Round 3 did not find a better operating point than round 2.* On this set candD and candA tie on the macro score, and candA has the lower unsupported-answer rate. What round 3 adds is the single-passage ability, available only with the unsupported-answer cost.
+6. *Three independent splits now put candA ahead of main on "ends well"*: test2 (+0.056 [−0.007, +0.122]), the first benchmark suite (+0.049 [+0.026, +0.072]) and this one (+0.061 [+0.028, +0.093]). Each time candA has 3 to 6 points more unsupported answers. The round-2 rule chose main on development data, and no split has been used to change that. Switching the headline would be a new decision and needs its own pre-registered rule and a fresh split.
+
+**Deviations and omissions, in one place.**
+- The interpolation probe (section 25) and the test of non-eligible candidates were decided after the development result, and are labelled that way.
+- The informed re-run of the first-round benchmark sets was not run (budget).
+- No strict reading was run for round 3.
+- Compute used this week: 2.70 h (patch training and development evaluation) + 0.12 h (a failed first probe launch) + 1.12 h (probe) + 1.07 h (test, main and candD) + 0.50 h (candA) = 5.5 h of the 6 h available.
+- The test report's paired intervals use a seeded bootstrap over questions; a set-ordering detail made them differ in the third decimal between two runs until `report_round3.py` sorted its keys. The numbers above are from the sorted version.

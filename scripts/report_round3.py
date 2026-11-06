@@ -34,7 +34,7 @@ def unsupported(s: dict) -> bool:
 def clusters(a: list[dict], b: list[dict], fn) -> dict[str, list[tuple[float, float]]]:
     ka, kb = {(s["qid"], s["variant"]): s for s in a}, {(s["qid"], s["variant"]): s for s in b}
     out: dict[str, list[tuple[float, float]]] = defaultdict(list)
-    for k in ka.keys() & kb.keys():
+    for k in sorted(ka.keys() & kb.keys()):  # sorted, so the bootstrap is reproducible run to run
         r = fn(ka[k], kb[k])
         if r is not None:
             out[k[0]].append(r)
@@ -73,6 +73,8 @@ def main() -> None:
     ap.add_argument("--eval", action="append", required=True)
     ap.add_argument("--systems", required=True, help="comma list; the first is the reference (main), the second is compared with it")
     ap.add_argument("--suite", choices=list(SUITES), default="test")
+    ap.add_argument("--tag", default=None, help="file stem suffix under reports/ (default: test or informed)")
+    ap.add_argument("--post-hoc", action="store_true", help="the second system was not a pre-registered candidate; the section 24 criteria are applied to it afterwards")
     args = ap.parse_args()
     roots = [Path(e) for e in args.eval]
     systems = args.systems.split(",")
@@ -130,8 +132,9 @@ def main() -> None:
                   "| pooled over all sets | " + LABEL[ref] + " | " + LABEL[new] + " | difference [95% CI] | episodes |", "| --- | ---: | ---: | --- | ---: |",
                   f"| unsupported answers, hidden-evidence episodes (lower is better) | {pooled_unsup['before']:.3f} | {pooled_unsup['after']:.3f} | {pooled_unsup['difference']:+.3f} [{pooled_unsup['ci95'][0]:+.3f}, {pooled_unsup['ci95'][1]:+.3f}] | {pooled_unsup['n']} |",
                   f"| false abstentions, open search (lower is better) | {pooled_fa['before']:.3f} | {pooled_fa['after']:.3f} | {pooled_fa['difference']:+.3f} [{pooled_fa['ci95'][0]:+.3f}, {pooled_fa['ci95'][1]:+.3f}] | {pooled_fa['n']} |", "",
-                  f"Pre-registered criteria: primary difference with its 95% interval above zero: **{'met' if better else 'not met'}**; pooled unsupported-answer rate at most {SAFE_MARGIN} above the reference's: **{'met' if safe else 'not met'}**. "
-                  f"Recommended as the default model: **{'yes' if better and safe else 'no'}**."]
+                  (f"Plan section 24 criteria, applied post hoc ({LABEL[new]} was not a pre-registered candidate; its selection status is unchanged): " if args.post_hoc else "Pre-registered criteria: ")
+                  + f"primary difference with its 95% interval above zero: **{'met' if better else 'not met'}**; pooled unsupported-answer rate at most {SAFE_MARGIN} above the reference's: **{'met' if safe else 'not met'}**. "
+                  f"{'Would be recommended' if args.post_hoc else 'Recommended'} as the default model: **{'yes' if better and safe else 'no'}**."]
     for b, title in have:
         m = result["components"][b]["metrics"]
         lines += ["", f"## {title}", "", "| metric | " + " | ".join(LABEL[s] for s in systems) + " |", "| --- |" + " ---: |" * len(systems)]
@@ -143,7 +146,7 @@ def main() -> None:
         lines += ["", "| AuditKIT (all episodes) | " + " | ".join(LABEL[s] for s in systems) + " |", "| --- |" + " ---: |" * len(systems)]
         for k in AUDIT:
             lines.append(f"| {AUDIT_LABEL.get(k, k)} | " + " | ".join("n/a" if audit[(b, s)].get(k) is None else f"{audit[(b, s)][k]:.3f}" for s in systems) + " |")
-    tag = "test" if args.suite == "test" else "informed"
+    tag = args.tag or ("test" if args.suite == "test" else "informed")
     (ROOT / "reports" / f"round3_{tag}.md").write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
     (ROOT / "reports" / f"round3_{tag}.json").write_text(json.dumps(result, indent=1), encoding="utf-8", newline="\n")
     print("\n".join(lines[: 14 + (len(have) if new else 0) + 12]))
