@@ -6,7 +6,7 @@
 
 Lexsi AI Safety and Alignment Hackathon · Track 3: Agentic fine-tuning · PS 4: Fine-tuning for RAG
 
-[![Models](https://img.shields.io/badge/%F0%9F%A4%97%20Models-3%20LoRA%20adapters-ffcc4d)](https://huggingface.co/collections/BMEscanor/against-the-safety-tiny-aya-rag-adapters-6aec1fda812ed14d9f60bfbc)
+[![Models](https://img.shields.io/badge/%F0%9F%A4%97%20Models-4%20LoRA%20adapters-ffcc4d)](https://huggingface.co/collections/BMEscanor/against-the-safety-tiny-aya-rag-adapters-6aec1fda812ed14d9f60bfbc)
 [![Data](https://img.shields.io/badge/%F0%9F%A4%97%20Data-episodes%20%26%20traces-ffcc4d)](https://huggingface.co/collections/BMEscanor/against-the-safety-rag-episodes-traces-and-demo-6aec1fdb994e3b036c6c958d)
 [![Demo](https://img.shields.io/badge/%F0%9F%A4%97%20Demo-trace%20viewer-ffcc4d)](https://huggingface.co/spaces/BMEscanor/against-the-safety-trace-viewer)
 [![Base model](https://img.shields.io/badge/base-Tiny%20Aya%20Global%20%28Cohere%29-39594d)](https://huggingface.co/CohereLabs/tiny-aya-global)
@@ -22,6 +22,7 @@ Lexsi AI Safety and Alignment Hackathon · Track 3: Agentic fine-tuning · PS 4:
 - **Result:** on a held-out test split, opened once, the share of episodes that end well rose from **2.0% to 58.3%**. An episode ends well with a cited, supported answer when the documents hold the answer, or with an abstention when they don't.
 - **Replicated:** in a second round, on 100 fresh questions that no choice had seen, the same adapter went from **2.8% to 60.1%**.
 - **Five external benchmarks:** on 2WikiMultihopQA, MuSiQue, SQuAD 2.0, RGB and RGB integration (1,131 episodes, never trained on or used for any choice), the rate went from **7.9% to 49.9%**. It rose on four of the five. The adapter fails on questions that need a two-part answer, and it often refuses single-passage questions.
+- **A third round, judged and rejected:** a patch for those failures fixed single-passage questions (fresh SQuAD: 4 to 32 supported answers of 57) but raised unsupported answers on SQuAD from 6 to 31 of 109, so it failed the safety guard we had fixed beforehand and **main stays the model**. The negative result is reported in full below.
 - **The price:** the adapter declines about one answerable question in five. A second-round variant (candA) halves that on dev, at the cost of more answers when the evidence is missing. A control adapter trained without abstention examples answers more, but it never abstains.
 
 <p align="center">
@@ -112,6 +113,9 @@ This is the typical pattern; the counts are in the figure above. Every test epis
 | [`round2_selection.md`](reports/round2_selection.md) | round 2: candidate selection on the development split |
 | [`scorecard_test2_lenient.md`](reports/scorecard_test2_lenient.md), [`scorecard_test2_strict.md`](reports/scorecard_test2_strict.md), [`tradeoff_test2_lenient.md`](reports/tradeoff_test2_lenient.md) | round 2: the fresh test split |
 | [`benchmarks_lenient.md`](reports/benchmarks_lenient.md), [`benchmarks_strict.md`](reports/benchmarks_strict.md) | five external benchmarks: every metric, paired intervals, AuditKIT rows, closed book |
+| [`round3_selection.md`](reports/round3_selection.md), [`round3_selection_interp.md`](reports/round3_selection_interp.md) | round 3: development results and the selection rule's outcome; the weight-blend probe |
+| [`round3_test.md`](reports/round3_test.md), [`round3_test_candA.md`](reports/round3_test_candA.md) | round 3: the fresh test set, every metric per set (main, candD, candA) |
+| [`round3_data.json`](reports/round3_data.json), [`training_sets_round3.json`](reports/training_sets_round3.json) | round 3: what was drawn, accepted and rejected; composition of the two patch sets |
 
 ## Round 2: a fresh test split, and an attempt to cut the refusals
 
@@ -192,6 +196,59 @@ Does the behaviour learned on HotpotQA hold on data we did not build, train on o
 
 **Main against candA.** CandA is ahead on all five, by 0.049 [0.026, 0.072] pooled. It gives more supported answers (133 against 105 of 346 open questions) and more unsupported ones (128 against 102 of 465 hidden-evidence episodes), the same trade-off as on dev and test2. Main stays the project's model, as pre-registered. If you prefer answers over caution, use candA.
 
+## Round 3: a patch for single-passage and two-part questions (not adopted)
+
+The benchmarks showed three gaps that re-weighting the first-round data could not close, because that data never contained them: single-passage questions are refused, two-part answers get half an answer, and on-topic passages that lack the answer are trusted. We built a patch and judged it under rules written down first ([plan sections 24 to 26](research/2026-11-04-fine-tuning-for-rag.md)): the candidates, a development set, a safety guard, and a fresh test set that no choice touched.
+
+**The patch.** Two candidates continue from the main adapter for one epoch (93 steps, 2.2 M tokens), on new scripted episodes plus rehearsal rows from main's training set.
+- *single:* 240 SQuAD 2.0 training-split questions, where one passage holds the answer.
+- *compound:* 120 pairs of such questions joined into one, with the answer "A1; A2".
+- *prompt variants,* also on the 600 HotpotQA training questions: the support plus three on-topic passages without the answer supplied (answer without searching); on-topic passages only supplied, support masked (search, then abstain); one of two supports masked (abstain).
+- candC is the stronger patch (65% new rows), candD the careful one (45%).
+
+**Development set and guard.** Held-out SQuAD training-split articles (single, compound and prompt-variant episodes) plus the HotpotQA dev split. A candidate was eligible only if its pooled unsupported-answer rate stayed within 3 points of main's.
+
+| development set, ends well | main | candC | candD |
+| --- | ---: | ---: | ---: |
+| HotpotQA dev | **0.673** | 0.566 | 0.629 |
+| single-passage | 0.325 | **0.762** | 0.730 |
+| compound | 0.510 | **0.600** | 0.570 |
+| prompt variants | 0.497 | **0.699** | 0.601 |
+| macro average | 0.501 | **0.657** | 0.633 |
+| answers when no passage in reach holds the answer (282) ↓ | **17** | 70 | 72 |
+| eligible | | no | no |
+
+**No candidate was eligible, so main stayed.** Both patched models learned to answer from on-topic passages even when they lack the answer, and answered the visible half of a compound question while inventing the other half. A probe added afterwards, blending the main and candD weights at 20%, 35% and 50% (`scripts/interp_adapters.py`), raised unsupported answers steadily (34, 39 and 46 of 282, limit 25): there is no blend that gains the skill and stays inside the guard.
+
+**Fresh test set** (739 episodes per system, questions disjoint from every earlier set, opened once):
+
+<p align="center">
+  <img src="docs/figures/round3_test.svg" alt="Ends-well rate on six fresh sets for main, candD and candA, and the pooled unsupported-answer rate" width="760">
+</p>
+
+| fresh test | main | candD (round 3) | candA (round 2) |
+| --- | ---: | ---: | ---: |
+| macro average of six sets, ends well | 0.489 | **0.555** | 0.549 |
+| difference from main, 95% CI | | +0.066 [+0.031, +0.103] | +0.061 [+0.028, +0.093] |
+| answers when no passage in reach holds the answer ↓ | **0.203** | 0.322 | 0.233 |
+| difference from main, 95% CI | | +0.120 [+0.076, +0.163] | +0.031 [−0.003, +0.064] |
+| SQuAD 2.0, supported answers on open search (57) | 4 | **32** | 6 |
+| SQuAD 2.0, answers when the passage cannot answer (109) ↓ | **6** | 31 | **6** |
+| RGB integration, accuracy with clean passages (27) | 0 | **4** | 0 |
+
+**What round 3 showed.**
+- **The patch fixes what it targeted.** On fresh SQuAD questions main gave a supported answer to 4 of 57 and candD to 32 of 57; invalid turns fell from 30 to 3 of 166. Two-part answers improved only a little (0 to 4 of 27).
+- **It costs safety, mostly on two sets.** On SQuAD candD answered 31 of 109 questions the passages could not answer (main: 6), and on RGB 64 of 97 (main: 51). The safety criterion, fixed beforehand, was not met (+0.120, limit +0.05), so candD is a higher-answering variant and main remains the headline model.
+- **Round 3 did not find a better operating point than round 2.** CandA ties candD on the macro score with a smaller safety cost; it gains by abstaining correctly and by fewer invalid turns, and still refuses single-passage questions. On three independent splits (test2, the benchmark suite, this one) candA is ahead of main on ends well by 0.05 to 0.06 and gives 3 to 6 points more unsupported answers. The round-2 rule picked main on development data, and we did not change that after seeing test data. Switching would need its own pre-registered rule and a new split.
+
+**Which adapter to use.**
+
+| if you need | use |
+| --- | --- |
+| the fewest answers without evidence | main |
+| fewer refusals on multi-hop questions, a little more risk | candA |
+| answers to single-passage questions, and you accept the most unsupported answers | candD |
+
 ## How it works
 
 ### The agent loop
@@ -268,6 +325,7 @@ Both readings, and the choice of lenient as primary, were fixed before the test 
 | Main adapter | [against-the-safety-tiny-aya-rag-main](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-main) |
 | Control adapter | [against-the-safety-tiny-aya-rag-control](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-control) |
 | candA adapter (round 2, fewer refusals; not the selected model) | [against-the-safety-tiny-aya-rag-cand-a](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-cand-a) |
+| candD adapter (round 3 patch, answers single-passage questions; fails the safety guard, not the selected model) | [against-the-safety-tiny-aya-rag-patch](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-patch) |
 | Episodes, evaluation traces, reports | [against-the-safety-rag-episodes](https://huggingface.co/datasets/BMEscanor/against-the-safety-rag-episodes) |
 | Nimbus Home suite | [nimbus-home-support-suite](https://huggingface.co/datasets/BMEscanor/nimbus-home-support-suite) |
 | External benchmark traces | [against-the-safety-benchmark-traces](https://huggingface.co/datasets/BMEscanor/against-the-safety-benchmark-traces) |
@@ -371,16 +429,31 @@ python scripts/bench_report.py --eval runs/kaggle/ats-eval-bench-a/out/eval --ev
 
 The two benchmark kernels took 2.8 h and 2.5 h.
 
+**6. Round 3 (optional).**
+
+```powershell
+python scripts/prepare_round3.py         # SQuAD training-split episodes, the development set (r3dev) and the fresh test set (r3t_*)
+python scripts/make_patch_sets.py        # candC and candD training sets
+python scripts/kaggle_launch.py dataset
+python scripts/kaggle_launch.py run patch --adapters-from ats-train-both --tag r3 "--extra=--epochs 1 --lr 1.5e-4 --jobs candC:bench_r3dev:30,candD:bench_r3dev:30,main:bench_r3dev:30,candC:dev:11,candD:dev:11"
+python scripts/select_round3.py --eval runs/kaggle/ats-patch-r3/out/eval --main-dev runs/kaggle/ats-eval-dev/out/eval/main_dev/lenient
+python scripts/kaggle_launch.py run eval-jobs --adapters-from ats-train-both,ats-patch-r3 --tag r3test "--extra=--jobs main:bench_r3t_rgb:19,candD:bench_r3t_rgb:19,..."   # all six r3t sets
+python scripts/report_round3.py --eval runs/kaggle/ats-eval-jobs-r3test/out/eval --systems main,candD --suite test
+```
+
+The patch kernel took 2.7 h, the weight-blend probe 1.1 h and the fresh test 1.6 h (main, candD and candA).
+
 ## Limits
 
 - **False abstains.** The main adapter declines 19% of answerable test episodes (22% on test2, 18% on dev). The candA adapter lowers this to 15% on test2, but answers in 8% of test2 episodes whose evidence is missing (main: 4%).
 - **Small evaluation sets.** There are 86 answerable test questions and 65 headline episodes with masked evidence, so differences of a few points are not established. Every report gives intervals.
 - **Near-miss credit.** An answer counts as supported at F1 ≥ 0.5 against the gold answer, plus a cited gold passage. F1 can credit near misses on short answers, so exact-match rates are reported too: main 0.424, control 0.571, base 0.020 on answerable episodes.
 - **Narrow coverage.** Everything is English, with short HotpotQA-style factual questions. The Nimbus Home suite has only 24 tasks.
-- **Single-span, two-passage habits.** On the external benchmarks the adapters answer only the first part of two-part questions (RGB integration), and they decline most single-passage SQuAD 2.0 questions even with the answer on screen. The training data had neither kind of question. A third round with such episodes was not run, because this week's GPU quota is nearly used, and all five benchmarks have now been opened.
+- **Single-span, two-passage habits.** On the external benchmarks the main adapter answers only the first part of two-part questions (RGB integration), and it declines most single-passage SQuAD 2.0 questions even with the answer on screen. Round 3 trained a patch for both; the patch fixes the single-passage case but fails the safety guard (see Round 3), so the shipped model keeps the habit. A model that does both safely would need more training steps than the remaining compute allowed.
+- **On-topic passages without the answer.** When such passages are supplied in the prompt (RGB noise 1), main abstains on only 14 of 60 fresh questions. All adapters are weak here, and the unsupported-answer rates in the tables are dominated by this case.
 - **Nimbus run 1 was flawed.** F1 could not tell "30 days" from "45 days". We shortened the gold answers, fixed one question and re-ran every system. Traces from both runs are published.
 - **Masking check.** The test that a masked episode lacks the answer is a text match. It does not prove that no other passage could support a different valid answer.
-- **One more training round, judged on fresh data.** Choosing a new mixture after the first test split was opened needed a new split. Round 2 used test2, so the first test split was never used for selection.
+- **Three training rounds, each judged on fresh data.** Choosing a new mixture after a test split was opened needed a new split. Round 2 used test2 and round 3 a fresh set of six, so the first test split was never used for selection. Round 3's probe (the weight blend) and its test of non-eligible candidates were decided after the development result and are labelled as such in the plan.
 
 <details>
 <summary><b>Repository layout</b></summary>
@@ -395,7 +468,7 @@ reports/          every table cited on this page (markdown and json)
 docs/figures/     the figures on this page
 demo/             static trace viewer, also published as a Hugging Face Space
 article/          write-up and submission abstract
-research/         planning record with the pre-registered choices (sections 18 to 23)
+research/         planning record with the pre-registered choices (sections 18 to 26)
 tests/            harness tests
 ```
 
@@ -407,7 +480,7 @@ tests/            harness tests
 | --- | --- |
 | Code in this repository | MIT |
 | Adapters | CC BY-NC 4.0, inherited from Tiny Aya (the base model is gated; accept its terms to use it) |
-| HotpotQA-derived episodes and traces | CC BY-SA 4.0, as HotpotQA |
+| HotpotQA- and SQuAD-derived episodes and traces | CC BY-SA 4.0, as HotpotQA and SQuAD 2.0 |
 | Nimbus Home suite | CC BY 4.0 (written by us, fictional) |
 | Benchmark traces | per benchmark, as the source: 2WikiMultihopQA Apache-2.0, MuSiQue CC BY 4.0, SQuAD 2.0 CC BY-SA 4.0, RGB CC BY-NC-SA 4.0 |
 | AgentTune (LSAL v1.1), AuditKIT (LSAL v1.2) | source-available, used as dependencies, not redistributed |

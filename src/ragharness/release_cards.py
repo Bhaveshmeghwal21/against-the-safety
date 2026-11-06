@@ -224,9 +224,9 @@ The epoch count was chosen on the development split before the test split was op
 ## Limits
 
 - Fine-tuned on one language (English) and one question style (HotpotQA-like, short factual answers); the 24-task Nimbus Home check shows weaker results on two-document questions and on choosing the current edition of a policy.
+- On the external benchmarks above, two-part answers (RGB integration) and single-passage questions (SQuAD 2.0) fail; neither kind was in the training data. A third-round patch ([the patch adapter](https://huggingface.co/{user}/against-the-safety-tiny-aya-rag-patch)) fixes single-passage questions but failed the safety guard fixed beforehand.
 - The main adapter declines roughly one in five answerable questions on the test split.
 - Evaluation sets are small (86 test questions with evidence states). Intervals are in the repository; differences of a few points are not established.
-- On the external benchmarks above, two-part answers (RGB integration) and single-passage questions (SQuAD 2.0) fail; neither kind was in the training data.
 - Not for safety-critical or legal use. The base model's license (CC BY-NC 4.0) applies to this adapter.
 
 ## License
@@ -258,6 +258,7 @@ Passages are Wikipedia text through HotpotQA. Please attribute HotpotQA (Yang et
 - `traces/<run>/<system>__<lenient|strict>__{{transcripts,scores,trajectories}}.jsonl`: every evaluated episode of the base model, the main adapter and the control adapter on dev and test. `transcripts` are readable, `scores` hold the deterministic outcome per episode, `trajectories` is AgentTune's TrajectoryStore export. `dev_epoch1` holds the epoch-1 adapters used to choose the epoch. `dev_bias` and `dev_bias2` hold the main adapter decoded with an abstain-logit bias (systems `main_b<bias>`; see `reports/bias_sweep.md`; development split only).
 - `manifests/`: split manifest (question ids), index manifest (hash of the shared 7,820-passage index), leakage and shortcut reports. `reports/`: scorecards, trade-off tables, ROI.
 - Second round (plan sections 20 and 21 in the code repository): `training/candA.jsonl` and `training/candB.jsonl` (two re-weighted selections of the same train decisions), `traces/dev_round2/` (both candidates on dev, used for selection), `traces/test2/` (base, closed book, main, control and candA on the fresh split), `manifests/test2_manifest.json` (question ids, sampling rule, and the hash of the extended 8,777-passage index).
+- Third round (plan sections 24 to 26): `training/candC.jsonl` and `training/candD.jsonl` (the two patch sets: new rows from SQuAD 2.0 training-split passages and HotpotQA train questions, plus rehearsal rows), `episodes/eventlogs_train3.jsonl` (the new episodes), `traces/dev_round3*` (both patches, and the weight blends of the main and candD adapters, on the development set, which holds held-out SQuAD training-split articles), `manifests/r3dev.json` (what was drawn for the development set). Fresh-test traces and manifests for the third round are in the benchmark-traces dataset.
 
 ## How it was built
 
@@ -303,6 +304,12 @@ BENCH_SOURCES = {  # folder -> (benchmark, license, citation)
     "squad2": ("SQuAD 2.0, dev", "CC BY-SA 4.0", "Rajpurkar et al., 2018, Know What You Don't Know: Unanswerable Questions for SQuAD"),
     "rgb": ("RGB, English refined set", "CC BY-NC-SA 4.0", "Chen et al., 2024, Benchmarking Large Language Models in Retrieval-Augmented Generation"),
     "rgb_int": ("RGB, English integration set", "CC BY-NC-SA 4.0", "Chen et al., 2024 (as above)"),
+    "r3t_hotpot": ("HotpotQA validation, fresh questions (round 3 test)", "CC BY-SA 4.0", "Yang et al., 2018, HotpotQA"),
+    "r3t_2wiki": ("2WikiMultihopQA, dev, fresh questions (round 3 test)", "Apache-2.0", "Ho et al., 2020 (as above)"),
+    "r3t_musique": ("MuSiQue-Ans v1.0, dev, 2-hop, fresh questions (round 3 test)", "CC BY 4.0", "Trivedi et al., 2022 (as above)"),
+    "r3t_squad2": ("SQuAD 2.0, dev, fresh questions (round 3 test)", "CC BY-SA 4.0", "Rajpurkar et al., 2018 (as above)"),
+    "r3t_rgb": ("RGB, English refined set, fresh questions (round 3 test)", "CC BY-NC-SA 4.0", "Chen et al., 2024 (as above)"),
+    "r3t_rgb_int": ("RGB, English integration set, fresh questions (round 3 test)", "CC BY-NC-SA 4.0", "Chen et al., 2024 (as above)"),
 }
 
 
@@ -320,7 +327,7 @@ tags: [rag, retrieval, abstention, agent-traces, 2wikimultihopqa, musique, squad
 Every evaluated episode of the base model (Tiny Aya Global), the [main adapter](https://huggingface.co/{user}/against-the-safety-tiny-aya-rag-main),
 the [candA adapter](https://huggingface.co/{user}/against-the-safety-tiny-aya-rag-cand-a) and the
 [control adapter](https://huggingface.co/{user}/against-the-safety-tiny-aya-rag-control) on 2WikiMultihopQA, MuSiQue, SQuAD 2.0, RGB and RGB integration,
-1,131 episodes per system, plus the closed-book baseline. Nothing here was used for training or for any choice.
+1,131 episodes per system, plus the closed-book baseline. Nothing here was used for training or for any choice, but these sets showed the failures that round 3 then tried to patch.
 The sets, settings and metrics were fixed before any model ran on them (plan section 22, results in section 23): [{REPO_URL}]({REPO_URL}).
 
 ## Results (ends well: a supported answer when the documents hold the answer, an abstention when they do not)
@@ -338,10 +345,18 @@ The sets, settings and metrics were fixed before any model ran on them (plan sec
 
 The RGB folders are non-commercial (CC BY-NC-SA 4.0), as RGB. The traces contain passages and questions from the source benchmarks, model outputs, and scores.
 
+## Round 3: a fresh test set (`r3t_*` folders)
+
+Six sets of questions disjoint from every earlier set (plan sections 24 to 26), run once for the main adapter, the round-3 patch (candD, [patch adapter](https://huggingface.co/{user}/against-the-safety-tiny-aya-rag-patch)) and candA, lenient reading only, 739 episodes per system:
+
+{r3_test_table()}
+
+Pooled unsupported answers are dominated by RGB's on-topic-passage setting, where every adapter is weak. The patch fixed single-passage questions but failed the safety criterion fixed beforehand, so the main adapter stays the headline model.
+
 ## Contents
 
 - `traces/<benchmark>/<system>__<lenient|strict>__{{transcripts,scores,trajectories}}.jsonl` and `__summary.json`: `transcripts` are readable conversations, `scores` hold the deterministic
-  outcome of each episode, `trajectories` is AgentTune's TrajectoryStore export, `summary` holds the aggregate and AuditKIT metrics. Systems: `base`, `main`, `candA`, `control`.
+  outcome of each episode, `trajectories` is AgentTune's TrajectoryStore export, `summary` holds the aggregate and AuditKIT metrics. Systems: `base`, `main`, `candA`, `control` (first suite); `main`, `candD`, `candA` (`r3t_*`).
 - `traces/<benchmark>/closed__summary.json`: the base model answering from memory, question only.
 - `manifests/<benchmark>.json`: source file, question ids, sampling seed, index hash and counts, written by `scripts/prepare_benchmarks.py`.
 - `reports/benchmarks_lenient.md`, `reports/benchmarks_strict.md` (and `.json`): every metric with denominators, paired intervals, AuditKIT rows.
@@ -353,4 +368,96 @@ citations or abstain. Variants: open search, and the support masked from search 
 searches. SQuAD 2.0's natural unanswerable questions are run as open search. RGB is also run in its own settings, with five passages in the prompt (noise 0, 0.8 and 1; at noise 1
 the positives are also masked from search). An answer is correct at F1 >= 0.5 against the gold answer or an alias, or, for RGB, when every answer part is contained;
 it is supported when it is correct, every cited chunk was shown, and a cited chunk holds the answer. The numbers are not comparable with official leaderboards.
+"""
+
+
+# ---------------------------------------------------------------- round 3 (plan sections 24 to 26)
+
+R3_TITLES = {"r3t_hotpot": "HotpotQA, fresh", "r3t_2wiki": "2WikiMultihopQA, fresh", "r3t_musique": "MuSiQue 2-hop, fresh", "r3t_squad2": "SQuAD 2.0, fresh questions",
+             "r3t_rgb": "RGB, fresh", "r3t_rgb_int": "RGB integration, fresh"}
+
+
+def _r3(name: str) -> dict:
+    return json.loads((ROOT / "reports" / f"{name}.json").read_text(encoding="utf-8"))
+
+
+def _ci(p: dict) -> str:
+    return f"{p['difference']:+.3f} [{p['ci95'][0]:+.3f}, {p['ci95'][1]:+.3f}]"
+
+
+def r3_test_table() -> str:
+    """Fresh test set (739 episodes per system): ends well per set, macro average, and the pooled unsupported-answer rate."""
+    rep, ca = _r3("round3_test"), _r3("round3_test_candA")
+    key = "ends well (all scored episodes)"
+    names = ("main", "candD", "candA")
+    lines = ["| ends well (episodes) | main | candD (round 3 patch) | candA (round 2) |", "| --- | ---: | ---: | ---: |"]
+    for b, c in rep["components"].items():
+        m = c["metrics"]
+        lines.append(f"| {R3_TITLES[b]} ({m['main'][key]['n']}) | " + " | ".join(f"{m[s][key]['value']:.3f}" for s in names) + " |")
+    lines.append("| **macro average of six sets** | " + " | ".join(f"{rep['macro'][s]:.3f}" for s in names) + " |")
+    lines.append(f"| difference from main, 95% CI | | {_ci(rep['macro_paired'])} | {_ci(ca['macro_paired'])} |")
+    pu, pa = rep["pooled_unsupported_answers"], ca["pooled_unsupported_answers"]
+    lines.append(f"| answers when no passage in reach holds the answer ({pu['n']} episodes; lower is better) | {pu['before']:.3f} | {pu['after']:.3f} | {pa['after']:.3f} |")
+    lines.append(f"| difference from main, 95% CI | | {_ci(pu)} | {_ci(pa)} |")
+    return "\n".join(lines)
+
+
+def r3_dev_table() -> str:
+    sel = _r3("round3_selection")["stats"]
+    comps = list(sel["main"]["components"])
+    lines = ["| development set, ends well | main | candC | candD |", "| --- | ---: | ---: | ---: |"]
+    for c in comps:
+        lines.append(f"| {c} | " + " | ".join(f"{sel[s]['components'][c]['rate']:.3f}" for s in ("main", "candC", "candD")) + " |")
+    lines.append("| macro average | " + " | ".join(f"{sel[s]['macro']:.3f}" for s in ("main", "candC", "candD")) + " |")
+    lines.append("| answers when no passage in reach holds the answer (of 282; lower is better) | " + " | ".join(str(sel[s]["pooled_unsupported"][0]) for s in ("main", "candC", "candD")) + " |")
+    return "\n".join(lines)
+
+
+def patch_card(user: str) -> str:
+    return f"""---
+license: cc-by-nc-4.0
+base_model: {BASE}
+library_name: peft
+pipeline_tag: text-generation
+language: [en]
+tags: [lora, qlora, peft, rag, retrieval, abstention, citations, agent, tiny-aya, lexsi-hackathon, agenttune, auditkit]
+datasets: [{user}/against-the-safety-rag-episodes]
+---
+
+# against-the-safety-tiny-aya-rag-patch
+
+A LoRA adapter for [Tiny Aya Global]({"https://huggingface.co/" + BASE}) (revision `{REVISION[:8]}`) from the project's third round (candD, "careful patch"). It continues from
+[the main adapter](https://huggingface.co/{user}/against-the-safety-tiny-aya-rag-main) for one epoch (93 steps, 2.2 M tokens) on new episodes that teach it to answer when a single passage
+holds the answer, to answer both parts of a two-part question, and to treat supplied on-topic passages without the answer as insufficient: 45% new rows (SQuAD 2.0 training-split questions,
+compound questions, prompt variants) and 55% rehearsal rows from the main adapter's training set. Built for the Lexsi AI Safety and Alignment Hackathon, Track 3, problem statement 4.
+Team **Against-the-safety**. Code and plan: [{REPO_URL}]({REPO_URL}) (plan sections 24 to 26).
+
+**Status: not the selected model, and not recommended where an unsupported answer is costly.** The rules were fixed before training: a candidate could replace the main adapter only if its
+pooled rate of answers given when no passage in reach holds the answer stayed within 3 points of main's on the development set. This adapter, like candC, did not, so the main adapter stayed the
+project's model. On fresh questions the same rate was again too high (below). Use it when you need single-passage questions answered and accept more unsupported answers.
+
+## Development set (held-out SQuAD training-split articles and HotpotQA dev; ends well)
+
+{r3_dev_table()}
+
+## Fresh test set (six sets, 739 episodes per system, questions disjoint from every earlier set, opened once)
+
+{r3_test_table()}
+
+On fresh SQuAD questions this adapter gave a supported answer to 32 of 57 answerable questions (main: 4, candA: 6) and had 3 invalid turns of 166 (main: 30). It also answered 31 of 109 SQuAD
+episodes whose passages cannot answer (main: 6, candA: 6). The pre-registered criterion (pooled unsupported answers at most 0.05 above main's) was not met (+0.120).
+
+## Use
+
+Loading is the same as for the main adapter (see its card); replace the adapter id with `{user}/against-the-safety-tiny-aya-rag-patch`. It expects the same system prompt and tool loop
+(`ragharness.protocol.system_prompt`, `ragharness.rollout`).
+
+## Limits
+
+The main adapter's limits apply. Two-part answers improved only a little (4 of 27 fresh RGB integration questions answered fully, against 0). When one part of a compound question is missing, the
+adapter tends to answer the visible part and invent the other. Evaluated sets are small (60 to 120 questions per set); every report gives intervals. Not for safety-critical or legal use.
+
+## License
+
+CC BY-NC 4.0, inherited from the base model. Cohere Labs' terms for Tiny Aya apply.
 """

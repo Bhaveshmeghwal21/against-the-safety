@@ -35,10 +35,16 @@ EVALS = {  # label -> (split, directory holding <system>_<split>/<parse>/)
     "dev_bias2": ("dev", RUNS / "ats-eval-dev-bias2" / "out" / "eval"),
     "dev_round2": ("dev", RUNS / "ats-eval-dev-cands" / "out" / "eval"),  # second round: candA and candB on dev (selection)
     "test2": ("test2", RUNS / "ats-eval-test2" / "out" / "eval"),  # second round: fresh split
+    "dev_round3": ("dev", RUNS / "ats-patch-r3" / "out" / "eval"),  # third round: both patches on HotpotQA dev
+    "dev_round3_r3dev": ("bench_r3dev", RUNS / "ats-patch-r3" / "out" / "eval"),  # main and both patches on the round-3 development set
+    "dev_round3_blend": ("dev", RUNS / "ats-interp-r3b" / "out" / "eval"),  # weight blends of main and candD
+    "dev_round3_blend_r3dev": ("bench_r3dev", RUNS / "ats-interp-r3b" / "out" / "eval"),
 }
 TRAIN_ROUND2 = RUNS / "ats-train-cands" / "out"
-BENCH_EVALS = [RUNS / "ats-eval-bench-a" / "out" / "eval", RUNS / "ats-eval-bench-b" / "out" / "eval"]  # plan sections 22 and 23
-BENCHES = ["2wiki", "musique", "squad2", "rgb", "rgb_int"]
+TRAIN_ROUND3 = RUNS / "ats-patch-r3" / "out"
+BENCH_EVALS = [RUNS / "ats-eval-bench-a" / "out" / "eval", RUNS / "ats-eval-bench-b" / "out" / "eval",  # plan sections 22 and 23
+               RUNS / "ats-eval-jobs-r3test" / "out" / "eval", RUNS / "ats-eval-jobs-r3testA" / "out" / "eval"]  # plan section 26: fresh test
+BENCHES = ["2wiki", "musique", "squad2", "rgb", "rgb_int", "r3t_hotpot", "r3t_2wiki", "r3t_musique", "r3t_squad2", "r3t_rgb", "r3t_rgb_int"]
 
 
 def copy(src: Path, dst: Path) -> None:
@@ -89,12 +95,15 @@ def main() -> None:
     for name in ("main", "control"):
         build_model(name, out, cards.model_card(name, args.user))
     build_model("candA", out, cards.cand_a_card(args.user), train=TRAIN_ROUND2, dst_name="cand_a")
+    build_model("candD", out, cards.patch_card(args.user), train=TRAIN_ROUND3, dst_name="patch")
 
     ds = out / "dataset_episodes"
     shutil.rmtree(ds, ignore_errors=True)
-    for name in ("main", "control", "dev", "candA", "candB"):
+    for name in ("main", "control", "dev", "candA", "candB", "candC", "candD"):
         copy(ROOT / "data" / "processed" / "training" / f"{name}.jsonl", ds / "training" / f"{name}.jsonl")
     copy(ROOT / "data" / "processed" / "episodes" / "eventlogs_train.jsonl", ds / "episodes" / "eventlogs_train.jsonl")
+    copy(ROOT / "data" / "processed" / "episodes" / "eventlogs_train3.jsonl", ds / "episodes" / "eventlogs_train3.jsonl")
+    copy(ROOT / "data" / "bench" / "r3dev" / "manifest.json", ds / "manifests" / "r3dev.json")
     for f in (ROOT / "data" / "manifests").glob("*.json"):
         copy(f, ds / "manifests" / f.name)
     for f in sorted((ROOT / "reports").glob("*")):
@@ -118,7 +127,7 @@ def main() -> None:
     for b in BENCHES:
         counts[f"bench_{b}"] = sum(copy_traces(b, f"bench_{b}", root, bt) for root in BENCH_EVALS)
         copy(ROOT / "data" / "bench" / b / "manifest.json", bt / "manifests" / f"{b}.json")
-    for f in sorted((ROOT / "reports").glob("benchmarks_*")):
+    for f in sorted((ROOT / "reports").glob("benchmarks_*")) + sorted((ROOT / "reports").glob("round3_test*")):
         copy(f, bt / "reports" / f.name)
     (bt / "README.md").write_text(cards.bench_card(args.user), encoding="utf-8", newline="\n")
 
