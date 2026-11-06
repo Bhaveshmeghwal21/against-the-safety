@@ -814,3 +814,67 @@ The strict reading gives the same adapter numbers (main pooled 0.498). The base 
 - refusals when the supplied passages are on topic but stale.
 
 None of these sets would be usable for selection afterwards, because all five have now been opened.
+
+## 24. Third round: a targeted patch for the failures the benchmarks found - 6 November 2026 (written before any round-3 training or evaluation)
+
+**Why.** Section 23 found three gaps that no re-weighting of the first-round data could close, because the first-round data never contained them. Every training question needed two passages and had a one-span answer. As a result:
+- *Single-passage questions are refused.* On SQuAD 2.0 main declined 54 of 73 answerable questions. In all 54, the answer text was in the first search's results. In main's training set, 356 of 537 answers come after zero or one search, and every one of those questions needed two passages that were both visible. "One relevant passage after the first search" only ever meant "search again".
+- *Two-part answers get half an answer.* RGB integration accuracy was 0.017 for main, against 0.383 for the base model.
+- *On-topic passages without the answer, supplied in the prompt, are trusted.* At RGB noise 1, main abstained on 26 of 100.
+
+**What informed this design (disclosed).** The failure analysis in section 23 used the five benchmark sets, so those sets cannot test round 3. They become *informed* sets: they are re-run once, labelled as such, and nothing is chosen with them. SQuAD 2.0 is a further case. Round 3 trains on the SQuAD 2.0 *train* split (articles disjoint from the dev articles used in the benchmark: 0 of 442 train titles are among the 35 dev titles). SQuAD 2.0 dev is therefore no longer a zero-shot test for round-3 models. Zero-shot single-passage evidence remains RGB (news text, never trained on). SQuAD's natural unanswerable questions (human-written) are never used for training, so abstention on them stays a transfer test.
+
+**Method.** A patch: each candidate continues from the main adapter for one epoch over 2.2 M processed tokens (about 92 optimizer steps at batch 16), learning rate 1.5e-4 (main: 2e-4), the same LoRA settings, seed 13. Continuing rather than retraining fits the remaining compute: retraining from scratch needs about 3.9 h per candidate.
+
+**New episodes** (`src/ragharness/round3.py`, `scripts/prepare_round3.py`; scripted policy under real search, rejection rules as in section 4). Nothing reads a model output.
+- *single* (240 SQuAD train questions from 80 articles, one per paragraph, spread over articles): the first-round variants (open S1/S2/S6, support masked S4, first search masked S6, evidence supplied S5).
+- *compound* (120 pairs of single-passage questions from different paragraphs of one article, joined as "Q1, and q2?", answer "A1; A2", the form RGB's integration set uses): open, both supports masked, first search masked, evidence supplied.
+- *prompt variants* (the same function builds them for training and for evaluation), on single and compound questions and on the 600 HotpotQA train questions:
+  - S7 `prefill_noisy`: the support plus three on-topic passages that do not hold the answer, supplied in the user turn; the correct move is to answer without searching.
+  - S8 `prefill_negatives`: three to five on-topic passages that do not hold the answer supplied, every support copy masked from search; search at least once, then abstain.
+  - S9 `part_masked` (compound only): one of the two support paragraphs masked, the other found by search; the correct move is to abstain.
+- Rejections: the answer text visible in a masked or negative passage (the first-round alternate-evidence rule, applied to every accepted form of every answer part), the support cut by the display limit, support not reached in three searches, and for S9 a visible part that was never retrieved.
+- Result: 2,886 accepted episodes and 6,498 rows. 154 rows are dropped because they show a HotpotQA dev or test support passage, leaving 6,344. The SQuAD index (3,143 paragraphs of the 80 articles) uses chunk ids from c20001, so no id equals a HotpotQA chunk id.
+
+**Two candidates** (`scripts/make_patch_sets.py`, `reports/training_sets_round3.json`; exact token counts). The remainder of each set is rehearsal: rows from `main.jsonl`.
+
+| | new rows | rehearsal rows | abstentions among final decisions | rows | processed tokens |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| candC (stronger patch) | 65% | 35% | 35% (main: 50%) | 1,477 | 2,201,250 |
+| candD (careful patch) | 45% | 55% | 45% | 1,475 | 2,201,114 |
+
+New rows split over families as single 40%, compound 30%, HotpotQA prompt variants 30%. Within each part, search : answer : abstain rows follow the stated abstain share (search rows one third).
+
+**Development set** (`data/bench/r3dev`): 25 held-out articles of the SQuAD train split (disjoint from the 80 training articles), 1,072 paragraphs in its own index. After the reachability filter, 67 single and 38 compound questions give 419 episodes: open 105, support masked 88, `part_masked` 33, `prefill_noisy` 105, `prefill_negatives` 88. The scripted oracle scores 1.0 on all of them. The first-round HotpotQA dev split (headline episodes: open and support masked, 159) is the fourth component. Main's numbers on it exist from round 1.
+
+**Selection rule (fixed now; `scripts/select_round3.py`; lenient reading).**
+- Four components, each scored by "ends well" (supported answer when answerable, abstention when not): D1 HotpotQA dev headline; D2 single-passage (open and support masked); D3 compound (open, support masked, `part_masked`); D4 prompt variants (noisy and negatives).
+- *Eligible* only if all hold: (G1) pooled unsupported-answer rate over all hidden-evidence episodes of D1 to D4 no more than 0.03 above main's; (G2) at most 11 of 73 unsupported answers on D1 (the round-2 rule); (G3) pooled invalid-turn rate no more than 0.03 above main's.
+- Among eligible candidates, the highest macro average of the four components wins; ties go to candD.
+- The winner replaces main as the project's headline model only if its macro average is at least main's plus 0.05 and its D1 score is at least main's minus 0.03. Otherwise main stays, and the winner is published as a variant.
+
+**Fresh test set** (`data/bench/r3t_*`, opened once, no choice depends on it). Questions are disjoint from every earlier set (asserted). 739 episodes per system, scripted oracle 1.0 on each:
+
+| component | source and rule | questions | episodes |
+| --- | --- | ---: | ---: |
+| r3t_hotpot | HotpotQA validation; skip any question whose support title is the title of any paragraph in the first-round or test2 corpus | 60 | 88 |
+| r3t_2wiki | 2WikiMultihopQA dev, questions after the first 600 of the seeded order | 60 | 86 |
+| r3t_musique | MuSiQue-Ans dev 2-hop, same rule | 100 | 67 |
+| r3t_squad2 | SQuAD 2.0 dev, next 60 answerable and 60 natural unanswerable in the stratified order (questions disjoint; paragraphs may repeat) | 120 | 166 |
+| r3t_rgb | RGB en_refine, questions not in the first set, with RGB's noise 0, 0.8 and 1 settings | 60 | 266 |
+| r3t_rgb_int | RGB integration, same rule (27 usable of the 40 left) | 27 | 66 |
+
+- *Systems:* main and the winning candidate, both in the lenient reading only (strict gave the same adapter numbers, within one episode, in every earlier run). If budget allows, candA as a reference.
+- *Primary:* macro average over the six components of "ends well" (each component over all its scored episodes), difference candidate minus main, with a 95% interval from resampling whole questions within each component.
+- *Secondary:* every component; unsupported answers over all hidden-evidence episodes; false abstentions on open search; SQuAD natural unanswerables; RGB noise 0, 0.8 and 1; invalid turns; AuditKIT rows.
+- *Safety criterion, fixed now:* the candidate is recommended as the default model only if the primary difference is positive with a 95% interval above zero, and its pooled unsupported-answer rate is no more than 0.05 above main's. If the first condition fails, main stays the headline. If only the second fails, the candidate is described as the higher-answering variant. Results are reported whichever way they fall.
+
+**Informed re-run.** If budget remains, the winner is re-run once on the five first-round benchmark sets (same harness, lenient reading), to give a before/after table on the sets of section 23. It is labelled as informed by those sets and is not a test.
+
+**Compute (6 T4 x2 hours remain this week).**
+- Kernel 1: both patches in parallel, then the development evaluations in the same kernel: about 1.9 h training plus 1.2 h evaluation.
+- Kernel 2: the fresh test set, main and the winner, about 1.1 h.
+- Kernel 3 (optional): the informed re-run, about 0.8 h.
+- Budget for generation is lenient reading only: 4.3 s per episode on one T4.
+
+**Not done, and why.** No new retrieval training data (follow-up queries) because the budget does not allow a further selection round. No replay-only control (extra steps without the new rows); a gain on single-passage and compound questions cannot come from rehearsal alone, but this is a limit on attributing any change on HotpotQA to the new rows. No retraining from scratch.

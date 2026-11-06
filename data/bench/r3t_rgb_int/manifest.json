@@ -1,0 +1,50 @@
+{
+ "benchmark": "rgb_int",
+ "url": "https://raw.githubusercontent.com/chen700564/RGB/master/data/en_int.json",
+ "license": "CC BY-NC-SA 4.0",
+ "cite": "Chen et al., AAAI 2024",
+ "seed": 22,
+ "fresh": true,
+ "n_questions": 27,
+ "by_type": {
+  "integration": 27
+ },
+ "natural_unanswerable": 0,
+ "corpus_questions": 100,
+ "n_chunks": 4701,
+ "index_hash": "fe6fd2266ab6eb904a02ed3edf0c2f900d42f715b3645767daab610ab7a76d90",
+ "load_rejections": {},
+ "dropped_after_index": {
+  "no_positive_shows_the_answer_within_the_display_limit": 9,
+  "too_few_usable_positives_or_negatives_for_the_prompt_settings": 4
+ },
+ "ids": [
+  "rgbint-46",
+  "rgbint-15",
+  "rgbint-21",
+  "rgbint-94",
+  "rgbint-30",
+  "rgbint-57",
+  "rgbint-77",
+  "rgbint-10",
+  "rgbint-75",
+  "rgbint-87",
+  "rgbint-72",
+  "rgbint-29",
+  "rgbint-78",
+  "rgbint-45",
+  "rgbint-14",
+  "rgbint-4",
+  "rgbint-35",
+  "rgbint-18",
+  "rgbint-49",
+  "rgbint-84",
+  "rgbint-22",
+  "rgbint-9",
+  "rgbint-60",
+  "rgbint-8",
+  "rgbint-11",
+  "rgbint-37",
+  "rgbint-24"
+ ]
+}

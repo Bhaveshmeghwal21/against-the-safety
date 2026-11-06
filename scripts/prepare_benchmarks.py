@@ -45,28 +45,32 @@ def raw_file(url: str) -> Path:
     return p
 
 
-def build(name: str) -> dict:
+def build(name: str, out_name: str | None = None, n_eval: int | None = None, fresh: bool = False, skip: frozenset = frozenset()) -> dict:
+    """`fresh` (plan section 24) builds a second, disjoint set from the same source and the same seeded order: questions after the
+    ones the first set used, its own corpus questions, and its own index. The default arguments reproduce the first set exactly."""
     src = SOURCES[name]
-    n_eval, n_corpus = SIZES[name]
+    n_eval0, n_corpus = SIZES[name]
+    n_eval = n_eval or n_eval0
     variants: dict = {}
     if name == "2wiki":
         qs, rej = B.load_2wiki(hub_file(src["repo"], src["file"]))
         order = data.stratified_order(qs, SEED)
-        corpus_qs, evalq = order[:n_corpus], order[:n_eval]
+        corpus_qs, evalq = (order[n_corpus:2 * n_corpus], order[n_corpus:n_corpus + n_eval]) if fresh else (order[:n_corpus], order[:n_eval])
     elif name == "musique":
         qs, rej = B.load_musique(hub_file(src["repo"], src["file"]))
         order = data.stratified_order(qs, SEED)
-        corpus_qs, evalq = order[:n_corpus], order[:n_eval]
+        corpus_qs, evalq = (order[n_corpus:2 * n_corpus], order[n_corpus:n_corpus + n_eval]) if fresh else (order[:n_corpus], order[:n_eval])
     elif name == "squad2":
         qs, ctx_qs, rej = B.load_squad2(hub_file(src["repo"], src["file"]))
-        evalq = data.stratified_order(qs, SEED)[:n_eval]  # stratified by qtype: half answerable, half natural unanswerable
+        order = data.stratified_order(qs, SEED)  # stratified by qtype: half answerable, half natural unanswerable
+        evalq = order[n_eval0:n_eval0 + n_eval] if fresh else order[:n_eval]
         corpus_qs = ctx_qs
     else:
         qs, rej = B.load_rgb(raw_file(src["url"]), integration=(name == "rgb_int"))
         corpus_qs = qs  # every passage of every RGB query is in the index, so negatives of other queries are distractors too
-        evalq = B.sample(qs, len(qs), SEED, stratify=False)
+        evalq = [q for q in B.sample(qs, len(qs), SEED, stratify=False) if q.qid not in skip]
 
-    out = ROOT / "data" / "bench" / name
+    out = ROOT / "data" / "bench" / (out_name or name)
     out.mkdir(parents=True, exist_ok=True)
     seen_ids = {q.qid for q in corpus_qs}
     corp = corpus_mod.build_corpus(list(corpus_qs) + [q for q in evalq if q.qid not in seen_ids], seed=SEED)
@@ -99,7 +103,7 @@ def build(name: str) -> dict:
     if variants:
         (out / "prompt_variants.json").write_text(json.dumps(variants, indent=1), encoding="utf-8", newline="\n")
     man = {
-        "benchmark": name, **src, "seed": SEED, "n_questions": len(evalq), "by_type": dict(Counter(q.qtype for q in evalq)),
+        "benchmark": name, **src, "seed": SEED, "fresh": fresh, "n_questions": len(evalq), "by_type": dict(Counter(q.qtype for q in evalq)),
         "natural_unanswerable": sum(q.natural_unanswerable for q in evalq), "corpus_questions": len(corpus_qs),
         "n_chunks": len(corp.chunks), "index_hash": corp.index_hash, "load_rejections": dict(rej), "dropped_after_index": dict(dropped),
         "ids": [q.qid for q in evalq],

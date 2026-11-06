@@ -47,7 +47,9 @@ class EpochSnapshots:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--set", choices=["main", "control", "candA", "candB"], required=True)
+    ap.add_argument("--set", choices=["main", "control", "candA", "candB", "candC", "candD"], required=True)
+    ap.add_argument("--splits", default=None, help="comma list of episode splits to load; default train (candC and candD: train,train3)")
+    ap.add_argument("--init-adapter", default=None, help="continue training this LoRA adapter (round 3 patch: the main adapter)")
     ap.add_argument("--out", required=True)
     ap.add_argument("--epochs", type=float, default=2.0)
     ap.add_argument("--lr", type=float, default=2e-4)
@@ -73,7 +75,11 @@ def main() -> None:
     keys = training.read_keys(set_path)
     if args.limit_rows:
         keys = set(sorted(keys)[: args.limit_rows])
-    logs, metas = training.load_episodes(ep_dir, "train")
+    logs, metas = [], []
+    for split in (args.splits.split(",") if args.splits else ["train", "train3"] if args.set in ("candC", "candD") else ["train"]):
+        l, m = training.load_episodes(ep_dir, split)
+        logs += l
+        metas += m
     logs, metas = training.episodes_for_keys(logs, metas, keys)
     system = training.read_system(ROOT / "data" / "processed" / "training" / "main.jsonl")
 
@@ -83,6 +89,7 @@ def main() -> None:
         system, quantize=True, dtype="float16", lora_r=args.lora_r, lora_alpha=2 * args.lora_r, revision=model_revision,
         max_length=args.max_length, metas=metas, keep=keys,
         callbacks=[EpochSnapshots(out, int(args.epochs))] if float(args.epochs).is_integer() and args.epochs > 1 else [],
+        init_adapter=args.init_adapter,
     )
     trainer = create_distill_trainer(
         model_path, trajectories=logs, trainer_factory=factory, output_dir=str(out),

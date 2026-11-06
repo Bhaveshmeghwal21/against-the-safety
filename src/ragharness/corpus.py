@@ -58,14 +58,14 @@ class Corpus:
         return frozenset({chunk_id, *self._by_title.get(title.casefold(), [])})
 
 
-def build_corpus(questions: list[Question], seed: int) -> Corpus:
+def build_corpus(questions: list[Question], seed: int, id_start: int = 0) -> Corpus:
     unique: dict[str, tuple[str, str]] = {}
     for q in questions:
         for p in q.paragraphs:
             unique.setdefault(_key(p.title, p.text), (p.title, p.text))
     keys = sorted(unique)
     random.Random(seed).shuffle(keys)
-    chunk_id = {k: f"c{i + 1:05d}" for i, k in enumerate(keys)}
+    chunk_id = {k: f"c{id_start + i + 1:05d}" for i, k in enumerate(keys)}
 
     chunks = [
         {"chunk_id": chunk_id[k], "doc_id": chunk_id[k], "title": unique[k][0], "text": unique[k][1], "chunk_index": 0}

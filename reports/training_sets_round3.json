@@ -1,0 +1,252 @@
+{
+  "token_counts": "exact (Tiny Aya tokenizer)",
+  "target_processed_tokens": 2200000,
+  "family_share_of_new_rows": {
+    "single": 0.4,
+    "compound": 0.3,
+    "hotpot": 0.3
+  },
+  "new_rows_available": 6344,
+  "rehearsal_pool": "main.jsonl (1,611 rows the main adapter already trained on)",
+  "main": {
+    "rows": 1611,
+    "parents": 488,
+    "by_kind": {
+      "abstain": 537,
+      "answer": 537,
+      "search": 537
+    },
+    "by_state": {
+      "S1": 91,
+      "S2": 32,
+      "S3": 127,
+      "S4": 733,
+      "S5": 356,
+      "S6": 272
+    },
+    "processed_tokens_est": 2330132,
+    "supervised_tokens_est": 61171,
+    "new_rows": 0,
+    "new_share_of_rows": 0.0,
+    "new_share_of_tokens": 0.0,
+    "new_by_family_and_kind": {
+      "single:search": 0,
+      "single:answer": 0,
+      "single:abstain": 0,
+      "compound:search": 0,
+      "compound:answer": 0,
+      "compound:abstain": 0,
+      "hotpot:search": 0,
+      "hotpot:answer": 0,
+      "hotpot:abstain": 0
+    },
+    "new_by_variant": {},
+    "finals_by_searches_before": {
+      "0": {
+        "answer": 139,
+        "abstain": 0,
+        "abstain_rate": 0.0
+      },
+      "1": {
+        "answer": 217,
+        "abstain": 0,
+        "abstain_rate": 0.0
+      },
+      "2": {
+        "answer": 79,
+        "abstain": 108,
+        "abstain_rate": 0.578
+      },
+      "3": {
+        "answer": 102,
+        "abstain": 429,
+        "abstain_rate": 0.808
+      }
+    },
+    "abstain_share_of_finals": 0.5
+  },
+  "candC": {
+    "config": {
+      "new_share": 0.65,
+      "abstain_new": 0.35,
+      "abstain_replay": 0.35
+    },
+    "rows": 1477,
+    "parents": 782,
+    "by_kind": {
+      "abstain": 345,
+      "answer": 640,
+      "search": 492
+    },
+    "by_state": {
+      "S1": 95,
+      "S2": 30,
+      "S3": 54,
+      "S4": 290,
+      "S5": 227,
+      "S6": 183,
+      "S7": 247,
+      "S8": 301,
+      "S9": 50
+    },
+    "processed_tokens_est": 2201250,
+    "supervised_tokens_est": 52473,
+    "new_rows": 960,
+    "new_share_of_rows": 0.65,
+    "new_share_of_tokens": 0.666,
+    "new_by_family_and_kind": {
+      "single:search": 128,
+      "single:answer": 166,
+      "single:abstain": 90,
+      "compound:search": 96,
+      "compound:answer": 125,
+      "compound:abstain": 67,
+      "hotpot:search": 96,
+      "hotpot:answer": 125,
+      "hotpot:abstain": 67
+    },
+    "new_by_variant": {
+      "first_search_masked": 87,
+      "open": 85,
+      "part_masked": 50,
+      "prefill_negatives": 301,
+      "prefill_noisy": 247,
+      "prefill_partial": 27,
+      "prefill_sufficient": 51,
+      "support_masked": 112
+    },
+    "finals_by_searches_before": {
+      "0": {
+        "answer": 361,
+        "abstain": 0,
+        "abstain_rate": 0.0
+      },
+      "1": {
+        "answer": 157,
+        "abstain": 0,
+        "abstain_rate": 0.0
+      },
+      "2": {
+        "answer": 72,
+        "abstain": 146,
+        "abstain_rate": 0.67
+      },
+      "3": {
+        "answer": 50,
+        "abstain": 199,
+        "abstain_rate": 0.799
+      }
+    },
+    "abstain_share_of_finals": 0.35,
+    "fill": {
+      "taken": {
+        "new_single_search": 128,
+        "new_single_answer": 166,
+        "new_single_abstain": 90,
+        "new_compound_search": 96,
+        "new_compound_answer": 125,
+        "new_compound_abstain": 67,
+        "new_hotpot_search": 96,
+        "new_hotpot_answer": 125,
+        "new_hotpot_abstain": 67,
+        "replay_search": 172,
+        "replay_answer": 224,
+        "replay_abstain": 121
+      },
+      "tokens": 2201250,
+      "groups_short_of_target": {}
+    }
+  },
+  "candD": {
+    "config": {
+      "new_share": 0.45,
+      "abstain_new": 0.45,
+      "abstain_replay": 0.45
+    },
+    "rows": 1475,
+    "parents": 759,
+    "by_kind": {
+      "abstain": 443,
+      "answer": 541,
+      "search": 491
+    },
+    "by_state": {
+      "S1": 84,
+      "S2": 26,
+      "S3": 69,
+      "S4": 427,
+      "S5": 251,
+      "S6": 198,
+      "S7": 141,
+      "S8": 236,
+      "S9": 43
+    },
+    "processed_tokens_est": 2201114,
+    "supervised_tokens_est": 53878,
+    "new_rows": 664,
+    "new_share_of_rows": 0.45,
+    "new_share_of_tokens": 0.47,
+    "new_by_family_and_kind": {
+      "single:search": 89,
+      "single:answer": 97,
+      "single:abstain": 80,
+      "compound:search": 66,
+      "compound:answer": 73,
+      "compound:abstain": 60,
+      "hotpot:search": 66,
+      "hotpot:answer": 73,
+      "hotpot:abstain": 60
+    },
+    "new_by_variant": {
+      "first_search_masked": 57,
+      "open": 52,
+      "part_masked": 43,
+      "prefill_negatives": 236,
+      "prefill_noisy": 141,
+      "prefill_partial": 16,
+      "prefill_sufficient": 32,
+      "support_masked": 87
+    },
+    "finals_by_searches_before": {
+      "0": {
+        "answer": 259,
+        "abstain": 0,
+        "abstain_rate": 0.0
+      },
+      "1": {
+        "answer": 156,
+        "abstain": 0,
+        "abstain_rate": 0.0
+      },
+      "2": {
+        "answer": 63,
+        "abstain": 158,
+        "abstain_rate": 0.715
+      },
+      "3": {
+        "answer": 63,
+        "abstain": 285,
+        "abstain_rate": 0.819
+      }
+    },
+    "abstain_share_of_finals": 0.45,
+    "fill": {
+      "taken": {
+        "new_single_search": 89,
+        "new_single_answer": 97,
+        "new_single_abstain": 80,
+        "new_compound_search": 66,
+        "new_compound_answer": 73,
+        "new_compound_abstain": 60,
+        "new_hotpot_search": 66,
+        "new_hotpot_answer": 73,
+        "new_hotpot_abstain": 60,
+        "replay_search": 270,
+        "replay_answer": 298,
+        "replay_abstain": 243
+      },
+      "tokens": 2201114,
+      "groups_short_of_target": {}
+    }
+  }
+}

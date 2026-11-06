@@ -10,6 +10,9 @@ Stages
   smoke                  compatibility test (one T4): environment, tokens, QLoRA step, batched generation, adapter reload
   train-both             main on GPU 0 and control on GPU 1 at the same time
   train-cands            second round (plan section 20): candA on GPU 0 and candB on GPU 1
+  patch                  third round (plan section 24): candC on GPU 0 and candD on GPU 1, both continuing from the main adapter
+                         (needs ats-train-both attached); --jobs system:split[:weight],... then evaluates them in the same kernel
+  eval-jobs              third round: --jobs system:split[:weight],... over both GPUs (split: dev, test, test2 or bench_<name>)
   eval-dev | eval-test | eval-test2 | eval-product
                          systems two at a time over GPU 0 and GPU 1; default base + main, then closed-book + control;
                          options in --extra: --ckpt adapter_ep1 (which saved adapter), --systems a,b,c (which systems, in this
@@ -126,6 +129,34 @@ def run_parallel(jobs: list[tuple[str, dict, str]]) -> int:
     return worst
 
 
+def eval_jobs(py: str, spec: str, rest: str, adapters: dict[str, str]) -> int:
+    """Round 3 (plan section 24): a list of system:split[:weight] jobs spread over the two GPUs.
+
+    `split` is dev | test | test2 | a benchmark folder written as bench_<name> (for example bench_r3dev). `weight` is the expected
+    cost (minutes); jobs are placed on the less loaded GPU, longest first, and each GPU runs its jobs one after the other."""
+    jobs = []
+    for item in spec.split(","):
+        name, split, *w = item.split(":")
+        weight = float(w[0]) if w else 10.0
+        ev = f"{py} scripts/run_eval.py --split {split} {rest}"
+        if name == "base":
+            cmd = f"{ev} --system base --out {OUT}/eval/base_{split}"
+        elif name == "closed":
+            cmd = f"{ev} --system closed_book --out {OUT}/eval/closed_{split}"
+        else:
+            if f"{name}/adapter" not in adapters:
+                raise SystemExit(f"adapter {name}/adapter not found (have {sorted(adapters)})")
+            cmd = f"{ev} --system adapter --adapter {adapters[f'{name}/adapter']} --out {OUT}/eval/{name}_{split}"
+        jobs.append((weight, cmd))
+    load, chains = {0: 0.0, 1: 0.0}, {0: [], 1: []}
+    for weight, cmd in sorted(jobs, key=lambda j: -j[0]):
+        g = min(load, key=lambda k: load[k])
+        chains[g].append(cmd)
+        load[g] += weight
+    print("expected minutes per GPU:", load, flush=True)
+    return run_parallel([(" ; ".join(c), {"CUDA_VISIBLE_DEVICES": str(g)}, f"eval_jobs_gpu{g}.log") for g, c in chains.items() if c])
+
+
 def main() -> None:
     stage = sys.argv[1] if len(sys.argv) > 1 else "smoke"
     extra = " ".join(sys.argv[2:])
@@ -155,6 +186,29 @@ def main() -> None:
             (f"{py} scripts/train.py --set candA --out {OUT}/candA {extra}", g0, "train_candA.log"),
             (f"{py} scripts/train.py --set candB --out {OUT}/candB {extra}", g1, "train_candB.log"),
         ])
+    elif stage == "patch":  # round 3 (plan section 24): candC on GPU 0 and candD on GPU 1, both continuing from the main adapter; then --jobs
+        m = re.search(r"--jobs\s+(\S+)", extra)
+        jobs_spec, rest = (m.group(1), extra.replace(m.group(0), "")) if m else ("", extra)
+        m = re.search(r"--eval-args\s+\"([^\"]*)\"", rest)
+        eval_args, rest = (m.group(1), rest.replace(m.group(0), "")) if m else ("--parse lenient --extra-questions 0", rest)
+        if "main/adapter" not in adapters:
+            raise SystemExit("attach the kernel that trained the main adapter (ats-train-both)")
+        init = adapters["main/adapter"]
+        rc = run_parallel([
+            (f"{py} scripts/train.py --set candC --out {OUT}/candC --init-adapter {init} {rest}", g0, "train_candC.log"),
+            (f"{py} scripts/train.py --set candD --out {OUT}/candD --init-adapter {init} {rest}", g1, "train_candD.log"),
+        ])
+        for n in ("candC", "candD"):
+            if (OUT / n / "adapter" / "adapter_config.json").exists():
+                adapters[f"{n}/adapter"] = str(OUT / n / "adapter")
+        if jobs_spec:
+            rc = max(rc, eval_jobs(py, jobs_spec, eval_args, adapters))
+    elif stage == "eval-jobs":  # round 3: any list of system:split[:weight] jobs
+        m = re.search(r"--jobs\s+(\S+)", extra)
+        if not m:
+            raise SystemExit("eval-jobs needs --jobs system:split[:weight],...")
+        rest = extra.replace(m.group(0), "").strip() or "--parse lenient --extra-questions 0"
+        rc = eval_jobs(py, m.group(1), rest, adapters)
     elif stage == "eval-bench":  # external benchmarks (plan section 22): each system runs every benchmark in turn on one GPU
         m = re.search(r"--benches\s+(\S+)", extra)
         benches = m.group(1).split(",") if m else ["squad2", "rgb", "rgb_int", "2wiki", "musique"]

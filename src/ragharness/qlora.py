@@ -106,8 +106,10 @@ class QLoraFactory:
         keep: set | None = None,
         eval_rows: list[dict] | None = None,
         callbacks: list | None = None,
+        init_adapter: str | None = None,
     ):
         self.system = system
+        self.init_adapter = init_adapter  # round 3: continue training an existing LoRA adapter instead of starting a new one
         self.metas, self.keep, self.eval_rows = metas, keep, eval_rows
         self.callbacks = list(callbacks or [])
         self.n_train_rows = 0
@@ -164,6 +166,16 @@ class QLoraFactory:
         }
         cfg_kwargs.update(kwargs)  # AgentTune forwards output_dir and any SFT knobs
         self.dtype_info: dict = {}
+        peft_config = LoraConfig(
+            r=self.lora_r, lora_alpha=self.lora_alpha, lora_dropout=self.lora_dropout,
+            target_modules=self.lora_targets, task_type="CAUSAL_LM", bias="none",
+        )
+        if self.init_adapter:
+            # TRL rejects a PeftModel together with a peft_config, so the adapter is attached here and no config is passed on.
+            from peft import PeftModel
+
+            self.model = PeftModel.from_pretrained(self.model, self.init_adapter, is_trainable=True)
+            peft_config = None
         self.sft_trainer = SFTTrainer(
             model=self.model,
             args=SFTConfig(**cfg_kwargs),
@@ -171,10 +183,7 @@ class QLoraFactory:
             eval_dataset=eval_data,
             processing_class=self.tokenizer,
             callbacks=[make_dtype_guard(self.dtype_info, cast=bool(cfg_kwargs.get("fp16"))), *self.callbacks],
-            peft_config=LoraConfig(
-                r=self.lora_r, lora_alpha=self.lora_alpha, lora_dropout=self.lora_dropout,
-                target_modules=self.lora_targets, task_type="CAUSAL_LM", bias="none",
-            ),
+            peft_config=peft_config,
         )
         if cfg_kwargs.get("fp16"):
             # TRL 1.7.1 casts every trainable parameter of a quantized model to bfloat16 (sft_trainer.py, QLoRA block).
