@@ -916,3 +916,15 @@ New rows split over families as single 40%, compound 30%, HotpotQA prompt varian
 - The development set was already used once, so a winner here is a weaker finding than a first-time selection. The fresh test set arbitrates, under the section 24 criteria.
 - If there is a winner, it and main run on the fresh test set. If there is none, main and candD run on it only to describe the trade-off on fresh data, if budget allows; the headline stays main.
 - Compute: about 1.2 h for the probe and 1.1 h for the test, out of about 3.3 h left.
+
+**Probe result (`ats-interp-r3b`, 1 h 07 min; the first attempt, `ats-interp-r3`, stopped after 7 min because the blended folders lacked the tokenizer files, which the evaluation loads from the adapter folder; the script was fixed and the run repeated).** Same development set and rule (`reports/round3_selection_interp.md`):
+
+| | D1 HotpotQA dev | D2 single-passage | D3 compound | D4 prompt variants | macro | pooled unsupported answers | pooled invalid turns | eligible |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| main (alpha 0) | 0.673 | 0.325 | 0.510 | 0.497 | 0.501 | 17/282 | 67/578 | n/a |
+| candD_a20 | 0.642 | 0.429 | 0.520 | 0.513 | 0.526 | 34/282 | 39/578 | no (G1) |
+| candD_a35 | 0.648 | 0.500 | 0.540 | 0.539 | 0.557 | 39/282 | 20/578 | no (G1) |
+| candD_a50 | 0.635 | 0.587 | 0.540 | 0.575 | 0.584 | 46/282 | 12/578 | no (G1) |
+| candD (alpha 1) | 0.629 | 0.730 | 0.570 | 0.601 | 0.633 | 72/282 | 4/578 | no (G1) |
+
+G1 allows 25 unsupported answers out of 282 (main's 6.0% plus 3 points). Even alpha = 0.20 doubles main's count, and the count rises steadily with alpha, so there is no point on this path that gains single-passage ability while staying inside the guard. **No winner; main stays the headline model.** In line with the rule written above, main and candD now run once on the fresh test set (kernel `ats-eval-jobs-r3test`), only to describe the trade-off on questions no choice has seen.

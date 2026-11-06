@@ -1,0 +1,488 @@
+{
+  "stats": {
+    "main": {
+      "components": {
+        "D1 HotpotQA dev": {
+          "n": 159,
+          "good": 107,
+          "rate": 0.6729559748427673,
+          "supported_correct": [
+            37,
+            86
+          ],
+          "false_abstain": [
+            20,
+            86
+          ],
+          "correct_abstain": [
+            70,
+            73
+          ],
+          "unsupported": [
+            2,
+            73
+          ],
+          "invalid": [
+            4,
+            159
+          ]
+        },
+        "D2 single-passage": {
+          "n": 126,
+          "good": 41,
+          "rate": 0.3253968253968254,
+          "supported_correct": [
+            3,
+            67
+          ],
+          "false_abstain": [
+            47,
+            67
+          ],
+          "correct_abstain": [
+            38,
+            59
+          ],
+          "unsupported": [
+            1,
+            59
+          ],
+          "invalid": [
+            36,
+            126
+          ]
+        },
+        "D3 compound": {
+          "n": 100,
+          "good": 51,
+          "rate": 0.51,
+          "supported_correct": [
+            1,
+            38
+          ],
+          "false_abstain": [
+            26,
+            38
+          ],
+          "correct_abstain": [
+            50,
+            62
+          ],
+          "unsupported": [
+            1,
+            62
+          ],
+          "invalid": [
+            13,
+            100
+          ]
+        },
+        "D4 prompt variants": {
+          "n": 193,
+          "good": 96,
+          "rate": 0.49740932642487046,
+          "supported_correct": [
+            28,
+            105
+          ],
+          "false_abstain": [
+            31,
+            105
+          ],
+          "correct_abstain": [
+            68,
+            88
+          ],
+          "unsupported": [
+            13,
+            88
+          ],
+          "invalid": [
+            14,
+            193
+          ]
+        }
+      },
+      "macro": 0.5014405316661158,
+      "pooled_unsupported": [
+        17,
+        282
+      ],
+      "d1_unsupported": [
+        2,
+        73
+      ],
+      "pooled_invalid": [
+        67,
+        578
+      ],
+      "eligible": true
+    },
+    "candD_a20": {
+      "components": {
+        "D1 HotpotQA dev": {
+          "n": 159,
+          "good": 102,
+          "rate": 0.6415094339622641,
+          "supported_correct": [
+            35,
+            86
+          ],
+          "false_abstain": [
+            21,
+            86
+          ],
+          "correct_abstain": [
+            67,
+            73
+          ],
+          "unsupported": [
+            4,
+            73
+          ],
+          "invalid": [
+            4,
+            159
+          ]
+        },
+        "D2 single-passage": {
+          "n": 126,
+          "good": 54,
+          "rate": 0.42857142857142855,
+          "supported_correct": [
+            11,
+            67
+          ],
+          "false_abstain": [
+            45,
+            67
+          ],
+          "correct_abstain": [
+            43,
+            59
+          ],
+          "unsupported": [
+            4,
+            59
+          ],
+          "invalid": [
+            22,
+            126
+          ]
+        },
+        "D3 compound": {
+          "n": 100,
+          "good": 52,
+          "rate": 0.52,
+          "supported_correct": [
+            1,
+            38
+          ],
+          "false_abstain": [
+            19,
+            38
+          ],
+          "correct_abstain": [
+            51,
+            62
+          ],
+          "unsupported": [
+            6,
+            62
+          ],
+          "invalid": [
+            8,
+            100
+          ]
+        },
+        "D4 prompt variants": {
+          "n": 193,
+          "good": 99,
+          "rate": 0.5129533678756477,
+          "supported_correct": [
+            33,
+            105
+          ],
+          "false_abstain": [
+            29,
+            105
+          ],
+          "correct_abstain": [
+            66,
+            88
+          ],
+          "unsupported": [
+            20,
+            88
+          ],
+          "invalid": [
+            5,
+            193
+          ]
+        }
+      },
+      "macro": 0.5257585576023351,
+      "pooled_unsupported": [
+        34,
+        282
+      ],
+      "d1_unsupported": [
+        4,
+        73
+      ],
+      "pooled_invalid": [
+        39,
+        578
+      ],
+      "g1": false,
+      "g2": true,
+      "g3": true,
+      "eligible": false
+    },
+    "candD_a35": {
+      "components": {
+        "D1 HotpotQA dev": {
+          "n": 159,
+          "good": 103,
+          "rate": 0.6477987421383647,
+          "supported_correct": [
+            35,
+            86
+          ],
+          "false_abstain": [
+            23,
+            86
+          ],
+          "correct_abstain": [
+            68,
+            73
+          ],
+          "unsupported": [
+            5,
+            73
+          ],
+          "invalid": [
+            2,
+            159
+          ]
+        },
+        "D2 single-passage": {
+          "n": 126,
+          "good": 63,
+          "rate": 0.5,
+          "supported_correct": [
+            17,
+            67
+          ],
+          "false_abstain": [
+            45,
+            67
+          ],
+          "correct_abstain": [
+            46,
+            59
+          ],
+          "unsupported": [
+            3,
+            59
+          ],
+          "invalid": [
+            13,
+            126
+          ]
+        },
+        "D3 compound": {
+          "n": 100,
+          "good": 54,
+          "rate": 0.54,
+          "supported_correct": [
+            1,
+            38
+          ],
+          "false_abstain": [
+            16,
+            38
+          ],
+          "correct_abstain": [
+            53,
+            62
+          ],
+          "unsupported": [
+            7,
+            62
+          ],
+          "invalid": [
+            2,
+            100
+          ]
+        },
+        "D4 prompt variants": {
+          "n": 193,
+          "good": 104,
+          "rate": 0.538860103626943,
+          "supported_correct": [
+            42,
+            105
+          ],
+          "false_abstain": [
+            24,
+            105
+          ],
+          "correct_abstain": [
+            62,
+            88
+          ],
+          "unsupported": [
+            24,
+            88
+          ],
+          "invalid": [
+            3,
+            193
+          ]
+        }
+      },
+      "macro": 0.556664711441327,
+      "pooled_unsupported": [
+        39,
+        282
+      ],
+      "d1_unsupported": [
+        5,
+        73
+      ],
+      "pooled_invalid": [
+        20,
+        578
+      ],
+      "g1": false,
+      "g2": true,
+      "g3": true,
+      "eligible": false
+    },
+    "candD_a50": {
+      "components": {
+        "D1 HotpotQA dev": {
+          "n": 159,
+          "good": 101,
+          "rate": 0.6352201257861635,
+          "supported_correct": [
+            33,
+            86
+          ],
+          "false_abstain": [
+            24,
+            86
+          ],
+          "correct_abstain": [
+            68,
+            73
+          ],
+          "unsupported": [
+            5,
+            73
+          ],
+          "invalid": [
+            3,
+            159
+          ]
+        },
+        "D2 single-passage": {
+          "n": 126,
+          "good": 74,
+          "rate": 0.5873015873015873,
+          "supported_correct": [
+            24,
+            67
+          ],
+          "false_abstain": [
+            40,
+            67
+          ],
+          "correct_abstain": [
+            50,
+            59
+          ],
+          "unsupported": [
+            3,
+            59
+          ],
+          "invalid": [
+            7,
+            126
+          ]
+        },
+        "D3 compound": {
+          "n": 100,
+          "good": 54,
+          "rate": 0.54,
+          "supported_correct": [
+            4,
+            38
+          ],
+          "false_abstain": [
+            14,
+            38
+          ],
+          "correct_abstain": [
+            50,
+            62
+          ],
+          "unsupported": [
+            10,
+            62
+          ],
+          "invalid": [
+            2,
+            100
+          ]
+        },
+        "D4 prompt variants": {
+          "n": 193,
+          "good": 111,
+          "rate": 0.5751295336787565,
+          "supported_correct": [
+            51,
+            105
+          ],
+          "false_abstain": [
+            11,
+            105
+          ],
+          "correct_abstain": [
+            60,
+            88
+          ],
+          "unsupported": [
+            28,
+            88
+          ],
+          "invalid": [
+            0,
+            193
+          ]
+        }
+      },
+      "macro": 0.5844128116916268,
+      "pooled_unsupported": [
+        46,
+        282
+      ],
+      "d1_unsupported": [
+        5,
+        73
+      ],
+      "pooled_invalid": [
+        12,
+        578
+      ],
+      "g1": false,
+      "g2": true,
+      "g3": true,
+      "eligible": false
+    }
+  },
+  "winner": null,
+  "headline": "main",
+  "replaces_main": false
+}
