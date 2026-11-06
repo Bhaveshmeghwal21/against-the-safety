@@ -39,11 +39,15 @@ class HFGenerator:
     abstain less, positive values more. It moves the model along its accuracy-coverage curve."""
 
     def __init__(self, model, tokenizer, max_new_tokens: int = 160, max_input_tokens: int = 4096, chat_template: str | None = None,
-                 batch_size: int = 12, max_batch_tokens: int = 32768, abstain_bias: float = 0.0):
+                 batch_size: int = 12, max_batch_tokens: int = 32768, abstain_bias: float = 0.0,
+                 temperature: float = 0.0, top_p: float = 1.0):
         import torch
 
         self.torch = torch
         self.model, self.tokenizer = model, tokenizer
+        # Round 5 (plan section 27, priority 2): `temperature` > 0 switches to sampling, used only to draw preference pairs on
+        # training episodes. The default 0.0 is the greedy decoding every evaluation uses.
+        self.temperature, self.top_p = temperature, top_p
         if chat_template:
             self.tokenizer.chat_template = chat_template
         self.max_new_tokens, self.max_input_tokens = max_new_tokens, max_input_tokens
@@ -96,9 +100,13 @@ class HFGenerator:
                     return scores
 
             extra["logits_processor"] = LogitsProcessorList([_Bias()])
+        if self.temperature > 0:
+            extra.update(do_sample=True, temperature=self.temperature, top_p=self.top_p, top_k=0)
+        else:
+            extra["do_sample"] = False
         with torch.no_grad():
             out = self.model.generate(
-                input_ids=input_ids.to(self.model.device), attention_mask=attention.to(self.model.device), do_sample=False,
+                input_ids=input_ids.to(self.model.device), attention_mask=attention.to(self.model.device),
                 max_new_tokens=self.max_new_tokens, eos_token_id=self.stop_ids, pad_token_id=self.pad_id, **extra,
             )
         results = []

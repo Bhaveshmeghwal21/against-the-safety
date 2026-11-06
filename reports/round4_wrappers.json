@@ -1,0 +1,121 @@
+{
+  "systems": {
+    "main": {
+      "macro": 0.3567867317867318,
+      "components": {
+        "single": 0.4807692307692308,
+        "compound": 0.2328042328042328
+      },
+      "legacy_success": 0.37639198218262804,
+      "supported_success": 0.20229007633587787,
+      "unsupported": 40,
+      "hidden_n": 187,
+      "unsupported_rate": 0.21390374331550802,
+      "false_abstain": 0.3015267175572519,
+      "invalid": 0.111358574610245,
+      "exact_match_when_answered": 0.2682926829268293,
+      "n": 449
+    },
+    "candA": {
+      "macro": 0.37480667480667484,
+      "components": {
+        "single": 0.5538461538461539,
+        "compound": 0.19576719576719576
+      },
+      "legacy_success": 0.40311804008908686,
+      "supported_success": 0.25190839694656486,
+      "unsupported": 55,
+      "hidden_n": 187,
+      "unsupported_rate": 0.29411764705882354,
+      "false_abstain": 0.22519083969465647,
+      "invalid": 0.042316258351893093,
+      "exact_match_when_answered": 0.27860696517412936,
+      "n": 449
+    },
+    "FB(main)": {
+      "macro": 0.42723850223850224,
+      "components": {
+        "single": 0.5423076923076923,
+        "compound": 0.31216931216931215
+      },
+      "legacy_success": 0.44543429844098,
+      "supported_success": 0.20229007633587787,
+      "unsupported": 40,
+      "hidden_n": 187,
+      "unsupported_rate": 0.21390374331550802,
+      "false_abstain": 0.37404580152671757,
+      "invalid": 0.0,
+      "exact_match_when_answered": 0.2682926829268293,
+      "n": 449
+    },
+    "FB(candA)": {
+      "macro": 0.41327838827838825,
+      "components": {
+        "single": 0.5884615384615385,
+        "compound": 0.23809523809523808
+      },
+      "legacy_success": 0.44097995545657015,
+      "supported_success": 0.25190839694656486,
+      "unsupported": 55,
+      "hidden_n": 187,
+      "unsupported_rate": 0.29411764705882354,
+      "false_abstain": 0.23282442748091603,
+      "invalid": 0.0,
+      "exact_match_when_answered": 0.27860696517412936,
+      "n": 449
+    },
+    "G(main, candA)": {
+      "macro": 0.4455128205128205,
+      "components": {
+        "single": 0.5576923076923077,
+        "compound": 0.3333333333333333
+      },
+      "legacy_success": 0.46325167037861914,
+      "supported_success": 0.17557251908396945,
+      "unsupported": 25,
+      "hidden_n": 187,
+      "unsupported_rate": 0.13368983957219252,
+      "false_abstain": 0.5305343511450382,
+      "invalid": 0.0,
+      "exact_match_when_answered": 0.3170731707317073,
+      "n": 449
+    }
+  },
+  "ci95_vs_main": {
+    "FB(main)": {
+      "macro": [
+        0.04560593038246674,
+        0.09883205799436162
+      ],
+      "unsupported_rate": [
+        0.0,
+        0.0
+      ],
+      "supported_success": [
+        0.0,
+        0.0
+      ]
+    },
+    "G(main, candA)": {
+      "macro": [
+        0.057946682946682926,
+        0.12174788562223116
+      ],
+      "unsupported_rate": [
+        -0.12565445026178013,
+        -0.042328042328042326
+      ],
+      "supported_success": [
+        -0.04980842911877392,
+        -0.007604562737642595
+      ]
+    }
+  },
+  "claims": {
+    "FB(main) raises the score without more unsupported answers": true,
+    "G(main, candA) lowers the unsupported-answer rate": true,
+    "G(main, candA) does not lower the score": true
+  },
+  "threshold": 0.5,
+  "note": "Pre-registered before the test traces were read. Inference-time wrappers, not new adapters. They do not change the headline automatically."
+}
