@@ -878,3 +878,41 @@ New rows split over families as single 40%, compound 30%, HotpotQA prompt varian
 - Budget for generation is lenient reading only: 4.3 s per episode on one T4.
 
 **Not done, and why.** No new retrieval training data (follow-up queries) because the budget does not allow a further selection round. No replay-only control (extra steps without the new rows); a gain on single-passage and compound questions cannot come from rehearsal alone, but this is a limit on attributing any change on HotpotQA to the new rows. No retraining from scratch.
+
+## 25. Round 3 development result, and one probe added afterwards - 6 November 2026
+
+**Training (`ats-patch-r3`, T4 x2, 2 h 42 min including the development evaluation).**
+
+| run | rows | processed tokens | optimizer steps | final loss | wall time | peak memory |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| candC | 1,477 | 2,201,250 | 93 | 0.068 | 6,027 s | 6.07 GB |
+| candD | 1,475 | 2,201,114 | 93 | 0.053 | 5,994 s | 6.07 GB |
+
+**Development set, rule from section 24 (`scripts/select_round3.py`, `reports/round3_selection.md`).** "Ends well" per component, with the counts:
+
+| | D1 HotpotQA dev | D2 single-passage | D3 compound | D4 prompt variants | macro | pooled unsupported answers | pooled invalid turns | eligible |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| main | 0.673 (107/159) | 0.325 (41/126) | 0.510 (51/100) | 0.497 (96/193) | 0.501 | 17/282 | 67/578 | n/a |
+| candC | 0.566 (90/159) | 0.762 (96/126) | 0.600 (60/100) | 0.699 (135/193) | 0.657 | 70/282 | 4/578 | no (G1, G2) |
+| candD | 0.629 (100/159) | 0.730 (92/126) | 0.570 (57/100) | 0.601 (116/193) | 0.633 | 72/282 | 4/578 | no (G1) |
+
+**Outcome under the rule: no candidate is eligible, so main stays the headline model.** The guards that failed: G1 (pooled unsupported answers 24.8% and 25.5% against main's 6.0%; the limit was main's plus 3 points) for both, and G2 for candC (15 of 73 unsupported answers on HotpotQA dev, limit 11).
+
+**What the patch did.**
+- *It fixed the targeted failures.* On single-passage questions, ends well went from 0.325 to 0.730 (candD) and 0.762 (candC); false abstentions on those questions fell from 47 of 67 to 23 and 20. Invalid turns, mostly repeated queries, fell from 67 of 578 to 4 of 578. Compound questions improved from 0.510 to 0.570 and 0.600.
+- *It also made both models answer when they should not.* Counting answers given when no passage in reach holds the answer:
+
+| hidden-evidence episodes | main | candC | candD |
+| --- | ---: | ---: | ---: |
+| HotpotQA and SQuAD, support masked (161) | 3 | 23 | 16 |
+| on-topic passages supplied, support masked (88) | 13 | 32 | 41 |
+| one of the two parts masked (33) | 1 | 15 | 15 |
+
+- *Where the extra answers come from.* With on-topic passages in the prompt and the answer absent, the patched models answer without searching (30 of 32 for candC, 40 of 41 for candD; main: 8 of 13). When one part of a compound question is masked, they answer the visible part correctly and invent the other, for example "Constitutional Reform Act 2005; 2004" where the passage for the first part was masked. In training, the answer-without-search rows (S7) and the abstain-after-search rows (S8) differ only in whether the supplied text contains the answer, and a 3.35B model trained for 93 steps learned the shortcut "evidence supplied: answer".
+
+**A probe added after seeing this result (not part of section 24; decided before it ran).** The candidates continue from the main adapter and lie close to it (relative distance of the LoRA weights, candD from main: 0.12). Linear interpolation between the two adapters (`scripts/interp_adapters.py`, as in WiSE-FT) is a one-parameter path from main to candD. Three points are evaluated on the same development set with the same rule, only to see whether any point keeps a useful part of the gain inside the guards:
+- Candidates: alpha = 0.20, 0.35 and 0.50 (result = (1 - alpha) main + alpha candD, both LoRA factors), named candD_a20, candD_a35 and candD_a50. Ties go to the lower alpha.
+- Rule: unchanged from section 24 (G1, G2, G3, macro at least main's plus 0.05, D1 at least main's minus 0.03).
+- The development set was already used once, so a winner here is a weaker finding than a first-time selection. The fresh test set arbitrates, under the section 24 criteria.
+- If there is a winner, it and main run on the fresh test set. If there is none, main and candD run on it only to describe the trade-off on fresh data, if budget allows; the headline stays main.
+- Compute: about 1.2 h for the probe and 1.1 h for the test, out of about 3.3 h left.

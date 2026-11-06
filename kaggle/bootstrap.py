@@ -13,6 +13,8 @@ Stages
   patch                  third round (plan section 24): candC on GPU 0 and candD on GPU 1, both continuing from the main adapter
                          (needs ats-train-both attached); --jobs system:split[:weight],... then evaluates them in the same kernel
   eval-jobs              third round: --jobs system:split[:weight],... over both GPUs (split: dev, test, test2 or bench_<name>)
+  interp                 third round probe (plan section 25): --from main --to candD --alphas 0.2,0.35 --splits bench_r3dev:30,dev:11 builds the
+                         blends (1 - alpha) * from + alpha * to inside the kernel and evaluates them
   eval-dev | eval-test | eval-test2 | eval-product
                          systems two at a time over GPU 0 and GPU 1; default base + main, then closed-book + control;
                          options in --extra: --ckpt adapter_ep1 (which saved adapter), --systems a,b,c (which systems, in this

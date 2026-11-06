@@ -20,7 +20,7 @@ MAX_UNSUPPORTED_D1 = 11  # of the 73 unanswerable dev headline episodes
 MARGIN_G1, MARGIN_G3 = 0.03, 0.03
 MIN_GAIN, MAX_D1_LOSS = 0.05, 0.03
 CANDIDATES = ("candC", "candD")
-TIE_ORDER = {"candD": 0, "candC": 1}  # ties go to candD
+PREFER = ("candD", "candC")  # ties go to the first one listed
 
 
 def components(dev: list[dict], r3: list[dict]) -> dict[str, list[dict]]:
@@ -70,10 +70,14 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--eval", action="append", required=True)
     ap.add_argument("--main-dev", required=True, help="first-round dev run of the main adapter (its headline episodes are D1)")
+    ap.add_argument("--candidates", default=",".join(CANDIDATES), help="comma list of candidate systems, in display order")
+    ap.add_argument("--prefer", default=",".join(PREFER), help="comma list: on equal macro the first listed wins")
+    ap.add_argument("--report", default="round3_selection", help="file stem written under reports/")
     args = ap.parse_args()
+    candidates, tie_order = tuple(args.candidates.split(",")), {n: i for i, n in enumerate(args.prefer.split(","))}
     roots = [Path(e) for e in args.eval]
     st: dict[str, dict] = {}
-    for sysname in ("main",) + CANDIDATES:
+    for sysname in ("main",) + candidates:
         dev_dir = Path(args.main_dev) if sysname == "main" else find(roots, f"{sysname}_dev")
         r3_dir = find(roots, f"{sysname}_bench_r3dev")
         if dev_dir is None or r3_dir is None:
@@ -90,9 +94,9 @@ def main() -> None:
         s["g2"] = s["d1_unsupported"][0] <= MAX_UNSUPPORTED_D1
         s["g3"] = rate(s["pooled_invalid"]) <= rate(main_s["pooled_invalid"]) + MARGIN_G3
         s["eligible"] = s["g1"] and s["g2"] and s["g3"]
-    cands = [c for c in CANDIDATES if c in st]
+    cands = [c for c in candidates if c in st]
     eligible = [c for c in cands if st[c]["eligible"]]
-    best = max(eligible, key=lambda c: (st[c]["macro"], -TIE_ORDER[c])) if eligible else None
+    best = max(eligible, key=lambda c: (st[c]["macro"], -tie_order.get(c, 99))) if eligible else None
     d1 = lambda n: st[n]["components"]["D1 HotpotQA dev"]["rate"]
     replaces = bool(best) and st[best]["macro"] >= main_s["macro"] + MIN_GAIN and d1(best) >= d1("main") - MAX_D1_LOSS
     headline = best if replaces else "main"
@@ -101,7 +105,7 @@ def main() -> None:
     lines = ["# Third-round selection on the development set (rule fixed in plan section 24)", "",
              f"Eligible: (G1) pooled unsupported-answer rate at most {MARGIN_G1} above main's; (G2) at most {MAX_UNSUPPORTED_D1} of 73 unsupported answers on D1; "
              f"(G3) pooled invalid-turn rate at most {MARGIN_G3} above main's.",
-             f"Winner: the eligible candidate with the highest macro average of the four components (ties: candD). It replaces main only if its macro is at least "
+             f"Winner: the eligible candidate with the highest macro average of the four components (ties: first in the preference list). It replaces main only if its macro is at least "
              f"main's plus {MIN_GAIN} and its D1 score is at least main's minus {MAX_D1_LOSS}.", "",
              "| system | " + " | ".join(f"{c} ends well" for c in comp_names) + " | macro | pooled unsupported answers | pooled invalid | G1 | G2 | G3 | eligible |",
              "| --- |" + " ---: |" * len(comp_names) + " ---: | ---: | ---: | --- | --- | --- | --- |"]
@@ -118,9 +122,9 @@ def main() -> None:
     lines += ["", f"**Winner: {best or 'none eligible'}.** Macro {('%.3f' % st[best]['macro']) if best else 'n/a'} against main's {main_s['macro']:.3f}; "
               f"D1 {('%.3f' % d1(best)) if best else 'n/a'} against {d1('main'):.3f}.",
               f"**Headline model after development: {headline}.** " + ("The winner replaces main." if replaces else "Main stays the headline model; the winner, if any, is published as a variant."),
-              "Main and the winner are evaluated once on the fresh test set (r3t_*)."]
-    (ROOT / "reports" / "round3_selection.md").write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
-    (ROOT / "reports" / "round3_selection.json").write_text(json.dumps({"stats": st, "winner": best, "headline": headline, "replaces_main": replaces}, indent=2), encoding="utf-8", newline="\n")
+              "If there is a winner, main and the winner are evaluated once on the fresh test set (r3t_*)."]
+    (ROOT / "reports" / f"{args.report}.md").write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
+    (ROOT / "reports" / f"{args.report}.json").write_text(json.dumps({"stats": st, "winner": best, "headline": headline, "replaces_main": replaces}, indent=2), encoding="utf-8", newline="\n")
     print("\n".join(lines))
 
 
