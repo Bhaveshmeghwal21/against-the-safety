@@ -1,0 +1,57 @@
+{
+  "rollouts": {
+    "candA/hotpot_train": 338,
+    "candA/r5train": 622,
+    "main/hotpot_train": 338,
+    "main/r5train": 622
+  },
+  "decisions": {
+    "incomplete_search": 391,
+    "abstain_is_fine": 483,
+    "answerable_complete": 607,
+    "alternate_evidence_visible": 106,
+    "already_good": 329,
+    "duplicate": 141,
+    "incomplete_abstain": 4,
+    "overlength": 3,
+    "caps_used": "3,6"
+  },
+  "candidates_after_template_and_length": 858,
+  "after_caps": 425,
+  "pro_answer": 276,
+  "pro_caution": 149,
+  "selected": 335,
+  "selected_by_chosen_kind": {
+    "search": 147,
+    "answer": 186,
+    "abstain": 2
+  },
+  "selected_by_rejected_kind": {
+    "answer": 213,
+    "invalid": 31,
+    "abstain": 91
+  },
+  "selected_by_set": {
+    "r5train": 224,
+    "hotpot_train": 111
+  },
+  "selected_by_source_system": {
+    "main": 167,
+    "candA": 168
+  },
+  "selected_by_answerable": {
+    "True": 263,
+    "False": 72
+  },
+  "selected_by_depth": {
+    "0": 95,
+    "1": 106,
+    "2": 98,
+    "3": 36
+  },
+  "questions": 77,
+  "mean_tokens": 1626,
+  "max_tokens": 2485,
+  "sha256": "8214a2c62bf7b0483fead2d32a6758c05849a1bd01cbef4fec7ba8f9c4681508",
+  "path": "data/processed/training/dpo_r5.jsonl"
+}

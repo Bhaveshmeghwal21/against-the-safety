@@ -159,7 +159,7 @@ def main() -> None:
         eligible = [p for p in pairs if p["meta"]["tokens"] <= max_length]
         mean_tokens = int(sum(p["meta"]["tokens"] for p in eligible) / max(1, len(eligible)))
         seconds = probe_seconds_per_pair(model, mean_tokens)
-        fit = int(args.time_budget_h * 3600 / seconds)
+        fit = int(args.time_budget_h * 3600 / (seconds * max(1.0, args.epochs)))
         decisions.update(max_length=max_length, probe_peak_gb=peak, pairs_within_length=len(eligible), mean_pair_tokens=mean_tokens,
                          seconds_per_pair=round(seconds, 2), pairs_fitting_budget=fit)
         pairs = eligible[:fit]
