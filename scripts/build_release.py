@@ -42,9 +42,17 @@ EVALS = {  # label -> (split, directory holding <system>_<split>/<parse>/)
 }
 TRAIN_ROUND2 = RUNS / "ats-train-cands" / "out"
 TRAIN_ROUND3 = RUNS / "ats-patch-r3" / "out"
+A2R4, A2R5 = ROOT / "runs" / "account2_round4", ROOT / "runs" / "account2_round5"  # rounds 4 and 5 ran on the second Kaggle account
+EVALS["dev_round4"] = ("dev", A2R4 / "ats-eval-jobs-r4dev" / "out" / "eval")  # round-4 checkpoints on HotpotQA dev
+EVALS["dev_round5"] = ("dev", A2R5 / "ats-train-dpo-r5c" / "out" / "eval")  # round-5 preference-trained checkpoints on HotpotQA dev
+EVALS["dev_round5b"] = ("dev", A2R5 / "ats-train-dpo2-r5b" / "out" / "eval")  # round-5b checkpoints on HotpotQA dev (present once that kernel is downloaded)
 BENCH_EVALS = [RUNS / "ats-eval-bench-a" / "out" / "eval", RUNS / "ats-eval-bench-b" / "out" / "eval",  # plan sections 22 and 23
-               RUNS / "ats-eval-jobs-r3test" / "out" / "eval", RUNS / "ats-eval-jobs-r3testA" / "out" / "eval"]  # plan section 26: fresh test
-BENCHES = ["2wiki", "musique", "squad2", "rgb", "rgb_int", "r3t_hotpot", "r3t_2wiki", "r3t_musique", "r3t_squad2", "r3t_rgb", "r3t_rgb_int"]
+               RUNS / "ats-eval-jobs-r3test" / "out" / "eval", RUNS / "ats-eval-jobs-r3testA" / "out" / "eval",  # plan section 26: fresh test
+               A2R4 / "ats-eval-jobs-r4dev" / "out" / "eval", A2R4 / "ats-eval-jobs-r4test" / "out" / "eval",  # round 4: development and final holdout
+               A2R5 / "ats-train-dpo-r5c" / "out" / "eval", A2R5 / "ats-train-dpo2-r5b" / "out" / "eval",  # rounds 5 and 5b: development evaluation
+               A2R5 / "ats-eval-jobs-r5test-ref" / "out" / "eval", A2R5 / "ats-eval-jobs-r5test-final" / "out" / "eval"]  # round 5: sealed test
+BENCHES = ["2wiki", "musique", "squad2", "rgb", "rgb_int", "r3t_hotpot", "r3t_2wiki", "r3t_musique", "r3t_squad2", "r3t_rgb", "r3t_rgb_int",
+           "r4dev", "r4test", "r5t_squad", "r5t_hotpot", "r5t_rgb"]
 
 
 def copy(src: Path, dst: Path) -> None:
@@ -99,8 +107,21 @@ def main() -> None:
 
     ds = out / "dataset_episodes"
     shutil.rmtree(ds, ignore_errors=True)
-    for name in ("main", "control", "dev", "candA", "candB", "candC", "candD"):
+    for name in ("main", "control", "dev", "candA", "candB", "candC", "candD", "candE", "candF"):
         copy(ROOT / "data" / "processed" / "training" / f"{name}.jsonl", ds / "training" / f"{name}.jsonl")
+    for name in ("dpo_r5", "dpo_r5b", "force_contexts_r5"):  # round 5 and 5b: preference pairs and the decision points behind the abstention pairs
+        if (ROOT / "data" / "processed" / "training" / f"{name}.jsonl").exists():
+            copy(ROOT / "data" / "processed" / "training" / f"{name}.jsonl", ds / "training" / f"{name}.jsonl")
+    for f in sorted((ROOT / "data" / "processed" / "verifier").glob("*.jsonl")):  # the cases the self-check was run on
+        copy(f, ds / "verifier" / f.name)
+    for tag, folder in (("dev_main", A2R5 / "ats-verify-r5-dev"), ("dev_r4cands", A2R5 / "ats-verify-main-r5-devcands"), ("r4test", A2R5 / "ats-verify-main-r5-r4test"),
+                        ("r5test_refs", A2R5 / "ats-verify-main-r5-r5test-refs"), ("dev_dpo", A2R5 / "ats-train-dpo-r5c"), ("dev_dpo2", A2R5 / "ats-train-dpo2-r5b"),
+                        ("r5test_final", A2R5 / "ats-verify-main-r5-r5test-final")):
+        for v in sorted(folder.rglob("verdicts_*.jsonl")):
+            copy(v, ds / "verifier" / f"verdicts_{tag}__{v.parent.name}__{v.name}")
+    for folder in ("ats-sample-r5-pairs", "ats-force-r5-r5b"):  # sampled rollouts and forced answers
+        for f in sorted((A2R5 / folder / "out").rglob("*.jsonl")):
+            copy(f, ds / "sampling" / folder / f.relative_to(A2R5 / folder / "out").as_posix().replace("/", "__"))
     copy(ROOT / "data" / "processed" / "episodes" / "eventlogs_train.jsonl", ds / "episodes" / "eventlogs_train.jsonl")
     copy(ROOT / "data" / "processed" / "episodes" / "eventlogs_train3.jsonl", ds / "episodes" / "eventlogs_train3.jsonl")
     copy(ROOT / "data" / "bench" / "r3dev" / "manifest.json", ds / "manifests" / "r3dev.json")
@@ -127,7 +148,8 @@ def main() -> None:
     for b in BENCHES:
         counts[f"bench_{b}"] = sum(copy_traces(b, f"bench_{b}", root, bt) for root in BENCH_EVALS)
         copy(ROOT / "data" / "bench" / b / "manifest.json", bt / "manifests" / f"{b}.json")
-    for f in sorted((ROOT / "reports").glob("benchmarks_*")) + sorted((ROOT / "reports").glob("round3_test*")):
+    for f in sorted((ROOT / "reports").glob("benchmarks_*")) + sorted((ROOT / "reports").glob("round3_test*")) + sorted((ROOT / "reports").glob("round4_test*")) \
+            + sorted((ROOT / "reports").glob("round5_final*")) + sorted((ROOT / "reports").glob("round5b_final*")) + sorted((ROOT / "reports").glob("round5_system_check*")):
         copy(f, bt / "reports" / f.name)
     (bt / "README.md").write_text(cards.bench_card(args.user), encoding="utf-8", newline="\n")
 

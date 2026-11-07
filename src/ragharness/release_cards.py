@@ -268,6 +268,7 @@ Passages are Wikipedia text through HotpotQA. Please attribute HotpotQA (Yang et
 - `manifests/`: split manifest (question ids), index manifest (hash of the shared 7,820-passage index), leakage and shortcut reports. `reports/`: scorecards, trade-off tables, ROI.
 - Second round (plan sections 20 and 21 in the code repository): `training/candA.jsonl` and `training/candB.jsonl` (two re-weighted selections of the same train decisions), `traces/dev_round2/` (both candidates on dev, used for selection), `traces/test2/` (base, closed book, main, control and candA on the fresh split), `manifests/test2_manifest.json` (question ids, sampling rule, and the hash of the extended 8,777-passage index).
 - Third round (plan sections 24 to 26): `training/candC.jsonl` and `training/candD.jsonl` (the two patch sets: new rows from SQuAD 2.0 training-split passages and HotpotQA train questions, plus rehearsal rows), `episodes/eventlogs_train3.jsonl` (the new episodes), `traces/dev_round3*` (both patches, and the weight blends of the main and candD adapters, on the development set, which holds held-out SQuAD training-split articles), `manifests/r3dev.json` (what was drawn for the development set). Fresh-test traces and manifests for the third round are in the benchmark-traces dataset.
+- Fourth and fifth rounds (plan sections 27 and 28, `research/` notes in the code repository): `training/candE.jsonl` and `training/candF.jsonl` (matched evidence decisions), `training/dpo_r5.jsonl` (335 preference pairs from sampled rollouts), `training/dpo_r5b.jsonl` and `training/force_contexts_r5.jsonl` (the same pairs plus abstention-chosen pairs, and the decision points they come from), `sampling/` (the 1,920 sampled rollouts and the forced answers), `verifier/` (the cases the self-check was run on and its verdicts), `traces/dev_round4`, `traces/dev_round5` and `traces/dev_round5b` (checkpoints on HotpotQA dev). The round-4 and round-5 SQuAD-style development and test traces, and the sealed round-5 test, are in the benchmark-traces dataset.
 
 ## How it was built
 
@@ -319,7 +320,32 @@ BENCH_SOURCES = {  # folder -> (benchmark, license, citation)
     "r3t_squad2": ("SQuAD 2.0, dev, fresh questions (round 3 test)", "CC BY-SA 4.0", "Rajpurkar et al., 2018 (as above)"),
     "r3t_rgb": ("RGB, English refined set, fresh questions (round 3 test)", "CC BY-NC-SA 4.0", "Chen et al., 2024 (as above)"),
     "r3t_rgb_int": ("RGB, English integration set, fresh questions (round 3 test)", "CC BY-NC-SA 4.0", "Chen et al., 2024 (as above)"),
+    "r4dev": ("SQuAD 2.0 training-split articles, round-4 development set (single and two-part questions, evidence variants)", "CC BY-SA 4.0", "Rajpurkar et al., 2018 (as above)"),
+    "r4test": ("SQuAD 2.0 training-split articles, round-4 final holdout", "CC BY-SA 4.0", "Rajpurkar et al., 2018 (as above)"),
+    "r5t_squad": ("SQuAD 2.0 training-split articles, sealed round-5 test", "CC BY-SA 4.0", "Rajpurkar et al., 2018 (as above)"),
+    "r5t_hotpot": ("HotpotQA validation, sealed round-5 test", "CC BY-SA 4.0", "Yang et al., 2018, HotpotQA"),
+    "r5t_rgb": ("RGB, English refined set, sealed round-5 test (noise 0, 0.8, 1)", "CC BY-NC-SA 4.0", "Chen et al., 2024 (as above)"),
 }
+
+
+def r5_final_table() -> str:
+    """Sealed round-5 test (938 episodes): macro success, unsupported answers, supported correct answers and refusals, from reports/round5_final.json (and 5b)."""
+    tables = []
+    for name in ("round5_final", "round5b_final"):
+        p = ROOT / "reports" / f"{name}.json"
+        if p.exists():
+            tables.append(json.loads(p.read_text(encoding="utf-8"))["systems"])
+    if not tables:
+        return ""
+    lines = ["| configuration | macro success | unsupported answers / hidden-evidence episodes | supported correct (answerable) | refusals (answerable) |", "| --- | ---: | ---: | ---: | ---: |"]
+    seen = set()
+    for systems in tables:
+        for k, s in systems.items():
+            if k in seen:
+                continue
+            seen.add(k)
+            lines.append(f"| {k} | {s['macro']:.3f} | {s['unsupported']} / {s['hidden_n']} | {s['supported_correct']:.3f} | {s['false_abstain']:.3f} |")
+    return "\n".join(lines)
 
 
 def bench_card(user: str) -> str:
@@ -362,10 +388,22 @@ Six sets of questions disjoint from every earlier set (plan sections 24 to 26), 
 
 Pooled unsupported answers are dominated by RGB's on-topic-passage setting, where every adapter is weak. The patch fixed single-passage questions but failed the safety criterion fixed beforehand, so the main adapter stays the headline model.
 
+## Rounds 4 and 5: the sealed final test (`r5t_*` folders) and the round-4 sets (`r4dev`, `r4test`)
+
+`r5t_squad`, `r5t_hotpot` and `r5t_rgb` are the sealed round-5 test: 938 episodes built before any round-5 training from questions no earlier round used, opened once, with a scripted oracle scoring 1.0 on all
+three parts (manifests carry the file hashes). The traces are the raw model runs. The two repairs of the submitted system are applied offline by `scripts/report_round5.py`: a rollout that ends without a valid
+answer or abstention becomes an abstention (fail-closed, FB), and an answer the self-check withholds becomes an abstention (V; the verdicts are in the episodes dataset under `verifier/`). Scorer version 2.
+
+{r5_final_table()}
+
+Macro success is the mean of four component rates (SQuAD single, SQuAD two-part, HotpotQA, RGB); the scorer is stricter than the one used for the first-round tables, so the numbers do not compare with them.
+Paired intervals and the per-part numbers are in `reports/round5_final.md`. `r4dev` and `r4test` are the round-4 development set and final holdout.
+
 ## Contents
 
 - `traces/<benchmark>/<system>__<lenient|strict>__{{transcripts,scores,trajectories}}.jsonl` and `__summary.json`: `transcripts` are readable conversations, `scores` hold the deterministic
-  outcome of each episode, `trajectories` is AgentTune's TrajectoryStore export, `summary` holds the aggregate and AuditKIT metrics. Systems: `base`, `main`, `candA`, `control` (first suite); `main`, `candD`, `candA` (`r3t_*`).
+  outcome of each episode, `trajectories` is AgentTune's TrajectoryStore export, `summary` holds the aggregate and AuditKIT metrics. Systems: `base`, `main`, `candA`, `control` (first suite); `main`, `candD`, `candA` (`r3t_*`);
+  `base`, `main`, `candA`, `candE1`, the round-5 checkpoints and the round-5b checkpoints (`r4dev`, `r4test`, `r5t_*`, where present).
 - `traces/<benchmark>/closed__summary.json`: the base model answering from memory, question only.
 - `manifests/<benchmark>.json`: source file, question ids, sampling seed, index hash and counts, written by `scripts/prepare_benchmarks.py`.
 - `reports/benchmarks_lenient.md`, `reports/benchmarks_strict.md` (and `.json`): every metric with denominators, paired intervals, AuditKIT rows.

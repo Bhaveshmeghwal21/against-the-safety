@@ -18,6 +18,7 @@ Stages
   train-dpo              fifth round: DPO on the pairs file, candG (from main) on GPU 0 and candH (from candA) on GPU 1; then --jobs
                          system:split[:weight],... for development evaluation (names candG1/candG2/candH1/candH2 = half and full epoch)
   force-r5               round 5b: the system answers at the abstention contexts of round 5 with `<answer>` forced (main on GPU 0, candA on GPU 1)
+  check-system           packaging check: src/ragharness/system.py with main's adapter on sealed-test parts, to compare with the offline evaluation
   train-dpo2             round 5b: DPO on the abstention-augmented pairs, candI (from main) and candK (from the round-4 checkpoint candF1); candI1/candI2/candK1/candK2
   interp                 third round probe (plan section 25): --from main --to candD --alphas 0.2,0.35 --splits bench_r3dev:30,dev:11 builds the
                          blends (1 - alpha) * from + alpha * to inside the kernel and evaluates them
@@ -337,6 +338,16 @@ def main() -> None:
                 sh(f"{py} scripts/build_verifier_cases.py --eval {OUT}/eval --system {cands} --out {OUT}/verify/cases_candidates.jsonl", check=False)
                 sh(f"{py} scripts/verify_round5.py --cases {OUT}/verify/cases_candidates.jsonl --tag main --adapter {adapters['main/adapter']} "
                    f"--out {OUT}/verify/main --wordings A", check=False, env=g0)
+    elif stage == "check-system":  # round 5 packaging: the packaged system (src/ragharness/system.py) with main's adapter on sealed-test parts that main already ran on
+        m = re.search(r"--benches\s+(\S+)", extra)
+        benches = (m.group(1) if m else "r5t_hotpot:0,r5t_rgb:100").split(",")
+        if "main/adapter" not in adapters:
+            raise SystemExit("check-system needs the main adapter")
+        rc = run_parallel([
+            (f"{py} scripts/check_system_round5.py --adapter {adapters['main/adapter']} --bench {b.split(':')[0]} --limit {b.split(':')[1] if ':' in b else 0} --out {OUT}/system_check",
+             {"CUDA_VISIBLE_DEVICES": str(i % 2)}, f"check_{b.split(':')[0]}.log")
+            for i, b in enumerate(benches)
+        ])
     elif stage == "verify-main-r5":  # round 5: the selected checker (main's adapter, wording A) on another cases file, --cases <name under data/processed/verifier>
         m = re.search(r"--cases\s+(\S+)", extra)
         cases = REPO / "data" / "processed" / "verifier" / (m.group(1) if m else "cases_dev.jsonl")

@@ -59,3 +59,20 @@ Because a candidate that is a little more accurate but not safer than main canno
 Latest start of the sealed-test run: 10 November. Hard freeze for training: 11 November, 23:59 IST. Account 2's remaining quota is unknown to me (about 14 hours of its probably 30-hour weekly allowance are used); no step starts without a reason to believe it can finish, and a failed launch is reported.
 
 Every step is committed before it runs. The next commits are the forced-answer results with the pair-file hash (before training), the development selection (before the sealed test is touched), and the final report.
+
+## Amendment 1: forced answers and the pair file (7 November 2026, 11:45 IST; written before any round-5b model is trained)
+
+Kernel `vibhutimeghwal/ats-force-r5-r5b` (the forced-answer step, about 8 minutes of GPU time): main answered at its 86 contexts in 152 s and candA at its 109 in 202 s, with no truncated input. The context file is `data/processed/training/force_contexts_r5.jsonl`, SHA256 `a47d1aafcf6b0f4a0c0b5d8c3555a0535d12652cc2e11d3a8f1f11a0fc14e75e` (195 contexts; `reports/round5b_contexts.json`).
+
+`scripts/build_pairs_round5b.py pairs` (`reports/round5b_pairs.json`): 3 forced texts were not valid answers with a citation and were dropped; the per-set cap of 90 removed 29 more; **163 new pairs** remain (r5train 90, hotpot_train 73; from main's contexts 73, from candA's 90; stopping after 1, 2 and 3 searches: 9, 101, 53). Merged with the 335 round-5 pairs unchanged: **498 pairs, SHA256 `eddbca624fb10164a927abd9d33e8794bfcd281b808e661375b36add3cc56e29`**, 79 questions, mean 1,692 tokens, maximum 2,485.
+
+| | chosen | rejected |
+| --- | ---: | ---: |
+| abstention | 165 | 91 |
+| answer | 186 | 376 |
+| further search | 147 | 0 |
+| invalid turn | 0 | 31 |
+
+The file now contains an abstention as the chosen side 165 times and as the rejected side 91 times (round 5: 2 and 91). The HotpotQA share is 37% (round 5: 33%). Two things I noticed when reading five new pairs, recorded so they are not discovered later: a forced answer is sometimes the right answer from the model's memory (for example "puppy litter", "teachers"). The pair still teaches the intended behavior, abstain when the passages in view do not hold the answer, and it is the same grounding rule the first-round training used; but the model is being taught to withhold answers it could give from memory, and this can cost some accuracy on questions whose evidence the search fails to reach.
+
+Training starts from this file with the recipe above. The development evaluation after training uses these jobs on each of the four checkpoints: `r4dev` (321 episodes) and HotpotQA dev (the same two sets as every earlier selection), then the checker V on their answers.

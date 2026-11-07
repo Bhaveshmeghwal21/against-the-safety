@@ -1,0 +1,35 @@
+{
+  "found": 362,
+  "picked": 195,
+  "decisions": {
+    "overlength": 18,
+    "not_an_abstention_after_a_search": 214,
+    "alternate_evidence_visible": 4,
+    "duplicate_context": 98,
+    "cap": 167
+  },
+  "by_set": {
+    "r5train": 120,
+    "hotpot_train": 75
+  },
+  "by_system": {
+    "main": 86,
+    "candA": 109
+  },
+  "by_depth": {
+    "1": 11,
+    "2": 125,
+    "3": 59
+  },
+  "by_variant": {
+    "r4_missing_2": 16,
+    "support_masked": 102,
+    "prefill_partial_masked": 25,
+    "r4_missing_0": 33,
+    "r4_partial_1": 10,
+    "r4_partial_0": 9
+  },
+  "questions": 71,
+  "sha256": "a47d1aafcf6b0f4a0c0b5d8c3555a0535d12652cc2e11d3a8f1f11a0fc14e75e",
+  "path": "data/processed/training/force_contexts_r5.jsonl"
+}

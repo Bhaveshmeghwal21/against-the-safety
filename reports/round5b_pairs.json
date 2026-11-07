@@ -1,0 +1,42 @@
+{
+  "old_pairs": 335,
+  "old_sha256": "8214a2c62bf7b0483fead2d32a6758c05849a1bd01cbef4fec7ba8f9c4681508",
+  "new_pairs": 163,
+  "total": 498,
+  "decisions": {
+    "forced_text_is_not_a_valid_answer": 3,
+    "set_cap": 29
+  },
+  "new_by_set": {
+    "r5train": 90,
+    "hotpot_train": 73
+  },
+  "new_by_system": {
+    "main": 73,
+    "candA": 90
+  },
+  "new_by_depth": {
+    "1": 9,
+    "2": 101,
+    "3": 53
+  },
+  "total_by_chosen_kind": {
+    "abstain": 165,
+    "search": 147,
+    "answer": 186
+  },
+  "total_by_rejected_kind": {
+    "answer": 376,
+    "abstain": 91,
+    "invalid": 31
+  },
+  "total_by_set": {
+    "r5train": 314,
+    "hotpot_train": 184
+  },
+  "questions": 79,
+  "mean_tokens": 1692,
+  "max_tokens": 2485,
+  "sha256": "eddbca624fb10164a927abd9d33e8794bfcd281b808e661375b36add3cc56e29",
+  "path": "data/processed/training/dpo_r5b.jsonl"
+}
