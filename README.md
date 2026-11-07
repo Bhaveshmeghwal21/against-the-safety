@@ -301,6 +301,12 @@ Twenty unsupported answers is a small sample. On the round-4 final-test traces, 
 
 <sub>Paired 95% intervals from resampling whole questions within each part (3,000 draws). Main + FB + V minus base: macro <b>+0.495 [+0.468, +0.521]</b>, unsupported rate <b>−0.646 [−0.698, −0.591]</b>, supported correct <b>+0.249 [+0.203, +0.295]</b>. Main + FB + V minus main: macro <b>+0.103 [+0.079, +0.127]</b>, unsupported rate <b>−0.195 [−0.231, −0.159]</b>, supported correct −0.014 [−0.025, −0.005]. Fail-closed alone adds +0.059 [+0.041, +0.079] and changes no unsupported-answer count. The scores use a stricter definition of success than rounds 1 to 3 and a different, harder mix of questions, so they cannot be compared with the 58.3% above.</sub>
 
+<p align="center">
+  <img src="docs/figures/round5_final.svg" alt="Macro success and its four components on the sealed round-5 test, and the unsupported-answer, supported-correct and refusal rates, for the base model, main, main with fail-closed, main with both repairs and candA with both repairs" width="760">
+</p>
+
+<sub>Sealed test, 938 episodes. Drawn from <code>reports/round5_final.json</code> by <code>scripts/make_round5_figure.py</code>.</sub>
+
 **Reading it.**
 - **The unsupported-answer cut is the result.** The self-check removes 71 of main's 108 unsupported answers (29.7% to 10.2% of hidden-evidence episodes). Fail-closed adds 0.059 macro by itself, entirely on hidden-evidence episodes.
 - **The accuracy gain over the base model comes from training, not from the repairs.** Supported correct answers rise from 2.7% to 29.0% with the adapter. The repairs leave them at 27.5%, a small and measurable loss.
