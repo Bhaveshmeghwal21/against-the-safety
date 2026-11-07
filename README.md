@@ -17,13 +17,14 @@ Lexsi AI Safety and Alignment Hackathon · Track 3: Agentic fine-tuning · PS 4:
 
 ## At a glance
 
-- **Model:** [Tiny Aya Global](https://huggingface.co/CohereLabs/tiny-aya-global) (Cohere, 3.35B parameters) with a QLoRA adapter, trained for 2 epochs on one Kaggle T4 (3.9 GPU-hours on the free quota).
+- **Model:** [Tiny Aya Global](https://huggingface.co/CohereLabs/tiny-aya-global) (Cohere, 3.35B parameters) with a QLoRA adapter (**main**), trained for 2 epochs on one Kaggle T4 (3.9 GPU-hours on the free quota). The submitted system is main plus two repairs applied to its output in round 5: a **fail-closed** rule and a **self-check**. The repairs need no extra training.
 - **Lexsi tools:** [AgentTune](https://github.com/Lexsi-Labs/AgentTune) supplies the retrieval backend, the search tool, the episode logs and the trainer. [AuditKIT](https://github.com/Lexsi-Labs/AuditKIT) supplies the RAG and agent metrics.
-- **Result:** on a held-out test split, opened once, the share of episodes that end well rose from **2.0% to 58.3%**. An episode ends well with a cited, supported answer when the documents hold the answer, or with an abstention when they don't.
-- **Replicated:** in a second round, on 100 fresh questions that no choice had seen, the same adapter went from **2.8% to 60.1%**.
+- **Final result (round 5):** on a sealed test of 938 fresh episodes, opened once, the share of episodes that end in a correct, fully cited answer or a correct abstention rose from **2.2% (Tiny Aya Global) to 51.7%** (+0.495 [+0.468, +0.521]). Answers given although the evidence was hidden fell from **74.8% to 10.2%** of hidden-evidence episodes (276 of 369 to 37 of 364), and supported correct answers on answerable episodes rose from 2.7% to 27.5%. Against the main adapter alone, the repairs add +0.103 macro success [+0.079, +0.127] and cut unsupported answers from 29.7% to 10.2%.
+- **What the repairs cost:** refusals of answerable questions rise from 22% to 39% of answerable episodes, and the repairs do not raise the share of supported correct answers (29.0% to 27.5%). They convert wrong or unsupported answers into abstentions. They do not teach the model more.
+- **First round:** on a held-out HotpotQA test split, opened once, the share of episodes that end well rose from **2.0% to 58.3%**. In a second round, on 100 fresh questions that no choice had seen, the same adapter went from **2.8% to 60.1%**.
 - **Five external benchmarks:** on 2WikiMultihopQA, MuSiQue, SQuAD 2.0, RGB and RGB integration (1,131 episodes, never trained on or used for any choice), the rate went from **7.9% to 49.9%**. It rose on four of the five. The adapter fails on questions that need a two-part answer, and it often refuses single-passage questions.
-- **A third round, judged and rejected:** a patch for those failures fixed single-passage questions (fresh SQuAD: 4 to 32 supported answers of 57) but raised unsupported answers on SQuAD from 6 to 31 of 109, so it failed the safety guard we had fixed beforehand and **main stays the model**. The negative result is reported in full below.
-- **The price:** the adapter declines about one answerable question in five. A second-round variant (candA) halves that on dev, at the cost of more answers when the evidence is missing. A control adapter trained without abstention examples answers more, but it never abstains.
+- **Three attempts to fix those failures were judged and rejected under rules fixed beforehand:** a round-3 patch (fixed single-passage questions, 4 to 32 supported answers of 57, but raised unsupported answers on SQuAD from 6 to 31 of 109), a round-4 evidence curriculum (better on controlled exercises, no checkpoint passed the release rules), and round-5 preference training (DPO), whose checkpoints stopped abstaining altogether. **Main stays the model.** Every negative result is reported below.
+- **The price of the first-round adapter:** it declines about one answerable question in five. A second-round variant (candA) halves that on dev, at the cost of more answers when the evidence is missing. A control adapter trained without abstention examples answers more, but it never abstains.
 
 <p align="center">
   <img src="docs/figures/outcomes_test.svg" alt="How each of the 151 headline test episodes ends, for the base model, the main adapter and the control adapter" width="760">
@@ -32,6 +33,8 @@ Lexsi AI Safety and Alignment Hackathon · Track 3: Agentic fine-tuning · PS 4:
 <sub>151 headline test episodes: 86 with the evidence reachable by search, 65 with the supporting passages hidden. Drawn from the score files by <code>scripts/make_figure.py</code>.</sub>
 
 ## Results
+
+This section reports the first round, on a HotpotQA test split. The final system's results, on a larger sealed test with a stricter scorer, are in [Round 5](#round-5-two-repairs-that-need-no-training-and-a-preference-training-negative-result).
 
 **Setup.**
 - **Test split:** 100 HotpotQA questions, opened once, after every choice had been fixed on the development split.
@@ -249,6 +252,79 @@ The benchmarks showed three gaps that re-weighting the first-round data could no
 | fewer refusals on multi-hop questions, a little more risk | candA |
 | answers to single-passage questions, and you accept the most unsupported answers | candD |
 
+## Round 4: matched evidence decisions
+
+We trained another focused curriculum on two T4s: the same question and search depth, with the required fact present in one example and missing in the other. The 721-row mixture includes search-policy replay. Two initializations, main and candA, each save two epochs, giving four checkpoints. The additional training takes about 2.02 hours of concurrent dual-T4 configuration time.
+
+The strongest development variant, **F1**, improves the new single/compound evidence-success macro from **39.2% to 52.7%**, with unsupported answers falling from **18/132 to 13/132**. Against its own parent candA, the corresponding changes are 43.5% to 52.7% and 20/132 to 13/132. However, F1's original HotpotQA success is 60.4% against main's 67.3%, and unsupported answers are 9/73 against main's 2/73. **None of the four checkpoints passes the fixed release rules, so main remains the submission model.**
+
+These scores are from additional development exercises, with every required evidence aspect cited, and cannot be compared directly with the original headline test score. Trace review finds semantic errors that token matching and citation coverage miss, plus constructed masking errors where alternate evidence remains visible. The frozen E1 final diagnostic also fails to establish an upgrade: main/E1 macro success is 35.7%/37.7%, with a difference interval crossing zero and more E1 query-loop failures. The evaluation-only ten-query Bright-Pro pilot gives main/E1 weighted aspect recall of 17.0%/7.0%. These automatic scores are not human-verified hallucination rates or official competition scores.
+
+See the [prospective plan](research/2026-11-06-round4-evidence-training.md), [results and trace findings](research/2026-11-06-round4-results.md), [all-checkpoint selection](reports/round4_selection.md), and [saved checkpoint checksums](reports/round4_checkpoints.json).
+
+## Round 5: two repairs that need no training, and a preference-training negative result
+
+Round 4's traces pointed at two cheap fixes. A rollout that never reaches a valid action (a repeated query, a search over budget, malformed output) was scored as a failure although the model had asserted nothing. And some answers were not backed by the passages the model itself cited. We tested both repairs, and preference training (DPO) on top of them, under rules written down first ([pre-registration](research/2026-11-07-round5-preregistration.md), [plan sections 27 and 28](research/2026-11-04-fine-tuning-for-rag.md)). The work took about 8 hours on a second Kaggle account's two T4s.
+
+**The two repairs.**
+
+| repair | rule | cost |
+| --- | --- | --- |
+| fail-closed (FB) | A rollout that does not end in a valid answer or abstention ends as an abstention. | none |
+| self-check (V) | The main adapter reads the question, the cited passages and the answer, and replies `SUPPORTED` or `NOT`. The answer is withheld, and the episode ends as an abstention, when the probability of `SUPPORTED` is below 0.5, when the cited chunk was never shown, or when a part of the answer does not appear in the cited passages. | one forward pass of about 770 tokens per answer, no generated text |
+
+Fail-closed is a protocol repair. It changes the score because an abstention is the right ending on a hidden-evidence episode. It does not make the model know more. Both repairs act only on a finished episode, so we applied them offline to the saved rollouts, which gives the same result as running them at inference time. The code is `fail_closed` and `apply_v` in `scripts/select_round5.py` and `scripts/verify_round5.py`; there is no packaged inference wrapper yet.
+
+**Choosing the self-check, on development data only.** Four checker configurations (the base model or the main adapter; two wordings), one forward pass each, threshold 0.5 fixed beforehand. The gate, fixed in advance: block at least 40% of main's 20 unsupported development answers and at most 10% of its 76 supported correct answers.
+
+| checker | unsupported answers blocked (20) | supported correct answers blocked (76) | gate |
+| --- | ---: | ---: | --- |
+| base model, wording `SUPPORTED` / `NOT` | 60% | 24% | no |
+| base model, wording `Yes` / `No` | 75% | 21% | no |
+| **main adapter, wording `SUPPORTED` / `NOT`** | **70%** | **8%** | **yes** |
+| main adapter, wording `Yes` / `No` | 100% | 87% | no, blocks nearly everything |
+
+Twenty unsupported answers is a small sample. On the round-4 final-test traces, which were never used to choose the checker, it blocks 59% of main's 39 unsupported answers at a cost of 14% of its 51 supported correct ones (candA: 67% at 5%).
+
+**Sealed final test.** 938 episodes built before any training from data no earlier round used: 385 SQuAD (25 unused training-split articles; single and two-part questions, with the round-4 evidence variants), 82 HotpotQA (unused validation questions) and 471 RGB (noise 0, 0.8 and 1). A scripted oracle scores 1.0 on all three parts, so every episode can be solved. The scorer (version 2, fixed before any round-5 result) counts an answer as correct when its token F1 and token precision against the gold answer are both at least 0.5 and it cites every required piece of evidence, and it drops hidden-evidence episodes whose shown passages already hold the whole answer. Macro success is the mean of four component rates: SQuAD single, SQuAD two-part, HotpotQA and RGB. The set was opened once, for the reference systems only; no preference-trained checkpoint was eligible, so none was run on it.
+
+| sealed test (938 episodes) | Tiny Aya base | main | main + FB | **main + FB + V** | candA + FB + V (reference) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| **macro success** | 0.022 | 0.414 | 0.474 | **0.517** | 0.541 |
+| SQuAD single | 0.018 | 0.545 | 0.600 | 0.591 | 0.614 |
+| SQuAD two-part | 0.036 | 0.224 | 0.327 | 0.394 | 0.390 |
+| HotpotQA | 0.000 | 0.524 | 0.561 | 0.561 | 0.634 |
+| RGB | 0.034 | 0.363 | 0.407 | 0.524 | 0.526 |
+| answers although the evidence was hidden ↓ | 276 / 369 | 108 / 364 | 108 / 364 | **37 / 364** | 45 / 365 |
+| supported correct answers, answerable episodes | 0.027 | 0.290 | 0.290 | 0.275 | 0.309 |
+| refusals of answerable episodes ↓ | **0.011** | 0.222 | 0.270 | 0.391 | 0.323 |
+
+<sub>Paired 95% intervals from resampling whole questions within each part (3,000 draws). Main + FB + V minus base: macro <b>+0.495 [+0.468, +0.521]</b>, unsupported rate <b>−0.646 [−0.698, −0.591]</b>, supported correct <b>+0.249 [+0.203, +0.295]</b>. Main + FB + V minus main: macro <b>+0.103 [+0.079, +0.127]</b>, unsupported rate <b>−0.195 [−0.231, −0.159]</b>, supported correct −0.014 [−0.025, −0.005]. Fail-closed alone adds +0.059 [+0.041, +0.079] and changes no unsupported-answer count. The scores use a stricter definition of success than rounds 1 to 3 and a different, harder mix of questions, so they cannot be compared with the 58.3% above.</sub>
+
+**Reading it.**
+- **The unsupported-answer cut is the result.** The self-check removes 71 of main's 108 unsupported answers (29.7% to 10.2% of hidden-evidence episodes). Fail-closed adds 0.059 macro by itself, entirely on hidden-evidence episodes.
+- **The accuracy gain over the base model comes from training, not from the repairs.** Supported correct answers rise from 2.7% to 29.0% with the adapter. The repairs leave them at 27.5%, a small and measurable loss.
+- **The price is more refusals.** Refusals of answerable episodes rise from 22% to 39%. Most of the extra abstentions were wrong answers already, but a user sees more "I cannot answer".
+- **candA with the same repairs scores 0.024 higher on macro** (interval [+0.003, +0.045]) and is not different on unsupported answers (+0.022 [−0.014, +0.057]). It was a reference and was not a candidate under the rule, so main stays the default. It remains the better choice if you prefer answers to caution.
+
+**Preference training (DPO), judged and rejected.** We sampled 1,920 rollouts on training episodes (main and candA, temperature 0.8, two samples each) and built 335 preference pairs (186 favour a cited correct answer, 149 favour searching again or abstaining). Four checkpoints continued from main (candG) and from candA (candH), two epochs of 84 steps each, with the chosen-text likelihood as an anchor. Training loss fell from 0.67 to 0.19. Development selection ran with FB and V applied to every system, which makes the first gate (strictly fewer unsupported answers than main + FB + V) hard to pass; we kept it as written. No candidate passed.
+
+| development, FB + V on every system | macro | SQuAD single | supported correct | unsupported / hidden | HotpotQA unsupported | eligible |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| main | 0.538 | 0.603 | 0.228 | 5 / 131 | 1 | reference |
+| candG2 (DPO from main) | 0.558 | 0.700 | 0.381 | 9 / 132 | 9 | no |
+| candH2 (DPO from candA) | 0.557 | 0.678 | 0.386 | 12 / 129 | 8 | no |
+| candF1 (round 4) | 0.583 | 0.612 | 0.312 | 7 / 131 | 2 | no |
+
+DPO raised accuracy on SQuAD-style questions (candG2: supported correct 0.381 against 0.228) and lost the ability to abstain. None of the four checkpoints ends a single `r4dev` episode with an abstention, while main does so in 160 of 321. The cause is in the pair file: it rejects an abstention 91 times and chooses one twice, because on-policy sampling almost never produces an unsupported answer at the last search, which is where the reference action is an abstention. The training pushed abstentions down by about 17 nats and nothing pushed them up. With FB and V applied, the looping and unsupported answers of these checkpoints turn into abstentions, so the wrapped numbers look reasonable; the abstaining is then done by the repairs, not by the model. A repaired pair set would need pairs that choose an abstention, with the rejected answer taken from a forced answer on hidden evidence. We did not run it.
+
+**Departures from the plan, all recorded with dates in the pre-registration.**
+- Two samples per episode instead of four, 335 pairs instead of 1,500 to 3,000, and a learning rate of 2e-5 instead of 5e-6, all set by measured T4 throughput.
+- The candidate pool was widened from four to eight, adding the round-4 checkpoints, after an informed look at their test traces (stated at the time); selection used development data only.
+- TRL's `DPOTrainer`, through AgentTune's `TrlAgenticDPO`, ran out of memory because it builds full-vocabulary logits (262k entries) for both sequences of a pair, so only 38 of 335 pairs fitted. We replaced it with a short loop (`scripts/train_dpo.py`) that computes logits at the completion positions only and uses the same loss. **The DPO optimiser step is therefore not an AgentTune class this round.** AgentTune supplied the training of rounds 1 to 4 and the tool, trajectory and evaluation stack throughout.
+
+Reports: [`round5_final.md`](reports/round5_final.md), [`round5_verifier.md`](reports/round5_verifier.md), [`round5_selection.md`](reports/round5_selection.md), [`round5_selection_r4cands_with_V.md`](reports/round5_selection_r4cands_with_V.md), [`round5_rescore_r4.md`](reports/round5_rescore_r4.md), [`round5_r4test_wrappers.md`](reports/round5_r4test_wrappers.md), [`round5_pairs.json`](reports/round5_pairs.json) and [`round5_test_manifest.json`](reports/round5_test_manifest.json). Narrative: [`research/2026-11-07-round5-results.md`](research/2026-11-07-round5-results.md).
+
 ## How it works
 
 ### The agent loop
@@ -296,7 +372,8 @@ flowchart LR
     C --> D["QLoRA SFT<br/>AgentTune trainer<br/>Kaggle T4"]
     D --> E["main and control<br/>LoRA adapters"]
     E --> F["Rollouts on dev and test<br/>search_corpus, budget 3"]
-    F --> G["Scoring<br/>deterministic code<br/>and AuditKIT"]
+    F --> R["Round 5 repairs<br/>fail-closed rule<br/>and answer self-check"]
+    R --> G["Scoring<br/>deterministic code<br/>and AuditKIT"]
 ```
 
 **Recipe** (identical for both adapters, fixed before any result): QLoRA in 4-bit NF4 with fp16 compute; rank 16, alpha 32, dropout 0.05, on all linear layers; learning rate 2e-4 with a cosine schedule and 3% warmup; effective batch 16; 2 epochs; seed 13; context 2,560 tokens. The loss covers the model's own turns only.
@@ -307,6 +384,8 @@ flowchart LR
 | --- | --- | --- |
 | AgentTune | `create_distill_trainer` with a QLoRA trainer factory; `SQLiteFTSBackend` and `SearchCorpusTool` for retrieval and the tool the model calls; `EventLog` and `TrajectoryStore` for every training episode and evaluation rollout; `qa_metrics` F1 and exact match | `src/ragharness/trainer.py`, `retrieval.py`, `tools.py`, `episodes.py`, `evaluation.py` |
 | AuditKIT | RAG metrics `evidence_set_recall`, `citation_support`, `abstention`, `freshness`; agent metrics `tool_call_validity`, `redundant_tool_calls`, `agent_loop_detection`; every episode becomes an `ak.Sample` with a `RAGTrace`, scored by `ak.evaluate` | `src/ragharness/audit.py`, `scorecard.py` |
+
+In round 5, every rollout still runs through AgentTune's tool, trajectory and evaluation stack. The round-5 headline numbers come from the outcome classes of scorer version 2 (`src/ragharness/rescore.py`), not from AuditKIT metrics, and the DPO optimiser step was our own loop rather than an AgentTune class.
 
 ### Two readings of every run
 
@@ -332,6 +411,7 @@ Both readings, and the choice of lenient as primary, were fixed before the test 
 | Trace viewer (static, no model runs) | [against-the-safety-trace-viewer](https://huggingface.co/spaces/BMEscanor/against-the-safety-trace-viewer) |
 | Write-up | [`article/ARTICLE.md`](article/ARTICLE.md) |
 
+Round 5 adds no adapter. The submitted system is the main adapter above plus the fail-closed rule and the self-check, which are code in this repository. The four DPO checkpoints were not selected and are not published.
 ## Use the adapter
 
 The base model is gated, so first accept its terms at [CohereLabs/tiny-aya-global](https://huggingface.co/CohereLabs/tiny-aya-global). Loading in 4-bit needs a CUDA GPU.
@@ -359,6 +439,8 @@ The adapter expects the protocol it was trained on:
 - **Search results:** returned as a user turn by `ragharness.protocol.format_tool_result`.
 
 The package versions used are pinned in `requirements-gpu.lock.txt`.
+
+The round-5 system adds two steps after the rollout: treat a rollout without a valid final action as an abstention, and run the self-check on every answer (`scripts/verify_round5.py`, main adapter, wording A, threshold 0.5; see [Round 5](#round-5-two-repairs-that-need-no-training-and-a-preference-training-negative-result)). The adapter alone gives the first-round results.
 
 ## Reproduce
 
@@ -443,17 +525,38 @@ python scripts/report_round3.py --eval runs/kaggle/ats-eval-jobs-r3test/out/eval
 
 The patch kernel took 2.7 h, the weight-blend probe 1.1 h and the fresh test 1.6 h (main, candD and candA).
 
+**7. Round 5 (optional).** Round 5 needs the round-4 data and scripts, and a second bundle that carries the starting adapters (`scripts/bundle_for_kaggle.py --adapter main=<dir> --adapter candA=<dir>`, uploaded with `kaggle_launch.py dataset --existing`). The paths in angle brackets are the downloaded kernel outputs; every script has `--help`, and the registered launches are in the [pre-registration](research/2026-11-07-round5-preregistration.md).
+
+```powershell
+python scripts/prepare_round5.py                  # article allocation, r5train and the sealed r5t_squad / r5t_hotpot / r5t_rgb sets, each checked with the scripted oracle
+python scripts/kaggle_launch.py run sample-r5     # 1,920 sampled rollouts on training episodes (main on GPU 0, candA on GPU 1), about 1.2 h
+python scripts/build_pairs_round5.py --samples <samples folder>                 # 335 preference pairs
+python scripts/kaggle_launch.py run train-dpo     # candG and candH, then development evaluation, about 3.9 h
+python scripts/build_verifier_cases.py --eval <round-4 dev eval folder> --system main --out data/processed/verifier/cases_dev.jsonl
+python scripts/kaggle_launch.py run verify-r5     # the four checker configurations on main's development answers
+python scripts/analyze_verifier_round5.py --verify <verify folder> --out reports/round5_verifier
+python scripts/select_round5.py --eval <dev eval folder> --cases <cases file> --verdicts <verdicts folder> --out reports/round5_selection
+python scripts/kaggle_launch.py run eval-jobs --tag r5test-ref --adapters-from <training kernels> "--extra=--jobs ..."   # base, main and candA on the sealed test, about 2 h
+python scripts/build_verifier_cases.py --eval <sealed eval folder> --system base,main,candA --out data/processed/verifier/cases_r5test_refs.jsonl
+python scripts/kaggle_launch.py run verify-main-r5 "--extra=--cases cases_r5test_refs.jsonl"                           # the checker on their answers (rebuild the bundle first)
+python scripts/report_round5.py --eval <sealed eval folder> --systems base,main,candA --cases <cases file> --verdicts <verdicts folder> --compare main+FB+V/main
+```
+
 ## Limits
 
 - **False abstains.** The main adapter declines 19% of answerable test episodes (22% on test2, 18% on dev). The candA adapter lowers this to 15% on test2, but answers in 8% of test2 episodes whose evidence is missing (main: 4%).
 - **Small evaluation sets.** There are 86 answerable test questions and 65 headline episodes with masked evidence, so differences of a few points are not established. Every report gives intervals.
 - **Near-miss credit.** An answer counts as supported at F1 ≥ 0.5 against the gold answer, plus a cited gold passage. F1 can credit near misses on short answers, so exact-match rates are reported too: main 0.424, control 0.571, base 0.020 on answerable episodes.
 - **Narrow coverage.** Everything is English, with short HotpotQA-style factual questions. The Nimbus Home suite has only 24 tasks.
-- **Single-span, two-passage habits.** On the external benchmarks the main adapter answers only the first part of two-part questions (RGB integration), and it declines most single-passage SQuAD 2.0 questions even with the answer on screen. Round 3 trained a patch for both; the patch fixes the single-passage case but fails the safety guard (see Round 3), so the shipped model keeps the habit. A model that does both safely would need more training steps than the remaining compute allowed.
+- **Single-span, two-passage habits.** On the external benchmarks the main adapter answers only the first part of two-part questions (RGB integration), and it declines most single-passage SQuAD 2.0 questions even with the answer on screen. Round 3's patch fixes the single-passage case but fails the safety guard. Round 4 uses additional compute for matched evidence decisions and improves some controlled reading exercises, but also fails the release rules. The shipped model retains these limitations; more training alone has not established a safe fix.
 - **On-topic passages without the answer.** When such passages are supplied in the prompt (RGB noise 1), main abstains on only 14 of 60 fresh questions. All adapters are weak here, and the unsupported-answer rates in the tables are dominated by this case.
 - **Nimbus run 1 was flawed.** F1 could not tell "30 days" from "45 days". We shortened the gold answers, fixed one question and re-ran every system. Traces from both runs are published.
-- **Masking check.** The test that a masked episode lacks the answer is a text match. It does not prove that no other passage could support a different valid answer.
-- **Three training rounds, each judged on fresh data.** Choosing a new mixture after a test split was opened needed a new split. Round 2 used test2 and round 3 a fresh set of six, so the first test split was never used for selection. Round 3's probe (the weight blend) and its test of non-eligible candidates were decided after the development result and are labelled as such in the plan.
+- **Masking check.** The test that a masked episode lacks the answer is a text match. Round 4's trace audit confirms false-positive unsupported labels where alternate passages still give the answer (including the National Archives location). Its raw gold-mask counts are not human-verified hallucination counts. See the dated results report before using them as a reliability claim.
+- **Four training rounds, with held-out selection protocols.** Choosing a new mixture after a test split was opened needed a new split. Round 2 used test2 and round 3 a fresh set of six, so the first test split was never used for selection. Round 3's probe (the weight blend) and its test of non-eligible candidates were decided after the development result and are labelled as such in the plan. Round 4 uses new article groups and keeps existing benchmarks as informed regression checks; its E1 fallback diagnostic was declared before full-checkpoint evaluation and cannot select a replacement. Round 5 built its sealed test before any training. Its candidate pool was widened from four to eight checkpoints after an informed look at round-4 test traces, which is disclosed in the pre-registration; selection used development data only.
+- **The round-5 repairs trade answers for caution.** On the sealed test, 39% of answerable episodes end in a refusal and only 27.5% end in a correct, fully cited answer (29.0% for the adapter alone). The test mixes harder variants than the first-round HotpotQA split, and its scorer is stricter, so the two sets of numbers do not compare.
+- **The self-check rests on a small development sample.** It was chosen among four configurations on 20 unsupported and 76 supported correct answers. It held on round-4 test traces (59% to 67% of unsupported answers blocked) and on the sealed test (71 of 108 blocked), but the exact rates are uncertain. It adds one forward pass per answer.
+- **The repairs are applied offline.** Both act only on a finished episode, so offline application equals running them at inference time, but the repository has no packaged inference wrapper.
+- **Preference training failed.** The DPO checkpoints lost the abstention action, and a repaired pair set was not run. Round 5 does not show that DPO, or any further training, improves answers at a safe operating point.
 
 <details>
 <summary><b>Repository layout</b></summary>
@@ -468,7 +571,7 @@ reports/          every table cited on this page (markdown and json)
 docs/figures/     the figures on this page
 demo/             static trace viewer, also published as a Hugging Face Space
 article/          write-up and submission abstract
-research/         planning record with the pre-registered choices (sections 18 to 26)
+research/         planning records, dated repository assessments and training-result investigations
 tests/            harness tests
 ```
 
