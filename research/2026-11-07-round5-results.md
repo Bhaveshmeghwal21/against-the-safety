@@ -24,6 +24,7 @@ Paired differences, 95% intervals from resampling whole questions within each pa
 | comparison | macro | unsupported rate | supported correct |
 | --- | ---: | ---: | ---: |
 | main against base | +0.392 [+0.357, +0.425] | -0.451 [-0.508, -0.392] | +0.263 [+0.217, +0.310] |
+| **main + FB + V against base** (added 7 November for the write-up; computed by appending the comparison last, so the other rows keep their draws) | **+0.495 [+0.468, +0.521]** | **-0.646 [-0.698, -0.591]** | +0.249 [+0.203, +0.295] |
 | main + FB against main (claim 1 of 0a) | +0.059 [+0.041, +0.079] | +0.000 | +0.000 |
 | main + FB + V against main + FB | +0.044 [+0.028, +0.059] | -0.195 [-0.233, -0.157] | -0.014 [-0.025, -0.005] |
 | **main + FB + V against main** | **+0.103 [+0.079, +0.127]** | **-0.195 [-0.231, -0.159]** | -0.014 [-0.025, -0.005] |
@@ -78,4 +79,4 @@ The first epoch of candG (candG1) is worse than the second: 224 of 321 episodes 
 
 - Headline: `main` + fail-closed + V. Pre-registered, significant on a sealed test, no retraining.
 - Not done: priority 3 (GRPO with the +1 / 0 / -1 reward) is the plan's next step. The DPO failure sharpens why: that reward gives the model an on-policy reason to keep abstaining when evidence is hidden, which a pair set built from errors cannot. A corrected DPO is the cheaper alternative: add pairs that choose an abstention, with the rejected answer obtained by forcing an answer at depth-3 hidden-evidence contexts, raise the HotpotQA share, and stop on an abstention-rate guard. Either needs about 4 GPU hours and a new pre-registration.
-- Nothing from this round is published on the Hub yet. The README, Article and abstract still describe rounds 1 to 4.
+- Nothing from this round is published on the Hub yet. The README, Article and abstract describe rounds 1 to 5 as of 7 November; the Hub model cards and the trace datasets still describe rounds 1 to 3.

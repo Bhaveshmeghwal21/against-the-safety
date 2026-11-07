@@ -34,6 +34,17 @@ python scripts/kaggle_launch.py run eval-bench --adapters-from "ats-train-both,a
 python scripts/kaggle_launch.py run eval-bench --adapters-from "ats-train-both,ats-train-cands" --tag b "--extra=--systems candA,control,closed"
 ```
 
+Rounds 3 to 5 use more stages (`patch`, `interp`, `eval-jobs`, and for round 5 `sample-r5`, `train-dpo`, `verify-r5`, `verify-main-r5`; the list with a line each is at the top of `kaggle/bootstrap.py`). Round 5 ran on a second Kaggle account, with a bundle that carries the starting adapters:
+
+```powershell
+python scripts/bundle_for_kaggle.py --out runs/kaggle_bundle_account2 --adapter main=<main adapter dir> --adapter candA=<candA adapter dir>
+python scripts/kaggle_launch.py --credentials-env <VARIABLE> --bundle-dir runs/kaggle_bundle_account2 dataset --existing
+python scripts/kaggle_launch.py --credentials-env <VARIABLE> --bundle-dir runs/kaggle_bundle_account2 run sample-r5 --tag r5-pairs
+python scripts/kaggle_launch.py --credentials-env <VARIABLE> --bundle-dir runs/kaggle_bundle_account2 run train-dpo --tag r5c
+python scripts/kaggle_launch.py --credentials-env <VARIABLE> --bundle-dir runs/kaggle_bundle_account2 run verify-r5
+python scripts/kstatus.py <kernel slugs> --wait-minutes 25     # progress of one or more kernels; `kernels logs` shows nothing while a kernel runs
+```
+
 `--extra` is passed to the stage. For `eval-*`: `--ckpt` selects `adapter` (final, default) or `adapter_ep1`; `--systems` selects
 from `base,main,closed,control` (also `candA` and `candB` where their adapters are attached); anything else goes to
 `scripts/run_eval.py` (for example `--limit-questions 6`). `eval-bench` also takes `--benches` (default
@@ -59,3 +70,4 @@ from `base,main,closed,control` (also `candA` and `candB` where their adapters a
 - Measured on one T4 (smoke test): 8 s per training row at about 1,640 tokens, 6.5 GB peak; batched generation 1.8 s per episode (base)
   and 3.5 s (adapter), 9.3 GB peak.
 - Use the same hardware, precision and decoding for every system in the final evaluation.
+- Measured in round 5 on one T4: sampling 1,920 rollouts took about 63 minutes per GPU; the DPO loop took 1.6 to 1.7 hours for 84 steps at 8.0 GB peak; one checker pass over 366 cases took about 4 minutes. Two GPU kernels of one account ran at the same time without trouble. TRL's `DPOTrainer` does not fit a pair longer than about 1,280 tokens on a T4 (it materialises the full 262k-entry vocabulary logits), which is why `scripts/train_dpo.py` computes logits at the completion positions only.

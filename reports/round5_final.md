@@ -20,3 +20,4 @@ Paired differences (first minus second), 95% intervals:
 - main+FB+V/main: macro +0.103 [+0.079, +0.127]; unsupported rate -0.195 [-0.231, -0.159]; supported correct -0.014 [-0.025, -0.005]
 - candA+FB+V/main+FB+V: macro +0.024 [+0.003, +0.045]; unsupported rate +0.022 [-0.014, +0.057]; supported correct +0.034 [+0.000, +0.066]
 - main/base: macro +0.392 [+0.357, +0.425]; unsupported rate -0.451 [-0.508, -0.392]; supported correct +0.263 [+0.217, +0.310]
+- main+FB+V/base: macro +0.495 [+0.468, +0.521]; unsupported rate -0.646 [-0.698, -0.591]; supported correct +0.249 [+0.203, +0.295]

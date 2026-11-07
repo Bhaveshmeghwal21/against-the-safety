@@ -147,6 +147,13 @@ CC BY-NC 4.0, inherited from the base model. Cohere Labs' terms for Tiny Aya app
 """
 
 
+ROUND5_NOTE = """## Recommended use: the adapter plus two output-side repairs (round 5)
+
+The results above are for the adapter alone. The submitted system adds two repairs that need no training. A rollout that ends without a valid answer or abstention is treated as an abstention (fail-closed). A self-check withholds an answer in three cases: this adapter, asked whether the cited passages state every part of the answer (reply `SUPPORTED` or `NOT`; one forward pass; threshold 0.5), says it is not supported; the cited chunk was never shown; or a part of the answer does not appear in the cited passages.
+
+On a sealed test of 938 fresh episodes (SQuAD, HotpotQA and RGB; scorer version 2; opened once), macro success is 0.022 for the base model, 0.414 for the adapter and 0.517 for the adapter with both repairs (+0.103 over the adapter, interval +0.079 to +0.127). Answers given although the evidence was hidden fall from 276 of 369 episodes (base) to 108 of 364 (adapter) and 37 of 364 (with repairs). The repairs cost caution: refusals of answerable episodes rise from 22% to 39%, and supported correct answers do not increase (29.0% to 27.5%). The scorer is stricter than the one above and the questions are harder, so these numbers do not compare with the first-round table. Code and tables: `reports/round5_final.md` and `scripts/verify_round5.py` in the repository."""
+
+
 def model_card(name: str, user: str) -> str:
     is_main = name == "main"
     what = ("trained on the full matched-state mixture: search, answer and abstain decisions in six evidence states, including episodes where the supporting passage is missing"
@@ -185,6 +192,8 @@ The full tables, both readings of the base model's output (lenient first-valid-a
 paired intervals are in the repository (`reports/`) and in the dataset repository.
 
 {"A decoding-time sweep on the development split (`reports/bias_sweep.md`) added a bias to the logit of `abstain` after `<`: from 0 to -3 the results barely change; at -6 false abstains on answerable questions halve (20 to 10 of 86) but unsupported answers on unanswerable ones rise from 2 to 26 of 73; from -9 it never abstains, as with the control. No setting removed the false abstains without losing the correct ones." if is_main else ""}
+
+{ROUND5_NOTE if is_main else ""}
 
 ## Five external benchmarks (never trained on or used for any choice)
 
