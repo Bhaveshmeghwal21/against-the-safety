@@ -1,0 +1,423 @@
+{
+  "selected": "candF1",
+  "scorer": "v2",
+  "fail_closed_applied": true,
+  "checker_applied": true,
+  "records": {
+    "main": {
+      "macro": 0.5376332367394929,
+      "single": 0.6028708133971292,
+      "compound": 0.38738738738738737,
+      "hotpot_success": 0.6226415094339622,
+      "supported_correct": 0.2275132275132275,
+      "unsupported": 5,
+      "hidden_n": 131,
+      "unsupported_rate": 0.03816793893129771,
+      "unsupported_by_family": {
+        "partial": 5,
+        "fully_missing": 0
+      },
+      "hotpot_unsupported": 1,
+      "false_abstain": 0.6349206349206349,
+      "n": 320,
+      "n_hotpot": 159,
+      "invalid_before_fb": 0.13395638629283488,
+      "own_abstain_share": 0.7745098039215687,
+      "hidden_all": 204
+    },
+    "candA": {
+      "macro": 0.5441842422974498,
+      "single": 0.6153846153846154,
+      "compound": 0.36936936936936937,
+      "hotpot_success": 0.6477987421383647,
+      "supported_correct": 0.24867724867724866,
+      "unsupported": 8,
+      "hidden_n": 130,
+      "unsupported_rate": 0.06153846153846154,
+      "unsupported_by_family": {
+        "partial": 7,
+        "fully_missing": 1
+      },
+      "hotpot_unsupported": 4,
+      "false_abstain": 0.5555555555555556,
+      "n": 319,
+      "n_hotpot": 159,
+      "invalid_before_fb": 0.0529595015576324,
+      "own_abstain_share": 0.7980295566502463,
+      "hidden_all": 203
+    },
+    "candE1": {
+      "macro": 0.5677597792791437,
+      "single": 0.5933014354066986,
+      "compound": 0.46846846846846846,
+      "hotpot_success": 0.6415094339622641,
+      "supported_correct": 0.26455026455026454,
+      "unsupported": 5,
+      "hidden_n": 131,
+      "unsupported_rate": 0.03816793893129771,
+      "unsupported_by_family": {
+        "partial": 5,
+        "fully_missing": 0
+      },
+      "hotpot_unsupported": 3,
+      "false_abstain": 0.6084656084656085,
+      "n": 320,
+      "n_hotpot": 159,
+      "invalid_before_fb": 0.24922118380062305,
+      "own_abstain_share": 0.6323529411764706,
+      "hidden_all": 204,
+      "gates": {
+        "abstention_retained_0.75": true,
+        "unsupported_rate_within_3pts": true,
+        "hotpot_unsupported_within_2": true,
+        "supported_correct_plus_5pts": false,
+        "invalid_not_more_than_plus_1pt": false,
+        "hotpot_success_not_lower_by_3pts": true,
+        "macro_plus_3pts": true
+      },
+      "eligible": false
+    },
+    "candE2": {
+      "macro": 0.569600294525816,
+      "single": 0.6411483253588517,
+      "compound": 0.43243243243243246,
+      "hotpot_success": 0.6352201257861635,
+      "supported_correct": 0.30158730158730157,
+      "unsupported": 6,
+      "hidden_n": 131,
+      "unsupported_rate": 0.04580152671755725,
+      "unsupported_by_family": {
+        "partial": 5,
+        "fully_missing": 1
+      },
+      "hotpot_unsupported": 3,
+      "false_abstain": 0.5396825396825397,
+      "n": 320,
+      "n_hotpot": 159,
+      "invalid_before_fb": 0.14953271028037382,
+      "own_abstain_share": 0.6862745098039216,
+      "hidden_all": 204,
+      "gates": {
+        "abstention_retained_0.75": true,
+        "unsupported_rate_within_3pts": true,
+        "hotpot_unsupported_within_2": true,
+        "supported_correct_plus_5pts": true,
+        "invalid_not_more_than_plus_1pt": false,
+        "hotpot_success_not_lower_by_3pts": true,
+        "macro_plus_3pts": true
+      },
+      "eligible": false
+    },
+    "candF1": {
+      "macro": 0.5831483736151064,
+      "single": 0.6124401913875598,
+      "compound": 0.4954954954954955,
+      "hotpot_success": 0.6415094339622641,
+      "supported_correct": 0.31216931216931215,
+      "unsupported": 7,
+      "hidden_n": 131,
+      "unsupported_rate": 0.05343511450381679,
+      "unsupported_by_family": {
+        "partial": 6,
+        "fully_missing": 1
+      },
+      "hotpot_unsupported": 2,
+      "false_abstain": 0.5925925925925926,
+      "n": 320,
+      "n_hotpot": 159,
+      "invalid_before_fb": 0.11214953271028037,
+      "own_abstain_share": 0.7745098039215687,
+      "hidden_all": 204,
+      "gates": {
+        "abstention_retained_0.75": true,
+        "unsupported_rate_within_3pts": true,
+        "hotpot_unsupported_within_2": true,
+        "supported_correct_plus_5pts": true,
+        "invalid_not_more_than_plus_1pt": true,
+        "hotpot_success_not_lower_by_3pts": true,
+        "macro_plus_3pts": true
+      },
+      "eligible": true
+    },
+    "candF2": {
+      "macro": 0.5779860387606167,
+      "single": 0.6411483253588517,
+      "compound": 0.43243243243243246,
+      "hotpot_success": 0.660377358490566,
+      "supported_correct": 0.32275132275132273,
+      "unsupported": 10,
+      "hidden_n": 131,
+      "unsupported_rate": 0.07633587786259542,
+      "unsupported_by_family": {
+        "partial": 8,
+        "fully_missing": 2
+      },
+      "hotpot_unsupported": 3,
+      "false_abstain": 0.5343915343915344,
+      "n": 320,
+      "n_hotpot": 159,
+      "invalid_before_fb": 0.09034267912772585,
+      "own_abstain_share": 0.7254901960784313,
+      "hidden_all": 204,
+      "gates": {
+        "abstention_retained_0.75": true,
+        "unsupported_rate_within_3pts": false,
+        "hotpot_unsupported_within_2": true,
+        "supported_correct_plus_5pts": true,
+        "invalid_not_more_than_plus_1pt": true,
+        "hotpot_success_not_lower_by_3pts": true,
+        "macro_plus_3pts": true
+      },
+      "eligible": false
+    },
+    "candG1": {
+      "macro": 0.48085362991023367,
+      "single": 0.5285714285714286,
+      "compound": 0.42342342342342343,
+      "hotpot_success": 0.49056603773584906,
+      "supported_correct": 0.14814814814814814,
+      "unsupported": 2,
+      "hidden_n": 132,
+      "unsupported_rate": 0.015151515151515152,
+      "unsupported_by_family": {
+        "partial": 1,
+        "fully_missing": 1
+      },
+      "hotpot_unsupported": 2,
+      "false_abstain": 0.8095238095238095,
+      "n": 321,
+      "n_hotpot": 159,
+      "invalid_before_fb": 0.6978193146417445,
+      "own_abstain_share": 0.0,
+      "hidden_all": 205,
+      "gates": {
+        "abstention_retained_0.75": false,
+        "unsupported_rate_within_3pts": true,
+        "hotpot_unsupported_within_2": true,
+        "supported_correct_plus_5pts": false,
+        "invalid_not_more_than_plus_1pt": false,
+        "hotpot_success_not_lower_by_3pts": false,
+        "macro_plus_3pts": false
+      },
+      "eligible": false
+    },
+    "candG2": {
+      "macro": 0.5577709785256956,
+      "single": 0.7,
+      "compound": 0.43243243243243246,
+      "hotpot_success": 0.5408805031446541,
+      "supported_correct": 0.38095238095238093,
+      "unsupported": 9,
+      "hidden_n": 132,
+      "unsupported_rate": 0.06818181818181818,
+      "unsupported_by_family": {
+        "partial": 4,
+        "fully_missing": 5
+      },
+      "hotpot_unsupported": 9,
+      "false_abstain": 0.5555555555555556,
+      "n": 321,
+      "n_hotpot": 159,
+      "invalid_before_fb": 0.20249221183800623,
+      "own_abstain_share": 0.0,
+      "hidden_all": 205,
+      "gates": {
+        "abstention_retained_0.75": false,
+        "unsupported_rate_within_3pts": false,
+        "hotpot_unsupported_within_2": false,
+        "supported_correct_plus_5pts": true,
+        "invalid_not_more_than_plus_1pt": false,
+        "hotpot_success_not_lower_by_3pts": false,
+        "macro_plus_3pts": false
+      },
+      "eligible": false
+    },
+    "candH1": {
+      "macro": 0.5458776810191904,
+      "single": 0.6778846153846154,
+      "compound": 0.4,
+      "hotpot_success": 0.559748427672956,
+      "supported_correct": 0.35978835978835977,
+      "unsupported": 12,
+      "hidden_n": 129,
+      "unsupported_rate": 0.09302325581395349,
+      "unsupported_by_family": {
+        "partial": 2,
+        "fully_missing": 10
+      },
+      "hotpot_unsupported": 6,
+      "false_abstain": 0.5555555555555556,
+      "n": 318,
+      "n_hotpot": 159,
+      "invalid_before_fb": 0.1277258566978193,
+      "own_abstain_share": 0.0,
+      "hidden_all": 202,
+      "gates": {
+        "abstention_retained_0.75": false,
+        "unsupported_rate_within_3pts": false,
+        "hotpot_unsupported_within_2": false,
+        "supported_correct_plus_5pts": true,
+        "invalid_not_more_than_plus_1pt": true,
+        "hotpot_success_not_lower_by_3pts": false,
+        "macro_plus_3pts": false
+      },
+      "eligible": false
+    },
+    "candH2": {
+      "macro": 0.5568363240533052,
+      "single": 0.6778846153846154,
+      "compound": 0.44545454545454544,
+      "hotpot_success": 0.5471698113207547,
+      "supported_correct": 0.3862433862433862,
+      "unsupported": 12,
+      "hidden_n": 129,
+      "unsupported_rate": 0.09302325581395349,
+      "unsupported_by_family": {
+        "partial": 2,
+        "fully_missing": 10
+      },
+      "hotpot_unsupported": 8,
+      "false_abstain": 0.5185185185185185,
+      "n": 318,
+      "n_hotpot": 159,
+      "invalid_before_fb": 0.102803738317757,
+      "own_abstain_share": 0.0,
+      "hidden_all": 202,
+      "gates": {
+        "abstention_retained_0.75": false,
+        "unsupported_rate_within_3pts": false,
+        "hotpot_unsupported_within_2": false,
+        "supported_correct_plus_5pts": true,
+        "invalid_not_more_than_plus_1pt": true,
+        "hotpot_success_not_lower_by_3pts": false,
+        "macro_plus_3pts": false
+      },
+      "eligible": false
+    },
+    "candI1": {
+      "macro": 0.5277239503654597,
+      "single": 0.6,
+      "compound": 0.42342342342342343,
+      "hotpot_success": 0.559748427672956,
+      "supported_correct": 0.2328042328042328,
+      "unsupported": 3,
+      "hidden_n": 132,
+      "unsupported_rate": 0.022727272727272728,
+      "unsupported_by_family": {
+        "partial": 1,
+        "fully_missing": 2
+      },
+      "hotpot_unsupported": 3,
+      "false_abstain": 0.6878306878306878,
+      "n": 321,
+      "n_hotpot": 159,
+      "invalid_before_fb": 0.06853582554517133,
+      "own_abstain_share": 0.8292682926829268,
+      "hidden_all": 205,
+      "gates": {
+        "abstention_retained_0.75": true,
+        "unsupported_rate_within_3pts": true,
+        "hotpot_unsupported_within_2": true,
+        "supported_correct_plus_5pts": false,
+        "invalid_not_more_than_plus_1pt": true,
+        "hotpot_success_not_lower_by_3pts": false,
+        "macro_plus_3pts": false
+      },
+      "eligible": false
+    },
+    "candI2": {
+      "macro": 0.5657592902875921,
+      "single": 0.6952380952380952,
+      "compound": 0.42342342342342343,
+      "hotpot_success": 0.5786163522012578,
+      "supported_correct": 0.35978835978835977,
+      "unsupported": 7,
+      "hidden_n": 132,
+      "unsupported_rate": 0.05303030303030303,
+      "unsupported_by_family": {
+        "partial": 2,
+        "fully_missing": 5
+      },
+      "hotpot_unsupported": 5,
+      "false_abstain": 0.5714285714285714,
+      "n": 321,
+      "n_hotpot": 159,
+      "invalid_before_fb": 0.04672897196261682,
+      "own_abstain_share": 0.6341463414634146,
+      "hidden_all": 205,
+      "gates": {
+        "abstention_retained_0.75": true,
+        "unsupported_rate_within_3pts": true,
+        "hotpot_unsupported_within_2": false,
+        "supported_correct_plus_5pts": true,
+        "invalid_not_more_than_plus_1pt": true,
+        "hotpot_success_not_lower_by_3pts": false,
+        "macro_plus_3pts": false
+      },
+      "eligible": false
+    },
+    "candK1": {
+      "macro": 0.574482661771639,
+      "single": 0.7559808612440191,
+      "compound": 0.44545454545454544,
+      "hotpot_success": 0.5220125786163522,
+      "supported_correct": 0.49206349206349204,
+      "unsupported": 16,
+      "hidden_n": 130,
+      "unsupported_rate": 0.12307692307692308,
+      "unsupported_by_family": {
+        "partial": 7,
+        "fully_missing": 9
+      },
+      "hotpot_unsupported": 12,
+      "false_abstain": 0.3968253968253968,
+      "n": 319,
+      "n_hotpot": 159,
+      "invalid_before_fb": 0.04672897196261682,
+      "own_abstain_share": 0.16748768472906403,
+      "hidden_all": 203,
+      "gates": {
+        "abstention_retained_0.75": false,
+        "unsupported_rate_within_3pts": false,
+        "hotpot_unsupported_within_2": false,
+        "supported_correct_plus_5pts": true,
+        "invalid_not_more_than_plus_1pt": true,
+        "hotpot_success_not_lower_by_3pts": false,
+        "macro_plus_3pts": true
+      },
+      "eligible": false
+    },
+    "candK2": {
+      "macro": 0.5905044909891717,
+      "single": 0.7666666666666667,
+      "compound": 0.4954128440366973,
+      "hotpot_success": 0.5094339622641509,
+      "supported_correct": 0.5185185185185185,
+      "unsupported": 13,
+      "hidden_n": 130,
+      "unsupported_rate": 0.1,
+      "unsupported_by_family": {
+        "partial": 5,
+        "fully_missing": 8
+      },
+      "hotpot_unsupported": 12,
+      "false_abstain": 0.3544973544973545,
+      "n": 319,
+      "n_hotpot": 159,
+      "invalid_before_fb": 0.06542056074766354,
+      "own_abstain_share": 0.15763546798029557,
+      "hidden_all": 203,
+      "gates": {
+        "abstention_retained_0.75": false,
+        "unsupported_rate_within_3pts": false,
+        "hotpot_unsupported_within_2": false,
+        "supported_correct_plus_5pts": true,
+        "invalid_not_more_than_plus_1pt": true,
+        "hotpot_success_not_lower_by_3pts": false,
+        "macro_plus_3pts": true
+      },
+      "eligible": false
+    }
+  },
+  "note": "Development selection only; at most the winner is opened on the sealed final test."
+}
