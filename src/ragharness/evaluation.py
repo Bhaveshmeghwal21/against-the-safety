@@ -69,6 +69,12 @@ def prompt_jobs(qs: list[Question], corp: Corpus, tool: CorpusSearchTool, varian
             prefill = [builder._hit(corp, c) for c in v["prefill"]]
             spec = builder.Spec(variant, masked=frozenset(v["masked"]), prefill=prefill, answerable=v["answerable"],
                                 finish="answer_if_complete" if v["answerable"] else "abstain")
+            if v.get("oracle_search"):
+                ep = episodes.run_scripted(q, corp, tool, variant, spec.masked, 3, prefill=prefill, finish=spec.finish)
+                if not ep.complete:
+                    raise ValueError(f"declared recoverable evidence is unreachable: {q.qid}/{variant}")
+                jobs.append(Job(q, variant, spec, [s.text for s in ep.steps]))
+                continue
             # reference answer for the oracle replay: cite the supplied positives (any positive holds the answer)
             if v["answerable"]:
                 text = protocol.format_answer(q.answer, [h.chunk_id for h in prefill if h.chunk_id in gold(q)])
@@ -155,6 +161,9 @@ def score_results(
     scores, samples = [], {"all": []}
     for job, ep, cost in results:
         s = metrics.score_episode(ep, job.q, corp, job.spec.answerable)
+        from .round4 import aspect_coverage
+        s.update(aspect_coverage(job.q, corp, ep))
+        s["evidence_supported_good"] = bool(s["good"] and (not job.spec.answerable or s["all_aspects_cited"]))
         s["qtype"] = job.q.qtype
         if audit.CHUNK_META and audit.DECISION_DATE:  # dated documents: did the answer cite an edition that was already superseded?
             cited = ep.final.turn.citations if ep.final.turn.kind == "answer" else []

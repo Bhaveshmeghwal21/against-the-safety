@@ -1,0 +1,31 @@
+{
+  "candidate": "candF1",
+  "reference": "main",
+  "bootstrap_reps": 3000,
+  "seed": 47,
+  "grouping": "parent question, stratified by single/compound",
+  "note": "Exploratory development intervals for the highest-scoring development candidate; unadjusted for selection across four checkpoints. Not independent confirmation.",
+  "metrics": {
+    "new_suite_macro": {
+      "difference": 0.13507078507078513,
+      "ci95": [
+        0.042857142857142816,
+        0.2273282764433207
+      ]
+    },
+    "unsupported_rate": {
+      "difference": -0.03787878787878787,
+      "ci95": [
+        -0.10370370370370371,
+        0.029850746268656705
+      ]
+    },
+    "supported_answer_success": {
+      "difference": 0.14814814814814814,
+      "ci95": [
+        0.0732984293193717,
+        0.22994652406417115
+      ]
+    }
+  }
+}

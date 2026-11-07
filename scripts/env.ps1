@@ -9,6 +9,7 @@ $dirs = @{
     PIP_CACHE_DIR       = "pip"
     UV_CACHE_DIR        = "uv"
     XDG_CACHE_HOME      = "xdg"
+    XDG_DATA_HOME       = "xdg-data"
     HF_HOME             = "huggingface"
     TORCH_HOME          = "torch"
     WANDB_DIR           = "wandb"

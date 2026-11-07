@@ -1,0 +1,60 @@
+{
+  "kernel": "vibhutimeghwal/ats-train-evidence-r4",
+  "kernel_version": 1,
+  "bundle_id": "e9cb19cf02b90cc450cf",
+  "checkpoints": {
+    "candE1": {
+      "path": "runs/account2_round4/ats-train-evidence-r4/out/candE/adapter_ep1/adapter_model.safetensors",
+      "initial_adapter": "main",
+      "epoch": 1,
+      "bytes": 120981200,
+      "sha256": "d5c45392e5e75b34c8629e94343ae7dcd8bfb555f0e142ccd4c0ecdbddff892d",
+      "parameters": 30228480,
+      "tensors": 504,
+      "dtypes": [
+        "torch.float32"
+      ],
+      "all_finite": true
+    },
+    "candE2": {
+      "path": "runs/account2_round4/ats-train-evidence-r4/out/candE/adapter/adapter_model.safetensors",
+      "initial_adapter": "main",
+      "epoch": 2,
+      "bytes": 120981200,
+      "sha256": "0063049d92d846082bc7d399bc9566b280929f05a273b51e9aca0f29316b8057",
+      "parameters": 30228480,
+      "tensors": 504,
+      "dtypes": [
+        "torch.float32"
+      ],
+      "all_finite": true
+    },
+    "candF1": {
+      "path": "runs/account2_round4/ats-train-evidence-r4/out/candF/adapter_ep1/adapter_model.safetensors",
+      "initial_adapter": "candA",
+      "epoch": 1,
+      "bytes": 120981200,
+      "sha256": "cefbd4e824d6c59c5376a2ba3511acaa71a2f5784ebdf345a03efcc1368fb461",
+      "parameters": 30228480,
+      "tensors": 504,
+      "dtypes": [
+        "torch.float32"
+      ],
+      "all_finite": true
+    },
+    "candF2": {
+      "path": "runs/account2_round4/ats-train-evidence-r4/out/candF/adapter/adapter_model.safetensors",
+      "initial_adapter": "candA",
+      "epoch": 2,
+      "bytes": 120981200,
+      "sha256": "c325fce0cbc4c0b7195b4b392a9db1452c1760d673710c4f14448b2bc078b283",
+      "parameters": 30228480,
+      "tensors": 504,
+      "dtypes": [
+        "torch.float32"
+      ],
+      "all_finite": true
+    }
+  },
+  "note": "Integrity checks only, not a QA-quality claim."
+}

@@ -1,0 +1,181 @@
+{
+  "kernel": "vibhutimeghwal/ats-brightpro-r4",
+  "status": "complete",
+  "corpus_documents": 63920,
+  "n_queries": 10,
+  "systems": {
+    "main": {
+      "n": 10,
+      "weighted_aspect_recall": 0.17034965034965036,
+      "cited_aspect_recall": 0.07307692307692308,
+      "invalid": 3,
+      "truncated_inputs": 0,
+      "wall_seconds": 57.94461441040039,
+      "adapter": "/tmp/repo/initial_adapters/main/adapter",
+      "note": "10-query custom robotics transfer diagnostic, not the official 175-query benchmark; no answer-quality judge"
+    },
+    "candE1": {
+      "n": 10,
+      "weighted_aspect_recall": 0.07034965034965035,
+      "cited_aspect_recall": 0.023076923076923078,
+      "invalid": 5,
+      "truncated_inputs": 0,
+      "wall_seconds": 49.10564136505127,
+      "adapter": "/kaggle/input/notebooks/vibhutimeghwal/ats-train-evidence-r4/out/candE/adapter_ep1",
+      "note": "10-query custom robotics transfer diagnostic, not the official 175-query benchmark; no answer-quality judge"
+    }
+  },
+  "per_query": [
+    {
+      "id": "4",
+      "main": {
+        "weighted_aspect_recall": 1.0,
+        "cited_aspect_recall": 0.5,
+        "final_kind": "answer",
+        "searches": 1
+      },
+      "candE1": {
+        "weighted_aspect_recall": 0,
+        "cited_aspect_recall": 0,
+        "final_kind": "answer",
+        "searches": 0
+      }
+    },
+    {
+      "id": "7",
+      "main": {
+        "weighted_aspect_recall": 0,
+        "cited_aspect_recall": 0,
+        "final_kind": "answer",
+        "searches": 0
+      },
+      "candE1": {
+        "weighted_aspect_recall": 0,
+        "cited_aspect_recall": 0,
+        "final_kind": "answer",
+        "searches": 0
+      }
+    },
+    {
+      "id": "8",
+      "main": {
+        "weighted_aspect_recall": 0.2727272727272727,
+        "cited_aspect_recall": 0,
+        "final_kind": "abstain",
+        "searches": 2
+      },
+      "candE1": {
+        "weighted_aspect_recall": 0.2727272727272727,
+        "cited_aspect_recall": 0,
+        "final_kind": "abstain",
+        "searches": 2
+      }
+    },
+    {
+      "id": "17",
+      "main": {
+        "weighted_aspect_recall": 0,
+        "cited_aspect_recall": 0,
+        "final_kind": "invalid",
+        "searches": 1
+      },
+      "candE1": {
+        "weighted_aspect_recall": 0,
+        "cited_aspect_recall": 0,
+        "final_kind": "invalid",
+        "searches": 1
+      }
+    },
+    {
+      "id": "18",
+      "main": {
+        "weighted_aspect_recall": 0.23076923076923078,
+        "cited_aspect_recall": 0.23076923076923078,
+        "final_kind": "answer",
+        "searches": 1
+      },
+      "candE1": {
+        "weighted_aspect_recall": 0.23076923076923078,
+        "cited_aspect_recall": 0.23076923076923078,
+        "final_kind": "answer",
+        "searches": 1
+      }
+    },
+    {
+      "id": "27",
+      "main": {
+        "weighted_aspect_recall": 0.2,
+        "cited_aspect_recall": 0,
+        "final_kind": "invalid",
+        "searches": 1
+      },
+      "candE1": {
+        "weighted_aspect_recall": 0.2,
+        "cited_aspect_recall": 0,
+        "final_kind": "invalid",
+        "searches": 1
+      }
+    },
+    {
+      "id": "29",
+      "main": {
+        "weighted_aspect_recall": 0,
+        "cited_aspect_recall": 0,
+        "final_kind": "invalid",
+        "searches": 1
+      },
+      "candE1": {
+        "weighted_aspect_recall": 0,
+        "cited_aspect_recall": 0,
+        "final_kind": "invalid",
+        "searches": 1
+      }
+    },
+    {
+      "id": "31",
+      "main": {
+        "weighted_aspect_recall": 0,
+        "cited_aspect_recall": 0,
+        "final_kind": "abstain",
+        "searches": 2
+      },
+      "candE1": {
+        "weighted_aspect_recall": 0,
+        "cited_aspect_recall": 0,
+        "final_kind": "invalid",
+        "searches": 1
+      }
+    },
+    {
+      "id": "33",
+      "main": {
+        "weighted_aspect_recall": 0,
+        "cited_aspect_recall": 0,
+        "final_kind": "abstain",
+        "searches": 2
+      },
+      "candE1": {
+        "weighted_aspect_recall": 0,
+        "cited_aspect_recall": 0,
+        "final_kind": "invalid",
+        "searches": 1
+      }
+    },
+    {
+      "id": "34",
+      "main": {
+        "weighted_aspect_recall": 0,
+        "cited_aspect_recall": 0,
+        "final_kind": "abstain",
+        "searches": 3
+      },
+      "candE1": {
+        "weighted_aspect_recall": 0,
+        "cited_aspect_recall": 0,
+        "final_kind": "abstain",
+        "searches": 3
+      }
+    }
+  ],
+  "note": "Fixed custom robotics sample; document-ID weighted aspect coverage only. Not the official 175-query benchmark, a claim-entailment measure, or a checkpoint-selection set. Supporting facts can lie beyond the 800-character display."
+}

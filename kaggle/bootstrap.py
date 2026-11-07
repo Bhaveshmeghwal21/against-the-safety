@@ -13,6 +13,10 @@ Stages
   patch                  third round (plan section 24): candC on GPU 0 and candD on GPU 1, both continuing from the main adapter
                          (needs ats-train-both attached); --jobs system:split[:weight],... then evaluates them in the same kernel
   eval-jobs              third round: --jobs system:split[:weight],... over both GPUs (split: dev, test, test2 or bench_<name>)
+  sample-r5              fifth round (plan section 27, priority 2): sampled rollouts on training episodes for preference pairs,
+                         main on GPU 0 and candA on GPU 1 (needs the initial adapters in the bundle)
+  train-dpo              fifth round: DPO on the pairs file, candG (from main) on GPU 0 and candH (from candA) on GPU 1; then --jobs
+                         system:split[:weight],... for development evaluation (names candG1/candG2/candH1/candH2 = half and full epoch)
   interp                 third round probe (plan section 25): --from main --to candD --alphas 0.2,0.35 --splits bench_r3dev:30,dev:11 builds the
                          blends (1 - alpha) * from + alpha * to inside the kernel and evaluates them
   eval-dev | eval-test | eval-test2 | eval-product
@@ -156,7 +160,7 @@ def eval_jobs(py: str, spec: str, rest: str, adapters: dict[str, str]) -> int:
         chains[g].append(cmd)
         load[g] += weight
     print("expected minutes per GPU:", load, flush=True)
-    return run_parallel([(" ; ".join(c), {"CUDA_VISIBLE_DEVICES": str(g)}, f"eval_jobs_gpu{g}.log") for g, c in chains.items() if c])
+    return run_parallel([(" && ".join(c), {"CUDA_VISIBLE_DEVICES": str(g)}, f"eval_jobs_gpu{g}.log") for g, c in chains.items() if c])
 
 
 def main() -> None:
@@ -172,6 +176,12 @@ def main() -> None:
     os.environ.update(base_env)
     sh("nvidia-smi")
     adapters = {f"{p.parent.parent.name}/{p.parent.name}": str(p.parent) for p in Path("/kaggle/input").rglob("adapter_config.json")}
+    adapters.update({f"{p.parent.parent.name}/{p.parent.name}": str(p.parent) for p in (REPO / "initial_adapters").rglob("adapter_config.json")})
+    for name in ("candE", "candF"):
+        if f"{name}/adapter_ep1" in adapters:
+            adapters[f"{name}1/adapter"] = adapters[f"{name}/adapter_ep1"]
+        if f"{name}/adapter" in adapters:
+            adapters[f"{name}2/adapter"] = adapters[f"{name}/adapter"]
     print("adapters found:", adapters)
 
     g0, g1 = {"CUDA_VISIBLE_DEVICES": "0"}, {"CUDA_VISIBLE_DEVICES": "1"}
@@ -188,6 +198,31 @@ def main() -> None:
             (f"{py} scripts/train.py --set candA --out {OUT}/candA {extra}", g0, "train_candA.log"),
             (f"{py} scripts/train.py --set candB --out {OUT}/candB {extra}", g1, "train_candB.log"),
         ])
+    elif stage in ("evidence-smoke", "train-evidence"):
+        smoke = stage == "evidence-smoke"
+        names = (("candE", "main", g0), ("candF", "candA", g1))
+        options = "--epochs 1 --max-steps 2 --limit-rows 32" if smoke else "--epochs 2"
+        for _, initial, _ in names:
+            if f"{initial}/adapter" not in adapters:
+                raise SystemExit(f"initial adapter missing: {initial}")
+        rc = run_parallel([
+            (f"{py} scripts/train.py --set {name} --out {OUT}/{name} --init-adapter {adapters[f'{initial}/adapter']} "
+             f"--lr 3e-5 --seed 47 --max-length 2560 {options} {extra}", gpu, f"train_{name}.log")
+            for name, initial, gpu in names
+        ])
+        if rc:
+            raise SystemExit(rc)
+        for name, _, _ in names:
+            report = json.loads((OUT / name / "train_report.json").read_text())
+            if not __import__('math').isfinite(report["train_loss"]):
+                raise SystemExit(f"non-finite training loss: {name}")
+            adapters[f"{name}/adapter"] = str(OUT / name / "adapter")
+            if (OUT / name / "adapter_ep1").exists():
+                adapters[f"{name}1/adapter"] = str(OUT / name / "adapter_ep1")
+            adapters[f"{name}2/adapter"] = str(OUT / name / "adapter")
+        if smoke:
+            spec = "candE:bench_r4dev:1,candF:bench_r4dev:1"
+            rc = eval_jobs(py, spec, "--parse lenient --limit-questions 2 --extra-questions 0", adapters)
     elif stage == "patch":  # round 3 (plan section 24): candC on GPU 0 and candD on GPU 1, both continuing from the main adapter; then --jobs
         m = re.search(r"--jobs\s+(\S+)", extra)
         jobs_spec, rest = (m.group(1), extra.replace(m.group(0), "")) if m else ("", extra)
@@ -220,12 +255,77 @@ def main() -> None:
             adapters[f"{name}/adapter"] = str(OUT / "interp" / name / "adapter")
             jobs += [f"{name}:{s.split(':')[0]}:{s.split(':')[1]}" for s in splits.split(",")]
         rc = eval_jobs(py, ",".join(jobs), rest.strip() or "--parse lenient --extra-questions 0", adapters)
+    elif stage == "sample-r5":  # round 5 (plan section 27, priority 2): sampled rollouts on training episodes, main on GPU 0, candA on GPU 1
+        for n in ("main", "candA"):
+            if f"{n}/adapter" not in adapters:
+                raise SystemExit(f"initial adapter missing: {n}")
+        rc = run_parallel([
+            (f"{py} scripts/sample_round5.py --adapter {adapters[f'{n}/adapter']} --tag {n} --out {OUT}/samples/{n} --seed {seed} {extra}", gpu, f"sample_{n}.log")
+            for n, gpu, seed in (("main", g0, 5301), ("candA", g1, 5302))
+        ])
+    elif stage == "train-dpo":  # round 5 (plan section 27, priority 2): candG from main on GPU 0 and candH from candA on GPU 1, same pairs; then dev evaluation
+        m = re.search(r"--jobs\s+(\S+)", extra)
+        jobs_spec, rest = (m.group(1), extra.replace(m.group(0), "")) if m else ("", extra)
+        pairs_file = REPO / "data" / "processed" / "training" / "dpo_r5.jsonl"
+        if not pairs_file.exists():
+            raise SystemExit("the preference-pair file is missing from the bundle")
+        names = (("candG", "main", g0), ("candH", "candA", g1))
+        for _, initial, _ in names:
+            if f"{initial}/adapter" not in adapters:
+                raise SystemExit(f"initial adapter missing: {initial}")
+        rc = run_parallel([
+            (f"{py} scripts/train_dpo.py --init-adapter {adapters[f'{initial}/adapter']} --pairs {pairs_file} --out {OUT}/{name} --name {name} {rest}",
+             gpu, f"train_{name}.log")
+            for name, initial, gpu in names
+        ])
+        if rc:
+            raise SystemExit(rc)
+        for name, _, _ in names:
+            report = json.loads((OUT / name / "train_report.json").read_text())
+            adapters[f"{name}2/adapter"] = str(OUT / name / "adapter")
+            if (OUT / name / "adapter_half").exists():
+                adapters[f"{name}1/adapter"] = str(OUT / name / "adapter_half")
+            print(name, "trained", {k: report[k] for k in ("pairs_trained", "steps", "wall_seconds", "seconds_per_pair_pass", "peak_gpu_memory_gb")}, flush=True)
+        if jobs_spec:
+            rc = eval_jobs(py, jobs_spec, "--parse lenient --extra-questions 0", adapters)
+            if rc == 0:  # priority 1: the checker V on every candidate's development answers (main's adapter, wording A), for selection with V on both sides
+                cands = ",".join(f"{n}{i}" for n, _, _ in names for i in (1, 2))
+                sh(f"{py} scripts/build_verifier_cases.py --eval {OUT}/eval --system {cands} --out {OUT}/verify/cases_candidates.jsonl", check=False)
+                sh(f"{py} scripts/verify_round5.py --cases {OUT}/verify/cases_candidates.jsonl --tag main --adapter {adapters['main/adapter']} "
+                   f"--out {OUT}/verify/main --wordings A", check=False, env=g0)
+    elif stage == "verify-main-r5":  # round 5: the selected checker (main's adapter, wording A) on another cases file, --cases <name under data/processed/verifier>
+        m = re.search(r"--cases\s+(\S+)", extra)
+        cases = REPO / "data" / "processed" / "verifier" / (m.group(1) if m else "cases_dev.jsonl")
+        if "main/adapter" not in adapters or not cases.exists():
+            raise SystemExit("verify-main-r5 needs the main adapter and the cases file in the bundle")
+        rc = run_parallel([(f"{py} scripts/verify_round5.py --cases {cases} --tag main --adapter {adapters['main/adapter']} --out {OUT}/verify/main --wordings A", g0, "verify_main.log")])
+    elif stage == "verify-r5":  # round 5 (plan section 27, priority 1): the answer checker, base on GPU 0 and main's adapter on GPU 1
+        cases = REPO / "data" / "processed" / "verifier" / "cases_dev.jsonl"
+        if "main/adapter" not in adapters or not cases.exists():
+            raise SystemExit("verify-r5 needs the main adapter and the verifier cases in the bundle")
+        rc = run_parallel([
+            (f"{py} scripts/verify_round5.py --cases {cases} --tag base --out {OUT}/verify/base {extra}", g0, "verify_base.log"),
+            (f"{py} scripts/verify_round5.py --cases {cases} --tag main --adapter {adapters['main/adapter']} --out {OUT}/verify/main {extra}", g1, "verify_main.log"),
+        ])
     elif stage == "eval-jobs":  # round 3: any list of system:split[:weight] jobs
         m = re.search(r"--jobs\s+(\S+)", extra)
         if not m:
             raise SystemExit("eval-jobs needs --jobs system:split[:weight],...")
         rest = extra.replace(m.group(0), "").strip() or "--parse lenient --extra-questions 0"
         rc = eval_jobs(py, m.group(1), rest, adapters)
+    elif stage == "brightpro":
+        m = re.search(r"--systems\s+(\S+)", extra)
+        if not m:
+            raise SystemExit("brightpro needs --systems name,name")
+        if not (REPO / "data/brightpro/robotics/manifest.json").exists():
+            raise SystemExit("the evaluation bundle must include the frozen Bright-Pro corpus")
+        wanted = m.group(1).split(",")
+        if len(wanted) > 2:
+            raise SystemExit("the fixed Bright-Pro pilot permits at most two systems")
+        rc = run_parallel([
+            (f"{py} scripts/run_brightpro_pilot.py --adapter {adapters[f'{name}/adapter']} --out {OUT}/brightpro/{name}",
+             {"CUDA_VISIBLE_DEVICES": str(i)}, f"brightpro_{name}.log") for i, name in enumerate(wanted)
+        ])
     elif stage == "eval-bench":  # external benchmarks (plan section 22): each system runs every benchmark in turn on one GPU
         m = re.search(r"--benches\s+(\S+)", extra)
         benches = m.group(1).split(",") if m else ["squad2", "rgb", "rgb_int", "2wiki", "musique"]
@@ -296,6 +396,7 @@ def main() -> None:
     else:
         raise SystemExit(f"unknown stage {stage!r}")
     print("done; outputs in", OUT, "exit", rc)
+    raise SystemExit(rc)
 
 
 if __name__ == "__main__":

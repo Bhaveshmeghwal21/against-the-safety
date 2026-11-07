@@ -1,0 +1,23 @@
+{
+  "dataset": "yale-nlp/Bright-Pro",
+  "revision": "dbdc22babbef310210e267b99249e7cec86d5edf",
+  "domain": "robotics",
+  "query_ids": [
+    "4",
+    "7",
+    "8",
+    "17",
+    "18",
+    "27",
+    "29",
+    "31",
+    "33",
+    "34"
+  ],
+  "n_documents": 63920,
+  "index_hash": "c19877d3518f7e032a35df2c1abc4e9d2838fd3dcd49a1206255b67a70bdeed6",
+  "license": "MIT (dataset card)",
+  "training_use": false,
+  "protocol": "custom evaluation-only: lexical search, top3, three searches, 800 characters",
+  "source_sample": "https://github.com/yale-nlp/Bright-Pro/blob/main/agentic_sample_ids.json"
+}

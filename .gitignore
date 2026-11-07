@@ -3,6 +3,7 @@
 *.env
 *.key
 .mcp-auth/
+KaggleTokens/
 
 # Workspace-local caches and temp (see scripts/env.ps1)
 .cache/
@@ -28,6 +29,7 @@ wandb/
 # Local data and indexes (rebuild from scripts and pinned manifests)
 data/raw/
 data/processed/
+data/brightpro/
 data/index/
 data/bench/*/corpus.json
 data/bench/*/questions.jsonl

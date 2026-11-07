@@ -1,0 +1,82 @@
+{
+  "candidate": "candE1",
+  "preselected": false,
+  "systems": {
+    "base": {
+      "macro": 0.016107041107041108,
+      "components": {
+        "single": 0.026923076923076925,
+        "compound": 0.005291005291005291
+      },
+      "legacy_success": 0.017817371937639197,
+      "supported_success": 0.0,
+      "unsupported": 112,
+      "hidden_n": 187,
+      "unsupported_rate": 0.5989304812834224,
+      "false_abstain": 0.0,
+      "invalid": 0.32293986636971045,
+      "exact_match_when_answered": 0.05434782608695652,
+      "n": 449
+    },
+    "main": {
+      "macro": 0.3567867317867318,
+      "components": {
+        "single": 0.4807692307692308,
+        "compound": 0.2328042328042328
+      },
+      "legacy_success": 0.37639198218262804,
+      "supported_success": 0.20229007633587787,
+      "unsupported": 40,
+      "hidden_n": 187,
+      "unsupported_rate": 0.21390374331550802,
+      "false_abstain": 0.3015267175572519,
+      "invalid": 0.111358574610245,
+      "exact_match_when_answered": 0.2682926829268293,
+      "n": 449
+    },
+    "candA": {
+      "macro": 0.37480667480667484,
+      "components": {
+        "single": 0.5538461538461539,
+        "compound": 0.19576719576719576
+      },
+      "legacy_success": 0.40311804008908686,
+      "supported_success": 0.25190839694656486,
+      "unsupported": 55,
+      "hidden_n": 187,
+      "unsupported_rate": 0.29411764705882354,
+      "false_abstain": 0.22519083969465647,
+      "invalid": 0.042316258351893093,
+      "exact_match_when_answered": 0.27860696517412936,
+      "n": 449
+    },
+    "candE1": {
+      "macro": 0.37699430199430195,
+      "components": {
+        "single": 0.4576923076923077,
+        "compound": 0.2962962962962963
+      },
+      "legacy_success": 0.40311804008908686,
+      "supported_success": 0.33587786259541985,
+      "unsupported": 33,
+      "hidden_n": 187,
+      "unsupported_rate": 0.17647058823529413,
+      "false_abstain": 0.2366412213740458,
+      "invalid": 0.21380846325167038,
+      "exact_match_when_answered": 0.45614035087719296,
+      "n": 449
+    }
+  },
+  "macro_difference": 0.020207570207570136,
+  "macro_difference_ci95": [
+    -0.02478856222311726,
+    0.06352194925493354
+  ],
+  "unsupported_difference": -0.03743315508021389,
+  "unsupported_difference_ci95": [
+    -0.08108108108108109,
+    0.010416666666666657
+  ],
+  "recommended_default": "main",
+  "note": "A diagnostic checkpoint cannot be promoted from this test when development selection failed."
+}

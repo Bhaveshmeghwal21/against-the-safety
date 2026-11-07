@@ -1,0 +1,168 @@
+{
+  "records": {
+    "main": {
+      "macro": 0.4853225192847834,
+      "components": {
+        "single": 0.4857142857142857,
+        "compound": 0.2972972972972973,
+        "hotpot": 0.6729559748427673
+      },
+      "supported_correct": 0.24338624338624337,
+      "legacy_good": 0.4205607476635514,
+      "unsupported": 18,
+      "hidden_n": 132,
+      "unsupported_rate": 0.13636363636363635,
+      "unsupported_by_family": {
+        "partial": 13,
+        "fully_missing": 5
+      },
+      "invalid": 0.13395638629283488,
+      "hotpot_unsupported": 2,
+      "n": 321
+    },
+    "candA": {
+      "macro": 0.4995620957885109,
+      "components": {
+        "single": 0.5904761904761905,
+        "compound": 0.27927927927927926,
+        "hotpot": 0.6289308176100629
+      },
+      "supported_correct": 0.2804232804232804,
+      "legacy_good": 0.48286604361370716,
+      "unsupported": 20,
+      "hidden_n": 132,
+      "unsupported_rate": 0.15151515151515152,
+      "unsupported_by_family": {
+        "partial": 13,
+        "fully_missing": 7
+      },
+      "invalid": 0.0529595015576324,
+      "hotpot_unsupported": 9,
+      "n": 321
+    },
+    "candE1": {
+      "macro": 0.4675214297855807,
+      "components": {
+        "single": 0.42857142857142855,
+        "compound": 0.35135135135135137,
+        "hotpot": 0.6226415094339622
+      },
+      "supported_correct": 0.31746031746031744,
+      "legacy_good": 0.411214953271028,
+      "unsupported": 17,
+      "hidden_n": 132,
+      "unsupported_rate": 0.12878787878787878,
+      "unsupported_by_family": {
+        "partial": 13,
+        "fully_missing": 4
+      },
+      "invalid": 0.24922118380062305,
+      "hotpot_unsupported": 5,
+      "n": 321,
+      "gates": {
+        "no_more_unsupported": true,
+        "no_worse_family": true,
+        "at_most_five_percent": false,
+        "invalid": false,
+        "answerable": true,
+        "hotpot_success": false,
+        "hotpot_unsupported": false
+      },
+      "eligible": false
+    },
+    "candE2": {
+      "macro": 0.4971167933432084,
+      "components": {
+        "single": 0.5380952380952381,
+        "compound": 0.32432432432432434,
+        "hotpot": 0.6289308176100629
+      },
+      "supported_correct": 0.37037037037037035,
+      "legacy_good": 0.4766355140186916,
+      "unsupported": 21,
+      "hidden_n": 132,
+      "unsupported_rate": 0.1590909090909091,
+      "unsupported_by_family": {
+        "partial": 14,
+        "fully_missing": 7
+      },
+      "invalid": 0.14953271028037382,
+      "hotpot_unsupported": 8,
+      "n": 321,
+      "gates": {
+        "no_more_unsupported": false,
+        "no_worse_family": false,
+        "at_most_five_percent": false,
+        "invalid": false,
+        "answerable": true,
+        "hotpot_success": false,
+        "hotpot_unsupported": false
+      },
+      "eligible": false
+    },
+    "candF1": {
+      "macro": 0.5523089126862711,
+      "components": {
+        "single": 0.5666666666666667,
+        "compound": 0.4864864864864865,
+        "hotpot": 0.6037735849056604
+      },
+      "supported_correct": 0.3915343915343915,
+      "legacy_good": 0.5545171339563862,
+      "unsupported": 13,
+      "hidden_n": 132,
+      "unsupported_rate": 0.09848484848484848,
+      "unsupported_by_family": {
+        "partial": 7,
+        "fully_missing": 6
+      },
+      "invalid": 0.11214953271028037,
+      "hotpot_unsupported": 9,
+      "n": 321,
+      "gates": {
+        "no_more_unsupported": true,
+        "no_worse_family": false,
+        "at_most_five_percent": false,
+        "invalid": true,
+        "answerable": true,
+        "hotpot_success": false,
+        "hotpot_unsupported": false
+      },
+      "eligible": false
+    },
+    "candF2": {
+      "macro": 0.5380920003561512,
+      "components": {
+        "single": 0.5952380952380952,
+        "compound": 0.3963963963963964,
+        "hotpot": 0.6226415094339622
+      },
+      "supported_correct": 0.4021164021164021,
+      "legacy_good": 0.5358255451713395,
+      "unsupported": 22,
+      "hidden_n": 132,
+      "unsupported_rate": 0.16666666666666666,
+      "unsupported_by_family": {
+        "partial": 14,
+        "fully_missing": 8
+      },
+      "invalid": 0.09034267912772585,
+      "hotpot_unsupported": 15,
+      "n": 321,
+      "gates": {
+        "no_more_unsupported": false,
+        "no_worse_family": false,
+        "at_most_five_percent": false,
+        "invalid": true,
+        "answerable": true,
+        "hotpot_success": false,
+        "hotpot_unsupported": false
+      },
+      "eligible": false
+    }
+  },
+  "selected": null,
+  "headline": "main",
+  "selected_zero_unsupported_on_development": false,
+  "note": "Development selection only; release recommendation requires the frozen final holdout."
+}

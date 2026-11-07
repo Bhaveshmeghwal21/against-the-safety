@@ -107,9 +107,11 @@ class QLoraFactory:
         eval_rows: list[dict] | None = None,
         callbacks: list | None = None,
         init_adapter: str | None = None,
+        strict_lengths: bool = False,
     ):
         self.system = system
         self.init_adapter = init_adapter  # round 3: continue training an existing LoRA adapter instead of starting a new one
+        self.strict_lengths = strict_lengths
         self.metas, self.keep, self.eval_rows = metas, keep, eval_rows
         self.callbacks = list(callbacks or [])
         self.n_train_rows = 0
@@ -149,6 +151,10 @@ class QLoraFactory:
             self.model = prepare_model_for_kbit_training(self.model, use_gradient_checkpointing=self.gradient_checkpointing)
 
         rows_ = to_hf_rows(train_dataset, self.system, self.metas, self.keep, self.max_tokens_est)
+        if self.strict_lengths:
+            lengths = [rowmod.real_tokens(r, self.tokenizer)[0] for r in rows_]
+            if lengths and max(lengths) > self.max_length:
+                raise ValueError(f"training would truncate a selected row: {max(lengths)} > {self.max_length}")
         self.n_train_rows = len(rows_)
         data = Dataset.from_list(rows_)
         eval_data = Dataset.from_list([{"prompt": r["prompt"], "completion": r["completion"]} for r in self.eval_rows]) if self.eval_rows else None

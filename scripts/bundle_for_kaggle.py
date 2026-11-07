@@ -8,6 +8,8 @@ until the project is published.
 
 import hashlib
 import json
+import argparse
+import re
 import zipfile
 from pathlib import Path
 
@@ -19,10 +21,16 @@ SKIP = ("__pycache__", ".pyc", "tests/fixtures", "trajectories.sqlite")
 
 
 def main() -> None:
-    OUT.mkdir(parents=True, exist_ok=True)
-    zpath = OUT / "against-the-safety.zip"
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", default=str(OUT))
+    ap.add_argument("--adapter", action="append", default=[], help="NAME=local adapter directory; credentials are never included")
+    ap.add_argument("--brightpro", action="store_true", help="include the optional evaluation-only full robotics corpus")
+    args = ap.parse_args()
+    out = Path(args.out)
+    out.mkdir(parents=True, exist_ok=True)
+    zpath = out / "against-the-safety.zip"
     files = [ROOT / f for f in INCLUDE_FILES]
-    for d in INCLUDE_DIRS:
+    for d in INCLUDE_DIRS + (["data/brightpro"] if args.brightpro else []):
         files += [p for p in (ROOT / d).rglob("*") if p.is_file()]
     files = [p for p in files if not any(s in p.as_posix() for s in SKIP)]
     with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
@@ -31,11 +39,23 @@ def main() -> None:
             rel = p.relative_to(ROOT).as_posix()
             z.write(p, rel)
             content.update(rel.encode() + b"\0" + hashlib.sha256(p.read_bytes()).digest())
+        for spec in args.adapter:
+            name, path = spec.split("=", 1)
+            if not re.fullmatch(r"[A-Za-z0-9_-]+", name):
+                raise ValueError("invalid adapter name")
+            source = Path(path)
+            for filename in ("adapter_config.json", "adapter_model.safetensors", "tokenizer.json", "tokenizer_config.json", "chat_template.jinja"):
+                p = source / filename
+                if not p.is_file():
+                    raise FileNotFoundError(f"adapter {name} is missing {filename}")
+                rel = f"initial_adapters/{name}/adapter/{filename}"
+                z.write(p, rel)
+                content.update(rel.encode() + b"\0" + hashlib.sha256(p.read_bytes()).digest())
         # the kernel compares this id with the one it was launched with, so a stale dataset mount fails fast
         z.writestr("BUNDLE_ID", content.hexdigest()[:20])
     digest = hashlib.sha256(zpath.read_bytes()).hexdigest()
     index = json.loads((ROOT / "data" / "manifests" / "index_manifest.json").read_text(encoding="utf-8"))
-    (OUT / "dataset-metadata.json").write_text(json.dumps({
+    (out / "dataset-metadata.json").write_text(json.dumps({
         "title": "against-the-safety-bundle", "id": "REPLACE_WITH_YOUR_KAGGLE_USERNAME/against-the-safety-bundle",
         "licenses": [{"name": "CC-BY-SA-4.0"}],
     }, indent=2), encoding="utf-8")
