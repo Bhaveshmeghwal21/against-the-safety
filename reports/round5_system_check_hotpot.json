@@ -1,0 +1,23 @@
+{
+  "bench": "r5t_hotpot",
+  "episodes_compared": 82,
+  "only_in_offline": 0,
+  "only_in_system": 0,
+  "same_final_decision": 82,
+  "same_model_ending_before_repairs": 82,
+  "decisions_system": {
+    "answer": 21,
+    "abstain": 61
+  },
+  "decisions_offline": {
+    "answer": 21,
+    "abstain": 61
+  },
+  "repairs_system": {
+    "None": 68,
+    "self_check": 8,
+    "fail_closed": 6
+  },
+  "disagreements": [],
+  "both_answer": 21
+}

@@ -1,0 +1,23 @@
+{
+  "bench": "r5t_rgb",
+  "episodes_compared": 100,
+  "only_in_offline": 371,
+  "only_in_system": 0,
+  "same_final_decision": 100,
+  "same_model_ending_before_repairs": 100,
+  "decisions_system": {
+    "abstain": 63,
+    "answer": 37
+  },
+  "decisions_offline": {
+    "abstain": 63,
+    "answer": 37
+  },
+  "repairs_system": {
+    "None": 79,
+    "fail_closed": 14,
+    "self_check": 7
+  },
+  "disagreements": [],
+  "both_answer": 37
+}

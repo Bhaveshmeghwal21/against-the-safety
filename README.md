@@ -448,6 +448,17 @@ The package versions used are pinned in `requirements-gpu.lock.txt`.
 
 The round-5 system adds two steps after the rollout: treat a rollout without a valid final action as an abstention, and run the self-check on every answer (`scripts/verify_round5.py`, main adapter, wording A, threshold 0.5; see [Round 5](#round-5-two-repairs-that-need-no-training-and-a-preference-training-negative-result)). The adapter alone gives the first-round results.
 
+**Run the submitted system on your own documents.** `src/ragharness/system.py` packages the round-5 system (main adapter, fail-closed, self-check) as `RagSystem.ask`, and `scripts/ask.py` wraps it in a command line:
+
+```powershell
+# my_docs.jsonl: one {"title": "...", "text": "..."} per line, one passage per line
+python scripts/ask.py --docs my_docs.jsonl --question "What is the refund window?" --adapter BMEscanor/against-the-safety-tiny-aya-rag-main
+```
+
+It prints the decision the user sees (`answer` or `abstain`), the citations, whether a repair changed the model's ending (`fail_closed` or `self_check`) and why, the queries the model ran, and the passages it saw. It needs a CUDA GPU and access to the gated base model `CohereLabs/tiny-aya-global`. Two limits: the model reads the first 800 characters of each passage, so split long documents; and the command line has been run on Kaggle only with a local copy of the main adapter, not with the Hub repository id.
+
+**Packaging check.** The packaged system runs one episode at a time, and the offline evaluation ran padded batches of up to 12, so fp16 arithmetic could have flipped tokens. We ran the packaged system on the sealed-test HotpotQA episodes (82) and the first 100 RGB episodes in file order. All 182 episodes ended the same way as in the offline evaluation (answer or abstain), and the model's own ending before the repairs was identical in all 182 (`reports/round5_system_check_hotpot.json`, `reports/round5_system_check_rgb.json`). This shows that the code reproduces the offline numbers on these 182 episodes. It is not a new test of accuracy.
+
 ## Reproduce
 
 Requires Python 3.12. All caches and temp files stay inside the repository folder.
