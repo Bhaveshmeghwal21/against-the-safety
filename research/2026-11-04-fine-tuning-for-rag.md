@@ -1151,4 +1151,17 @@ Full account: `research/2026-11-07-round5-results.md`; registered design, amendm
 - **1** the self-check V (main's adapter, wording A) passes the gate on development data (70% of unsupported answers blocked at 8% of supported-correct) and holds out of sample.
 - **2** DPO on 335 on-policy pairs: no checkpoint eligible. All four DPO checkpoints lost the abstain action (0 abstentions in 321 + 159 development episodes) because the pairs rejected 91 abstentions and chose 2. No candidate was opened on the sealed test.
 - **Sealed test:** main + fail-closed + V against main: macro +0.103 [+0.079, +0.127], unsupported rate -0.195 [-0.231, -0.159], supported correct -0.014. Against base: macro 0.022 to 0.517 (+0.495 [+0.468, +0.521]), unsupported rate 75% to 10%.
-- Priority 3 has not been started; it needs a decision and a new pre-registration.
+- Priority 3 (GRPO) and priority 5 (hidden-state probe) have not been started. Priority 4 (RAFT-style quoting) was skipped because the self-check covers it. Round 5b (section 29) ran a corrected DPO instead.
+
+## 29. Round 5b outcome (corrected DPO, 7 November 2026)
+
+Registered design and three dated amendments: `research/2026-11-07-round5b-preregistration.md`. Reports: `reports/round5b_selection.md`, `reports/round5b_final.md`.
+
+- **Pairs.** 163 new pairs that choose an abstention and reject the system's own forced answer at hidden-evidence contexts where it had abstained, merged with the 335 round-5 pairs: 498 pairs (SHA256 `eddbca62...`), abstention chosen 165 times and rejected 91 times.
+- **Runs.** candI (from main) and candK (from candF1), recipe unchanged from round 5, 126 steps each, 2.4 h and 2.9 h on one T4.
+- **Gate.** Seven conditions relative to main with both repairs, written after the development table of the earlier checkpoints had been seen (disclosed; candF1 was known to pass). The final sealed-test rule was not changed.
+- **Development.** Only candF1 (round 4) passed. candI1 and candI2 kept the model's own abstention (83% and 63% of hidden-evidence episodes) but failed on HotpotQA success and macro; candK lost abstention (16% to 17%).
+- **Sealed test, opened once for candF1.** With both repairs: macro 0.570 against 0.517 for main (+0.052 [+0.021, +0.085]), unsupported rate -0.008 [-0.047, +0.030], supported correct +0.048 [+0.009, +0.087].
+- **Decision.** The rule needs the unsupported-rate upper bound at +0.02 or below; it is +0.030, so the rule fails. Main with fail-closed and the self-check stays the submitted system. candF1 is the documented alternative.
+- **Packaging.** `src/ragharness/system.py` and `scripts/ask.py` package the submitted system. On 182 sealed-test episodes (all HotpotQA, the first 100 RGB) it ended every episode as the offline evaluation did.
+- **Not done.** GRPO and the hidden-state probe. They could run in the 16 to 21 November extra-experiment window if the team is shortlisted.

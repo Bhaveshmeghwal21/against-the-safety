@@ -6,7 +6,7 @@ Registered design, amendments and every decision before its result: `research/20
 
 Two cheap, model-free repairs, applied to the unchanged `main` adapter, produce a large and significant gain on a sealed test of 938 fresh episodes: **fail-closed** (an invalid or looping turn ends as an abstention) and a **self-check V** (Tiny Aya, with main's adapter, re-reads each answer against the passages it cited and withholds it if it is not supported). Together they lift macro success from 0.414 to 0.517 and cut the unsupported-answer rate from 29.7% to 10.2%, at a cost of 1.4 points of supported-correct answers. Preference training (DPO, priority 2) raised answer accuracy on SQuAD-style questions a lot but removed the model's ability to abstain, hurt multi-hop questions, and no checkpoint passed the pre-registered development gates. **The round-5 system is `main` + fail-closed + V.** The DPO result is a negative result with a clear cause (below).
 
-## Sealed final test (`r5test`, 938 episodes: 385 SQuAD, 82 HotpotQA, 471 RGB; opened once)
+## Sealed final test (`r5test`, 938 episodes: 385 SQuAD, 82 HotpotQA, 471 RGB; opened for base, main and candA; round 5b later opened it once more for candF1)
 
 Scorer version 2; macro = mean of four component rates (SQuAD single, SQuAD compound, HotpotQA, RGB); unsupported = unsupported answers / hidden-evidence episodes (`reports/round5_final.md`).
 
@@ -78,5 +78,6 @@ The first epoch of candG (candG1) is worse than the second: 224 of 321 episodes 
 ## What this changes and what is next
 
 - Headline: `main` + fail-closed + V. Pre-registered, significant on a sealed test, no retraining.
-- Not done: priority 3 (GRPO with the +1 / 0 / -1 reward) is the plan's next step. The DPO failure sharpens why: that reward gives the model an on-policy reason to keep abstaining when evidence is hidden, which a pair set built from errors cannot. A corrected DPO is the cheaper alternative: add pairs that choose an abstention, with the rejected answer obtained by forcing an answer at depth-3 hidden-evidence contexts, raise the HotpotQA share, and stop on an abstention-rate guard. Either needs about 4 GPU hours and a new pre-registration.
-- Nothing from this round is published on the Hub yet. The README, Article and abstract describe rounds 1 to 5 as of 7 November; the Hub model cards and the trace datasets still describe rounds 1 to 3.
+- The corrected DPO was run the same day (round 5b: `research/2026-11-07-round5b-preregistration.md`, plan section 29). The added abstention pairs restored the model's own abstention when training started from main, and no new checkpoint passed the development gate. The one eligible checkpoint, candF1 (a round-4 checkpoint), scored 0.570 macro on the sealed test against 0.517, and its unsupported-rate interval ended at +0.030 against a limit of +0.02, so the rule failed and the headline did not change.
+- Not done: priority 3 (GRPO with the +1 / 0 / -1 reward) and priority 5 (hidden-state probe). Priority 4 was skipped because the self-check covers it.
+- The system is packaged (`src/ragharness/system.py`, `scripts/ask.py`) and reproduced the offline decisions on 182 sealed-test episodes.

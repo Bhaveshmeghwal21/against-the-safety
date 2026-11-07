@@ -151,7 +151,7 @@ ROUND5_NOTE = """## Recommended use: the adapter plus two output-side repairs (r
 
 The results above are for the adapter alone. The submitted system adds two repairs that need no training. A rollout that ends without a valid answer or abstention is treated as an abstention (fail-closed). A self-check withholds an answer in three cases: this adapter, asked whether the cited passages state every part of the answer (reply `SUPPORTED` or `NOT`; one forward pass; threshold 0.5), says it is not supported; the cited chunk was never shown; or a part of the answer does not appear in the cited passages.
 
-On a sealed test of 938 fresh episodes (SQuAD, HotpotQA and RGB; scorer version 2; opened once), macro success is 0.022 for the base model, 0.414 for the adapter and 0.517 for the adapter with both repairs (+0.103 over the adapter, interval +0.079 to +0.127). Answers given although the evidence was hidden fall from 276 of 369 episodes (base) to 108 of 364 (adapter) and 37 of 364 (with repairs). The repairs cost caution: refusals of answerable episodes rise from 22% to 39%, and supported correct answers do not increase (29.0% to 27.5%). The scorer is stricter than the one above and the questions are harder, so these numbers do not compare with the first-round table. Code and tables: `reports/round5_final.md` and `scripts/verify_round5.py` in the repository. To run the whole system on your own documents (needs a CUDA GPU and access to the gated base model), use `scripts/ask.py` (`src/ragharness/system.py`); on 182 sealed-test episodes it ended every episode the same way as the offline evaluation."""
+On a sealed test of 938 fresh episodes (SQuAD, HotpotQA and RGB; scorer version 2; opened for the reference systems and once more for one round-5b candidate), macro success is 0.022 for the base model, 0.414 for the adapter and 0.517 for the adapter with both repairs (+0.103 over the adapter, interval +0.079 to +0.127). Answers given although the evidence was hidden fall from 276 of 369 episodes (base) to 108 of 364 (adapter) and 37 of 364 (with repairs). The repairs cost caution: refusals of answerable episodes rise from 22% to 39%, and supported correct answers do not increase (29.0% to 27.5%). The scorer is stricter than the one above and the questions are harder, so these numbers do not compare with the first-round table. Code and tables: `reports/round5_final.md` and `scripts/verify_round5.py` in the repository. To run the whole system on your own documents (needs a CUDA GPU and access to the gated base model), use `scripts/ask.py` (`src/ragharness/system.py`); on 182 sealed-test episodes it ended every episode the same way as the offline evaluation. A second round of preference training (round 5b) produced one eligible checkpoint, [candF1](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-cand-f1). With the same repairs it scored 0.570 macro against 0.517 on the sealed test, but its unsupported-answer difference from this system (-0.008, interval -0.047 to +0.030) did not meet the registered safety bound (upper end at most +0.02), so this adapter stays the submitted model."""
 
 
 def model_card(name: str, user: str) -> str:
@@ -390,7 +390,7 @@ Pooled unsupported answers are dominated by RGB's on-topic-passage setting, wher
 
 ## Rounds 4 and 5: the sealed final test (`r5t_*` folders) and the round-4 sets (`r4dev`, `r4test`)
 
-`r5t_squad`, `r5t_hotpot` and `r5t_rgb` are the sealed round-5 test: 938 episodes built before any round-5 training from questions no earlier round used, opened once, with a scripted oracle scoring 1.0 on all
+`r5t_squad`, `r5t_hotpot` and `r5t_rgb` are the sealed round-5 test: 938 episodes built before any round-5 training from questions no earlier round used, opened for the reference systems and once more for candF1 (round 5b), with a scripted oracle scoring 1.0 on all
 three parts (manifests carry the file hashes). The traces are the raw model runs. The two repairs of the submitted system are applied offline by `scripts/report_round5.py`: a rollout that ends without a valid
 answer or abstention becomes an abstention (fail-closed, FB), and an answer the self-check withholds becomes an abstention (V; the verdicts are in the episodes dataset under `verifier/`). Scorer version 2.
 
@@ -503,6 +503,70 @@ Loading is the same as for the main adapter (see its card); replace the adapter 
 
 The main adapter's limits apply. Two-part answers improved only a little (4 of 27 fresh RGB integration questions answered fully, against 0). When one part of a compound question is missing, the
 adapter tends to answer the visible part and invent the other. Evaluated sets are small (60 to 120 questions per set); every report gives intervals. Not for safety-critical or legal use.
+
+## License
+
+CC BY-NC 4.0, inherited from the base model. Cohere Labs' terms for Tiny Aya apply.
+"""
+
+
+def cand_f1_card(user: str) -> str:
+    final = json.loads((ROOT / "reports" / "round5b_final.json").read_text(encoding="utf-8"))
+    sysm, cmp_ = final["systems"], final["comparisons"]["candF1+FB+V/main+FB+V"]
+
+    def row(label: str, key: str) -> str:
+        s = sysm[key]
+        c = s["components"]
+        return (f"| {label} | {s['macro']:.3f} | {c['single']:.3f} | {c['compound']:.3f} | {c['hotpot']:.3f} | {c['rgb']:.3f} | {s['unsupported']} / {s['hidden_n']} | "
+                f"{s['supported_correct']:.3f} | {s['false_abstain']:.3f} |")
+
+    def ci(k: str) -> str:
+        d = cmp_[k]
+        return f"{d['difference']:+.3f} [{d['ci95'][0]:+.3f}, {d['ci95'][1]:+.3f}]"
+
+    table = "\n".join([
+        "| sealed test (938 episodes) | macro | SQuAD single | SQuAD two-part | HotpotQA | RGB | unsupported / hidden | supported correct | refusals of answerable |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        row("main + fail-closed + self-check (submitted)", "main+FB+V"), row("**candF1 + fail-closed + self-check**", "candF1+FB+V"),
+        row("main, no repairs", "main"), row("candF1, no repairs", "candF1")])
+    return f"""---
+license: cc-by-nc-4.0
+base_model: {BASE}
+library_name: peft
+pipeline_tag: text-generation
+language: [en]
+tags: [lora, qlora, peft, rag, retrieval, abstention, citations, agent, tiny-aya, lexsi-hackathon, agenttune, auditkit]
+datasets: [{user}/against-the-safety-rag-episodes]
+---
+
+# against-the-safety-tiny-aya-rag-cand-f1
+
+A LoRA adapter for [Tiny Aya Global]({"https://huggingface.co/" + BASE}) (revision `{REVISION[:8]}`) from the project's fourth round (candF, checkpoint after the first epoch). It continues from
+[candA]({"https://huggingface.co/" + user}/against-the-safety-tiny-aya-rag-cand-a) on 721 matched-evidence rows: the same question and search depth, once with the required fact present and once
+with it missing, plus replay of the search policy. Two epochs were planned (92 steps, learning rate 3e-5, seed 47); this adapter is the checkpoint after epoch 1. Built for the Lexsi AI Safety and Alignment
+Hackathon, Track 3, problem statement 4. Team **Against-the-safety**. Code and pre-registrations: [{REPO_URL}]({REPO_URL}) (plan sections 27 to 29).
+
+**Status: the documented alternative, not the submitted system.** The submitted system is [the main adapter](https://huggingface.co/{user}/against-the-safety-tiny-aya-rag-main) with a fail-closed rule and a self-check.
+Round 5b opened the sealed test once for this adapter, because it was the only one of twelve checkpoints that passed the development gate. The gate was written after its development results were known, so
+it was not chosen blind. The registered rule for replacing main needed, besides a macro gain, an unsupported-answer difference below zero with an upper bound of at most +0.02. That bound was +0.030, so the rule failed.
+
+## Sealed test (938 fresh SQuAD, HotpotQA and RGB episodes; scorer version 2; opened for this adapter once)
+
+{table}
+
+candF1 minus main, both with the repairs, paired 95% intervals from resampling whole questions: macro **{ci("macro")}**; unsupported-answer rate {ci("unsupported_rate")}; supported correct answers {ci("supported_correct")}.
+Read it as: more answers are correct (two-part questions in particular), and the data cannot say whether it is safer or less safe than main. The unsupported counts are small.
+
+## Use
+
+The result above needs both repairs. The self-check in those runs was done by the **main** adapter (wording A, threshold 0.5), not by this adapter. `scripts/ask.py` in the repository loads one adapter for both
+roles, so running it with this adapter would use candF1 as its own checker, which was not evaluated. Loading is otherwise the same as for the main adapter (see its card); replace the adapter id with
+`{user}/against-the-safety-tiny-aya-rag-cand-f1`. It expects the same system prompt and tool loop (`ragharness.protocol.system_prompt`, `ragharness.rollout`).
+
+## Limits
+
+The main adapter's limits apply. On the development set this checkpoint had more unsupported HotpotQA answers than main (2 against 1) and slightly more unsupported answers overall (7 of 131 against 5) with the repairs.
+Refusals of answerable episodes are still high (0.378 with the repairs). English, short factual questions. Not for safety-critical or legal use.
 
 ## License
 

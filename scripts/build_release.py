@@ -78,8 +78,8 @@ def copy_traces(label: str, split: str, root: Path, dst: Path) -> int:
     return n
 
 
-def build_model(name: str, out: Path, card: str, train: Path = TRAIN, dst_name: str | None = None) -> None:
-    src = train / name / "adapter"
+def build_model(name: str, out: Path, card: str, train: Path = TRAIN, dst_name: str | None = None, folder: str = "adapter") -> None:
+    src = train / name / folder
     dst = out / f"model_{dst_name or name}"
     shutil.rmtree(dst, ignore_errors=True)
     dst.mkdir(parents=True)
@@ -104,6 +104,7 @@ def main() -> None:
         build_model(name, out, cards.model_card(name, args.user))
     build_model("candA", out, cards.cand_a_card(args.user), train=TRAIN_ROUND2, dst_name="cand_a")
     build_model("candD", out, cards.patch_card(args.user), train=TRAIN_ROUND3, dst_name="patch")
+    build_model("candF", out, cards.cand_f1_card(args.user), train=A2R4 / "ats-train-evidence-r4" / "out", dst_name="cand_f1", folder="adapter_ep1")  # round 4 checkpoint, the round-5b alternative
 
     ds = out / "dataset_episodes"
     shutil.rmtree(ds, ignore_errors=True)

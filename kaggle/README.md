@@ -34,7 +34,7 @@ python scripts/kaggle_launch.py run eval-bench --adapters-from "ats-train-both,a
 python scripts/kaggle_launch.py run eval-bench --adapters-from "ats-train-both,ats-train-cands" --tag b "--extra=--systems candA,control,closed"
 ```
 
-Rounds 3 to 5 use more stages (`patch`, `interp`, `eval-jobs`, and for round 5 `sample-r5`, `train-dpo`, `verify-r5`, `verify-main-r5`; the list with a line each is at the top of `kaggle/bootstrap.py`). Round 5 ran on a second Kaggle account, with a bundle that carries the starting adapters:
+Rounds 3 to 5b use more stages (`patch`, `interp`, `eval-jobs`, for round 5 `sample-r5`, `train-dpo`, `verify-r5`, `verify-main-r5`, and for round 5b `force-r5`, `train-dpo2`, `check-system`; the list with a line each is at the top of `kaggle/bootstrap.py`). Round 5 ran on a second Kaggle account, with a bundle that carries the starting adapters:
 
 ```powershell
 python scripts/bundle_for_kaggle.py --out runs/kaggle_bundle_account2 --adapter main=<main adapter dir> --adapter candA=<candA adapter dir>
