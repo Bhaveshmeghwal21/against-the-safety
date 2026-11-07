@@ -1142,3 +1142,13 @@ G1 allows 25 unsupported answers out of 282 (main's 6.0% plus 3 points). Even al
 - Remaining quota on both Kaggle accounts is checked before each launch, and no step starts without enough quota to finish it.
 - **Hard freeze: 11 November, 23:59 IST.** No training after it. The final test runs by 12 November. 13 and 14 November are for the Article, the demo and the public repository. The submission deadline is 14 November, 23:59 AoE.
 - Every step above is committed before it runs, as in rounds 2 to 4. Any deviation is dated and labelled where it happens.
+
+## 28. Round 5 outcome (priorities 0 to 2 executed, 7 November 2026)
+
+Full account: `research/2026-11-07-round5-results.md`; registered design, amendments and decisions: `research/2026-11-07-round5-preregistration.md`.
+
+- **0a** the pre-registered wrappers hold on the round-4 test traces (fail-closed raises macro by 0.070 with no extra unsupported answers; the main + candA gate lowers the unsupported rate). **0b** deterministic checks alone block 15% of unsupported answers. **0c** scorer version 2 (token precision, whole-answer exclusion) reproduces version 1 exactly and was fixed before any round-5 result. **0d** the sealed `r5test` (938 episodes, oracle 1.0) is in `reports/round5_test_manifest.json`.
+- **1** the self-check V (main's adapter, wording A) passes the gate on development data (70% of unsupported answers blocked at 8% of supported-correct) and holds out of sample.
+- **2** DPO on 335 on-policy pairs: no checkpoint eligible. All four DPO checkpoints lost the abstain action (0 abstentions in 321 + 159 development episodes) because the pairs rejected 91 abstentions and chose 2. No candidate was opened on the sealed test.
+- **Sealed test:** main + fail-closed + V against main: macro +0.103 [+0.079, +0.127], unsupported rate -0.195 [-0.231, -0.159], supported correct -0.014. Against base: macro 0.022 to 0.517, unsupported rate 75% to 10%.
+- Priority 3 has not been started; it needs a decision and a new pre-registration.

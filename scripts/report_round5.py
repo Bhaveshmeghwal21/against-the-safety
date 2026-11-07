@@ -41,7 +41,7 @@ def vectors(rows, keys):
     """Per-episode numerators for every component and the unsupported rate, aligned to `keys` order."""
     by = {(r["part"], r["qid"], r["variant"]): r for r in rows}
     comps = sorted({r["comp"] for r in rows}, key=COMPONENTS.index)
-    out = np.zeros((len(keys), 2 * len(comps) + 3))
+    out = np.zeros((len(keys), 2 * len(comps) + 4))
     for i, k in enumerate(keys):
         r = by[k]
         if r["excluded_v2"]:
@@ -53,7 +53,7 @@ def vectors(rows, keys):
             out[i, j + 1] = 1
             out[i, j] = r["outcome_v2"].startswith("unsupported_")
         else:
-            out[i, j + 2] = r["strong_v2"]
+            out[i, j + 2], out[i, j + 3] = r["strong_v2"], 1
     return comps, out
 
 
@@ -62,7 +62,8 @@ def stats_from(total, comps):
     comp = [total[2 * c] / total[2 * c + 1] if total[2 * c + 1] else float("nan") for c in range(n)]
     j = 2 * n
     return {"macro": float(np.nanmean(comp)), "components": dict(zip(comps, comp)),
-            "unsupported": int(total[j]), "hidden_n": int(total[j + 1]), "unsupported_rate": float(total[j] / max(1, total[j + 1]))}
+            "unsupported": int(total[j]), "hidden_n": int(total[j + 1]), "unsupported_rate": float(total[j] / max(1, total[j + 1])),
+            "supported_correct": float(total[j + 2] / max(1, total[j + 3]))}
 
 
 def main() -> None:
@@ -104,7 +105,6 @@ def main() -> None:
         s = stats_from(vec.sum(axis=0), comps)
         raw = {(r["part"], r["qid"], r["variant"]): r for r in load_system(runs, name.split("+")[0], False, False, {}, {})} if True else {}
         s["invalid_before_repair"] = sum(r["final"] == "invalid" for r in raw.values()) / len(raw)
-        s["supported_correct"] = float(vec.sum(axis=0)[-1] / max(1, sum(1 for r in rows if r["answerable"] and not r["excluded_v2"])))
         s["false_abstain"] = sum(r["outcome_v2"] == "false_abstain" for r in rows if r["answerable"] and not r["excluded_v2"]) / max(1, sum(1 for r in rows if r["answerable"] and not r["excluded_v2"]))
         s["n"] = int(sum(1 for r in rows if not r["excluded_v2"]))
         table[name] = s
@@ -123,8 +123,7 @@ def main() -> None:
             sa, sb = stats_from(va[idx].sum(axis=0), ca), stats_from(vb[idx].sum(axis=0), cb)
             diffs["macro"].append(sa["macro"] - sb["macro"])
             diffs["unsupported_rate"].append(sa["unsupported_rate"] - sb["unsupported_rate"])
-            ja = 2 * len(ca)
-            diffs["supported_correct"].append(va[idx, -1].sum() / max(1, va[idx, ja + 2].size) - vb[idx, -1].sum() / max(1, vb[idx, ja + 2].size))
+            diffs["supported_correct"].append(sa["supported_correct"] - sb["supported_correct"])
         comparisons[pair] = {k: {"difference": table[a][k] - table[b][k] if k != "supported_correct" else table[a][k] - table[b][k],
                                  "ci95": [float(np.quantile(v, 0.025)), float(np.quantile(v, 0.975))]} for k, v in diffs.items()}
     out = Path(args.out)
