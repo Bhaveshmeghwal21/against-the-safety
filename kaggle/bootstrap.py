@@ -17,6 +17,8 @@ Stages
                          main on GPU 0 and candA on GPU 1 (needs the initial adapters in the bundle)
   train-dpo              fifth round: DPO on the pairs file, candG (from main) on GPU 0 and candH (from candA) on GPU 1; then --jobs
                          system:split[:weight],... for development evaluation (names candG1/candG2/candH1/candH2 = half and full epoch)
+  force-r5               round 5b: the system answers at the abstention contexts of round 5 with `<answer>` forced (main on GPU 0, candA on GPU 1)
+  train-dpo2             round 5b: DPO on the abstention-augmented pairs, candI (from main) and candK (from the round-4 checkpoint candF1); candI1/candI2/candK1/candK2
   interp                 third round probe (plan section 25): --from main --to candD --alphas 0.2,0.35 --splits bench_r3dev:30,dev:11 builds the
                          blends (1 - alpha) * from + alpha * to inside the kernel and evaluates them
   eval-dev | eval-test | eval-test2 | eval-product
@@ -289,6 +291,48 @@ def main() -> None:
         if jobs_spec:
             rc = eval_jobs(py, jobs_spec, "--parse lenient --extra-questions 0", adapters)
             if rc == 0:  # priority 1: the checker V on every candidate's development answers (main's adapter, wording A), for selection with V on both sides
+                cands = ",".join(f"{n}{i}" for n, _, _ in names for i in (1, 2))
+                sh(f"{py} scripts/build_verifier_cases.py --eval {OUT}/eval --system {cands} --out {OUT}/verify/cases_candidates.jsonl", check=False)
+                sh(f"{py} scripts/verify_round5.py --cases {OUT}/verify/cases_candidates.jsonl --tag main --adapter {adapters['main/adapter']} "
+                   f"--out {OUT}/verify/main --wordings A", check=False, env=g0)
+    elif stage == "force-r5":  # round 5b: forced answers at the abstention contexts of each system, main on GPU 0 and candA on GPU 1
+        contexts = REPO / "data" / "processed" / "training" / "force_contexts_r5.jsonl"
+        for n in ("main", "candA"):
+            if f"{n}/adapter" not in adapters:
+                raise SystemExit(f"initial adapter missing: {n}")
+        if not contexts.exists():
+            raise SystemExit("the context file is missing from the bundle")
+        rc = run_parallel([
+            (f"{py} scripts/force_answers_round5.py --adapter {adapters[f'{n}/adapter']} --tag {n} --contexts {contexts} --out {OUT}/forced --seed {seed} {extra}",
+             gpu, f"force_{n}.log")
+            for n, gpu, seed in (("main", g0, 5303), ("candA", g1, 5304))
+        ])
+    elif stage == "train-dpo2":  # round 5b: candI from main on GPU 0 and candJ from candA on GPU 1 on the abstention-augmented pair file; then dev evaluation and the checker
+        m = re.search(r"--jobs\s+(\S+)", extra)
+        jobs_spec, rest = (m.group(1), extra.replace(m.group(0), "")) if m else ("", extra)
+        pairs_file = REPO / "data" / "processed" / "training" / "dpo_r5b.jsonl"
+        if not pairs_file.exists():
+            raise SystemExit("the round 5b preference-pair file is missing from the bundle")
+        names = (("candI", "main", g0), ("candK", "candF1", g1))
+        for _, initial, _ in names:
+            if f"{initial}/adapter" not in adapters:
+                raise SystemExit(f"initial adapter missing: {initial}")
+        rc = run_parallel([
+            (f"{py} scripts/train_dpo.py --init-adapter {adapters[f'{initial}/adapter']} --pairs {pairs_file} --out {OUT}/{name} --name {name} {rest}",
+             gpu, f"train_{name}.log")
+            for name, initial, gpu in names
+        ])
+        if rc:
+            raise SystemExit(rc)
+        for name, _, _ in names:
+            report = json.loads((OUT / name / "train_report.json").read_text())
+            adapters[f"{name}2/adapter"] = str(OUT / name / "adapter")
+            if (OUT / name / "adapter_half").exists():
+                adapters[f"{name}1/adapter"] = str(OUT / name / "adapter_half")
+            print(name, "trained", {k: report[k] for k in ("pairs_trained", "steps", "wall_seconds", "seconds_per_pair_pass", "peak_gpu_memory_gb")}, flush=True)
+        if jobs_spec:
+            rc = eval_jobs(py, jobs_spec, "--parse lenient --extra-questions 0", adapters)
+            if rc == 0:
                 cands = ",".join(f"{n}{i}" for n, _, _ in names for i in (1, 2))
                 sh(f"{py} scripts/build_verifier_cases.py --eval {OUT}/eval --system {cands} --out {OUT}/verify/cases_candidates.jsonl", check=False)
                 sh(f"{py} scripts/verify_round5.py --cases {OUT}/verify/cases_candidates.jsonl --tag main --adapter {adapters['main/adapter']} "
