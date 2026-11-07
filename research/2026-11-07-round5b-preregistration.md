@@ -98,3 +98,20 @@ What the four new checkpoints show:
 **Selected: candF1**, the only checkpoint passing all seven conditions. Disclosure, repeated from the registration: the gate was written after I had seen the development table of the eight earlier checkpoints, and candF1 was known to pass it. candF1 was therefore not chosen blind. It is a round-4 checkpoint (init candA, epoch 1 of `candF`) that failed round 4's own release rules, mainly on HotpotQA, which this gate relaxes (the HotpotQA conditions here are relative to main with the repairs). On the development data it has 7 unsupported answers in 131 hidden-evidence episodes against main's 5, so the sealed-test rule, which needs an unsupported-rate point estimate below main's, may well fail. It is run anyway, because the rule was fixed for this purpose.
 
 Next, and nothing else: one `eval-jobs` kernel runs candF1 on `r5t_squad`, `r5t_hotpot` and `r5t_rgb` (the three parts of `r5test`), then the checker V runs over its answers with the main adapter (wording A, threshold 0.5), then `report_round5.py` compares candF1 + fail-closed + checker with main + fail-closed + checker, appended after the existing comparisons. The rule is the one above. Nothing else is opened on `r5test`.
+
+## Amendment 3: the sealed-test result and the decision (7 November 2026, 17:55 IST)
+
+The sealed test (`r5test`, 938 episodes) was opened for candF1 once, after the commit of Amendment 2 (`24b35b7`). Kernel `ats-eval-jobs-r5test-final` ran candF1 on the three parts (SQuAD, HotpotQA, RGB) in about 35 minutes; kernel `ats-verify-main-r5-r5test-final` ran the checker V (main adapter, wording A, threshold 0.5) over its 568 answers in 233 seconds. `reports/round5b_final.{md,json}` repeats the six earlier comparisons first, so their intervals are unchanged, and appends `candF1+FB+V / main+FB+V` last (seed 47, 3,000 draws, whole questions resampled within each part).
+
+| sealed test, both repairs on | macro | SQuAD single | SQuAD two-part | HotpotQA | RGB | unsupported / hidden | supported correct | refusals of answerable |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| main (headline) | 0.517 | 0.591 | 0.394 | 0.561 | 0.524 | 37 / 364 | 0.275 | 0.391 |
+| candF1 | 0.570 | 0.614 | 0.527 | 0.617 | 0.521 | 34 / 364 | 0.323 | 0.378 |
+
+Candidate minus main, both with the repairs: macro **+0.052 (95% interval +0.021 to +0.085)**; unsupported-answer rate **−0.008 (−0.047 to +0.030)**; supported correct +0.048 (+0.009 to +0.087). Without the repairs candF1 scores 0.449 macro with 114 of 364 unsupported answers (main: 0.414 and 108).
+
+**Decision, by the rule of section 27 unchanged.** The macro condition holds (interval above zero). The safety condition needs an unsupported-rate point estimate below zero with an upper bound of at most +0.02. The point estimate is −0.008, and the upper bound is +0.030. The rule fails. **main with fail-closed and the self-check stays the headline system.** candF1 with the same repairs is reported as a documented alternative: it scores higher on macro and on supported correct answers, and the data cannot tell whether its unsupported rate differs from main's, in either direction.
+
+Two cautions for anyone reading candF1's number. The gate that selected it was written after I had seen its development results (Amendment 2), so the sealed test confirms a checkpoint that was not chosen blind, and it is a single checkpoint tested once, not a family. And the unsupported counts (34 and 37) are small, so the interval is wide. No further checkpoint is opened on `r5test`.
+
+Round 5b is closed. The preference-training question is answered for this recipe: adding the abstention direction restores the model's own abstention when training starts from main (candI1 83%, candI2 63%) and does not when it starts from candF1 (candK 16% to 17%). Neither start produced a checkpoint that passed the development gate on HotpotQA success and macro together.
