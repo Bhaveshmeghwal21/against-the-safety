@@ -1,0 +1,1008 @@
+{
+  "scope": "r5 sealed test; common intersection; scorer v2",
+  "coverage": {
+    "expected": 938,
+    "provider_unavailable_or_missing": 3,
+    "excluded_on_at_least_one_actor": 59,
+    "common": 876,
+    "per_system": {
+      "main": {
+        "present": 938,
+        "excluded_v2": 11
+      },
+      "candA": {
+        "present": 938,
+        "excluded_v2": 10
+      },
+      "candF1": {
+        "present": 938,
+        "excluded_v2": 11
+      },
+      "azure_exact": {
+        "present": 938,
+        "excluded_v2": 9
+      },
+      "azure_native": {
+        "present": 935,
+        "excluded_v2": 53
+      },
+      "main+FB+V": {
+        "present": 938,
+        "excluded_v2": 11
+      },
+      "candA+FB+V": {
+        "present": 938,
+        "excluded_v2": 10
+      },
+      "candF1+FB+V": {
+        "present": 938,
+        "excluded_v2": 11
+      },
+      "azure_exact+FB": {
+        "present": 938,
+        "excluded_v2": 9
+      },
+      "azure_native+FB": {
+        "present": 935,
+        "excluded_v2": 53
+      }
+    }
+  },
+  "systems": {
+    "main": {
+      "macro": 0.4134807609775561,
+      "components": {
+        "single": 0.5402843601895735,
+        "compound": 0.225,
+        "hotpot": 0.5256410256410257,
+        "rgb": 0.3629976580796253
+      },
+      "unsupported": 86,
+      "hidden_n": 315,
+      "unsupported_rate": 0.273015873015873,
+      "supported_correct": 0.2905525846702317,
+      "n": 876,
+      "false_abstain": 0.22281639928698752,
+      "invalid": 0.0821917808219178
+    },
+    "candA": {
+      "macro": 0.4750370820957071,
+      "components": {
+        "single": 0.6350710900473934,
+        "compound": 0.25625,
+        "hotpot": 0.6153846153846154,
+        "rgb": 0.39344262295081966
+      },
+      "unsupported": 98,
+      "hidden_n": 315,
+      "unsupported_rate": 0.3111111111111111,
+      "supported_correct": 0.33868092691622104,
+      "n": 876,
+      "false_abstain": 0.1586452762923351,
+      "invalid": 0.0228310502283105
+    },
+    "candF1": {
+      "macro": 0.45028802424267517,
+      "components": {
+        "single": 0.5450236966824644,
+        "compound": 0.33125,
+        "hotpot": 0.5384615384615384,
+        "rgb": 0.3864168618266979
+      },
+      "unsupported": 88,
+      "hidden_n": 315,
+      "unsupported_rate": 0.27936507936507937,
+      "supported_correct": 0.35472370766488415,
+      "n": 876,
+      "false_abstain": 0.1586452762923351,
+      "invalid": 0.09018264840182648
+    },
+    "azure_exact": {
+      "macro": 0.21160755329441233,
+      "components": {
+        "single": 0.3080568720379147,
+        "compound": 0.15625,
+        "hotpot": 0.16666666666666666,
+        "rgb": 0.2154566744730679
+      },
+      "unsupported": 36,
+      "hidden_n": 315,
+      "unsupported_rate": 0.11428571428571428,
+      "supported_correct": 0.13725490196078433,
+      "n": 876,
+      "false_abstain": 0.058823529411764705,
+      "invalid": 0.3824200913242009
+    },
+    "azure_native": {
+      "macro": 0.28652056015909355,
+      "components": {
+        "single": 0.5639810426540285,
+        "compound": 0.05625,
+        "hotpot": 0.23076923076923078,
+        "rgb": 0.29508196721311475
+      },
+      "unsupported": 62,
+      "hidden_n": 315,
+      "unsupported_rate": 0.19682539682539682,
+      "supported_correct": 0.39215686274509803,
+      "n": 876,
+      "false_abstain": 0.0071301247771836,
+      "invalid": 0.2420091324200913
+    },
+    "main+FB+V": {
+      "macro": 0.5074792903047798,
+      "components": {
+        "single": 0.5829383886255924,
+        "compound": 0.3875,
+        "hotpot": 0.5512820512820513,
+        "rgb": 0.5081967213114754
+      },
+      "unsupported": 25,
+      "hidden_n": 315,
+      "unsupported_rate": 0.07936507936507936,
+      "supported_correct": 0.27629233511586454,
+      "n": 876,
+      "false_abstain": 0.39037433155080214,
+      "invalid": 0.0
+    },
+    "candA+FB+V": {
+      "macro": 0.5300145820402113,
+      "components": {
+        "single": 0.6066350710900474,
+        "compound": 0.3875,
+        "hotpot": 0.6153846153846154,
+        "rgb": 0.5105386416861827
+      },
+      "unsupported": 33,
+      "hidden_n": 315,
+      "unsupported_rate": 0.10476190476190476,
+      "supported_correct": 0.31016042780748665,
+      "n": 876,
+      "false_abstain": 0.32085561497326204,
+      "invalid": 0.0
+    },
+    "candF1+FB+V": {
+      "macro": 0.556694553366699,
+      "components": {
+        "single": 0.6066350710900474,
+        "compound": 0.51875,
+        "hotpot": 0.6025641025641025,
+        "rgb": 0.49882903981264637
+      },
+      "unsupported": 26,
+      "hidden_n": 315,
+      "unsupported_rate": 0.08253968253968254,
+      "supported_correct": 0.3244206773618538,
+      "n": 876,
+      "false_abstain": 0.3761140819964349,
+      "invalid": 0.0
+    },
+    "azure_exact+FB": {
+      "macro": 0.42804317090369554,
+      "components": {
+        "single": 0.5402843601895735,
+        "compound": 0.38125,
+        "hotpot": 0.44871794871794873,
+        "rgb": 0.34192037470725994
+      },
+      "unsupported": 36,
+      "hidden_n": 315,
+      "unsupported_rate": 0.11428571428571428,
+      "supported_correct": 0.13725490196078433,
+      "n": 876,
+      "false_abstain": 0.3689839572192513,
+      "invalid": 0.0
+    },
+    "azure_native+FB": {
+      "macro": 0.5476909163855593,
+      "components": {
+        "single": 0.7867298578199052,
+        "compound": 0.375,
+        "hotpot": 0.5512820512820513,
+        "rgb": 0.477751756440281
+      },
+      "unsupported": 62,
+      "hidden_n": 315,
+      "unsupported_rate": 0.19682539682539682,
+      "supported_correct": 0.39215686274509803,
+      "n": 876,
+      "false_abstain": 0.026737967914438502,
+      "invalid": 0.0
+    }
+  },
+  "comparisons": {
+    "azure_exact/main": {
+      "macro": {
+        "difference": -0.20187320768314376,
+        "ci95": [
+          -0.24343663362972162,
+          -0.15962439755463662
+        ]
+      },
+      "unsupported_rate": {
+        "difference": -0.15873015873015872,
+        "ci95": [
+          -0.2182490881429324,
+          -0.09657320872274144
+        ]
+      },
+      "supported_correct": {
+        "difference": -0.15329768270944738,
+        "ci95": [
+          -0.20107744321286392,
+          -0.10782478107236135
+        ]
+      }
+    },
+    "azure_exact/main+FB+V": {
+      "macro": {
+        "difference": -0.29587173701036745,
+        "ci95": [
+          -0.3311617199128068,
+          -0.2598454834635298
+        ]
+      },
+      "unsupported_rate": {
+        "difference": 0.03492063492063492,
+        "ci95": [
+          -0.009710319091742824,
+          0.08125188253012049
+        ]
+      },
+      "supported_correct": {
+        "difference": -0.13903743315508021,
+        "ci95": [
+          -0.18672293762835335,
+          -0.09252591405662894
+        ]
+      }
+    },
+    "azure_exact/candF1+FB+V": {
+      "macro": {
+        "difference": -0.3450870000722867,
+        "ci95": [
+          -0.3851577367535294,
+          -0.30611210317633625
+        ]
+      },
+      "unsupported_rate": {
+        "difference": 0.031746031746031744,
+        "ci95": [
+          -0.012580606639598755,
+          0.07467760043694624
+        ]
+      },
+      "supported_correct": {
+        "difference": -0.1871657754010695,
+        "ci95": [
+          -0.23801277171614652,
+          -0.1364452423698384
+        ]
+      }
+    },
+    "azure_exact+FB/main": {
+      "macro": {
+        "difference": 0.014562409926139441,
+        "ci95": [
+          -0.02573438212940022,
+          0.0533798962486528
+        ]
+      },
+      "unsupported_rate": {
+        "difference": -0.15873015873015872,
+        "ci95": [
+          -0.2182490881429324,
+          -0.09657320872274144
+        ]
+      },
+      "supported_correct": {
+        "difference": -0.15329768270944738,
+        "ci95": [
+          -0.20107744321286392,
+          -0.10782478107236135
+        ]
+      }
+    },
+    "azure_exact+FB/main+FB+V": {
+      "macro": {
+        "difference": -0.07943611940108425,
+        "ci95": [
+          -0.11120155477634773,
+          -0.04792783221466645
+        ]
+      },
+      "unsupported_rate": {
+        "difference": 0.03492063492063492,
+        "ci95": [
+          -0.009710319091742824,
+          0.08125188253012049
+        ]
+      },
+      "supported_correct": {
+        "difference": -0.13903743315508021,
+        "ci95": [
+          -0.18672293762835335,
+          -0.09252591405662894
+        ]
+      }
+    },
+    "azure_exact+FB/candF1+FB+V": {
+      "macro": {
+        "difference": -0.1286513824630035,
+        "ci95": [
+          -0.16786461826714438,
+          -0.09092835208696776
+        ]
+      },
+      "unsupported_rate": {
+        "difference": 0.031746031746031744,
+        "ci95": [
+          -0.012580606639598755,
+          0.07467760043694624
+        ]
+      },
+      "supported_correct": {
+        "difference": -0.1871657754010695,
+        "ci95": [
+          -0.23801277171614652,
+          -0.1364452423698384
+        ]
+      }
+    },
+    "azure_native/main": {
+      "macro": {
+        "difference": -0.12696020081846254,
+        "ci95": [
+          -0.1675186219149016,
+          -0.08452374755101008
+        ]
+      },
+      "unsupported_rate": {
+        "difference": -0.07619047619047617,
+        "ci95": [
+          -0.15000399361022362,
+          -0.0032784206578806525
+        ]
+      },
+      "supported_correct": {
+        "difference": 0.10160427807486633,
+        "ci95": [
+          0.048605510752688166,
+          0.15523465703971118
+        ]
+      }
+    },
+    "azure_native/main+FB+V": {
+      "macro": {
+        "difference": -0.22095873014568623,
+        "ci95": [
+          -0.25927751752539435,
+          -0.17827292434043532
+        ]
+      },
+      "unsupported_rate": {
+        "difference": 0.11746031746031746,
+        "ci95": [
+          0.05881921683629464,
+          0.1757617845117845
+        ]
+      },
+      "supported_correct": {
+        "difference": 0.1158645276292335,
+        "ci95": [
+          0.061079364065892,
+          0.17198581560283688
+        ]
+      }
+    },
+    "azure_native/candF1+FB+V": {
+      "macro": {
+        "difference": -0.2701739932076055,
+        "ci95": [
+          -0.3186218797517613,
+          -0.22116681058790147
+        ]
+      },
+      "unsupported_rate": {
+        "difference": 0.11428571428571428,
+        "ci95": [
+          0.05713095238095238,
+          0.17320588235294118
+        ]
+      },
+      "supported_correct": {
+        "difference": 0.06773618538324422,
+        "ci95": [
+          0.0017698333281215394,
+          0.13417084394773604
+        ]
+      }
+    },
+    "azure_native+FB/main": {
+      "macro": {
+        "difference": 0.13421015540800324,
+        "ci95": [
+          0.09019316880515113,
+          0.17612462607365986
+        ]
+      },
+      "unsupported_rate": {
+        "difference": -0.07619047619047617,
+        "ci95": [
+          -0.15000399361022362,
+          -0.0032784206578806525
+        ]
+      },
+      "supported_correct": {
+        "difference": 0.10160427807486633,
+        "ci95": [
+          0.048605510752688166,
+          0.15523465703971118
+        ]
+      }
+    },
+    "azure_native+FB/main+FB+V": {
+      "macro": {
+        "difference": 0.04021162608077955,
+        "ci95": [
+          -0.00032975933440233167,
+          0.08155459247532672
+        ]
+      },
+      "unsupported_rate": {
+        "difference": 0.11746031746031746,
+        "ci95": [
+          0.05881921683629464,
+          0.1757617845117845
+        ]
+      },
+      "supported_correct": {
+        "difference": 0.1158645276292335,
+        "ci95": [
+          0.061079364065892,
+          0.17198581560283688
+        ]
+      }
+    },
+    "azure_native+FB/candF1+FB+V": {
+      "macro": {
+        "difference": -0.009003636981139707,
+        "ci95": [
+          -0.055817687049552395,
+          0.038401299924566555
+        ]
+      },
+      "unsupported_rate": {
+        "difference": 0.11428571428571428,
+        "ci95": [
+          0.05713095238095238,
+          0.17320588235294118
+        ]
+      },
+      "supported_correct": {
+        "difference": 0.06773618538324422,
+        "ci95": [
+          0.0017698333281215394,
+          0.13417084394773604
+        ]
+      }
+    }
+  },
+  "external": {
+    "2wiki": {
+      "coverage": {
+        "expected": 166,
+        "provider_unavailable_or_missing": 0,
+        "excluded_on_at_least_one_actor": 1,
+        "common": 165,
+        "per_system": {
+          "main": {
+            "present": 166,
+            "excluded_v2": 0
+          },
+          "candA": {
+            "present": 166,
+            "excluded_v2": 0
+          },
+          "azure_exact": {
+            "present": 166,
+            "excluded_v2": 0
+          },
+          "azure_exact+FB": {
+            "present": 166,
+            "excluded_v2": 0
+          },
+          "azure_native": {
+            "present": 166,
+            "excluded_v2": 1
+          },
+          "azure_native+FB": {
+            "present": 166,
+            "excluded_v2": 1
+          },
+          "main+FB": {
+            "present": 166,
+            "excluded_v2": 0
+          }
+        }
+      },
+      "systems": {
+        "main": {
+          "n": 165,
+          "success": 0.5212121212121212,
+          "unsupported": 3,
+          "hidden_n": 78,
+          "supported_correct": 0.21839080459770116,
+          "false_abstain": 0.20689655172413793,
+          "invalid": 0.05454545454545454
+        },
+        "candA": {
+          "n": 165,
+          "success": 0.5454545454545454,
+          "unsupported": 5,
+          "hidden_n": 78,
+          "supported_correct": 0.22988505747126436,
+          "false_abstain": 0.1839080459770115,
+          "invalid": 0.01818181818181818
+        },
+        "azure_exact": {
+          "n": 165,
+          "success": 0.15151515151515152,
+          "unsupported": 0,
+          "hidden_n": 78,
+          "supported_correct": 0.022988505747126436,
+          "false_abstain": 0.11494252873563218,
+          "invalid": 0.6303030303030303
+        },
+        "azure_exact+FB": {
+          "n": 165,
+          "success": 0.48484848484848486,
+          "unsupported": 0,
+          "hidden_n": 78,
+          "supported_correct": 0.022988505747126436,
+          "false_abstain": 0.6781609195402298,
+          "invalid": 0.0
+        },
+        "azure_native": {
+          "n": 165,
+          "success": 0.21212121212121213,
+          "unsupported": 1,
+          "hidden_n": 78,
+          "supported_correct": 0.20689655172413793,
+          "false_abstain": 0.05747126436781609,
+          "invalid": 0.4909090909090909
+        },
+        "azure_native+FB": {
+          "n": 165,
+          "success": 0.5757575757575758,
+          "unsupported": 1,
+          "hidden_n": 78,
+          "supported_correct": 0.20689655172413793,
+          "false_abstain": 0.2988505747126437,
+          "invalid": 0.0
+        },
+        "main+FB": {
+          "n": 165,
+          "success": 0.5696969696969697,
+          "unsupported": 3,
+          "hidden_n": 78,
+          "supported_correct": 0.21839080459770116,
+          "false_abstain": 0.21839080459770116,
+          "invalid": 0.0
+        }
+      }
+    },
+    "musique": {
+      "coverage": {
+        "expected": 168,
+        "provider_unavailable_or_missing": 0,
+        "excluded_on_at_least_one_actor": 3,
+        "common": 165,
+        "per_system": {
+          "main": {
+            "present": 168,
+            "excluded_v2": 0
+          },
+          "candA": {
+            "present": 168,
+            "excluded_v2": 0
+          },
+          "azure_exact": {
+            "present": 168,
+            "excluded_v2": 1
+          },
+          "azure_exact+FB": {
+            "present": 168,
+            "excluded_v2": 1
+          },
+          "azure_native": {
+            "present": 168,
+            "excluded_v2": 3
+          },
+          "azure_native+FB": {
+            "present": 168,
+            "excluded_v2": 3
+          },
+          "main+FB": {
+            "present": 168,
+            "excluded_v2": 0
+          }
+        }
+      },
+      "systems": {
+        "main": {
+          "n": 165,
+          "success": 0.49696969696969695,
+          "unsupported": 1,
+          "hidden_n": 77,
+          "supported_correct": 0.18181818181818182,
+          "false_abstain": 0.5227272727272727,
+          "invalid": 0.09696969696969697
+        },
+        "candA": {
+          "n": 165,
+          "success": 0.5636363636363636,
+          "unsupported": 2,
+          "hidden_n": 77,
+          "supported_correct": 0.2727272727272727,
+          "false_abstain": 0.4659090909090909,
+          "invalid": 0.06060606060606061
+        },
+        "azure_exact": {
+          "n": 165,
+          "success": 0.18181818181818182,
+          "unsupported": 1,
+          "hidden_n": 77,
+          "supported_correct": 0.056818181818181816,
+          "false_abstain": 0.09090909090909091,
+          "invalid": 0.6424242424242425
+        },
+        "azure_exact+FB": {
+          "n": 165,
+          "success": 0.4909090909090909,
+          "unsupported": 1,
+          "hidden_n": 77,
+          "supported_correct": 0.056818181818181816,
+          "false_abstain": 0.7159090909090909,
+          "invalid": 0.0
+        },
+        "azure_native": {
+          "n": 165,
+          "success": 0.18787878787878787,
+          "unsupported": 2,
+          "hidden_n": 77,
+          "supported_correct": 0.25,
+          "false_abstain": 0.11363636363636363,
+          "invalid": 0.5151515151515151
+        },
+        "azure_native+FB": {
+          "n": 165,
+          "success": 0.5878787878787879,
+          "unsupported": 2,
+          "hidden_n": 77,
+          "supported_correct": 0.25,
+          "false_abstain": 0.32954545454545453,
+          "invalid": 0.0
+        },
+        "main+FB": {
+          "n": 165,
+          "success": 0.5575757575757576,
+          "unsupported": 1,
+          "hidden_n": 77,
+          "supported_correct": 0.18181818181818182,
+          "false_abstain": 0.5909090909090909,
+          "invalid": 0.0
+        }
+      }
+    },
+    "squad2": {
+      "coverage": {
+        "expected": 202,
+        "provider_unavailable_or_missing": 0,
+        "excluded_on_at_least_one_actor": 5,
+        "common": 197,
+        "per_system": {
+          "main": {
+            "present": 202,
+            "excluded_v2": 1
+          },
+          "candA": {
+            "present": 202,
+            "excluded_v2": 1
+          },
+          "azure_exact": {
+            "present": 202,
+            "excluded_v2": 1
+          },
+          "azure_exact+FB": {
+            "present": 202,
+            "excluded_v2": 1
+          },
+          "azure_native": {
+            "present": 202,
+            "excluded_v2": 4
+          },
+          "azure_native+FB": {
+            "present": 202,
+            "excluded_v2": 4
+          },
+          "main+FB": {
+            "present": 202,
+            "excluded_v2": 1
+          }
+        }
+      },
+      "systems": {
+        "main": {
+          "n": 197,
+          "success": 0.467005076142132,
+          "unsupported": 5,
+          "hidden_n": 124,
+          "supported_correct": 0.0547945205479452,
+          "false_abstain": 0.7397260273972602,
+          "invalid": 0.2182741116751269
+        },
+        "candA": {
+          "n": 197,
+          "success": 0.5634517766497462,
+          "unsupported": 6,
+          "hidden_n": 124,
+          "supported_correct": 0.0821917808219178,
+          "false_abstain": 0.7534246575342466,
+          "invalid": 0.09644670050761421
+        },
+        "azure_exact": {
+          "n": 197,
+          "success": 0.16751269035532995,
+          "unsupported": 19,
+          "hidden_n": 124,
+          "supported_correct": 0.0958904109589041,
+          "false_abstain": 0.0410958904109589,
+          "invalid": 0.6040609137055838
+        },
+        "azure_exact+FB": {
+          "n": 197,
+          "success": 0.5685279187817259,
+          "unsupported": 19,
+          "hidden_n": 124,
+          "supported_correct": 0.0958904109589041,
+          "false_abstain": 0.589041095890411,
+          "invalid": 0.0
+        },
+        "azure_native": {
+          "n": 197,
+          "success": 0.3350253807106599,
+          "unsupported": 51,
+          "hidden_n": 124,
+          "supported_correct": 0.4657534246575342,
+          "false_abstain": 0.0136986301369863,
+          "invalid": 0.2131979695431472
+        },
+        "azure_native+FB": {
+          "n": 197,
+          "success": 0.5431472081218274,
+          "unsupported": 51,
+          "hidden_n": 124,
+          "supported_correct": 0.4657534246575342,
+          "false_abstain": 0.0273972602739726,
+          "invalid": 0.0
+        },
+        "main+FB": {
+          "n": 197,
+          "success": 0.6243654822335025,
+          "unsupported": 5,
+          "hidden_n": 124,
+          "supported_correct": 0.0547945205479452,
+          "false_abstain": 0.9041095890410958,
+          "invalid": 0.0
+        }
+      }
+    },
+    "rgb": {
+      "coverage": {
+        "expected": 453,
+        "provider_unavailable_or_missing": 0,
+        "excluded_on_at_least_one_actor": 48,
+        "common": 405,
+        "per_system": {
+          "main": {
+            "present": 453,
+            "excluded_v2": 18
+          },
+          "candA": {
+            "present": 453,
+            "excluded_v2": 15
+          },
+          "azure_exact": {
+            "present": 453,
+            "excluded_v2": 11
+          },
+          "azure_exact+FB": {
+            "present": 453,
+            "excluded_v2": 11
+          },
+          "azure_native": {
+            "present": 453,
+            "excluded_v2": 46
+          },
+          "azure_native+FB": {
+            "present": 453,
+            "excluded_v2": 46
+          },
+          "main+FB": {
+            "present": 453,
+            "excluded_v2": 18
+          }
+        }
+      },
+      "systems": {
+        "main": {
+          "n": 405,
+          "success": 0.35555555555555557,
+          "unsupported": 57,
+          "hidden_n": 119,
+          "supported_correct": 0.3356643356643357,
+          "false_abstain": 0.07342657342657342,
+          "invalid": 0.05432098765432099
+        },
+        "candA": {
+          "n": 405,
+          "success": 0.362962962962963,
+          "unsupported": 73,
+          "hidden_n": 119,
+          "supported_correct": 0.36013986013986016,
+          "false_abstain": 0.024475524475524476,
+          "invalid": 0.009876543209876543
+        },
+        "azure_exact": {
+          "n": 405,
+          "success": 0.19753086419753085,
+          "unsupported": 13,
+          "hidden_n": 119,
+          "supported_correct": 0.08741258741258741,
+          "false_abstain": 0.013986013986013986,
+          "invalid": 0.22962962962962963
+        },
+        "azure_exact+FB": {
+          "n": 405,
+          "success": 0.3234567901234568,
+          "unsupported": 13,
+          "hidden_n": 119,
+          "supported_correct": 0.08741258741258741,
+          "false_abstain": 0.16083916083916083,
+          "invalid": 0.0
+        },
+        "azure_native": {
+          "n": 405,
+          "success": 0.28641975308641976,
+          "unsupported": 34,
+          "hidden_n": 119,
+          "supported_correct": 0.3181818181818182,
+          "false_abstain": 0.0034965034965034965,
+          "invalid": 0.1580246913580247
+        },
+        "azure_native+FB": {
+          "n": 405,
+          "success": 0.4345679012345679,
+          "unsupported": 34,
+          "hidden_n": 119,
+          "supported_correct": 0.3181818181818182,
+          "false_abstain": 0.017482517482517484,
+          "invalid": 0.0
+        },
+        "main+FB": {
+          "n": 405,
+          "success": 0.39012345679012345,
+          "unsupported": 57,
+          "hidden_n": 119,
+          "supported_correct": 0.3356643356643357,
+          "false_abstain": 0.10139860139860139,
+          "invalid": 0.0
+        }
+      }
+    },
+    "rgb_int": {
+      "coverage": {
+        "expected": 142,
+        "provider_unavailable_or_missing": 0,
+        "excluded_on_at_least_one_actor": 1,
+        "common": 141,
+        "per_system": {
+          "main": {
+            "present": 142,
+            "excluded_v2": 0
+          },
+          "candA": {
+            "present": 142,
+            "excluded_v2": 0
+          },
+          "azure_exact": {
+            "present": 142,
+            "excluded_v2": 1
+          },
+          "azure_exact+FB": {
+            "present": 142,
+            "excluded_v2": 1
+          },
+          "azure_native": {
+            "present": 142,
+            "excluded_v2": 1
+          },
+          "azure_native+FB": {
+            "present": 142,
+            "excluded_v2": 1
+          },
+          "main+FB": {
+            "present": 142,
+            "excluded_v2": 0
+          }
+        }
+      },
+      "systems": {
+        "main": {
+          "n": 141,
+          "success": 0.014184397163120567,
+          "unsupported": 4,
+          "hidden_n": 9,
+          "supported_correct": 0.0,
+          "false_abstain": 0.030303030303030304,
+          "invalid": 0.028368794326241134
+        },
+        "candA": {
+          "n": 141,
+          "success": 0.03546099290780142,
+          "unsupported": 4,
+          "hidden_n": 9,
+          "supported_correct": 0.0,
+          "false_abstain": 0.007575757575757576,
+          "invalid": 0.0
+        },
+        "azure_exact": {
+          "n": 141,
+          "success": 0.02127659574468085,
+          "unsupported": 1,
+          "hidden_n": 9,
+          "supported_correct": 0.007575757575757576,
+          "false_abstain": 0.12121212121212122,
+          "invalid": 0.2765957446808511
+        },
+        "azure_exact+FB": {
+          "n": 141,
+          "success": 0.06382978723404255,
+          "unsupported": 1,
+          "hidden_n": 9,
+          "supported_correct": 0.007575757575757576,
+          "false_abstain": 0.3712121212121212,
+          "invalid": 0.0
+        },
+        "azure_native": {
+          "n": 141,
+          "success": 0.028368794326241134,
+          "unsupported": 2,
+          "hidden_n": 9,
+          "supported_correct": 0.030303030303030304,
+          "false_abstain": 0.015151515151515152,
+          "invalid": 0.1276595744680851
+        },
+        "azure_native+FB": {
+          "n": 141,
+          "success": 0.07801418439716312,
+          "unsupported": 2,
+          "hidden_n": 9,
+          "supported_correct": 0.030303030303030304,
+          "false_abstain": 0.09848484848484848,
+          "invalid": 0.0
+        },
+        "main+FB": {
+          "n": 141,
+          "success": 0.03546099290780142,
+          "unsupported": 4,
+          "hidden_n": 9,
+          "supported_correct": 0.0,
+          "false_abstain": 0.03787878787878788,
+          "invalid": 0.0
+        }
+      }
+    }
+  }
+}

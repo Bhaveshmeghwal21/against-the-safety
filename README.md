@@ -23,6 +23,7 @@ Lexsi AI Safety and Alignment Hackathon · Track 3: Agentic fine-tuning · PS 4:
 - **What the repairs cost:** refusals of answerable questions rise from 22% to 39% of answerable episodes, and the repairs do not raise the share of supported correct answers (29.0% to 27.5%). They convert wrong or unsupported answers into abstentions. They do not teach the model more.
 - **First round:** on a held-out HotpotQA test split, opened once, the share of episodes that end well rose from **2.0% to 58.3%**. In a second round, on 100 fresh questions that no choice had seen, the same adapter went from **2.8% to 60.1%**.
 - **Five external benchmarks:** on 2WikiMultihopQA, MuSiQue, SQuAD 2.0, RGB and RGB integration (1,131 episodes, never trained on or used for any choice), the rate went from **7.9% to 49.9%**. It rose on four of the five. The adapter fails on questions that need a two-part answer, and it often refuses single-passage questions.
+- **Closed-model comparison:** on a shared subset of 876 round-5 episodes, Azure GPT-6 Luna with native tools and fail-closed fallback answered 39.2% of answerable cases correctly and gave unsupported answers on 62/315 hidden-evidence cases. Our submitted main system with its saved verifier scored 27.6% and 25/315 respectively. Azure had no verifier and used different decoding settings; 3 provider-blocked cases and 59 scorer-v2 exclusions were removed from the shared sample. [Full benchmark comparison](reports/azure_round5_comparison.md) · [cost scenario](reports/azure_roi.md) · [method and limitations](research/2026-11-09-azure-closed-model-comparison.md).
 - **Four attempts to improve the model were judged and not adopted under rules fixed beforehand:** a round-3 patch (fixed single-passage questions, 4 to 32 supported answers of 57, but raised unsupported answers on SQuAD from 6 to 31 of 109), a round-4 evidence curriculum (better on controlled exercises, no checkpoint passed the release rules), round-5 preference training (DPO), whose checkpoints stopped abstaining altogether, and round-5b, a second DPO run with abstention pairs added. Round 5b produced one eligible checkpoint, the round-4 checkpoint **candF1**. With both repairs it scored 0.570 macro against 0.517 on the sealed test (+0.052 [+0.021, +0.085]) and its unsupported-answer rate was not different (−0.008 [−0.047, +0.030]). The registered rule needed that interval to end at +0.020 or below, so it failed. **Main with the two repairs stays the submitted system**, and candF1 is published as the alternative for readers who want more answers. Every negative result is reported below.
 - **The price of the first-round adapter:** it declines about one answerable question in five. A second-round variant (candA) halves that on dev, at the cost of more answers when the evidence is missing. A control adapter trained without abstention examples answers more, but it never abstains.
 
@@ -31,6 +32,22 @@ Lexsi AI Safety and Alignment Hackathon · Track 3: Agentic fine-tuning · PS 4:
 </p>
 
 <sub>151 headline test episodes: 86 with the evidence reachable by search, 65 with the supporting passages hidden. Drawn from the score files by <code>scripts/make_figure.py</code>.</sub>
+
+## Azure GPT-6 Luna comparison
+
+We ran the closed model on the same benchmark questions and retrieval environment as our saved adapters. On the shared round-5 sample, Azure answered more questions correctly when the evidence was available, while the repaired adapters made fewer unsupported claims when evidence was hidden.
+
+<p align="center">
+  <img src="docs/figures/azure_tradeoff.svg" alt="Supported correct answer rates and unsupported answer rates for main, candF1 and Azure GPT-6 Luna" width="920">
+</p>
+
+<sub>876 common episodes: 3 provider-blocked episodes and 59 cases excluded by the shared scorer-v2 rule are omitted from the original 938. Main and candF1 use fail-closed plus the saved Tiny Aya verifier; Azure uses native tools and fail-closed, with no verifier. Different prompts and decoding settings also limit the comparison. Before fail-closed, 24.2% of Azure's common-sample episodes ended invalid; fail-closed converts these to abstentions. See the [paired comparison](reports/azure_round5_comparison.md) for the raw results, all eight suites and confidence intervals.</sub>
+
+<p align="center">
+  <img src="docs/figures/azure_cost.svg" alt="Estimated cost for ten thousand episodes: main 6.30 dollars, candF1 5.99 dollars, and Azure 2.66 dollars. An always-on T4 VM is 383.98 dollars per month before other costs." width="920">
+</p>
+
+<sub>The API estimate uses recorded round-5 tokens at published Global Standard rates. The GPU estimates assume an East US T4 at $0.526/hour and perfectly utilized busy time; the always-on estimate assumes 730 hours. Storage, network, retrieval and operations are excluded. These are illustrative estimates, not actual bills. See the [cost report](reports/azure_roi.md) and [methodology](research/2026-11-09-azure-closed-model-comparison.md). Both figures are generated from saved report data by <code>scripts/make_azure_figures.py</code>.</sub>
 
 ## Results
 
