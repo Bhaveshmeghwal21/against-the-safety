@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="360" viewBox="0 0 920 360" role="img" aria-labelledby="title desc" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<title id="title">Illustrative cost for 10,000 episodes</title>
+<desc id="desc">Estimated cost for 10,000 episodes: Main + repairs $6.30; candF1 + repairs $5.99; GPT-6 Luna + FB $2.66; DeepSeek + FB $5.57</desc>
+<rect width="920" height="360" fill="#ffffff"/>
+<text x="30" y="34" font-size="23" fill="#172b3a" font-weight="700" text-anchor="start">Illustrative cost for 10,000 episodes</text>
+<text x="30" y="58" font-size="13" fill="#546b79" font-weight="400" text-anchor="start">T4 busy time versus Azure token billing · USD · estimates, not an invoice</text>
+<line x1="223.0" x2="223.0" y1="87" y2="264" stroke="#dfe8e8"/>
+<text x="223.0" y="284" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">$0</text>
+<line x1="418.0" x2="418.0" y1="87" y2="264" stroke="#dfe8e8"/>
+<text x="418.0" y="284" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">$4</text>
+<line x1="613.0" x2="613.0" y1="87" y2="264" stroke="#dfe8e8"/>
+<text x="613.0" y="284" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">$8</text>
+<text x="205" y="115" font-size="14" fill="#172b3a" font-weight="600" text-anchor="end">Main + repairs</text>
+<rect x="223" y="98" width="307.2" height="23" rx="4" fill="#315a75"/>
+<text x="537.2" y="115" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">$6.30</text>
+<text x="205" y="155" font-size="14" fill="#172b3a" font-weight="600" text-anchor="end">candF1 + repairs</text>
+<rect x="223" y="138" width="292.2" height="23" rx="4" fill="#218a80"/>
+<text x="522.2" y="155" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">$5.99</text>
+<text x="205" y="195" font-size="14" fill="#172b3a" font-weight="600" text-anchor="end">GPT-6 Luna + FB</text>
+<rect x="223" y="178" width="129.7" height="23" rx="4" fill="#c27b34"/>
+<text x="359.7" y="195" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">$2.66</text>
+<text x="205" y="235" font-size="14" fill="#172b3a" font-weight="600" text-anchor="end">DeepSeek + FB</text>
+<rect x="223" y="218" width="271.5" height="23" rx="4" fill="#8055a1"/>
+<text x="501.5" y="235" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">$5.57</text>
+<rect x="676" y="90" width="214" height="130" rx="10" fill="#f1f7f6"/>
+<text x="692" y="118" font-size="14" fill="#172b3a" font-weight="700" text-anchor="start">T4 VM always on</text>
+<text x="692" y="151" font-size="23" fill="#218a80" font-weight="700" text-anchor="start">$383.98</text>
+<text x="692" y="174" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">per 730-hour month</text>
+<text x="692" y="197" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">before other costs</text>
+<text x="30" y="310" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">T4 estimate assumes perfect utilization; API estimates assume observed tokens and cache patterns.</text>
+<text x="30" y="332" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Storage, network, retrieval, taxes, and operations are excluded. Quality and model sizes differ.</text>
+</svg>

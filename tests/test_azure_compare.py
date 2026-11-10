@@ -1,7 +1,13 @@
 """Checks for comparison-critical handling, with no Azure or model calls."""
 import sys
+import tempfile
+import time
 import unittest
+from concurrent.futures import ThreadPoolExecutor
+from io import BytesIO
 from pathlib import Path
+from unittest.mock import patch
+from urllib.error import HTTPError
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 import azure_rag_eval as A
@@ -10,6 +16,24 @@ from ragharness import protocol
 
 
 class ComparisonTests(unittest.TestCase):
+    def test_shared_request_limiter_spaces_concurrent_requests(self):
+        workspace_tmp = Path(__file__).resolve().parents[1] / '.cache/tmp'
+        workspace_tmp.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=workspace_tmp) as folder, patch.object(A, 'ROOT', Path(folder)):
+            client = A.Azure('test-key', 512, 'https://example.test/chat/completions', .03)
+            start = time.monotonic()
+            with ThreadPoolExecutor(max_workers=5) as pool:
+                list(pool.map(lambda _: client.wait_for_request_slot(), range(5)))
+            self.assertGreaterEqual(time.monotonic() - start, .105)
+
+    def test_nested_azure_filter_is_separate_from_model_failure(self):
+        body = b'{"choices":[{"finish_reason":"content_filter"}],"usage":{"prompt_tokens":620}}'
+        error = HTTPError('https://example.test', 400, 'Bad Request', {}, BytesIO(body))
+        with patch('azure_rag_eval.urllib.request.urlopen', side_effect=error):
+            with self.assertRaises(A.ProviderFiltered) as caught:
+                A.Azure('test-key', 512, 'https://example.test/chat/completions').request([])
+        self.assertEqual(caught.exception.usage['prompt_tokens'], 620)
+
     def test_native_normalization_does_not_fabricate_citations(self):
         plain = 'Paris <citations>c00012</citations>'
         parsed, _ = protocol.parse_turn_lenient(A.canonical_text(plain))

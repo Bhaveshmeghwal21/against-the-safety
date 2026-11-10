@@ -7,11 +7,13 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures
+import contextlib
 import http.client
 import json
 import os
 import random
 import re
+import sqlite3
 import time
 import urllib.error
 import urllib.parse
@@ -36,6 +38,10 @@ SUITES = ('r5t_squad', 'r5t_hotpot', 'r5t_rgb', '2wiki', 'musique', 'squad2', 'r
 
 class ProviderFiltered(Exception):
     """An Azure policy block is not a model answer or a scored abstention."""
+
+    def __init__(self, message, usage=None):
+        super().__init__(message)
+        self.usage = usage
 
 
 def key_from_environment():
@@ -75,7 +81,7 @@ def build_jobs(name):
 
 
 class Azure:
-    def __init__(self, api_key, max_tokens, url):
+    def __init__(self, api_key, max_tokens, url, request_interval=0):
         parsed = urllib.parse.urlsplit(url)
         if parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password:
             raise ValueError('AZURE_OPENAI_CHAT_URL must be an HTTPS chat-completions URL')
@@ -83,6 +89,26 @@ class Azure:
         self.max_tokens = max_tokens
         self.url = url
         self.endpoint_host = parsed.hostname
+        self.request_interval = request_interval
+        if self.request_interval < 0:
+            raise ValueError('request interval must be nonnegative')
+
+    def wait_for_request_slot(self):
+        """Share a conservative request rate across local worker processes."""
+        if not self.request_interval:
+            return
+        path = ROOT / '.cache/tmp/azure_rate_slots.sqlite3'
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with contextlib.closing(sqlite3.connect(path, timeout=30)) as conn:
+            conn.execute('CREATE TABLE IF NOT EXISTS slots (model TEXT PRIMARY KEY, next_at REAL NOT NULL)')
+            conn.execute('BEGIN IMMEDIATE')
+            previous = conn.execute('SELECT next_at FROM slots WHERE model = ?', (MODEL,)).fetchone()
+            now = time.time()
+            slot = max(now, previous[0] if previous else now)
+            conn.execute('INSERT OR REPLACE INTO slots (model, next_at) VALUES (?, ?)',
+                         (MODEL, slot + self.request_interval))
+            conn.commit()
+        time.sleep(max(0, slot - time.time()))
 
     def request(self, messages, native=False):
         payload = {'model': MODEL, 'messages': messages, 'max_completion_tokens': self.max_tokens}
@@ -92,6 +118,7 @@ class Azure:
             payload['reasoning_effort'] = 'none'  # required by this deployment's chat-completions API for function tools
         body = json.dumps(payload).encode('utf-8')
         for attempt in range(9):
+            self.wait_for_request_slot()
             req = urllib.request.Request(self.url, data=body, method='POST',
                                          headers={'api-key': self.key, 'Content-Type': 'application/json'})
             try:
@@ -106,15 +133,18 @@ class Azure:
                     'refusal': choice['message'].get('refusal'), 'finish_reason': choice.get('finish_reason'),
                     'model': obj.get('model'), 'id': obj.get('id')}
             except urllib.error.HTTPError as exc:
-                detail = exc.read().decode('utf-8', errors='replace').replace(self.key, '[REDACTED]')[:1200]
+                detail = exc.read().decode('utf-8', errors='replace').replace(self.key, '[REDACTED]')
                 try:
-                    code = json.loads(detail).get('error', {}).get('code')
+                    error_body = json.loads(detail)
+                    code = error_body.get('error', {}).get('code')
                 except (ValueError, AttributeError):
+                    error_body = {}
                     code = None
-                if exc.code == 400 and code == 'content_filter':
-                    raise ProviderFiltered('Azure content filter blocked this unmodified prompt') from None
+                filtered_choice = any(c.get('finish_reason') == 'content_filter' for c in error_body.get('choices', []))
+                if exc.code == 400 and (code == 'content_filter' or filtered_choice):
+                    raise ProviderFiltered('Azure content filter blocked the unmodified request or response', error_body.get('usage')) from None
                 if exc.code not in (429, 500, 502, 503, 504) or attempt == 8:
-                    raise RuntimeError(f'Azure HTTP {exc.code}: {detail}') from None
+                    raise RuntimeError(f'Azure HTTP {exc.code}: {detail[:1200]}') from None
                 delay = min(55.0, max(float(exc.headers.get('Retry-After', 0) or 0), 2 ** attempt) + random.random())
             except (urllib.error.URLError, TimeoutError, http.client.RemoteDisconnected, ConnectionResetError) as exc:
                 if attempt == 8:
@@ -148,11 +178,15 @@ def one(job, corp, backend, system, api, mode='exact'):
         try:
             text, meta = api.request(native_messages if mode == 'native' else messages, native=(mode == 'native'))
         except ProviderFiltered as exc:
+            blocked_call = len(calls) + 1
+            if exc.usage is not None:
+                calls.append({'usage': exc.usage, 'content_raw': '', 'tool_calls': [], 'refusal': None,
+                              'finish_reason': 'content_filter', 'model': None, 'id': None})
             return {'score': {'qid': job.q.qid, 'variant': job.variant, 'answerable': job.spec.answerable,
                               'qtype': job.q.qtype, 'provider_blocked': True, 'model_calls': len(calls),
                               'input_tokens': sum(c['usage'].get('prompt_tokens', 0) for c in calls),
                               'output_tokens': sum(c['usage'].get('completion_tokens', 0) for c in calls)},
-                    'transcript': None, 'api_calls': calls, 'blocked': str(exc), 'blocked_call': len(calls)+1}
+                    'transcript': None, 'api_calls': calls, 'blocked': str(exc), 'blocked_call': blocked_call}
         calls.append(meta)
         if meta['finish_reason'] == 'content_filter':
             return {'score': {'qid': job.q.qid, 'variant': job.variant, 'answerable': job.spec.answerable,
@@ -197,21 +231,27 @@ def one(job, corp, backend, system, api, mode='exact'):
 
 
 def main():
+    global MODEL, VERSION
     ap = argparse.ArgumentParser()
     ap.add_argument('--suites', default=','.join(SUITES))
     ap.add_argument('--workers', type=int, default=8)
     ap.add_argument('--max-tokens', type=int, default=512)
     ap.add_argument('--mode', choices=('exact', 'native'), default='exact')
+    ap.add_argument('--model', default=MODEL, help='Azure deployment name')
+    ap.add_argument('--response-model', default=VERSION, help='Expected model name returned by the API')
+    ap.add_argument('--temperature-label', default='deployment default (1)', help='Recorded description; does not set temperature')
+    ap.add_argument('--request-interval', type=float, default=0, help='Minimum seconds between requests across local workers')
     ap.add_argument('--limit', type=int, default=0, help='per-suite pilot limit; never mix with full outputs')
     ap.add_argument('--out', default='runs/azure_round5')
     args = ap.parse_args()
+    MODEL, VERSION = args.model, args.response_model
     out = (ROOT / args.out).resolve()
     if not out.is_relative_to(ROOT.resolve()):
         raise SystemExit('Output must stay within the workspace')
     url = os.environ.get('AZURE_OPENAI_CHAT_URL')
     if not url:
         raise SystemExit('Set AZURE_OPENAI_CHAT_URL to your Azure chat-completions endpoint')
-    api = Azure(key_from_environment(), args.max_tokens, url)
+    api = Azure(key_from_environment(), args.max_tokens, url, args.request_interval)
     for name in args.suites.split(','):
         if name not in SUITES:
             raise ValueError(f'unknown suite {name}')
@@ -221,7 +261,7 @@ def main():
         folder = out / f'azure_bench_{name}' / 'lenient'
         folder.mkdir(parents=True, exist_ok=True)
         config = {'model': VERSION, 'endpoint_host': api.endpoint_host, 'max_completion_tokens': args.max_tokens,
-                  'temperature': 'deployment default (1)', 'episodes': len(jobs), 'corpus_hash': corp.index_hash,
+                  'temperature': args.temperature_label, 'episodes': len(jobs), 'corpus_hash': corp.index_hash,
                   'search_budget': 3, 'top_k': 3, 'passage_chars': 800, 'parser': 'lenient', 'mode': args.mode}
         if args.mode == 'native':
             config['reasoning_effort'] = 'none'

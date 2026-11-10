@@ -49,6 +49,22 @@ We ran the closed model on the same benchmark questions and retrieval environmen
 
 <sub>The API estimate uses recorded round-5 tokens at published Global Standard rates. The GPU estimates assume an East US T4 at $0.526/hour and perfectly utilized busy time; the always-on estimate assumes 730 hours. Storage, network, retrieval and operations are excluded. These are illustrative estimates, not actual bills. See the [cost report](reports/azure_roi.md) and [methodology](research/2026-11-09-azure-closed-model-comparison.md). Both figures are generated from saved report data by <code>scripts/make_azure_figures.py</code>.</sub>
 
+## DeepSeek V4 Flash comparison
+
+We also evaluated the existing Azure-hosted DeepSeek-V4-Flash deployment using the same benchmark questions and both action interfaces. On the shared round-5 sample, its native-tool setup answered more answerable cases correctly than the other systems, with fewer unsupported answers than GPT-6 Luna but more than the repaired adapters.
+
+<p align="center">
+  <img src="docs/figures/deepseek_tradeoff.svg" alt="Supported correct and unsupported answer rates for the main and candF1 adapters, GPT-6 Luna, and DeepSeek V4 Flash" width="920">
+</p>
+
+<sub>863 shared episodes: 9 provider-blocked or missing cases and 66 additional scorer-v2 exclusions removed from 938. The adapters use the saved verifier; the hosted models use fail-closed only. DeepSeek's raw native-tool run ended invalid on 37.1% of the common cases before fail-closed, mostly because it attempted another search after the budget was exhausted. In 221 native API calls across all suites it requested multiple tools, of which the shared harness executed only the first. See the [full paired comparison](reports/deepseek_comparison.md) for the raw and original-format results, confidence intervals, and all eight suites.</sub>
+
+<p align="center">
+  <img src="docs/figures/deepseek_cost.svg" alt="Illustrative token and GPU costs per ten thousand episodes for DeepSeek, GPT-6 Luna, main, and candF1" width="920">
+</p>
+
+<sub>Costs use the recorded token mix and published Microsoft prices; actual Azure bills and cache rates may differ. T4 bars assume perfectly utilized busy time, and all figures exclude other infrastructure costs. See the [cost report](reports/deepseek_roi.md) and [methodology](research/2026-11-10-deepseek-v4-flash-comparison.md). Generate both figures with <code>python scripts/make_deepseek_figures.py</code>.</sub>
+
 ## Results
 
 This section reports the first round, on a HotpotQA test split. The final system's results, on a larger sealed test with a stricter scorer, are in [Round 5](#round-5-two-repairs-that-need-no-training-and-a-preference-training-negative-result).
