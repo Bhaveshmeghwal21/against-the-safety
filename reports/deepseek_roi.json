@@ -9,7 +9,8 @@
       "reported_cache_write_tokens": 0,
       "output_tokens": 45615,
       "recorded_estimate_usd": 0.15476842,
-      "estimated_usd_per_10000": 1.6499831556503197
+      "estimated_usd_per_10000": 1.6499831556503197,
+      "cost_per_1000_successes": 0.4336835875146886
     },
     "native": {
       "episodes": 938,
@@ -20,7 +21,8 @@
       "reported_cache_write_tokens": 0,
       "output_tokens": 164507,
       "recorded_estimate_usd": 0.522311142,
-      "estimated_usd_per_10000": 5.568349061833688
+      "estimated_usd_per_10000": 5.568349061833688,
+      "cost_per_1000_successes": 0.8583500131668473
     }
   },
   "deepseek_all_suites": {
@@ -57,7 +59,8 @@
       "cache_write_tokens": 299937,
       "output_tokens_including_reasoning": 89144,
       "estimated_recorded_usd": 0.147303795,
-      "estimated_usd_per_10000": 1.5704029317697226
+      "estimated_usd_per_10000": 1.5704029317697226,
+      "cost_per_1000_successes": 0.3196903325052778
     },
     "native": {
       "episodes": 938,
@@ -68,7 +71,8 @@
       "cache_write_tokens": 897424,
       "output_tokens_including_reasoning": 80264,
       "estimated_recorded_usd": 0.24946888,
-      "estimated_usd_per_10000": 2.6595829424307036
+      "estimated_usd_per_10000": 2.6595829424307036,
+      "cost_per_1000_successes": 0.4401441926162827
     }
   },
   "local_t4": {
@@ -82,7 +86,8 @@
       "verifier_seconds_per_case_batched": 0.4717314487632509,
       "estimated_gpu_seconds_per_episode": 4.312593997453419,
       "estimated_gpu_hours_per_10000": 11.979427770703943,
-      "estimated_busy_gpu_usd_per_10000": 6.3011790073902745
+      "estimated_busy_gpu_usd_per_10000": 6.3011790073902745,
+      "cost_per_1000_successes": 1.085952249120104
     },
     "candF1+FB+V": {
       "episodes": 938,
@@ -94,7 +99,8 @@
       "verifier_seconds_per_case_batched": 0.41003521126760567,
       "estimated_gpu_seconds_per_episode": 4.102482777260578,
       "estimated_gpu_hours_per_10000": 11.395785492390495,
-      "estimated_busy_gpu_usd_per_10000": 5.994183168997401
+      "estimated_busy_gpu_usd_per_10000": 5.994183168997401,
+      "cost_per_1000_successes": 0.9364318449695783
     }
   },
   "t4_vm_usd_per_hour": 0.526,

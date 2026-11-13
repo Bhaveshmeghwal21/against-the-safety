@@ -28,6 +28,9 @@ def main():
     r5 = {name:compute(root, R.PARTS) for name, root in MODEL_PATHS.items()}
     all_suites = {name:compute(root, R.ALL_PARTS) for name, root in MODEL_PATHS.items()}
     saved = json.loads((ROOT/'reports/azure_roi.json').read_text(encoding='utf-8'))
+    scores = json.loads((ROOT/'reports/deepseek_comparison_corrected.json').read_text(encoding='utf-8'))['systems']
+    for name, value in r5.items():
+        value['cost_per_1000_successes'] = value['estimated_usd_per_10000'] / 10 / scores[f'azure_deepseek_{name}+FB']['macro']
     report = {'deepseek_round5':r5, 'deepseek_all_suites':all_suites,
               'gpt6_round5':saved['cloud'], 'local_t4':saved['local'],
               't4_vm_usd_per_hour':saved['gpu_usd_per_hour'],
@@ -38,13 +41,14 @@ def main():
     lines = ['# DeepSeek V4 Flash cost scenario', '',
         'The scenario scales observed round-5 usage to 10,000 episodes with the same workload and cache pattern. Prices are illustrative retail rates, not the account invoice; quality and verifier settings differ between systems.', '',
         '**Checked 13 November 2026:** These estimates use all 938 recorded episodes per system, rather than the 925 eligible [corrected quality-comparison cases](deepseek_comparison_corrected.md). Scoring corrections leave recorded token usage and GPU time unchanged, so the dollar estimates are unchanged. They describe the saved workload and checker decisions; a new run with revised prompts or checker coverage needs new metering.', '',
-        '| system | recorded round-5 cases | estimated cost / 10,000 |', '| --- | ---: | ---: |']
+        'Cost per 1,000 successful episodes uses corrected macro success. It approximates a workload with equally weighted components.', '',
+        '| system | recorded round-5 cases | estimated cost / 10,000 | cost per 1,000 successful episodes |', '| --- | ---: | ---: | ---: |']
     for name in ('exact','native'):
-        s=r5[name];lines.append(f"| DeepSeek via Azure, {name} | {s['episodes']} | ${s['estimated_usd_per_10000']:.2f} |")
+        s=r5[name];lines.append(f"| DeepSeek via Azure, {name} + fail-closed | {s['episodes']} | ${s['estimated_usd_per_10000']:.2f} | ${s['cost_per_1000_successes']:.2f} |")
     for name in ('exact','native'):
-        s=saved['cloud'][name];lines.append(f"| GPT-6 Luna via Azure, {name} | {s['episodes']} | ${s['estimated_usd_per_10000']:.2f} |")
+        s=saved['cloud'][name];lines.append(f"| GPT-6 Luna via Azure, {name} + fail-closed | {s['episodes']} | ${s['estimated_usd_per_10000']:.2f} | ${s['cost_per_1000_successes']:.2f} |")
     for name in ('main+FB+V','candF1+FB+V'):
-        s=saved['local'][name];lines.append(f"| {name}, ideal T4 busy time | {s['episodes']} | ${s['estimated_busy_gpu_usd_per_10000']:.2f} |")
+        s=saved['local'][name];lines.append(f"| {name}, ideal T4 busy time | {s['episodes']} | ${s['estimated_busy_gpu_usd_per_10000']:.2f} | ${s['cost_per_1000_successes']:.2f} |")
     lines += ['', 'DeepSeek pricing assumed $0.19 per million uncached input tokens, $0.028 per million cached input tokens and $0.51 per million output tokens, as published in [Microsoft’s Foundry announcement](https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/introducing-deepseek-v4-flash-and-v4-pro-in-microsoft-foundry/4515174) (updated July 2026). Current actual prices, region, offer, discounts and billing may differ. The published table does not give a separate cache-write rate; this estimate treats writes as ordinary input. Verify the actual meters and charges in Azure Cost Management.',
         'GPT-6 costs and local T4 assumptions are inherited from [the earlier ROI analysis](azure_roi.md). Local estimates assume a T4 at $0.526/hour that is fully utilized during all billed time and stopped immediately afterward; a continuously allocated 730-hour VM is $383.98 before disk and other infrastructure.', '',
         'Output tokens include any billed reasoning. Recorded usage includes successful calls before a later provider block, but excludes pilots, failed calls and responses lost on interruption. User-specific routing and cache patterns can change the estimates.']

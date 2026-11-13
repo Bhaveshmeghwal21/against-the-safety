@@ -58,6 +58,12 @@ def main():
           ROOT/'data/processed/verifier/cases_r5test_refs.jsonl',ROOT/'runs/account2_round5/ats-verify-main-r5-r5test-refs/out/verify/main/summary.json'),
       'candF1+FB+V':local('candF1',ROOT/'runs/account2_round5/ats-eval-jobs-r5test-final/out/eval',
           ROOT/'data/processed/verifier/cases_r5test_final.jsonl',ROOT/'runs/account2_round5/ats-verify-main-r5-r5test-final/out/verify/main/summary.json')}
+    local_scores = json.loads((ROOT/'reports/round5_corrected.json').read_text(encoding='utf-8'))['systems']
+    cloud_scores = json.loads((ROOT/'reports/azure_round5_comparison_corrected.json').read_text(encoding='utf-8'))['systems']
+    for name, value in local_data.items():
+        value['cost_per_1000_successes'] = value['estimated_busy_gpu_usd_per_10000'] / 10 / local_scores[name]['macro']
+    for name, value in cloud_data.items():
+        value['cost_per_1000_successes'] = value['estimated_usd_per_10000'] / 10 / cloud_scores[f'azure_{name}+FB']['macro']
     training = json.loads((ROOT/'runs/kaggle/ats-train-both/out/main/train_report.json').read_text(encoding='utf-8'))
     result={'volume_per_month':VOLUME, 'gpu_usd_per_hour':T4_RATE, 'continuous_730h_gpu_usd':730*T4_RATE,
             'training_report':training, 'cloud':cloud_data, 'all_eight_suites':cloud_all, 'local':local_data}
@@ -66,11 +72,12 @@ def main():
     lines=['# Azure versus self-hosting: illustrative ROI', '',
       'Workload: 10,000 episodes per month with the same mix, average token lengths, tool calls and cache-hit pattern as the three round-5 test sets. The quality comparison is in [the corrected replay](azure_round5_comparison_corrected.md); the systems have different quality and the estimates are not a like-for-like outcome guarantee.', '',
       '**Checked 13 November 2026:** These estimates use all 938 recorded episodes per system, rather than the 931 eligible quality-comparison cases. Scoring corrections leave recorded token usage and GPU time unchanged, so the dollar estimates are unchanged. They describe the saved workload and checker decisions; a new run with revised prompts or checker coverage needs new metering.', '',
-      '| System | Recorded episodes | Estimated GPU hours / 10,000 | Estimated compute or token cost / 10,000 |', '| --- | ---: | ---: | ---: |']
+      'Cost per 1,000 successful episodes divides the cost per 1,000 episodes by the corrected macro success rate. Macro weights the four components equally, so this is a workload-specific approximation.', '',
+      '| System | Recorded episodes | Estimated GPU hours / 10,000 | Estimated compute or token cost / 10,000 | Cost per 1,000 successful episodes |', '| --- | ---: | ---: | ---: | ---: |']
     for n,v in local_data.items():
-        lines.append(f"| {n}, busy T4 | {v['episodes']} | {v['estimated_gpu_hours_per_10000']:.2f} | ${v['estimated_busy_gpu_usd_per_10000']:.2f} |")
+        lines.append(f"| {n}, busy T4 | {v['episodes']} | {v['estimated_gpu_hours_per_10000']:.2f} | ${v['estimated_busy_gpu_usd_per_10000']:.2f} | ${v['cost_per_1000_successes']:.2f} |")
     for n,v in cloud_data.items():
-        lines.append(f"| Azure GPT-6 Luna, {n} | {v['episodes']} | provider-managed | ${v['estimated_usd_per_10000']:.2f} |")
+        lines.append(f"| Azure GPT-6 Luna, {n} + fail-closed | {v['episodes']} | provider-managed | ${v['estimated_usd_per_10000']:.2f} | ${v['cost_per_1000_successes']:.2f} |")
     lines += ['', '## Inputs and limitations', '',
       f'- A Linux Standard_NC4as_T4_v3 GPU VM in East US is estimated at **${T4_RATE:.3f}/hour** using the [Azure Retail Prices API](https://prices.azure.com/api/retail/prices), queried for the East US VM SKU and consumption price; 730 hours continuously costs **${730*T4_RATE:.2f}/month** for the VM. The table assumes perfectly stoppable, fully utilized busy GPU hours; a real always-on or lightly used service can cost much more. It excludes disk, network, storage, retrieval server, CPUs beyond the VM, operations and taxes; availability and startup credits do not guarantee quota.',
       '- Saved actor times apportion each model batch across episodes; saved verifier runtime is a separately batched average. The estimated checker workload counts answers that passed deterministic checks, matching the product pipeline. These are throughput estimates, not individual-request latency; batch size, prompt length and utilization affect cost.',

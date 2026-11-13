@@ -4,12 +4,14 @@ Workload: 10,000 episodes per month with the same mix, average token lengths, to
 
 **Checked 13 November 2026:** These estimates use all 938 recorded episodes per system, rather than the 931 eligible quality-comparison cases. Scoring corrections leave recorded token usage and GPU time unchanged, so the dollar estimates are unchanged. They describe the saved workload and checker decisions; a new run with revised prompts or checker coverage needs new metering.
 
-| System | Recorded episodes | Estimated GPU hours / 10,000 | Estimated compute or token cost / 10,000 |
-| --- | ---: | ---: | ---: |
-| main+FB+V, busy T4 | 938 | 11.98 | $6.30 |
-| candF1+FB+V, busy T4 | 938 | 11.40 | $5.99 |
-| Azure GPT-6 Luna, exact | 938 | provider-managed | $1.57 |
-| Azure GPT-6 Luna, native | 938 | provider-managed | $2.66 |
+Cost per 1,000 successful episodes divides the cost per 1,000 episodes by the corrected macro success rate. Macro weights the four components equally, so this is a workload-specific approximation.
+
+| System | Recorded episodes | Estimated GPU hours / 10,000 | Estimated compute or token cost / 10,000 | Cost per 1,000 successful episodes |
+| --- | ---: | ---: | ---: | ---: |
+| main+FB+V, busy T4 | 938 | 11.98 | $6.30 | $1.09 |
+| candF1+FB+V, busy T4 | 938 | 11.40 | $5.99 | $0.94 |
+| Azure GPT-6 Luna, exact + fail-closed | 938 | provider-managed | $1.57 | $0.32 |
+| Azure GPT-6 Luna, native + fail-closed | 938 | provider-managed | $2.66 | $0.44 |
 
 ## Inputs and limitations
 

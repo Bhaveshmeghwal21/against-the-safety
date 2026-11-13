@@ -136,7 +136,7 @@ This is the typical pattern; the counts are in the figure above. Every test epis
   - Two-document questions and dated policy changes are weak spots. The old metric credited main on 1 of 6 two-document questions although it cited a superseded warranty. Requiring both current documents removes that credit; see the [corrected Nimbus replay](reports/nimbus_corrected.md). It cites a superseded policy edition in 4 of 6 dated-change tasks.
 - **Format compliance.** Scored by the exact trained protocol, the base model breaks the format on 279 of 287 episodes.
 - **Closed book.** With no documents at all, the base model answers 16.3% of the test questions correctly from memory.
-- **Cost.** Training cost 1.36 USD (main) and 1.26 USD (control) at 0.35 USD per T4-hour, and nothing on Kaggle's free quota. Inference takes 5.0 s per episode for main against 2.8 s for the base. GPU cost per good outcome is 0.00084 USD for main and 0.0135 USD for the base.
+- **Cost.** Training used 3.90 T4 hours for main and 3.59 for control, at no charge on Kaggle's free quota. At an illustrative USD 0.526/hour VM rate, these runs cost USD 2.05 and USD 1.89. First-test GPU cost per successful episode is USD 0.00126 for main and USD 0.02029 for the base at that rate.
 
 | report | contents |
 | --- | --- |

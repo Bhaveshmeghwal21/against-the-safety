@@ -1,5 +1,7 @@
 # ROI (test, headline episodes: open and support-masked)
 
+The historical $0.35/hour reference is a GPU-only rate. The README uses the $0.526/hour VM rate.
+
 Reference price 0.35 USD per T4 GPU-hour (range 0.16 to 0.59). Seconds are amortized wall time on a shared, batched T4; they depend on batch size and are for comparison between rows, not a latency promise.
 
 | system | seconds / episode | model calls / episode | input tokens / episode | output tokens / episode | end-to-end good | supported_correct (answerable) | episodes needing review per 1,000 | GPU cost per 1,000 episodes (USD) | GPU cost per good outcome (USD) |

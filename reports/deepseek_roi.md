@@ -4,14 +4,16 @@ The scenario scales observed round-5 usage to 10,000 episodes with the same work
 
 **Checked 13 November 2026:** These estimates use all 938 recorded episodes per system, rather than the 925 eligible [corrected quality-comparison cases](deepseek_comparison_corrected.md). Scoring corrections leave recorded token usage and GPU time unchanged, so the dollar estimates are unchanged. They describe the saved workload and checker decisions; a new run with revised prompts or checker coverage needs new metering.
 
-| system | recorded round-5 cases | estimated cost / 10,000 |
-| --- | ---: | ---: |
-| DeepSeek via Azure, exact | 938 | $1.65 |
-| DeepSeek via Azure, native | 938 | $5.57 |
-| GPT-6 Luna via Azure, exact | 938 | $1.57 |
-| GPT-6 Luna via Azure, native | 938 | $2.66 |
-| main+FB+V, ideal T4 busy time | 938 | $6.30 |
-| candF1+FB+V, ideal T4 busy time | 938 | $5.99 |
+Cost per 1,000 successful episodes uses corrected macro success. It approximates a workload with equally weighted components.
+
+| system | recorded round-5 cases | estimated cost / 10,000 | cost per 1,000 successful episodes |
+| --- | ---: | ---: | ---: |
+| DeepSeek via Azure, exact + fail-closed | 938 | $1.65 | $0.43 |
+| DeepSeek via Azure, native + fail-closed | 938 | $5.57 | $0.86 |
+| GPT-6 Luna via Azure, exact + fail-closed | 938 | $1.57 | $0.32 |
+| GPT-6 Luna via Azure, native + fail-closed | 938 | $2.66 | $0.44 |
+| main+FB+V, ideal T4 busy time | 938 | $6.30 | $1.09 |
+| candF1+FB+V, ideal T4 busy time | 938 | $5.99 | $0.94 |
 
 DeepSeek pricing assumed $0.19 per million uncached input tokens, $0.028 per million cached input tokens and $0.51 per million output tokens, as published in [Microsoft’s Foundry announcement](https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/introducing-deepseek-v4-flash-and-v4-pro-in-microsoft-foundry/4515174) (updated July 2026). Current actual prices, region, offer, discounts and billing may differ. The published table does not give a separate cache-write rate; this estimate treats writes as ordinary input. Verify the actual meters and charges in Azure Cost Management.
 GPT-6 costs and local T4 assumptions are inherited from [the earlier ROI analysis](azure_roi.md). Local estimates assume a T4 at $0.526/hour that is fully utilized during all billed time and stopped immediately afterward; a continuously allocated 730-hour VM is $383.98 before disk and other infrastructure.
