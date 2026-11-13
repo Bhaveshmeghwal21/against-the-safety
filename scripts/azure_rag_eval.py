@@ -38,7 +38,7 @@ NATIVE_INSTRUCTIONS = (' Use the native search_corpus tool for searches. Issue o
                        'for two things, give both, separated by a semicolon, and cite a passage for each.')
 R5 = ROOT / 'runs/account2_round5/ats-eval-jobs-r5test-ref/out/eval'
 OLD = ROOT / 'runs/kaggle/ats-eval-bench-a/out/eval'
-SUITES = ('r5t_squad', 'r5t_hotpot', 'r5t_rgb', '2wiki', 'musique', 'squad2', 'rgb', 'rgb_int')
+SUITES = ('r5t_squad', 'r5t_hotpot', 'r5t_rgb', 'r6t_squad', 'r6t_hotpot', 'r6t_rgb', '2wiki', 'musique', 'squad2', 'rgb', 'rgb_int')
 
 
 class ProviderFiltered(Exception):
@@ -64,7 +64,9 @@ def read_jsonl(path):
     return [json.loads(line) for line in path.read_text(encoding='utf-8').splitlines() if line.strip()]
 
 
-def build_jobs(name):
+def build_jobs(name, reference_eval=None):
+    if name.startswith('r6t_') and reference_eval is None:
+        raise ValueError('Round 6 requires --reference-eval pointing to the completed local sealed-test eval directory')
     bench = ROOT / 'data/bench' / name
     corp = C.load_corpus(bench / 'corpus.json')
     backend = open_verified_backend(bench / 'corpus.sqlite', corp)
@@ -74,7 +76,8 @@ def build_jobs(name):
     variants = bench / 'prompt_variants.json'
     if variants.exists():
         jobs += evaluation.prompt_jobs(qs, corp, tool, json.loads(variants.read_text(encoding='utf-8')))
-    reference = (R5 if name.startswith('r5t_') else OLD) / f'main_bench_{name}/lenient/scores.jsonl'
+    reference_root = Path(reference_eval) if name.startswith('r6t_') else (R5 if name.startswith('r5t_') else OLD)
+    reference = reference_root / f'main_bench_{name}/lenient/scores.jsonl'
     refs = read_jsonl(reference)
     lookup = {(j.q.qid, j.variant): j for j in jobs}
     assert len(lookup) == len(jobs) == len(refs), (name, len(jobs), len(refs))
@@ -246,9 +249,15 @@ def main():
     ap.add_argument('--temperature-label', default='deployment default (1)', help='Recorded description; does not set temperature')
     ap.add_argument('--request-interval', type=float, default=0, help='Minimum seconds between requests across local workers')
     ap.add_argument('--limit', type=int, default=0, help='per-suite pilot limit; never mix with full outputs')
+    ap.add_argument('--reference-eval', default=None, help='completed local evaluation root required for matching Round 6 episodes')
     ap.add_argument('--out', default='runs/azure_round5')
     args = ap.parse_args()
     MODEL, VERSION = args.model, args.response_model
+    requested = args.suites.split(',')
+    if any(name not in SUITES for name in requested):
+        raise SystemExit('Unknown suite in --suites')
+    if any(name.startswith('r6t_') for name in requested) and not args.reference_eval:
+        raise SystemExit('Round 6 requires --reference-eval for matching local test jobs')
     out = (ROOT / args.out).resolve()
     if not out.is_relative_to(ROOT.resolve()):
         raise SystemExit('Output must stay within the workspace')
@@ -256,10 +265,13 @@ def main():
     if not url:
         raise SystemExit('Set AZURE_OPENAI_CHAT_URL to your Azure chat-completions endpoint')
     api = Azure(key_from_environment(), args.max_tokens, url, args.request_interval)
-    for name in args.suites.split(','):
-        if name not in SUITES:
-            raise ValueError(f'unknown suite {name}')
-        corp, backend, jobs, system = build_jobs(name)
+    for name in requested:
+        reference = None
+        if args.reference_eval:
+            reference = (ROOT / args.reference_eval).resolve()
+            if not reference.is_relative_to(ROOT.resolve()):
+                raise SystemExit('Reference evaluation must stay within the workspace')
+        corp, backend, jobs, system = build_jobs(name, reference)
         if args.limit:
             jobs = jobs[:args.limit]
         folder = out / f'azure_bench_{name}' / 'lenient'

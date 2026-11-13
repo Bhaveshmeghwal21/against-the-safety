@@ -16,6 +16,10 @@ from ragharness import protocol
 
 
 class ComparisonTests(unittest.TestCase):
+    def test_round6_requires_the_actual_local_test_jobs(self):
+        with self.assertRaisesRegex(ValueError, '--reference-eval'):
+            A.build_jobs('r6t_hotpot')
+
     def test_shared_request_limiter_spaces_concurrent_requests(self):
         workspace_tmp = Path(__file__).resolve().parents[1] / '.cache/tmp'
         workspace_tmp.mkdir(parents=True, exist_ok=True)
