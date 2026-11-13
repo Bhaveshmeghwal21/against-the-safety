@@ -172,7 +172,9 @@ def one(job, corp, backend, system, api, mode='exact'):
                                job.spec.first_search_masked, job.spec.prefill, 3, lenient=True)
     messages = next(co)
     native_messages = [{'role': 'system', 'content': protocol.ANSWER_PROTOCOL +
-                        ' Use the native search_corpus tool for searches. Follow the final-answer tags exactly.'}, messages[1]]
+                        ' Use the native search_corpus tool for searches. Issue one search call at a time. You may make at most three search calls. '
+                        'After the third search, answer with citations or abstain from the available evidence. '
+                        'Follow the final-answer tags exactly.'}, messages[1]]
     calls, start = [], time.time()
     while True:
         try:

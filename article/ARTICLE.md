@@ -1,12 +1,15 @@
 # Teaching a small Cohere model to search, cite and say "the documents don't say"
 
+**13 November 2026 correction:** This table preserves the original scorer and selection record. Evidence alternatives, binary answers, fixed eligibility and source offsets are corrected in the [dated remediation report](../reports/2026-11-13-evaluation-remediation.md). Later DPO prompts exposed held-out HotpotQA evidence. Annotation-based unsupported flags do not establish semantic hallucination; main remains submitted.
+
+
 **Team Against-the-safety** · Lexsi AI Safety and Alignment Hackathon · Track 3 (agentic fine-tuning) · PS 4: fine-tuning for retrieval-augmented generation
 
 Code: https://github.com/Bhaveshmeghwal21/against-the-safety
 
 ## Abstract
 
-A document assistant is only useful if it answers from its documents and stops when they do not contain the answer. We fine-tuned Tiny Aya Global (3.35B, a Cohere model) with QLoRA, through AgentTune, to run a three-search retrieval loop and then either answer with citations to the passages it saw or abstain. Training used 600 HotpotQA questions turned into 1,611 scripted episodes in six evidence states, including missing evidence. A main adapter learned the full mixture; a control learned supported tool episodes only. Every system ran with the same index, call budget and decoding, and was scored by deterministic code plus AuditKIT's RAG and agent metrics. Later choices were fixed in dated pre-registrations before their data was seen.
+A document assistant is only useful if it answers from its documents and stops when they do not contain the answer. We fine-tuned Tiny Aya Global (3.35B, a Cohere model) with QLoRA, through AgentTune, to run a three-search retrieval loop and then either answer with citations to the passages it saw or abstain. Training drew from 600 sampled HotpotQA questions and selected 1,611 assistant decision rows from 488 parent questions across six evidence states, including missing evidence. A main adapter learned the full mixture; a control learned supported tool episodes only. Every system ran with the same index, call budget and decoding, and was scored by deterministic code plus AuditKIT's RAG and agent metrics. Later choices used dated protocols; the round-5b development gate was informed by earlier development results, as disclosed.
 
 First round, on a held-out HotpotQA test split opened once: the share of episodes that end well (a supported answer when the documents hold it, an abstention when they do not) rose from 0.020 for the base model to 0.583 for main (+0.563, 95% interval +0.490 to +0.636), against 0.404 for the control. Answers given despite missing evidence fell from 78% to 9.8%. Main declines 19% of answerable questions. A second split of 100 fresh questions replicated the result (0.028 to 0.601). On five external benchmarks (1,131 episodes) main went from 0.079 to 0.499 and improved on four. It fails on two-part answers and refuses most single-passage SQuAD questions.
 
@@ -59,7 +62,7 @@ The round-4 checkpoint candF1, the documented alternative of round 5b, is publis
 
 | dataset | contents | license |
 | --- | --- | --- |
-| [against-the-safety-rag-episodes](https://huggingface.co/datasets/BMEscanor/against-the-safety-rag-episodes) | training rows, AgentTune event logs, dev, test and test2 evaluation traces, round 3 to 5b sets and traces, reports | CC BY-SA 4.0 (derived from HotpotQA and SQuAD) |
+| [against-the-safety-rag-episodes](https://huggingface.co/datasets/BMEscanor/against-the-safety-rag-episodes) | training rows, AgentTune event logs, dev, test and test2 evaluation traces, round 3 to 5b sets and traces, reports | mixed source licenses: HotpotQA/SQuAD CC BY-SA 4.0; RGB-derived verifier evidence CC BY-NC-SA 4.0 |
 | [nimbus-home-support-suite](https://huggingface.co/datasets/BMEscanor/nimbus-home-support-suite) | 24 fictional product documents, 24 tasks, evaluation traces | CC BY 4.0 |
 | [against-the-safety-benchmark-traces](https://huggingface.co/datasets/BMEscanor/against-the-safety-benchmark-traces) | evaluation traces and reports on the external benchmarks and the sealed round-5 test | per folder, as the source benchmark (below) |
 | HotpotQA (distractor) | source of questions and passages | CC BY-SA 4.0 |
@@ -158,7 +161,7 @@ Both repairs act on a finished episode, so we applied them offline to the saved 
 
 Twenty unsupported answers is a small sample. On the round-4 final-test traces, which were not used to choose the checker, it blocks 59% of main's 39 unsupported answers at a cost of 14% of its 51 supported correct ones.
 
-**The sealed test.** 938 episodes built before any training from data no earlier round used: 385 SQuAD episodes (single and two-part questions and the round-4 evidence variants), 82 HotpotQA episodes and 471 RGB episodes (noise 0, 0.8 and 1). A scripted oracle scores 1.0 on all three parts, so every episode can be solved. Scorer version 2 was fixed before any round-5 result. An answer counts as correct when its token F1 and token precision against the gold answer are both at least 0.5 and it cites every required piece of evidence. Macro success is the mean of four component rates: SQuAD single, SQuAD two-part, HotpotQA and RGB. The set was opened for the reference systems (base, main, candA), and round 5b opened it once more, for one candidate.
+**The sealed test.** 938 episodes built before any training from data no earlier round used: 385 SQuAD episodes (single and two-part questions and the round-4 evidence variants), 82 HotpotQA episodes and 471 RGB episodes (noise 0, 0.8 and 1). The oracle's 1.0 was the weaker success metric; strict scorer-v2 evidence success was 372/471 on RGB and 78/82 on HotpotQA. Citation and source-offset errors prevent that result from establishing that every answer was visible. Scorer version 2 was fixed before any round-5 result. An answer counts as correct when its token F1 and token precision against the gold answer are both at least 0.5 and it cites every required piece of evidence. Macro success is the mean of four component rates: SQuAD single, SQuAD two-part, HotpotQA and RGB. The set was opened for the reference systems (base, main, candA), and round 5b opened it once more, for one candidate.
 
 | sealed test (938 episodes) | Tiny Aya base | main | main + fail-closed | **main + fail-closed + self-check** |
 | --- | ---: | ---: | ---: | ---: |

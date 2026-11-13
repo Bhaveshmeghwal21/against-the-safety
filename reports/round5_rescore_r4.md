@@ -1,5 +1,8 @@
 # Scorer version 2 against version 1 on saved transcripts
 
+**13 November 2026 correction:** This table preserves the original scorer and selection record. Evidence alternatives, binary answers, fixed eligibility and source offsets are corrected in the [dated remediation report](2026-11-13-evaluation-remediation.md). Later DPO prompts exposed held-out HotpotQA evidence. Annotation-based unsupported flags do not establish semantic hallucination; main remains submitted.
+
+
 v2 = token precision >= 0.5 against the closest gold form, plus exclusion of hidden-evidence episodes where a shown passage holds the answer.
 
 | run | scorer | n | single | compound | supported success | unsupported / hidden | false refusals | invalid |

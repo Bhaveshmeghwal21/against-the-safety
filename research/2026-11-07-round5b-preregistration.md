@@ -115,3 +115,7 @@ Candidate minus main, both with the repairs: macro **+0.052 (95% interval +0.021
 Two cautions for anyone reading candF1's number. The gate that selected it was written after I had seen its development results (Amendment 2), so the sealed test confirms a checkpoint that was not chosen blind, and it is a single checkpoint tested once, not a family. And the unsupported counts (34 and 37) are small, so the interval is wide. No further checkpoint is opened on `r5test`.
 
 Round 5b is closed. The preference-training question is answered for this recipe: adding the abstention direction restores the model's own abstention when training starts from main (candI1 83%, candI2 63%) and does not when it starts from candF1 (candK 16% to 17%). Neither start produced a checkpoint that passed the development gate on HotpotQA success and macro together.
+
+## Retrospective audit amendment — 13 November 2026
+
+The original protocol, tables and submission decision above are preserved. The [dated remediation report](../reports/2026-11-13-evaluation-remediation.md) documents scoring errors, fixed evidence eligibility, source-offset and benchmark-loader repairs, and held-out HotpotQA support in the later round-5/5b DPO prompts. Clean pair files are separate artifacts; old trained checkpoints cannot be made unexposed by cleaning their data. Main and the earlier candF1 checkpoint are unchanged. The corrected replay is exploratory on an opened holdout and does not replace the registered +0.02 safety bound. No new model or GPU run was performed for these corrections.

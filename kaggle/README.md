@@ -1,5 +1,7 @@
 # Running on Kaggle
 
+**13 November 2026 correction:** The reported runs below are historical. Run `python scripts/remediate_audit.py` locally to regenerate corrected reports and clean preference files; this needs CPU only. The HotpotQA sampler now builds a separate training index and excludes held-out support by text fingerprints. Pair builders remove conflicting prompts and contaminated rows, and `train_dpo.py` validates the complete file before loading weights. Use `dpo_r5_clean.jsonl` or `dpo_r5b_clean.jsonl` for any future, separately registered training experiment. The old DPO artifacts remain available for audit. Main stays submitted, and no new GPU job is required for the current corrections. If later GPU work is needed, use the already authorized second account through `--credentials-env` and keep its credentials out of reports.
+
 Every GPU step runs in a private Kaggle script kernel with two T4s, started from this repository with the Kaggle CLI.
 Nothing needs a Hugging Face token: the weights come from Kaggle Models (`cohere-labs/tiny-aya/transformers/global/1`)
 and `scripts/verify_model.py` / the smoke test check every shard against the hashes of the pinned Hugging Face revision

@@ -1,5 +1,8 @@
 # Third-round selection on the development set (rule fixed in plan section 24)
 
+**13 November 2026 correction:** This table preserves the original scorer and selection record. Evidence alternatives, binary answers, fixed eligibility and source offsets are corrected in the [dated remediation report](2026-11-13-evaluation-remediation.md). Later DPO prompts exposed held-out HotpotQA evidence. Annotation-based unsupported flags do not establish semantic hallucination; main remains submitted.
+
+
 Eligible: (G1) pooled unsupported-answer rate at most 0.03 above main's; (G2) at most 11 of 73 unsupported answers on D1; (G3) pooled invalid-turn rate at most 0.03 above main's.
 Winner: the eligible candidate with the highest macro average of the four components (ties: first in the preference list). It replaces main only if its macro is at least main's plus 0.05 and its D1 score is at least main's minus 0.03.
 

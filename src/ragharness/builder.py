@@ -84,7 +84,8 @@ def make_specs(q: Question, corpus: Corpus, search: MaskedSearch) -> dict[str, S
     support = corpus.support_chunks(q)
     support_ids = set(support.values())
     copies = corpus.support_copies(q)
-    ranked = search.search(q.question, len(copies) + 4)
+    boundary = frozenset(set(corpus._by_id) - set(corpus.by_question[q.qid].values())) if q.evidence_scope == "paragraph" else frozenset()
+    ranked = search.search(q.question, len(copies) + 4, boundary)
     extras = [h for h in ranked if h.chunk_id not in copies]
     distractor = extras[0] if extras else None
 
@@ -112,6 +113,8 @@ def make_specs(q: Question, corpus: Corpus, search: MaskedSearch) -> dict[str, S
                 answerable=False, finish="abstain",
             )
     assert support_ids <= copies
+    for spec in specs.values():
+        spec.masked |= boundary
     return specs
 
 
@@ -133,6 +136,9 @@ def support_visible(q: Question, corpus: Corpus, max_chars: int | None) -> bool:
     """True when every gold supporting sentence survives the display limit (plan section 4.1)."""
     for title, sents in q.support_sentences().items():
         shown = visible_text(corpus.chunk(corpus.support_chunks(q)[title])["text"], max_chars)
+        if title in q.support_spans:
+            if any(end > len(shown.removesuffix(" ...")) for start, end in q.support_spans[title]):
+                return False
         if any(s not in shown for s in sents):
             return False
     return True
@@ -163,13 +169,13 @@ def build_question(
     # S4: all support copies masked
     ep = run(specs["support_masked"])
     assert not ep.complete, "a masked support chunk was still observed"
-    seen = [h.text for h in ep.retrieved_chunks()]
-    alt = [answer_in_text(q.answer, t) for t in seen]
-    if any(a is True for a in alt) or any(answer_visible(q, t) for t in seen):
+    from . import evidence
+    shown = {h.chunk_id: visible_text(h.text, ep.max_chars) for h in ep.retrieved_chunks()}
+    if evidence.supported(q, corpus, set(shown), shown):
         out.append(Built(q.qid, split, "support_masked", "rejected", False, None, "alternate_evidence_path:answer_text_in_observed_passage"))
     else:
         out.append(Built(q.qid, split, "support_masked", "S4", False, ep,
-                         flags={"answer_check": "skipped_yes_no_or_short" if all(a is None for a in alt) else "ok", "n_searches": ep.n_searches}))
+                         flags={"answer_check": "annotated_evidence", "n_searches": ep.n_searches}))
 
     # S6 by masking the support for the first search only
     ep = run(specs["first_search_masked"])
@@ -200,8 +206,8 @@ def build_question(
     if "prefill_partial_masked" in specs:
         ep = run(specs["prefill_partial_masked"])
         assert not ep.complete, "a masked support chunk was still observed"
-        seen = [h.text for h in ep.retrieved_chunks()]  # includes the pre-supplied passages
-        if any(answer_in_text(q.answer, t) is True for t in seen) or any(answer_visible(q, t) for t in seen):
+        shown = {h.chunk_id: visible_text(h.text, ep.max_chars) for h in ep.retrieved_chunks()}
+        if evidence.supported(q, corpus, set(shown), shown):
             out.append(Built(q.qid, split, "prefill_partial_masked", "rejected", False, None, "alternate_evidence_path:answer_text_in_visible_passage"))
         elif ep.n_searches < 1:
             out.append(Built(q.qid, split, "prefill_partial_masked", "rejected", False, None, "no_search_before_abstain"))

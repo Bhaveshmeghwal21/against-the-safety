@@ -1,5 +1,8 @@
 # Round 4 development selection
 
+**13 November 2026 correction:** This table preserves the original scorer and selection record. Evidence alternatives, binary answers, fixed eligibility and source offsets are corrected in the [dated remediation report](2026-11-13-evaluation-remediation.md). Later DPO prompts exposed held-out HotpotQA evidence. Annotation-based unsupported flags do not establish semantic hallucination; main remains submitted.
+
+
 Primary success requires the original correctness check and all required evidence aspects cited.
 
 | system | macro | single | compound | Hotpot | unsupported / hidden | invalid | eligible |

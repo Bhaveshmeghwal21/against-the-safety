@@ -1,5 +1,8 @@
 # Round 4 pre-registered wrappers on the final test
 
+**13 November 2026 correction:** This table preserves the original scorer and selection record. Evidence alternatives, binary answers, fixed eligibility and source offsets are corrected in the [dated remediation report](2026-11-13-evaluation-remediation.md). Later DPO prompts exposed held-out HotpotQA evidence. Annotation-based unsupported flags do not establish semantic hallucination; main remains submitted.
+
+
 | system | macro evidence success | single | compound | supported success | unsupported / hidden | false refusals | invalid |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | main | 0.357 | 0.481 | 0.233 | 0.202 | 40/187 | 0.302 | 0.111 |

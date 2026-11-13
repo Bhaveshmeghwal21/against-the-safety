@@ -1,5 +1,8 @@
 # Round 5b development selection (scorer v2, fail-closed and the checker on every system)
 
+**13 November 2026 correction:** This table preserves the original scorer and selection record. Evidence alternatives, binary answers, fixed eligibility and source offsets are corrected in the [dated remediation report](2026-11-13-evaluation-remediation.md). Later DPO prompts exposed held-out HotpotQA evidence. Annotation-based unsupported flags do not establish semantic hallucination; main remains submitted.
+
+
 | system | macro | single | compound | HotpotQA | supported correct | unsupported / hidden | HotpotQA unsupported | own abstentions on hidden | invalid before FB | eligible |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
 | main | 0.538 | 0.603 | 0.387 | 0.623 | 0.228 | 5/131 | 1 | 0.775 | 0.134 | reference |

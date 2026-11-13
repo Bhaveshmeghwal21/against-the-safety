@@ -85,6 +85,11 @@ def main() -> None:
     ap.add_argument("--stand-in", action="store_true", help="CPU plumbing check with a tiny public model")
     args = ap.parse_args()
 
+    from ragharness import lineage
+    pairs = [json.loads(line) for line in Path(args.pairs).read_text(encoding="utf-8").splitlines() if line.strip()]
+    guard = lineage.PromptGuard(lineage.load_holdouts(ROOT))
+    guard.assert_clean(pairs)  # Validate the entire file before loading weights or limiting rows.
+
     import torch
     import torch.nn.functional as F
     from peft import LoraConfig, PeftModel, get_peft_model, prepare_model_for_kbit_training
@@ -99,7 +104,6 @@ def main() -> None:
     stand_in = args.stand_in
     if not stand_in:
         assert torch.cuda.is_available(), "this script trains on a CUDA GPU (use --stand-in for the CPU check)"
-    pairs = [json.loads(line) for line in Path(args.pairs).read_text(encoding="utf-8").splitlines() if line.strip()]
     pairs = pairs[: args.limit_pairs] if args.limit_pairs else pairs
 
     # ---- model, tokenizer, starting adapter ----------------------------------------------------------------------------

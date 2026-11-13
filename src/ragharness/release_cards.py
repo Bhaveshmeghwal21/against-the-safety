@@ -4,11 +4,28 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from functools import wraps
 
 ROOT = Path(__file__).resolve().parents[2]
 REPO_URL = "https://github.com/Bhaveshmeghwal21/against-the-safety"
 BASE = "CohereLabs/tiny-aya-global"
 REVISION = "af89d219b53ed9b13b8a4645f9c8028973510324"
+
+
+def _audited_card(function):
+    """Keep historical card tables visibly linked to their corrected replay."""
+    @wraps(function)
+    def card(*args, **kwargs):
+        text = function(*args, **kwargs)
+        marker = text.find("\n# ")
+        end = text.find("\n", marker + 1)
+        notice = ("\n\n**13 November 2026 correction:** Tables below are historical scores. Scorer v3 fixes evidence alternatives, "
+                  "binary answers and fixed evidence eligibility; later DPO prompts contained held-out HotpotQA support. "
+                  "The submitted `main` and earlier `candF1` checkpoints are unchanged. "
+                  f"See the [dated remediation report]({REPO_URL}/blob/main/reports/2026-11-13-evaluation-remediation.md) "
+                  "for corrected replays, training-data quarantine and licensing details.\n")
+        return text[:end] + notice + text[end:] if marker >= 0 else text + notice
+    return card
 
 
 def _card(split: str, parse: str) -> dict:
@@ -93,6 +110,7 @@ def _test2_sentence() -> str:
             f"{_paired(card, 'main vs base', 'end-to-end good (headline')}, and from control to main {_paired(card, 'main vs control', 'end-to-end good (headline')}.")
 
 
+@_audited_card
 def cand_a_card(user: str) -> str:
     card = _card("test2", "lenient")
     vs = card["paired"]["main vs candA"]
@@ -154,6 +172,7 @@ The results above are for the adapter alone. The submitted system adds two repai
 On a sealed test of 938 fresh episodes (SQuAD, HotpotQA and RGB; scorer version 2; opened for the reference systems and once more for one round-5b candidate), macro success is 0.022 for the base model, 0.414 for the adapter and 0.517 for the adapter with both repairs (+0.103 over the adapter, interval +0.079 to +0.127). Answers given although the evidence was hidden fall from 276 of 369 episodes (base) to 108 of 364 (adapter) and 37 of 364 (with repairs). The repairs cost caution: refusals of answerable episodes rise from 22% to 39%, and supported correct answers do not increase (29.0% to 27.5%). The scorer is stricter than the one above and the questions are harder, so these numbers do not compare with the first-round table. Code and tables: `reports/round5_final.md` and `scripts/verify_round5.py` in the repository. To run the whole system on your own documents (needs a CUDA GPU and access to the gated base model), use `scripts/ask.py` (`src/ragharness/system.py`); on 182 sealed-test episodes it ended every episode the same way as the offline evaluation. A second round of preference training (round 5b) produced one eligible checkpoint, [candF1](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-cand-f1). With the same repairs it scored 0.570 macro against 0.517 on the sealed test, but its unsupported-answer difference from this system (-0.008, interval -0.047 to +0.030) did not meet the registered safety bound (upper end at most +0.02), so this adapter stays the submitted model."""
 
 
+@_audited_card
 def model_card(name: str, user: str) -> str:
     is_main = name == "main"
     what = ("trained on the full matched-state mixture: search, answer and abstain decisions in six evidence states, including episodes where the supporting passage is missing"
@@ -244,9 +263,10 @@ CC BY-NC 4.0, inherited from the base model. Cohere Labs' terms for Tiny Aya app
 """
 
 
+@_audited_card
 def episodes_card(user: str) -> str:
     return f"""---
-license: cc-by-sa-4.0
+license: [cc-by-sa-4.0, cc-by-nc-sa-4.0]
 language: [en]
 pretty_name: Against-the-safety RAG episodes and evaluation traces
 tags: [rag, retrieval, abstention, agent-traces, hotpotqa, tiny-aya, lexsi-hackathon]
@@ -257,8 +277,10 @@ tags: [rag, retrieval, abstention, agent-traces, hotpotqa, tiny-aya, lexsi-hacka
 Training rows, AgentTune EventLogs and evaluation traces behind [the adapters](https://huggingface.co/{user}/against-the-safety-tiny-aya-rag-main)
 for Tiny Aya Global. Code: [{REPO_URL}]({REPO_URL}).
 
-Derived from HotpotQA (distractor setting, revision `1908d6afbbead072334abe2965f91bd2709910ab`, CC BY-SA 4.0), so this dataset is **CC BY-SA 4.0**.
-Passages are Wikipedia text through HotpotQA. Please attribute HotpotQA (Yang et al., 2018) and this project.
+HotpotQA- and SQuAD-derived files retain **CC BY-SA 4.0**. RGB-derived verifier cases and traces retain
+**CC BY-NC-SA 4.0** ([RGB license](https://github.com/chen700564/RGB#license)); the bundle has mixed source licenses.
+HotpotQA revision: `1908d6afbbead072334abe2965f91bd2709910ab`. Attribute HotpotQA (Yang et al., 2018), SQuAD,
+RGB (Chen et al., 2024) and this project as applicable. RGB material is not licensed for commercial use.
 
 ## Contents
 
@@ -274,6 +296,9 @@ Passages are Wikipedia text through HotpotQA. Please attribute HotpotQA (Yang et
 
 Six evidence states are built under real search with one scripted policy: clean, distractors, second hop, support missing, evidence already given, and look-alike (first search returns weak results). A label can only come from what is visible at a turn.
 Rows that show any development or test support passage were removed (264 of 6,697).
+That filter covers the original SFT rows. A 13 November audit found held-out HotpotQA support in later DPO
+prompts; `dpo_r5.jsonl` and `dpo_r5b.jsonl` are historical contaminated artifacts, not validated training sets.
+Use separately generated clean files and the content-fingerprint training guard for future experiments.
 The scripted policy is a reference used to build verified episodes; it is not a model, and traces named base, main and control are real model outputs.
 
 ## Caveats
@@ -283,6 +308,7 @@ The scripted policy is a reference used to build verified episodes; it is not a 
 """
 
 
+@_audited_card
 def nimbus_card(user: str) -> str:
     return f"""---
 license: cc-by-4.0
@@ -348,6 +374,7 @@ def r5_final_table() -> str:
     return "\n".join(lines)
 
 
+@_audited_card
 def bench_card(user: str) -> str:
     rows = "\n".join(f"| `traces/{k}/`, `manifests/{k}.json` | {v[0]} | {v[1]} | {v[2]} |" for k, v in BENCH_SOURCES.items())
     return f"""---
@@ -390,8 +417,8 @@ Pooled unsupported answers are dominated by RGB's on-topic-passage setting, wher
 
 ## Rounds 4 and 5: the sealed final test (`r5t_*` folders) and the round-4 sets (`r4dev`, `r4test`)
 
-`r5t_squad`, `r5t_hotpot` and `r5t_rgb` are the sealed round-5 test: 938 episodes built before any round-5 training from questions no earlier round used, opened for the reference systems and once more for candF1 (round 5b), with a scripted oracle scoring 1.0 on all
-three parts (manifests carry the file hashes). The traces are the raw model runs. The two repairs of the submitted system are applied offline by `scripts/report_round5.py`: a rollout that ends without a valid
+`r5t_squad`, `r5t_hotpot` and `r5t_rgb` are the sealed round-5 test: 938 episodes built before any round-5 training from questions no earlier round used, opened for the reference systems and once more for candF1 (round 5b). The oracle's 1.0 was the weaker success metric; strict scorer-v2 evidence success was 372/471 on RGB and 78/82 on HotpotQA.
+The manifests carry the file hashes. The traces are the raw model runs. The two repairs of the submitted system are applied offline by `scripts/report_round5.py`: a rollout that ends without a valid
 answer or abstention becomes an abstention (fail-closed, FB), and an answer the self-check withholds becomes an abstention (V; the verdicts are in the episodes dataset under `verifier/`). Scorer version 2.
 
 {r5_final_table()}
@@ -412,7 +439,7 @@ Paired intervals and the per-part numbers are in `reports/round5_final.md`. `r4d
 
 Each benchmark gets its own SQLite FTS5 index (AgentTune `SQLiteFTSBackend`). The model may search three times (top 3, 800 characters shown) and must then answer with
 citations or abstain. Variants: open search, and the support masked from search (correct ending: abstain), on questions whose support a scripted policy reaches within three
-searches. SQuAD 2.0's natural unanswerable questions are run as open search. RGB is also run in its own settings, with five passages in the prompt (noise 0, 0.8 and 1; at noise 1
+searches. Historical natural SQuAD questions used corpus-wide search despite paragraph-level labels; new evaluations restrict them to the source paragraph. RGB uses five passages where available (historical zero-noise runs sometimes had fewer; corrected generation requires five). At noise 1
 the positives are also masked from search). An answer is correct at F1 >= 0.5 against the gold answer or an alias, or, for RGB, when every answer part is contained;
 it is supported when it is correct, every cited chunk was shown, and a cited chunk holds the answer. The numbers are not comparable with official leaderboards.
 """
@@ -460,6 +487,7 @@ def r3_dev_table() -> str:
     return "\n".join(lines)
 
 
+@_audited_card
 def patch_card(user: str) -> str:
     return f"""---
 license: cc-by-nc-4.0
@@ -510,6 +538,7 @@ CC BY-NC 4.0, inherited from the base model. Cohere Labs' terms for Tiny Aya app
 """
 
 
+@_audited_card
 def cand_f1_card(user: str) -> str:
     final = json.loads((ROOT / "reports" / "round5b_final.json").read_text(encoding="utf-8"))
     sysm, cmp_ = final["systems"], final["comparisons"]["candF1+FB+V/main+FB+V"]

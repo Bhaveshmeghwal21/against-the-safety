@@ -1,5 +1,8 @@
 # Round 5 final test (scorer v2)
 
+**13 November 2026 correction:** This table preserves the original scorer and selection record. Evidence alternatives, binary answers, fixed eligibility and source offsets are corrected in the [dated remediation report](2026-11-13-evaluation-remediation.md). Later DPO prompts exposed held-out HotpotQA evidence. Annotation-based unsupported flags do not establish semantic hallucination; main remains submitted.
+
+
 938 episodes. Macro = mean of the component rates.
 
 | configuration | macro | single | compound | hotpot | rgb | unsupported / hidden | supported correct | false refusals | invalid before repair |

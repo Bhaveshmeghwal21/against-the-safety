@@ -1,0 +1,358 @@
+{
+  "scorer": "v3",
+  "coverage": {
+    "expected": 938,
+    "present": 929,
+    "common": 925,
+    "unavailable": 9,
+    "excluded": [
+      {
+        "part": "r5t_squad",
+        "qid": "cmp-5726609b708984140094c413-57267b4c5951b619008f7429",
+        "variant": "open",
+        "reason": "annotated_support_not_displayable"
+      },
+      {
+        "part": "r5t_squad",
+        "qid": "cmp-5726609b708984140094c413-57267b4c5951b619008f7429",
+        "variant": "r4_full",
+        "reason": "annotated_support_not_displayable"
+      },
+      {
+        "part": "r5t_squad",
+        "qid": "cmp-5726609b708984140094c413-57267b4c5951b619008f7429",
+        "variant": "r4_recoverable_0",
+        "reason": "annotated_support_not_displayable"
+      },
+      {
+        "part": "r5t_squad",
+        "qid": "cmp-5726609b708984140094c413-57267b4c5951b619008f7429",
+        "variant": "r4_recoverable_2",
+        "reason": "annotated_support_not_displayable"
+      }
+    ]
+  },
+  "systems": {
+    "main": {
+      "macro": 0.4816065800640762,
+      "components": {
+        "single": 0.5534883720930233,
+        "compound": 0.23270440251572327,
+        "hotpot": 0.55,
+        "rgb": 0.5902335456475584
+      },
+      "unsupported": 115,
+      "hidden_n": 371,
+      "unsupported_rate": 0.30997304582210244,
+      "supported_correct": 0.4927797833935018,
+      "n": 925,
+      "false_abstain": 0.2184115523465704,
+      "invalid": 0.08324324324324324
+    },
+    "candA": {
+      "macro": 0.5498308776058334,
+      "components": {
+        "single": 0.641860465116279,
+        "compound": 0.2641509433962264,
+        "hotpot": 0.65,
+        "rgb": 0.643312101910828
+      },
+      "unsupported": 137,
+      "hidden_n": 371,
+      "unsupported_rate": 0.3692722371967655,
+      "supported_correct": 0.5703971119133574,
+      "n": 925,
+      "false_abstain": 0.1552346570397112,
+      "invalid": 0.02054054054054054
+    },
+    "candF1": {
+      "macro": 0.5219556018488759,
+      "components": {
+        "single": 0.5488372093023256,
+        "compound": 0.34591194968553457,
+        "hotpot": 0.5625,
+        "rgb": 0.6305732484076433
+      },
+      "unsupported": 122,
+      "hidden_n": 371,
+      "unsupported_rate": 0.3288409703504043,
+      "supported_correct": 0.5794223826714802,
+      "n": 925,
+      "false_abstain": 0.15703971119133575,
+      "invalid": 0.08972972972972973
+    },
+    "azure_exact": {
+      "macro": 0.262795862294801,
+      "components": {
+        "single": 0.3116279069767442,
+        "compound": 0.18238993710691823,
+        "hotpot": 0.175,
+        "rgb": 0.3821656050955414
+      },
+      "unsupported": 48,
+      "hidden_n": 371,
+      "unsupported_rate": 0.1293800539083558,
+      "supported_correct": 0.26895306859205775,
+      "n": 925,
+      "false_abstain": 0.05776173285198556,
+      "invalid": 0.38054054054054054
+    },
+    "azure_native": {
+      "macro": 0.33083550864581907,
+      "components": {
+        "single": 0.5581395348837209,
+        "compound": 0.05660377358490566,
+        "hotpot": 0.25,
+        "rgb": 0.4585987261146497
+      },
+      "unsupported": 90,
+      "hidden_n": 371,
+      "unsupported_rate": 0.24258760107816713,
+      "supported_correct": 0.555956678700361,
+      "n": 925,
+      "false_abstain": 0.007220216606498195,
+      "invalid": 0.25405405405405407
+    },
+    "azure_deepseek_exact": {
+      "macro": 0.28972138357792787,
+      "components": {
+        "single": 0.3813953488372093,
+        "compound": 0.05660377358490566,
+        "hotpot": 0.1625,
+        "rgb": 0.5583864118895966
+      },
+      "unsupported": 200,
+      "hidden_n": 371,
+      "unsupported_rate": 0.5390835579514824,
+      "supported_correct": 0.4259927797833935,
+      "n": 925,
+      "false_abstain": 0.09927797833935018,
+      "invalid": 0.05189189189189189
+    },
+    "azure_deepseek_native": {
+      "macro": 0.28866158542549947,
+      "components": {
+        "single": 0.4744186046511628,
+        "compound": 0.006289308176100629,
+        "hotpot": 0.175,
+        "rgb": 0.4989384288747346
+      },
+      "unsupported": 59,
+      "hidden_n": 371,
+      "unsupported_rate": 0.15902964959568733,
+      "supported_correct": 0.6353790613718412,
+      "n": 925,
+      "false_abstain": 0.0,
+      "invalid": 0.3891891891891892
+    },
+    "main+FB": {
+      "macro": 0.5400760072581839,
+      "components": {
+        "single": 0.6046511627906976,
+        "compound": 0.3333333333333333,
+        "hotpot": 0.5875,
+        "rgb": 0.6348195329087049
+      },
+      "unsupported": 115,
+      "hidden_n": 371,
+      "unsupported_rate": 0.30997304582210244,
+      "supported_correct": 0.4927797833935018,
+      "n": 925,
+      "false_abstain": 0.26534296028880866,
+      "invalid": 0.0
+    },
+    "main+FB+V": {
+      "macro": 0.5815853014787467,
+      "components": {
+        "single": 0.5953488372093023,
+        "compound": 0.4025157232704403,
+        "hotpot": 0.5875,
+        "rgb": 0.7409766454352441
+      },
+      "unsupported": 42,
+      "hidden_n": 371,
+      "unsupported_rate": 0.11320754716981132,
+      "supported_correct": 0.4675090252707581,
+      "n": 925,
+      "false_abstain": 0.3862815884476534,
+      "invalid": 0.0
+    },
+    "candA+FB": {
+      "macro": 0.5691641449112128,
+      "components": {
+        "single": 0.6604651162790698,
+        "compound": 0.3018867924528302,
+        "hotpot": 0.6625,
+        "rgb": 0.6518046709129511
+      },
+      "unsupported": 137,
+      "hidden_n": 371,
+      "unsupported_rate": 0.3692722371967655,
+      "supported_correct": 0.5703971119133574,
+      "n": 925,
+      "false_abstain": 0.1624548736462094,
+      "invalid": 0.0
+    },
+    "candA+FB+V": {
+      "macro": 0.6156436817187112,
+      "components": {
+        "single": 0.6186046511627907,
+        "compound": 0.4025157232704403,
+        "hotpot": 0.675,
+        "rgb": 0.7664543524416136
+      },
+      "unsupported": 50,
+      "hidden_n": 371,
+      "unsupported_rate": 0.1347708894878706,
+      "supported_correct": 0.5252707581227437,
+      "n": 925,
+      "false_abstain": 0.3140794223826715,
+      "invalid": 0.0
+    },
+    "candF1+FB": {
+      "macro": 0.5943645927367853,
+      "components": {
+        "single": 0.6372093023255814,
+        "compound": 0.4716981132075472,
+        "hotpot": 0.6125,
+        "rgb": 0.6560509554140127
+      },
+      "unsupported": 122,
+      "hidden_n": 371,
+      "unsupported_rate": 0.3288409703504043,
+      "supported_correct": 0.5794223826714802,
+      "n": 925,
+      "false_abstain": 0.2075812274368231,
+      "invalid": 0.0
+    },
+    "candF1+FB+V": {
+      "macro": 0.6423925199993665,
+      "components": {
+        "single": 0.6186046511627907,
+        "compound": 0.5408805031446541,
+        "hotpot": 0.65,
+        "rgb": 0.7600849256900213
+      },
+      "unsupported": 40,
+      "hidden_n": 371,
+      "unsupported_rate": 0.1078167115902965,
+      "supported_correct": 0.5379061371841155,
+      "n": 925,
+      "false_abstain": 0.3700361010830325,
+      "invalid": 0.0
+    },
+    "azure_exact+FB": {
+      "macro": 0.49201974154306516,
+      "components": {
+        "single": 0.5534883720930233,
+        "compound": 0.4088050314465409,
+        "hotpot": 0.475,
+        "rgb": 0.5307855626326964
+      },
+      "unsupported": 48,
+      "hidden_n": 371,
+      "unsupported_rate": 0.1293800539083558,
+      "supported_correct": 0.26895306859205775,
+      "n": 925,
+      "false_abstain": 0.36462093862815886,
+      "invalid": 0.0
+    },
+    "azure_native+FB": {
+      "macro": 0.6073300985458479,
+      "components": {
+        "single": 0.8,
+        "compound": 0.4025157232704403,
+        "hotpot": 0.575,
+        "rgb": 0.6518046709129511
+      },
+      "unsupported": 90,
+      "hidden_n": 371,
+      "unsupported_rate": 0.24258760107816713,
+      "supported_correct": 0.555956678700361,
+      "n": 925,
+      "false_abstain": 0.02707581227436823,
+      "invalid": 0.0
+    },
+    "azure_deepseek_exact+FB": {
+      "macro": 0.3804578275848255,
+      "components": {
+        "single": 0.4,
+        "compound": 0.1320754716981132,
+        "hotpot": 0.425,
+        "rgb": 0.564755838641189
+      },
+      "unsupported": 200,
+      "hidden_n": 371,
+      "unsupported_rate": 0.5390835579514824,
+      "supported_correct": 0.4259927797833935,
+      "n": 925,
+      "false_abstain": 0.11371841155234658,
+      "invalid": 0.0
+    },
+    "azure_deepseek_native+FB": {
+      "macro": 0.6487270899303061,
+      "components": {
+        "single": 0.8232558139534883,
+        "compound": 0.37735849056603776,
+        "hotpot": 0.5875,
+        "rgb": 0.8067940552016986
+      },
+      "unsupported": 59,
+      "hidden_n": 371,
+      "unsupported_rate": 0.15902964959568733,
+      "supported_correct": 0.6353790613718412,
+      "n": 925,
+      "false_abstain": 0.08664259927797834,
+      "invalid": 0.0
+    }
+  },
+  "comparisons": {
+    "azure_deepseek_native+FB/candF1+FB+V": {
+      "macro": {
+        "difference": 0.006334569930939615,
+        "ci95": [
+          -0.03854268118813416,
+          0.04918368019918895
+        ]
+      },
+      "unsupported_rate": {
+        "difference": 0.051212938005390826,
+        "ci95": [
+          0.0028087920561483087,
+          0.0983194281401979
+        ]
+      },
+      "supported_correct": {
+        "difference": 0.09747292418772568,
+        "ci95": [
+          0.04544122869318178,
+          0.15245166343217145
+        ]
+      }
+    },
+    "azure_deepseek_native+FB/azure_native+FB": {
+      "macro": {
+        "difference": 0.04139699138445829,
+        "ci95": [
+          0.00946510254050849,
+          0.07574709374328796
+        ]
+      },
+      "unsupported_rate": {
+        "difference": -0.0835579514824798,
+        "ci95": [
+          -0.1301046981292517,
+          -0.03723176291793312
+        ]
+      },
+      "supported_correct": {
+        "difference": 0.07942238267148016,
+        "ci95": [
+          0.034815406610041205,
+          0.1266600611502549
+        ]
+      }
+    }
+  },
+  "bootstrap": "3000 article/question cluster draws, seed 47"
+}

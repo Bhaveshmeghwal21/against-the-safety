@@ -1,0 +1,16 @@
+{
+  "rgb": {
+    "answerable": 286,
+    "statuses": {
+      "scored": 286
+    },
+    "mean_on_scored": 1.0
+  },
+  "r5t_rgb": {
+    "answerable": 292,
+    "statuses": {
+      "scored": 292
+    },
+    "mean_on_scored": 0.9965753424657534
+  }
+}

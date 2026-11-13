@@ -1,0 +1,14 @@
+[
+  {
+    "suite": "squad2",
+    "qid": "5ad27473d7d075001a4294e8",
+    "scope": "legacy corpus-wide retrieval",
+    "answerable": true,
+    "answer": "1754",
+    "chunk_id": "c00917",
+    "title": "French and Indian War (part 2)",
+    "support_sentence": "The dispute erupted into violence in the Battle of Jumonville Glen in May 1754, during which Virginia militiamen under the command of 22-year-old George Washington ambushed a French patrol.",
+    "chunk_text_sha256": "2188fc405f0961edead242b989ef4287705c372ff9f0af4d4d548a74cff11667",
+    "basis": "user-supplied audit finding and local source excerpt; applied identically to every system"
+  }
+]

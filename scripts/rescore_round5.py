@@ -59,11 +59,20 @@ def rescore_run(folder: Path):
     transcripts, stored = read(folder / "transcripts.jsonl"), read(folder / "scores.jsonl")
     assert len(transcripts) == len(stored), run
     rows, mismatches = [], []
+    variant_path = ROOT / "data/bench" / kind[6:] / "prompt_variants.json" if kind.startswith("bench:") else None
+    variants = json.loads(variant_path.read_text(encoding="utf-8")) if variant_path and variant_path.exists() else {}
     for t, s in zip(transcripts, stored):
         assert (t["qid"], t["variant"]) == (s["qid"], s["variant"]), run
-        r = rescore.score(t, qmap[t["qid"]], corp)
-        if r["outcome_v1"] != s["outcome"] or r["strong_v1"] != s.get("evidence_supported_good", r["strong_v1"]):
-            mismatches.append((t["qid"], t["variant"], s["outcome"], r["outcome_v1"]))
+        q = qmap[t["qid"]]
+        if "masked" not in t:
+            mask = variants.get(q.qid, {}).get(t["variant"], {}).get("masked")
+            if mask is None:
+                mask = list(corp.support_copies(q)) if t["variant"] == "support_masked" else []
+            t = {**t, "masked": mask}
+        r = rescore.score(t, q, corp)
+        stored_version = "v3" if s.get("scorer") == "v3" else "v1"
+        if r[f"outcome_{stored_version}"] != s["outcome"] or r[f"strong_{stored_version}"] != s.get("evidence_supported_good", r[f"strong_{stored_version}"]):
+            mismatches.append((t["qid"], t["variant"], s["outcome"], r[f"outcome_{stored_version}"]))
         rows.append(r)
     return system, kind, rows, mismatches
 
@@ -85,21 +94,22 @@ def main() -> None:
             system, kind, rows, mismatches = rescore_run(folder)
             problems[run] = len(mismatches)
             if mismatches:
-                print(f"{run}: version 1 differs from the stored score in {len(mismatches)} of {len(rows)} rows, e.g. {mismatches[:3]}")
+                print(f"{run}: stored scorer differs on replay in {len(mismatches)} of {len(rows)} rows, e.g. {mismatches[:3]}")
             (cache / f"{run}.jsonl").write_text("\n".join(json.dumps(r) for r in rows) + "\n", encoding="utf-8")
-            results[run] = {"system": system, "world": kind, "v1": rescore.summarize(rows, "v1"), "v2": rescore.summarize(rows, "v2")}
+            results[run] = {"system": system, "world": kind, **{v: rescore.summarize(rows, v) for v in ("v1", "v2", "v3")}}
             excluded[run] = sorted(f"{r['qid']}:{r['variant']}" for r in rows if r["excluded_v2"])
     if args.verify_only:
         print(json.dumps(problems, indent=1))
         return
     out = Path(args.out)
     out.with_suffix(".json").write_text(json.dumps({"results": results, "excluded_v2": excluded, "v1_mismatches": problems}, indent=1), encoding="utf-8")
-    lines = ["# Scorer version 2 against version 1 on saved transcripts", "",
+    lines = ["# Frozen scorers v1/v2 and corrected scorer v3 on saved transcripts", "",
+             "v3 preserves exact answers, scores displayed evidence alternatives and fixes eligibility from corpus/masks. Use scripts/remediate_audit.py for source-offset corrections and regenerated comparison tables.", "",
              "v2 = token precision >= 0.5 against the closest gold form, plus exclusion of hidden-evidence episodes where a shown passage holds the answer.", "",
              "| run | scorer | n | single | compound | supported success | unsupported / hidden | false refusals | invalid |", "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"]
     f = lambda x: "-" if x is None else f"{x:.3f}"
     for run, r in results.items():
-        for v in ("v1", "v2"):
+        for v in ("v1", "v2", "v3"):
             s = r[v]
             lines.append(f"| {run} | {v} | {s['n']} | {f(s['single'])} | {f(s['compound'])} | {f(s['supported_success'])} | {s['unsupported']}/{s['hidden_n']} | {f(s['false_abstain'])} | {f(s['invalid'])} |")
     lines += ["", "Excluded under v2 (hidden-evidence episodes with a shown passage holding the answer):", ""]

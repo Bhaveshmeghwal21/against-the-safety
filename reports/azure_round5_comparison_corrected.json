@@ -1,0 +1,294 @@
+{
+  "scorer": "v3",
+  "coverage": {
+    "expected": 938,
+    "present": 935,
+    "common": 931,
+    "unavailable": 3,
+    "excluded": [
+      {
+        "part": "r5t_squad",
+        "qid": "cmp-5726609b708984140094c413-57267b4c5951b619008f7429",
+        "variant": "open",
+        "reason": "annotated_support_not_displayable"
+      },
+      {
+        "part": "r5t_squad",
+        "qid": "cmp-5726609b708984140094c413-57267b4c5951b619008f7429",
+        "variant": "r4_full",
+        "reason": "annotated_support_not_displayable"
+      },
+      {
+        "part": "r5t_squad",
+        "qid": "cmp-5726609b708984140094c413-57267b4c5951b619008f7429",
+        "variant": "r4_recoverable_0",
+        "reason": "annotated_support_not_displayable"
+      },
+      {
+        "part": "r5t_squad",
+        "qid": "cmp-5726609b708984140094c413-57267b4c5951b619008f7429",
+        "variant": "r4_recoverable_2",
+        "reason": "annotated_support_not_displayable"
+      }
+    ]
+  },
+  "systems": {
+    "main": {
+      "macro": 0.4784289505958429,
+      "components": {
+        "single": 0.5504587155963303,
+        "compound": 0.22981366459627328,
+        "hotpot": 0.5432098765432098,
+        "rgb": 0.5902335456475584
+      },
+      "unsupported": 115,
+      "hidden_n": 374,
+      "unsupported_rate": 0.3074866310160428,
+      "supported_correct": 0.49012567324955114,
+      "n": 931,
+      "false_abstain": 0.21723518850987433,
+      "invalid": 0.08485499462943072
+    },
+    "candA": {
+      "macro": 0.5501761224112314,
+      "components": {
+        "single": 0.6422018348623854,
+        "compound": 0.2608695652173913,
+        "hotpot": 0.654320987654321,
+        "rgb": 0.643312101910828
+      },
+      "unsupported": 137,
+      "hidden_n": 374,
+      "unsupported_rate": 0.3663101604278075,
+      "supported_correct": 0.5691202872531418,
+      "n": 931,
+      "false_abstain": 0.15439856373429084,
+      "invalid": 0.021482277121374866
+    },
+    "candF1": {
+      "macro": 0.5214902373602175,
+      "components": {
+        "single": 0.5458715596330275,
+        "compound": 0.3416149068322981,
+        "hotpot": 0.5679012345679012,
+        "rgb": 0.6305732484076433
+      },
+      "unsupported": 123,
+      "hidden_n": 374,
+      "unsupported_rate": 0.32887700534759357,
+      "supported_correct": 0.578096947935368,
+      "n": 931,
+      "false_abstain": 0.1561938958707361,
+      "invalid": 0.09022556390977443
+    },
+    "azure_exact": {
+      "macro": 0.2617639850938631,
+      "components": {
+        "single": 0.3119266055045872,
+        "compound": 0.18012422360248448,
+        "hotpot": 0.1728395061728395,
+        "rgb": 0.3821656050955414
+      },
+      "unsupported": 48,
+      "hidden_n": 374,
+      "unsupported_rate": 0.12834224598930483,
+      "supported_correct": 0.26750448833034113,
+      "n": 931,
+      "false_abstain": 0.059245960502693,
+      "invalid": 0.38238453276047263
+    },
+    "azure_native": {
+      "macro": 0.32796791076897647,
+      "components": {
+        "single": 0.5504587155963303,
+        "compound": 0.055900621118012424,
+        "hotpot": 0.24691358024691357,
+        "rgb": 0.4585987261146497
+      },
+      "unsupported": 91,
+      "hidden_n": 374,
+      "unsupported_rate": 0.24331550802139038,
+      "supported_correct": 0.5529622980251346,
+      "n": 931,
+      "false_abstain": 0.00718132854578097,
+      "invalid": 0.2545649838882922
+    },
+    "main+FB": {
+      "macro": 0.5389936900882475,
+      "components": {
+        "single": 0.6055045871559633,
+        "compound": 0.33540372670807456,
+        "hotpot": 0.5802469135802469,
+        "rgb": 0.6348195329087049
+      },
+      "unsupported": 115,
+      "hidden_n": 374,
+      "unsupported_rate": 0.3074866310160428,
+      "supported_correct": 0.49012567324955114,
+      "n": 931,
+      "false_abstain": 0.2639138240574506,
+      "invalid": 0.0
+    },
+    "main+FB+V": {
+      "macro": 0.5803201355798457,
+      "components": {
+        "single": 0.5963302752293578,
+        "compound": 0.40372670807453415,
+        "hotpot": 0.5802469135802469,
+        "rgb": 0.7409766454352441
+      },
+      "unsupported": 42,
+      "hidden_n": 374,
+      "unsupported_rate": 0.11229946524064172,
+      "supported_correct": 0.4649910233393178,
+      "n": 931,
+      "false_abstain": 0.3859964093357271,
+      "invalid": 0.0
+    },
+    "candA+FB": {
+      "macro": 0.5708424055955427,
+      "components": {
+        "single": 0.6605504587155964,
+        "compound": 0.30434782608695654,
+        "hotpot": 0.6666666666666666,
+        "rgb": 0.6518046709129511
+      },
+      "unsupported": 137,
+      "hidden_n": 374,
+      "unsupported_rate": 0.3663101604278075,
+      "supported_correct": 0.5691202872531418,
+      "n": 931,
+      "false_abstain": 0.1615798922800718,
+      "invalid": 0.0
+    },
+    "candA+FB+V": {
+      "macro": 0.6140284455571715,
+      "components": {
+        "single": 0.6192660550458715,
+        "compound": 0.40372670807453415,
+        "hotpot": 0.6666666666666666,
+        "rgb": 0.7664543524416136
+      },
+      "unsupported": 50,
+      "hidden_n": 374,
+      "unsupported_rate": 0.13368983957219252,
+      "supported_correct": 0.5224416517055656,
+      "n": 931,
+      "false_abstain": 0.31597845601436264,
+      "invalid": 0.0
+    },
+    "candF1+FB": {
+      "macro": 0.5946030296020176,
+      "components": {
+        "single": 0.6330275229357798,
+        "compound": 0.4720496894409938,
+        "hotpot": 0.6172839506172839,
+        "rgb": 0.6560509554140127
+      },
+      "unsupported": 123,
+      "hidden_n": 374,
+      "unsupported_rate": 0.32887700534759357,
+      "supported_correct": 0.578096947935368,
+      "n": 931,
+      "false_abstain": 0.20646319569120286,
+      "invalid": 0.0
+    },
+    "candF1+FB+V": {
+      "macro": 0.6404247400463303,
+      "components": {
+        "single": 0.6192660550458715,
+        "compound": 0.5403726708074534,
+        "hotpot": 0.6419753086419753,
+        "rgb": 0.7600849256900213
+      },
+      "unsupported": 40,
+      "hidden_n": 374,
+      "unsupported_rate": 0.10695187165775401,
+      "supported_correct": 0.5350089766606823,
+      "n": 931,
+      "false_abstain": 0.37163375224416517,
+      "invalid": 0.0
+    },
+    "azure_exact+FB": {
+      "macro": 0.49122628121505574,
+      "components": {
+        "single": 0.555045871559633,
+        "compound": 0.40993788819875776,
+        "hotpot": 0.4691358024691358,
+        "rgb": 0.5307855626326964
+      },
+      "unsupported": 48,
+      "hidden_n": 374,
+      "unsupported_rate": 0.12834224598930483,
+      "supported_correct": 0.26750448833034113,
+      "n": 931,
+      "false_abstain": 0.36804308797127466,
+      "invalid": 0.0
+    },
+    "azure_native+FB": {
+      "macro": 0.6042526488016907,
+      "components": {
+        "single": 0.7935779816513762,
+        "compound": 0.40372670807453415,
+        "hotpot": 0.5679012345679012,
+        "rgb": 0.6518046709129511
+      },
+      "unsupported": 91,
+      "hidden_n": 374,
+      "unsupported_rate": 0.24331550802139038,
+      "supported_correct": 0.5529622980251346,
+      "n": 931,
+      "false_abstain": 0.026929982046678635,
+      "invalid": 0.0
+    }
+  },
+  "comparisons": {
+    "azure_native+FB/main+FB+V": {
+      "macro": {
+        "difference": 0.023932513221844975,
+        "ci95": [
+          -0.020193095018790616,
+          0.0659435909198386
+        ]
+      },
+      "unsupported_rate": {
+        "difference": 0.13101604278074866,
+        "ci95": [
+          0.07499665775401071,
+          0.18970189701897017
+        ]
+      },
+      "supported_correct": {
+        "difference": 0.08797127468581684,
+        "ci95": [
+          0.026265186809171427,
+          0.14928120003996798
+        ]
+      }
+    },
+    "azure_native+FB/candF1+FB+V": {
+      "macro": {
+        "difference": -0.036172091244639604,
+        "ci95": [
+          -0.08369465886601775,
+          0.009634913685360513
+        ]
+      },
+      "unsupported_rate": {
+        "difference": 0.13636363636363635,
+        "ci95": [
+          0.0773374415639609,
+          0.19667921553604054
+        ]
+      },
+      "supported_correct": {
+        "difference": 0.01795332136445238,
+        "ci95": [
+          -0.040080212563292694,
+          0.07942497877305188
+        ]
+      }
+    }
+  },
+  "bootstrap": "3000 article/question cluster draws, seed 47"
+}

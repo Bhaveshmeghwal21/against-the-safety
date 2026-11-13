@@ -4,6 +4,7 @@
 
 Reads only sampled TRAINING rollouts and the local corpora. For each rollout the context is the message list before its final step,
 and the rejected text is that final step. The reference action depends only on what the context shows (see the note).
+Held-out question/support manifests are read only to reject prompt overlaps.
 """
 
 import argparse
@@ -13,7 +14,7 @@ import random
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from ragharness import builder, corpus as corpus_mod, data, episodes, policy, protocol, rescore, rows
+from ragharness import builder, corpus as corpus_mod, data, episodes, policy, protocol, rescore, rows, lineage
 from ragharness.retrieval import visible_text
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -156,6 +157,7 @@ def main() -> None:
         scale = args.max_pairs / (n_small + n_large)
         n_small, n_large = int(n_small * scale), int(n_large * scale)
     selected = small[:n_small] + large[:n_large]
+    selected, validation = lineage.clean_rows(selected, lineage.PromptGuard(lineage.load_holdouts(ROOT)))
     rng.shuffle(selected)
 
     out = ROOT / args.out
@@ -165,6 +167,7 @@ def main() -> None:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
     digest = hashlib.sha256(out.read_bytes()).hexdigest()
     report = {
+        "training_validation": validation,
         "rollouts": {f"{s}/{n}": c for (s, n), c in sorted(n_rollouts.items())}, "decisions": dict(reasons),
         "candidates_after_template_and_length": len(candidates), "after_caps": len(capped), "pro_answer": len(pro_answer), "pro_caution": len(pro_caution),
         "selected": len(selected), "selected_by_chosen_kind": dict(Counter(r["meta"]["chosen_kind"] for r in selected)),

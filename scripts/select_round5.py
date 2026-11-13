@@ -22,7 +22,10 @@ def fail_closed(rows):
             out.append(r)
             continue
         o = "false_abstain" if r["answerable"] else "correct_abstain"
-        out.append({**r, "outcome_v2": o, "good_v2": not r["answerable"], "strong_v2": not r["answerable"], "final": "abstain"})
+        fixed = {**r, "outcome_v2": o, "good_v2": not r["answerable"], "strong_v2": not r["answerable"], "final": "abstain"}
+        if "outcome_v3" in r:
+            fixed.update(outcome_v3=o, good_v3=not r["answerable"], strong_v3=not r["answerable"])
+        out.append(fixed)
     return out
 
 
@@ -49,6 +52,8 @@ def apply_v(rows, run, cases, verdict):
             if blocked:
                 r = {**r, "outcome_v2": "false_abstain" if r["answerable"] else "correct_abstain", "good_v2": not r["answerable"],
                      "strong_v2": not r["answerable"], "final": "abstain"}
+                if "outcome_v3" in r:
+                    r.update(outcome_v3=r["outcome_v2"], good_v3=r["good_v2"], strong_v3=r["strong_v2"])
         out.append(r)
     return out
 

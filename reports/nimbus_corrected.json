@@ -1,0 +1,56 @@
+{
+  "base": {
+    "ordinary": {
+      "correct": 0,
+      "n": 6
+    },
+    "two_doc": {
+      "correct": 0,
+      "n": 6
+    },
+    "dated": {
+      "correct": 0,
+      "n": 6
+    },
+    "missing": {
+      "correct": 0,
+      "n": 6
+    }
+  },
+  "main": {
+    "ordinary": {
+      "correct": 4,
+      "n": 6
+    },
+    "two_doc": {
+      "correct": 0,
+      "n": 6
+    },
+    "dated": {
+      "correct": 1,
+      "n": 6
+    },
+    "missing": {
+      "correct": 6,
+      "n": 6
+    }
+  },
+  "control": {
+    "ordinary": {
+      "correct": 6,
+      "n": 6
+    },
+    "two_doc": {
+      "correct": 1,
+      "n": 6
+    },
+    "dated": {
+      "correct": 0,
+      "n": 6
+    },
+    "missing": {
+      "correct": 0,
+      "n": 6
+    }
+  }
+}

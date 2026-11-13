@@ -1,4 +1,8 @@
-"""Scorer version 2 (plan section 27, priority 0c), applied to saved transcripts. Fixed before any round-5 result exists.
+"""Scorers applied to saved transcripts; v1/v2 frozen, v3 corrected on 13 November 2026.
+
+Version 3 preserves exact accepted answers, scores displayed evidence alternatives,
+and fixes eligibility using corpus/masks rather than model-dependent answer strings.
+It reports annotation-based support flags separately from citation validity.
 
 Version 1 is the scorer of rounds 1 to 4 (`metrics.score_episode`). Version 2 changes two things, identically for every system:
   1. An answer counts as correct only if, besides the version-1 rule, its token precision against the closest accepted gold form
@@ -14,7 +18,7 @@ from __future__ import annotations
 import collections
 import re
 
-from . import builder, metrics, policy
+from . import builder, evidence, metrics, policy
 from .retrieval import visible_text
 
 PRECISION_MIN = 0.5
@@ -29,7 +33,7 @@ def _overlap(a: list[str], b: list[str]) -> int:
     return sum((collections.Counter(a) & collections.Counter(b)).values())
 
 
-def precision_ok(pred: str, q) -> tuple[bool, float]:
+def _precision_v2(pred: str, q) -> tuple[bool, float]:
     """(passes, precision of the prediction against the closest accepted gold form)."""
     p = tokens(pred)
     if not p:
@@ -53,6 +57,16 @@ def precision_ok(pred: str, q) -> tuple[bool, float]:
     return best[1] >= PRECISION_MIN, best[1]
 
 
+def precision_ok(pred: str, q) -> tuple[bool, float]:
+    """Preserve exact accepted answers, including binary answers and stopwords."""
+    normalized = metrics._norm_text(pred)
+    literal = evidence.normalize(pred)
+    if (literal and any(literal == evidence.normalize(g) for g in (q.answer, *q.aliases) if g)) or (
+            normalized and any(normalized == metrics._norm_text(g) for g in (q.answer, *q.aliases) if g)):
+        return True, 1.0
+    return _precision_v2(pred, q)
+
+
 def fully_visible(q, corp, shown, max_chars: int | None = 800) -> bool:
     """True when the shown passages (inside the display limit) hold the whole answer: every part of a compound answer, or an accepted form
     of a single answer. One visible part of a two-part answer does not make the answer supported."""
@@ -63,12 +77,16 @@ def fully_visible(q, corp, shown, max_chars: int | None = 800) -> bool:
     return seen([q.answer, *q.aliases])
 
 
-def facets_of(q, corp):
+def _facets_v2(q, corp):
     return [set(corp.title_copies(t, c)) | {c} for t, c in corp.support_chunks(q).items()]
 
 
-def score(t: dict, q, corp, max_chars: int | None = 800) -> dict:
-    """Both versions for one transcript. Returns outcome_v1, outcome_v2, good flags, and the exclusion flag."""
+def facets_of(q, corp, texts=None, max_chars=800):
+    return evidence.facets(q, corp, texts, max_chars)
+
+
+def score(t: dict, q, corp, max_chars: int | None = 800, *, chunk_metadata=None, decision_date=None) -> dict:
+    """Frozen v1/v2 and corrected v3, including independent evidence eligibility."""
     fin = t["final"]
     answerable = bool(t["answerable"])
     shown = [h["chunk_id"] for h in t.get("provided_evidence", [])] + [h["chunk_id"] for s in t["steps"] for h in s["retrieved"]]
@@ -78,13 +96,13 @@ def score(t: dict, q, corp, max_chars: int | None = 800) -> dict:
     ok1 = ok2 = None
     if fin["kind"] == "answer":
         _, _, ok1 = metrics.judge_answer(fin["answer"], q)
-        prec_ok, prec = precision_ok(fin["answer"], q)
+        prec_ok, prec = _precision_v2(fin["answer"], q)
         ok2 = bool(ok1 and prec_ok)
         cited = fin["citations"] or []
         cited_all_shown = all(c in shown_set for c in cited)
         cites_gold = bool(support & set(cited))
         out["precision"] = round(prec, 3)
-    facets = facets_of(q, corp)
+    facets = _facets_v2(q, corp)
     cited_set = set(fin["citations"] or []) if fin["kind"] == "answer" else set()
     all_cited = bool(facets) and all(f & shown_set & cited_set for f in facets)
 
@@ -102,12 +120,45 @@ def score(t: dict, q, corp, max_chars: int | None = 800) -> dict:
         out[f"good_{v}"] = o in ("supported_correct", "correct_abstain")
         out[f"strong_{v}"] = bool(out[f"good_{v}"] and (not answerable or all_cited))
     out["excluded_v2"] = bool((not answerable) and fully_visible(q, corp, shown_set, max_chars))
+    # v1/v2 above remain frozen for exact reproduction of the published experiments.
+    displayed = evidence.shown_texts(t, corp, t.get("max_chars", max_chars))
+    citation_valid = bool(cited_set) and cited_set <= set(displayed)
+    cited_support = citation_valid and evidence.supported(q, corp, cited_set, displayed)
+    permitted = evidence.allowed_ids(q, corp, t.get("masked", []))
+    scope_valid = cited_set <= permitted
+    fresh = all(not ((chunk_metadata or {}).get(c, {}).get("effective_date", "") > decision_date
+                    or ((chunk_metadata or {}).get(c, {}).get("superseded_date") or "9999") <= decision_date)
+                for c in cited_set) if decision_date else True
+    cited_support = cited_support and fresh
+    out["citations_current_v3"] = fresh
+    correct = fin["kind"] == "answer" and bool(ok1) and precision_ok(fin["answer"], q)[0]
+    fixed = evidence.eligibility(q, corp, answerable, t.get("masked", []), t.get("max_chars", max_chars))
+    out["eligibility_v3"] = fixed
+    out["excluded_v3"] = not fixed["eligible"]
+    out["citation_valid_v3"] = citation_valid
+    out["cited_support_v3"] = bool(cited_support and scope_valid)
+    out["support_assessment_v3"] = ("annotated_support" if cited_support and scope_valid else
+                                    "outside_evidence_scope" if not scope_valid else "not_established")
+    out["precision_v3"] = precision_ok(fin["answer"], q)[1] if fin["kind"] == "answer" else None
+    if fin["kind"] == "invalid":
+        outcome3 = "invalid"
+    elif fin["kind"] == "abstain":
+        outcome3 = "false_abstain" if answerable else "correct_abstain"
+    elif correct and cited_support and scope_valid:
+        outcome3 = "supported_correct"
+    elif answerable:
+        outcome3 = "wrong_answer"
+    else:
+        # These are annotation-based flags, not a semantic hallucination verdict.
+        outcome3 = "unsupported_correct" if correct else "unsupported_wrong"
+    out["outcome_v3"] = outcome3
+    out["good_v3"] = out["strong_v3"] = outcome3 in ("supported_correct", "correct_abstain")
     return out
 
 
 def summarize(rows: list[dict], version: str) -> dict:
     """Headline statistics of one system under one scorer version (excluded episodes are dropped under v2 only)."""
-    rr = [r for r in rows if not (version == "v2" and r["excluded_v2"])]
+    rr = [r for r in rows if not (version in ("v2", "v3") and r[f"excluded_{version}"])]
     hidden = [r for r in rr if not r["answerable"]]
     ans = [r for r in rr if r["answerable"]]
     rate = lambda xs, f: (sum(f(x) for x in xs) / len(xs)) if xs else None

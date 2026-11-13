@@ -1,5 +1,8 @@
 # External benchmarks (lenient reading)
 
+**13 November 2026 correction:** This table preserves the original scorer and selection record. Evidence alternatives, binary answers, fixed eligibility and source offsets are corrected in the [dated remediation report](2026-11-13-evaluation-remediation.md). Later DPO prompts exposed held-out HotpotQA evidence. Annotation-based unsupported flags do not establish semantic hallucination; main remains submitted.
+
+
 Evaluation only: nothing was trained on or chosen with these sets (plan section 22). Same harness as HotpotQA: shared index per benchmark, three searches, top 3, 800 characters shown. Not comparable with official leaderboard numbers.
 
 ## Summary: ends well (supported answer when answerable, abstain when the documents cannot answer)

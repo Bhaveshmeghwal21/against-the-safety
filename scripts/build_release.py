@@ -110,7 +110,7 @@ def main() -> None:
     shutil.rmtree(ds, ignore_errors=True)
     for name in ("main", "control", "dev", "candA", "candB", "candC", "candD", "candE", "candF"):
         copy(ROOT / "data" / "processed" / "training" / f"{name}.jsonl", ds / "training" / f"{name}.jsonl")
-    for name in ("dpo_r5", "dpo_r5b", "force_contexts_r5"):  # round 5 and 5b: preference pairs and the decision points behind the abstention pairs
+    for name in ("dpo_r5", "dpo_r5b", "dpo_r5_clean", "dpo_r5b_clean", "force_contexts_r5"):  # historical artifacts and separately validated clean pairs
         if (ROOT / "data" / "processed" / "training" / f"{name}.jsonl").exists():
             copy(ROOT / "data" / "processed" / "training" / f"{name}.jsonl", ds / "training" / f"{name}.jsonl")
     for f in sorted((ROOT / "data" / "processed" / "verifier").glob("*.jsonl")):  # the cases the self-check was run on

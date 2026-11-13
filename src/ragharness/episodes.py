@@ -19,7 +19,7 @@ from . import protocol
 from .corpus import Corpus
 from .data import Question
 from .policy import next_query
-from .retrieval import Hit, render_observation
+from .retrieval import Hit, render_observation, visible_text
 from .tools import CorpusSearchTool
 
 ABSTAIN_TEXT = 'The accessible passages do not contain the evidence needed to answer: {question}'
@@ -146,7 +146,9 @@ def to_transcript(ep: Episode, q: Question, score: dict) -> dict:
     final = ep.final.turn
     return {
         "qid": ep.qid, "variant": ep.condition, "question": ep.question, "gold_answer": q.answer, "answerable": score.get("answerable"),
-        "provided_evidence": [{"chunk_id": h.chunk_id, "title": h.title} for h in ep.prefill],
+        "masked": sorted(ep.masked), "first_search_masked": sorted(ep.first_search_masked), "max_chars": ep.max_chars,
+        "scorer": score.get("scorer", "v1"), "evidence_scope": q.evidence_scope,
+        "provided_evidence": [{"chunk_id": h.chunk_id, "title": h.title, "text": visible_text(h.text, ep.max_chars)} for h in ep.prefill],
         "steps": steps,
         "final": {"kind": final.kind, "answer": final.answer, "citations": final.citations, "missing": final.missing, "error": final.error},
         "outcome": score.get("outcome"), "f1": score.get("f1"), "n_searches": ep.n_searches, "stop": ep.stop_reason,

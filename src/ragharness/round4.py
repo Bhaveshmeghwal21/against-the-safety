@@ -145,7 +145,9 @@ def aspect_coverage(q, corp, ep) -> dict:
         return {"retrieved_aspect_recall": None, "cited_aspect_recall": None, "all_aspects_cited": None}
     shown = {h.chunk_id for h in ep.retrieved_chunks()}
     cited = set(ep.final.turn.citations or []) if ep.final.turn.kind == "answer" else set()
-    facets = [set(corp.title_copies(t, c)) | {c} for t, c in supports.items()]
+    from . import evidence
+    texts = {h.chunk_id: visible_text(h.text, ep.max_chars) for h in ep.retrieved_chunks()}
+    facets = evidence.facets(q, corp, texts)
     retrieved = sum(bool(f & shown) for f in facets) / len(facets)
     citation = sum(bool(f & shown & cited) for f in facets) / len(facets)
     return {"retrieved_aspect_recall": retrieved, "cited_aspect_recall": citation,

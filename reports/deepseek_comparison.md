@@ -1,5 +1,8 @@
 # DeepSeek V4 Flash versus GPT-6 Luna and Tiny Aya
 
+**13 November 2026 correction:** This table preserves the original scorer and selection record. Evidence alternatives, binary answers, fixed eligibility and source offsets are corrected in the [dated remediation report](2026-11-13-evaluation-remediation.md). Later DPO prompts exposed held-out HotpotQA evidence. Annotation-based unsupported flags do not establish semantic hallucination; main remains submitted.
+
+
 DeepSeek-V4-Flash was run through the existing Azure deployment in two modes, matching the GPT-6 comparison: original prompt/parser and native tool calls. The returned model name was DeepSeek-V4-Flash; the response did not expose an immutable checkpoint revision. All rows use the same scored episode intersection, scorer v2, same corpus, question variants, evidence masks, top-three results and three-search limit.
 Azure model decoding uses deployment defaults; native mode specifies reasoning_effort=none; max completion is 512 including any reasoning. Tiny Aya used greedy decoding and a 160-token cap. FB maps an invalid final turn to a refusal, which can increase success on hidden-evidence cases. V is the saved verifier and applies only to the adapters. The hosted Azure models have FB rows but no V; no adapter was rerun. DeepSeek V4 Flash is an open-weight model hosted by Azure, whereas GPT-6 Luna is closed-source.
 

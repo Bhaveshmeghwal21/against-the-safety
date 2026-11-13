@@ -15,6 +15,7 @@ so the episode builder, masks, scoring and AuditKIT metrics are the ones used on
 from __future__ import annotations
 
 import json
+import hashlib
 import random
 import re
 from collections import Counter
@@ -78,7 +79,7 @@ def load_2wiki(parquet: Path) -> tuple[list[Question], Counter]:
 
 
 def load_musique(jsonl: Path) -> tuple[list[Question], Counter]:
-    out, rej = [], Counter()
+    out, rej, identities = [], Counter(), set()
     for line in jsonl.read_text(encoding="utf-8").splitlines():
         r = json.loads(line)
         if not r["id"].startswith("2hop") or not r.get("answerable", True):
@@ -107,6 +108,11 @@ def load_musique(jsonl: Path) -> tuple[list[Question], Counter]:
         if not ok or len(support) < 2:
             rej["support_not_locatable"] += 1
             continue
+        identity = (" ".join(r["question"].casefold().split()), " ".join(r["answer"].casefold().split()))
+        if identity in identities:
+            rej["duplicate_question_answer"] += 1
+            continue
+        identities.add(identity)
         paragraphs, seen = [], set()
         for p in paras:
             if p["title"] in seen:  # non-support duplicate titles: keep the first only
@@ -119,6 +125,31 @@ def load_musique(jsonl: Path) -> tuple[list[Question], Counter]:
 
 
 # ---------------------------------------------------------------- SQuAD 2.0
+
+
+def annotated_span(context: str, answer: str, offset: int):
+    """Map the official source offset through whitespace normalization and splitting."""
+    if offset < 0 or context[offset:offset + len(answer)] != answer:
+        return None
+    offset += len(answer) - len(answer.lstrip())
+    answer = answer.strip()
+    if not answer:
+        return None
+    normalized = " ".join(context.split())
+    start = len(" ".join(context[:offset].split()))
+    if start and context[offset - 1].isspace():
+        start += 1
+    form = " ".join(answer.split())
+    if normalized[start:start + len(form)] != form:
+        return None
+    parts = sentences(context)
+    cursor = 0
+    for i, sentence in enumerate(parts):
+        end = cursor + len(sentence)
+        if cursor <= start and start + len(form) <= end:
+            return i, [start, start + len(form)]
+        cursor = end + 1
+    return None
 
 
 def load_squad2(parquet: Path) -> tuple[list[Question], list[Question], Counter]:
@@ -143,16 +174,25 @@ def load_squad2(parquet: Path) -> tuple[list[Question], list[Question], Counter]
         if (r["context"], kind) in used:
             continue
         if texts:
-            ids = _find(para.sentences, texts)
-            if not ids:
-                rej["answer_sentence_not_found"] += 1
+            offsets = r["answers"].get("answer_start", [])
+            spans = [annotated_span(r["context"], raw, int(offset))
+                     for raw, offset in zip(r["answers"]["text"], offsets)]
+            if not spans or spans[0] is None:
+                rej["invalid_official_answer_offset"] += 1
+                continue
+            sid, span = spans[0]
+            from .retrieval import visible_text
+            displayed = visible_text(para.text, MAX_CHARS)
+            if span[1] > len(displayed.removesuffix(" ...")) or para.sentences[sid] not in displayed:
+                rej["annotated_answer_beyond_display"] += 1
                 continue
             aliases = sorted({t for t in texts if t != texts[0]})
             q = Question(qid=r["id"], question=r["question"].strip(), answer=texts[0], qtype="answerable", level="dev",
-                         paragraphs=[para], support={title: ids}, aliases=aliases)
+                         paragraphs=[para], support={title: [sid]}, aliases=aliases,
+                         evidence_scope="paragraph", support_spans={title: [span]})
         else:
             q = Question(qid=r["id"], question=r["question"].strip(), answer="", qtype="unanswerable", level="dev",
-                         paragraphs=[para], natural_unanswerable=True)
+                         paragraphs=[para], natural_unanswerable=True, evidence_scope="paragraph")
         used.add((r["context"], kind))
         out.append(q)
     return out, list(corpus_q.values()), rej
@@ -168,7 +208,8 @@ def _parts(answer) -> list[list[str]]:
 
 def _title(text: str, n: int = 9) -> str:
     words = text.split()
-    return " ".join(words[:n]) + (" ..." if len(words) > n else "")
+    digest = hashlib.sha256(" ".join(text.split()).encode("utf-8")).hexdigest()
+    return " ".join(words[:n]) + (" ..." if len(words) > n else "") + f" [{digest}]"
 
 
 def load_rgb(path: Path, integration: bool) -> tuple[list[Question], Counter]:
@@ -191,7 +232,11 @@ def load_rgb(path: Path, integration: bool) -> tuple[list[Question], Counter]:
             pt = []
             for text in g:
                 t = _title(text)
-                if t in seen or not text.strip():
+                if not text.strip():
+                    continue
+                if t in seen:
+                    if t not in pt:
+                        pt.append(t)
                     continue
                 seen.add(t)
                 paragraphs.append(Paragraph(t, sentences(text)))
@@ -265,7 +310,7 @@ def rgb_prefill_variants(q: Question, by_title: dict[str, str], seed: int) -> di
         rest = [t for p in per_part for t in p[1:]]
         if len(firsts) > 3:
             return {}
-        if len(firsts) + len(rest) >= 5 or len(firsts) + len(rest) >= 3:
+        if len(firsts) + len(rest) >= 5:
             out["rgb_int_noise_0"] = {"prefill": [by_title[t] for t in (firsts + rest)[:5]], "masked": [], "answerable": True}
         if len(neg) >= 2:
             three = (firsts + rest)[:3]
@@ -276,8 +321,8 @@ def rgb_prefill_variants(q: Question, by_title: dict[str, str], seed: int) -> di
         pos = [t for g in q._pos_titles for t in g if _visible(paras[t].sentences, _find(paras[t].sentences, forms))]
         rng.shuffle(pos)
         if len(pos) >= 1 and len(neg) >= 4:
-            n_pos = min(5, len(pos))
-            out["rgb_noise_0"] = {"prefill": [by_title[t] for t in pos[:n_pos]], "masked": [], "answerable": True}
+            if len(pos) >= 5:
+                out["rgb_noise_0"] = {"prefill": [by_title[t] for t in pos[:5]], "masked": [], "answerable": True}
             out["rgb_noise_0.8"] = {"prefill": [by_title[t] for t in pos[:1] + neg[:4]], "masked": [], "answerable": True}
         if len(neg) >= 5:
             out["rgb_noise_1"] = {"prefill": [by_title[t] for t in neg[:5]], "masked": allpos, "answerable": False}

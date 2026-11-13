@@ -2,7 +2,7 @@
 
   python scripts/sample_round5.py --adapter <dir> --tag main --out runs/samples/main --k 2 --temperature 0.8
 
-Sets (all training-split material; no development or test episode is read):
+Sets (only training episodes are sampled; held-out annotations are read for leakage blocking):
   r5train        data/bench/r5train  fresh SQuAD training-split articles that no earlier round used (open, support_masked and the
                                      round-4 prompt variants)
   hotpot_train   HotpotQA training questions (first-round training split), variants open / support_masked / first_search_masked /
@@ -18,7 +18,7 @@ import time
 from collections import Counter
 from pathlib import Path
 
-from ragharness import corpus as corpus_mod, data, evaluation, metrics, protocol, round4
+from ragharness import corpus as corpus_mod, data, evaluation, metrics, protocol, round4, lineage
 from ragharness.retrieval import MaskedSearch, open_verified_backend
 from ragharness.tools import CorpusSearchTool
 
@@ -43,9 +43,13 @@ def build_set(name: str, hotpot_questions: int, seed: int):
         man = json.loads((ROOT / "data" / "manifests" / "split_manifest.json").read_text(encoding="utf-8"))
         splits = {n: data.read_questions(ROOT / "data" / "processed" / f"questions_{n}.jsonl") for n in ("train", "dev", "test")}
         corp = corpus_mod.build_corpus([q for n in splits for q in splits[n]], seed=man["seed"])
-        backend = open_verified_backend(ROOT / "data" / "index" / "corpus.sqlite", corp)
+        guard = lineage.PromptGuard(lineage.load_holdouts(ROOT))
+        corp, training_questions = lineage.training_corpus(corp, splits["train"], guard)
+        db = ROOT / "data" / "index" / "training_round5.sqlite"
+        corpus_mod.build_index(corp, db)
+        backend = open_verified_backend(db, corp)
         tool, search = CorpusSearchTool(backend, top_k=3), MaskedSearch(backend)
-        order = data.stratified_order(sorted(splits["train"], key=lambda q: q.qid), seed)[: hotpot_questions]
+        order = data.stratified_order(sorted(training_questions, key=lambda q: q.qid), seed)[: hotpot_questions]
         jobs = evaluation.make_jobs(order, "train", corp, tool, search, len(order))
         return corp, backend, [j for j in jobs if j.variant in HOTPOT_VARIANTS]
     raise SystemExit(f"unknown set {name!r}")
@@ -81,6 +85,7 @@ def main() -> None:
     ap.add_argument("--batch-size", type=int, default=12)
     ap.add_argument("--limit-rollouts", type=int, default=0, help="debug: stop each set after this many rollouts")
     args = ap.parse_args()
+    guard = lineage.PromptGuard(lineage.load_holdouts(ROOT))
 
     import torch
 
@@ -109,6 +114,11 @@ def main() -> None:
                 results = evaluation.run_jobs_batched([j for j, _ in chunk], corp, lambda: CorpusSearchTool(backend, top_k=3), system, gen, 3,
                                                       args.concurrency, progress=0, lenient=True)
                 for (job, run), (_, ep, _) in zip(chunk, results):
+                    from build_pairs_round5 import context_messages
+                    draft = {
+                        "user_text": ep.user_text, "steps": [{"text": s.text, "observation": s.observation} for s in ep.steps]}
+                    if guard.matches(context_messages(draft, system)):
+                        raise ValueError("sampled training prompt contains held-out evidence")
                     score = metrics.score_episode(ep, job.q, corp, job.spec.answerable)
                     score.update(round4.aspect_coverage(job.q, corp, ep))
                     outcomes[score["outcome"]] += 1

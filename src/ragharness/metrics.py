@@ -18,14 +18,27 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass
+from functools import lru_cache
 
-from agenttune.rag.rewards.qa_metrics import exact_match_score, f1_score
+from agenttune.rag.rewards.qa_metrics import _get_squad_metric
 
 from .corpus import Corpus
 from .data import Question
 from .episodes import Episode
 
 F1_THRESHOLD = 0.5
+
+
+@lru_cache(maxsize=16384)
+def _answer_scores(pred: str, gold: str):
+    """Cache deterministic AgentTune QA scores during multi-version transcript replay."""
+    # Use the same loaded SQuAD implementation as AgentTune. Its public
+    # compute() writes a temporary Arrow dataset for every individual pair.
+    result = _get_squad_metric()._compute(
+        predictions=[{"id": "0", "prediction_text": pred}],
+        references=[{"id": "0", "answers": {"text": [gold], "answer_start": [0]}}],
+    )
+    return result["f1"] / 100.0, result["exact_match"] / 100.0
 
 
 def _norm_text(s: str) -> str:
@@ -46,8 +59,9 @@ def judge_answer(pred: str, q: Question) -> tuple[float, bool, bool]:
     the answer is correct when every part has one of its accepted forms contained in it.
     """
     golds = [q.answer] + [a for a in q.aliases if a]
-    f1 = max(f1_score(pred, g) for g in golds)
-    em = max(float(exact_match_score(pred, g)) for g in golds)
+    qa = [_answer_scores(pred, g) for g in golds]
+    f1 = max(s[0] for s in qa)
+    em = max(s[1] for s in qa)
     if q.answer_parts:
         p = _norm_text(pred)
         ok = all(any(_norm_text(a) and _norm_text(a) in p for a in part) for part in q.answer_parts)
@@ -56,7 +70,7 @@ def judge_answer(pred: str, q: Question) -> tuple[float, bool, bool]:
     return f1, em, ok
 
 
-def score_episode(ep: Episode, q: Question, corpus: Corpus, answerable: bool) -> dict:
+def score_episode(ep: Episode, q: Question, corpus: Corpus, answerable: bool, version: str = "v3") -> dict:
     final = ep.final.turn
     # Gold passages a citation may point to: the support chunks, plus (benchmarks only) other passages that each hold the answer
     support = set(corpus.support_chunks(q).values()) | set(corpus.extra_copies.get(q.qid, ()))
@@ -79,16 +93,34 @@ def score_episode(ep: Episode, q: Question, corpus: Corpus, answerable: bool) ->
             else "unsupported_correct" if out["answer_ok"] else "unsupported_wrong"
         )
     out["good"] = out["outcome"] in ("supported_correct", "correct_abstain")
+    if version == "v3":
+        from . import audit, rescore
+        transcript = {"qid": ep.qid, "variant": ep.condition, "answerable": answerable,
+                      "max_chars": ep.max_chars, "masked": list(ep.masked),
+                      "provided_evidence": [{"chunk_id": h.chunk_id, "text": h.text} for h in ep.prefill],
+                      "steps": [{"retrieved": [{"chunk_id": h.chunk_id, "text": h.text} for h in s.hits]} for s in ep.steps],
+                      "final": {"kind": final.kind, "answer": final.answer, "citations": final.citations}}
+        corrected = rescore.score(transcript, q, corpus, ep.max_chars,
+                                  chunk_metadata=audit.CHUNK_META, decision_date=audit.DECISION_DATE)
+        out.update(corrected)
+        out["outcome"], out["good"] = corrected["outcome_v3"], corrected["good_v3"]
+        out["scorer"] = "v3"
+        out["evidence_supported_good"] = corrected["strong_v3"]
+    elif version != "v1":
+        raise ValueError(f"unknown scorer version: {version}")
     return out
 
 
 def summarize(scores: list[dict]) -> dict:
+    total = len(scores)
+    scores = [s for s in scores if not s.get("excluded_v3", False)]
     def rate(rs, key):
         return round(sum(1 for r in rs if key(r)) / len(rs), 3) if rs else None
 
     ans = [s for s in scores if s["answerable"]]
     una = [s for s in scores if not s["answerable"]]
     return {
+        "n_total": total, "n_excluded": total - len(scores),
         "n": len(scores), "n_answerable": len(ans), "n_unanswerable": len(una),
         "end_to_end_good": rate(scores, lambda s: s["good"]),
         "supported_correct": rate(ans, lambda s: s["outcome"] == "supported_correct"),

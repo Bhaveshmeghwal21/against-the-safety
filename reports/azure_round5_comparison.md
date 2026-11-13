@@ -1,5 +1,8 @@
 # Azure GPT-6 Luna vs the saved RAG systems
 
+**13 November 2026 correction:** This table preserves the original scorer and selection record. Evidence alternatives, binary answers, fixed eligibility and source offsets are corrected in the [dated remediation report](2026-11-13-evaluation-remediation.md). Later DPO prompts exposed held-out HotpotQA evidence. Annotation-based unsupported flags do not establish semantic hallucination; main remains submitted.
+
+
 Same question/variant keys, index, masks, top 3, passage display and three-search budget. Scorer v2; every compared actor uses the same intersection of scorable episodes. Exclusion remains a heuristic, not a proof of missing evidence. Macro is the unweighted mean of success rates on SQuAD single, SQuAD compound, HotpotQA and RGB; success is a supported correct answer or a correct abstention.
 Azure exact uses the original prompt/parser and default temperature/reasoning; native uses function tools, minimal output-format normalization and reasoning_effort=none, as required by this deployment. Tiny Aya uses greedy decoding and 160 generated tokens; Azure has a 512-token completion cap including any reasoning. Each Azure mode is a separate stochastic run.
 FB maps invalid actions to abstention. V is the previously saved Tiny Aya verifier, available for the three round-5 adapter systems only. Azure has no V; no adapter was run for this comparison. Provider-blocked episodes are excluded, not scored as wrong answers or abstentions.

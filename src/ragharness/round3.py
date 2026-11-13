@@ -94,6 +94,7 @@ def make_compound(q1: Question, q2: Question) -> Question | None:
         qid=f"cmp-{q1.qid}-{q2.qid}", question=text, answer=f"{q1.answer}; {q2.answer}", qtype="compound", level="round3",
         paragraphs=[q1.paragraphs[0], q2.paragraphs[0]], support={t1: list(q1.support[t1]), t2: list(q2.support[t2])},
         answer_parts=[[q1.answer, *q1.aliases], [q2.answer, *q2.aliases]],
+        support_spans={**q1.support_spans, **q2.support_spans},
     )
 
 

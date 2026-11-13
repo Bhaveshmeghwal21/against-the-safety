@@ -1,0 +1,675 @@
+{
+  "episodes": 863,
+  "historical_coverage": {
+    "expected": 938,
+    "provider_unavailable_or_missing": 9,
+    "excluded_on_at_least_one_actor": 66,
+    "common": 863,
+    "per_system": {
+      "main": {
+        "present": 938,
+        "excluded_v2": 11
+      },
+      "candA": {
+        "present": 938,
+        "excluded_v2": 10
+      },
+      "candF1": {
+        "present": 938,
+        "excluded_v2": 11
+      },
+      "azure_exact": {
+        "present": 938,
+        "excluded_v2": 9
+      },
+      "azure_native": {
+        "present": 935,
+        "excluded_v2": 53
+      },
+      "azure_deepseek_exact": {
+        "present": 934,
+        "excluded_v2": 1
+      },
+      "azure_deepseek_native": {
+        "present": 933,
+        "excluded_v2": 52
+      },
+      "main+FB": {
+        "present": 938,
+        "excluded_v2": 11
+      },
+      "main+FB+V": {
+        "present": 938,
+        "excluded_v2": 11
+      },
+      "candA+FB": {
+        "present": 938,
+        "excluded_v2": 10
+      },
+      "candA+FB+V": {
+        "present": 938,
+        "excluded_v2": 10
+      },
+      "candF1+FB": {
+        "present": 938,
+        "excluded_v2": 11
+      },
+      "candF1+FB+V": {
+        "present": 938,
+        "excluded_v2": 11
+      },
+      "azure_exact+FB": {
+        "present": 938,
+        "excluded_v2": 9
+      },
+      "azure_native+FB": {
+        "present": 935,
+        "excluded_v2": 53
+      },
+      "azure_deepseek_exact+FB": {
+        "present": 934,
+        "excluded_v2": 1
+      },
+      "azure_deepseek_native+FB": {
+        "present": 933,
+        "excluded_v2": 52
+      }
+    }
+  },
+  "published": {
+    "main": {
+      "macro": 0.41518603707920104,
+      "components": {
+        "single": 0.5410628019323671,
+        "compound": 0.22929936305732485,
+        "hotpot": 0.5263157894736842,
+        "rgb": 0.3640661938534279
+      },
+      "unsupported": 82,
+      "hidden_n": 305,
+      "unsupported_rate": 0.26885245901639343,
+      "supported_correct": 0.2921146953405018,
+      "n": 863,
+      "false_abstain": 0.22401433691756273,
+      "invalid": 0.08111239860950174
+    },
+    "candA": {
+      "macro": 0.47233270456043325,
+      "components": {
+        "single": 0.6328502415458938,
+        "compound": 0.2611464968152866,
+        "hotpot": 0.6052631578947368,
+        "rgb": 0.3900709219858156
+      },
+      "unsupported": 96,
+      "hidden_n": 305,
+      "unsupported_rate": 0.31475409836065577,
+      "supported_correct": 0.3387096774193548,
+      "n": 863,
+      "false_abstain": 0.15949820788530467,
+      "invalid": 0.0220162224797219
+    },
+    "candF1": {
+      "macro": 0.4493739957267011,
+      "components": {
+        "single": 0.5458937198067633,
+        "compound": 0.3375796178343949,
+        "hotpot": 0.5263157894736842,
+        "rgb": 0.3877068557919622
+      },
+      "unsupported": 84,
+      "hidden_n": 305,
+      "unsupported_rate": 0.2754098360655738,
+      "supported_correct": 0.3548387096774194,
+      "n": 863,
+      "false_abstain": 0.15949820788530467,
+      "invalid": 0.08922363847045191
+    },
+    "azure_exact": {
+      "macro": 0.21028386065940455,
+      "components": {
+        "single": 0.30917874396135264,
+        "compound": 0.15286624203821655,
+        "hotpot": 0.17105263157894737,
+        "rgb": 0.20803782505910165
+      },
+      "unsupported": 36,
+      "hidden_n": 305,
+      "unsupported_rate": 0.1180327868852459,
+      "supported_correct": 0.13799283154121864,
+      "n": 863,
+      "false_abstain": 0.05734767025089606,
+      "invalid": 0.38122827346465815
+    },
+    "azure_native": {
+      "macro": 0.28993088235947784,
+      "components": {
+        "single": 0.5700483091787439,
+        "compound": 0.05732484076433121,
+        "hotpot": 0.23684210526315788,
+        "rgb": 0.29550827423167847
+      },
+      "unsupported": 59,
+      "hidden_n": 305,
+      "unsupported_rate": 0.19344262295081968,
+      "supported_correct": 0.3942652329749104,
+      "n": 863,
+      "false_abstain": 0.007168458781362007,
+      "invalid": 0.2398609501738123
+    },
+    "azure_deepseek_exact": {
+      "macro": 0.244061168373619,
+      "components": {
+        "single": 0.3719806763285024,
+        "compound": 0.05732484076433121,
+        "hotpot": 0.17105263157894737,
+        "rgb": 0.375886524822695
+      },
+      "unsupported": 158,
+      "hidden_n": 305,
+      "unsupported_rate": 0.5180327868852459,
+      "supported_correct": 0.2616487455197133,
+      "n": 863,
+      "false_abstain": 0.1003584229390681,
+      "invalid": 0.04982618771726535
+    },
+    "azure_deepseek_native": {
+      "macro": 0.27300149161278353,
+      "components": {
+        "single": 0.4927536231884058,
+        "compound": 0.006369426751592357,
+        "hotpot": 0.15789473684210525,
+        "rgb": 0.43498817966903075
+      },
+      "unsupported": 36,
+      "hidden_n": 305,
+      "unsupported_rate": 0.1180327868852459,
+      "supported_correct": 0.53584229390681,
+      "n": 863,
+      "false_abstain": 0.0,
+      "invalid": 0.3707995365005794
+    },
+    "main+FB": {
+      "macro": 0.4677749107759608,
+      "components": {
+        "single": 0.5893719806763285,
+        "compound": 0.3248407643312102,
+        "hotpot": 0.5526315789473685,
+        "rgb": 0.40425531914893614
+      },
+      "unsupported": 82,
+      "hidden_n": 305,
+      "unsupported_rate": 0.26885245901639343,
+      "supported_correct": 0.2921146953405018,
+      "n": 863,
+      "false_abstain": 0.27060931899641577,
+      "invalid": 0.0
+    },
+    "main+FB+V": {
+      "macro": 0.5072877468501313,
+      "components": {
+        "single": 0.5797101449275363,
+        "compound": 0.3885350318471338,
+        "hotpot": 0.5526315789473685,
+        "rgb": 0.508274231678487
+      },
+      "unsupported": 22,
+      "hidden_n": 305,
+      "unsupported_rate": 0.07213114754098361,
+      "supported_correct": 0.2777777777777778,
+      "n": 863,
+      "false_abstain": 0.3906810035842294,
+      "invalid": 0.0
+    },
+    "candA+FB": {
+      "macro": 0.4923713024402818,
+      "components": {
+        "single": 0.6521739130434783,
+        "compound": 0.29936305732484075,
+        "hotpot": 0.618421052631579,
+        "rgb": 0.39952718676122934
+      },
+      "unsupported": 96,
+      "hidden_n": 305,
+      "unsupported_rate": 0.31475409836065577,
+      "supported_correct": 0.3387096774193548,
+      "n": 863,
+      "false_abstain": 0.16666666666666666,
+      "invalid": 0.0
+    },
+    "candA+FB+V": {
+      "macro": 0.5297737626141792,
+      "components": {
+        "single": 0.6038647342995169,
+        "compound": 0.3885350318471338,
+        "hotpot": 0.618421052631579,
+        "rgb": 0.508274231678487
+      },
+      "unsupported": 31,
+      "hidden_n": 305,
+      "unsupported_rate": 0.10163934426229508,
+      "supported_correct": 0.3118279569892473,
+      "n": 863,
+      "false_abstain": 0.31899641577060933,
+      "invalid": 0.0
+    },
+    "candF1+FB": {
+      "macro": 0.5196385575753955,
+      "components": {
+        "single": 0.6280193236714976,
+        "compound": 0.46496815286624205,
+        "hotpot": 0.5789473684210527,
+        "rgb": 0.4066193853427896
+      },
+      "unsupported": 84,
+      "hidden_n": 305,
+      "unsupported_rate": 0.2754098360655738,
+      "supported_correct": 0.3548387096774194,
+      "n": 863,
+      "false_abstain": 0.20967741935483872,
+      "invalid": 0.0
+    },
+    "candF1+FB+V": {
+      "macro": 0.5553763399456136,
+      "components": {
+        "single": 0.6038647342995169,
+        "compound": 0.5159235668789809,
+        "hotpot": 0.6052631578947368,
+        "rgb": 0.49645390070921985
+      },
+      "unsupported": 25,
+      "hidden_n": 305,
+      "unsupported_rate": 0.08196721311475409,
+      "supported_correct": 0.32616487455197135,
+      "n": 863,
+      "false_abstain": 0.37455197132616486,
+      "invalid": 0.0
+    },
+    "azure_exact+FB": {
+      "macro": 0.42377347074543464,
+      "components": {
+        "single": 0.5362318840579711,
+        "compound": 0.37579617834394907,
+        "hotpot": 0.4473684210526316,
+        "rgb": 0.33569739952718675
+      },
+      "unsupported": 36,
+      "hidden_n": 305,
+      "unsupported_rate": 0.1180327868852459,
+      "supported_correct": 0.13799283154121864,
+      "n": 863,
+      "false_abstain": 0.3655913978494624,
+      "invalid": 0.0
+    },
+    "azure_native+FB": {
+      "macro": 0.5489688984142057,
+      "components": {
+        "single": 0.7922705314009661,
+        "compound": 0.37579617834394907,
+        "hotpot": 0.5526315789473685,
+        "rgb": 0.475177304964539
+      },
+      "unsupported": 59,
+      "hidden_n": 305,
+      "unsupported_rate": 0.19344262295081968,
+      "supported_correct": 0.3942652329749104,
+      "n": 863,
+      "false_abstain": 0.026881720430107527,
+      "invalid": 0.0
+    },
+    "azure_deepseek_exact+FB": {
+      "macro": 0.327801909367045,
+      "components": {
+        "single": 0.391304347826087,
+        "compound": 0.1337579617834395,
+        "hotpot": 0.40789473684210525,
+        "rgb": 0.37825059101654845
+      },
+      "unsupported": 158,
+      "hidden_n": 305,
+      "unsupported_rate": 0.5180327868852459,
+      "supported_correct": 0.2616487455197133,
+      "n": 863,
+      "false_abstain": 0.11469534050179211,
+      "invalid": 0.0
+    },
+    "azure_deepseek_native+FB": {
+      "macro": 0.6109501835994127,
+      "components": {
+        "single": 0.821256038647343,
+        "compound": 0.3630573248407643,
+        "hotpot": 0.5526315789473685,
+        "rgb": 0.706855791962175
+      },
+      "unsupported": 36,
+      "hidden_n": 305,
+      "unsupported_rate": 0.1180327868852459,
+      "supported_correct": 0.53584229390681,
+      "n": 863,
+      "false_abstain": 0.0913978494623656,
+      "invalid": 0.0
+    }
+  },
+  "corrected_two_bugs": {
+    "main": {
+      "macro": 0.4838217220362745,
+      "components": {
+        "single": 0.5410628019323671,
+        "compound": 0.22929936305732485,
+        "hotpot": 0.5526315789473685,
+        "rgb": 0.6122931442080378
+      },
+      "unsupported": 82,
+      "hidden_n": 305,
+      "unsupported_rate": 0.26885245901639343,
+      "supported_correct": 0.4838709677419355,
+      "n": 863,
+      "false_abstain": 0.22401433691756273,
+      "invalid": 0.08111239860950174
+    },
+    "candA": {
+      "macro": 0.5525320948802043,
+      "components": {
+        "single": 0.6328502415458938,
+        "compound": 0.2611464968152866,
+        "hotpot": 0.6447368421052632,
+        "rgb": 0.6713947990543735
+      },
+      "unsupported": 96,
+      "hidden_n": 305,
+      "unsupported_rate": 0.31475409836065577,
+      "supported_correct": 0.557347670250896,
+      "n": 863,
+      "false_abstain": 0.15949820788530467,
+      "invalid": 0.0220162224797219
+    },
+    "candF1": {
+      "macro": 0.525101879265335,
+      "components": {
+        "single": 0.5458937198067633,
+        "compound": 0.3375796178343949,
+        "hotpot": 0.5526315789473685,
+        "rgb": 0.6643026004728132
+      },
+      "unsupported": 84,
+      "hidden_n": 305,
+      "unsupported_rate": 0.2754098360655738,
+      "supported_correct": 0.568100358422939,
+      "n": 863,
+      "false_abstain": 0.15949820788530467,
+      "invalid": 0.08922363847045191
+    },
+    "azure_exact": {
+      "macro": 0.2516550190518395,
+      "components": {
+        "single": 0.30917874396135264,
+        "compound": 0.15286624203821655,
+        "hotpot": 0.17105263157894737,
+        "rgb": 0.3735224586288416
+      },
+      "unsupported": 36,
+      "hidden_n": 305,
+      "unsupported_rate": 0.1180327868852459,
+      "supported_correct": 0.26344086021505375,
+      "n": 863,
+      "false_abstain": 0.05734767025089606,
+      "invalid": 0.38122827346465815
+    },
+    "azure_native": {
+      "macro": 0.34134932207578994,
+      "components": {
+        "single": 0.5700483091787439,
+        "compound": 0.05732484076433121,
+        "hotpot": 0.23684210526315788,
+        "rgb": 0.5011820330969267
+      },
+      "unsupported": 59,
+      "hidden_n": 305,
+      "unsupported_rate": 0.19344262295081968,
+      "supported_correct": 0.5501792114695341,
+      "n": 863,
+      "false_abstain": 0.007168458781362007,
+      "invalid": 0.2398609501738123
+    },
+    "azure_deepseek_exact": {
+      "macro": 0.2960706246383944,
+      "components": {
+        "single": 0.3719806763285024,
+        "compound": 0.05732484076433121,
+        "hotpot": 0.17105263157894737,
+        "rgb": 0.5839243498817966
+      },
+      "unsupported": 158,
+      "hidden_n": 305,
+      "unsupported_rate": 0.5180327868852459,
+      "supported_correct": 0.41935483870967744,
+      "n": 863,
+      "false_abstain": 0.1003584229390681,
+      "invalid": 0.04982618771726535
+    },
+    "azure_deepseek_native": {
+      "macro": 0.30913126640437244,
+      "components": {
+        "single": 0.4927536231884058,
+        "compound": 0.006369426751592357,
+        "hotpot": 0.18421052631578946,
+        "rgb": 0.5531914893617021
+      },
+      "unsupported": 36,
+      "hidden_n": 305,
+      "unsupported_rate": 0.1180327868852459,
+      "supported_correct": 0.6290322580645161,
+      "n": 863,
+      "false_abstain": 0.0,
+      "invalid": 0.3707995365005794
+    },
+    "main+FB": {
+      "macro": 0.5364105957330343,
+      "components": {
+        "single": 0.5893719806763285,
+        "compound": 0.3248407643312102,
+        "hotpot": 0.5789473684210527,
+        "rgb": 0.6524822695035462
+      },
+      "unsupported": 82,
+      "hidden_n": 305,
+      "unsupported_rate": 0.26885245901639343,
+      "supported_correct": 0.4838709677419355,
+      "n": 863,
+      "false_abstain": 0.27060931899641577,
+      "invalid": 0.0
+    },
+    "main+FB+V": {
+      "macro": 0.5729683490648881,
+      "components": {
+        "single": 0.5797101449275363,
+        "compound": 0.3885350318471338,
+        "hotpot": 0.5789473684210527,
+        "rgb": 0.7446808510638298
+      },
+      "unsupported": 22,
+      "hidden_n": 305,
+      "unsupported_rate": 0.07213114754098361,
+      "supported_correct": 0.460573476702509,
+      "n": 863,
+      "false_abstain": 0.3906810035842294,
+      "invalid": 0.0
+    },
+    "candA+FB": {
+      "macro": 0.5725706927600529,
+      "components": {
+        "single": 0.6521739130434783,
+        "compound": 0.29936305732484075,
+        "hotpot": 0.6578947368421053,
+        "rgb": 0.6808510638297872
+      },
+      "unsupported": 96,
+      "hidden_n": 305,
+      "unsupported_rate": 0.31475409836065577,
+      "supported_correct": 0.557347670250896,
+      "n": 863,
+      "false_abstain": 0.16666666666666666,
+      "invalid": 0.0
+    },
+    "candA+FB+V": {
+      "macro": 0.6058360370947068,
+      "components": {
+        "single": 0.6038647342995169,
+        "compound": 0.3885350318471338,
+        "hotpot": 0.6578947368421053,
+        "rgb": 0.7730496453900709
+      },
+      "unsupported": 31,
+      "hidden_n": 305,
+      "unsupported_rate": 0.10163934426229508,
+      "supported_correct": 0.517921146953405,
+      "n": 863,
+      "false_abstain": 0.31899641577060933,
+      "invalid": 0.0
+    },
+    "candF1+FB": {
+      "macro": 0.5953664411140294,
+      "components": {
+        "single": 0.6280193236714976,
+        "compound": 0.46496815286624205,
+        "hotpot": 0.6052631578947368,
+        "rgb": 0.6832151300236406
+      },
+      "unsupported": 84,
+      "hidden_n": 305,
+      "unsupported_rate": 0.2754098360655738,
+      "supported_correct": 0.568100358422939,
+      "n": 863,
+      "false_abstain": 0.20967741935483872,
+      "invalid": 0.0
+    },
+    "candF1+FB+V": {
+      "macro": 0.6281491407419306,
+      "components": {
+        "single": 0.6038647342995169,
+        "compound": 0.5159235668789809,
+        "hotpot": 0.631578947368421,
+        "rgb": 0.7612293144208038
+      },
+      "unsupported": 25,
+      "hidden_n": 305,
+      "unsupported_rate": 0.08196721311475409,
+      "supported_correct": 0.5304659498207885,
+      "n": 863,
+      "false_abstain": 0.37455197132616486,
+      "invalid": 0.0
+    },
+    "azure_exact+FB": {
+      "macro": 0.4651446291378696,
+      "components": {
+        "single": 0.5362318840579711,
+        "compound": 0.37579617834394907,
+        "hotpot": 0.4473684210526316,
+        "rgb": 0.5011820330969267
+      },
+      "unsupported": 36,
+      "hidden_n": 305,
+      "unsupported_rate": 0.1180327868852459,
+      "supported_correct": 0.26344086021505375,
+      "n": 863,
+      "false_abstain": 0.3655913978494624,
+      "invalid": 0.0
+    },
+    "azure_native+FB": {
+      "macro": 0.6003873381305178,
+      "components": {
+        "single": 0.7922705314009661,
+        "compound": 0.37579617834394907,
+        "hotpot": 0.5526315789473685,
+        "rgb": 0.6808510638297872
+      },
+      "unsupported": 59,
+      "hidden_n": 305,
+      "unsupported_rate": 0.19344262295081968,
+      "supported_correct": 0.5501792114695341,
+      "n": 863,
+      "false_abstain": 0.026881720430107527,
+      "invalid": 0.0
+    },
+    "azure_deepseek_exact+FB": {
+      "macro": 0.37981136563182044,
+      "components": {
+        "single": 0.391304347826087,
+        "compound": 0.1337579617834395,
+        "hotpot": 0.40789473684210525,
+        "rgb": 0.5862884160756501
+      },
+      "unsupported": 158,
+      "hidden_n": 305,
+      "unsupported_rate": 0.5180327868852459,
+      "supported_correct": 0.41935483870967744,
+      "n": 863,
+      "false_abstain": 0.11469534050179211,
+      "invalid": 0.0
+    },
+    "azure_deepseek_native+FB": {
+      "macro": 0.6470799583910016,
+      "components": {
+        "single": 0.821256038647343,
+        "compound": 0.3630573248407643,
+        "hotpot": 0.5789473684210527,
+        "rgb": 0.8250591016548463
+      },
+      "unsupported": 36,
+      "hidden_n": 305,
+      "unsupported_rate": 0.1180327868852459,
+      "supported_correct": 0.6290322580645161,
+      "n": 863,
+      "false_abstain": 0.0913978494623656,
+      "invalid": 0.0
+    }
+  },
+  "comparisons": {
+    "azure_deepseek_native+FB/candF1+FB+V": {
+      "macro": {
+        "difference": 0.018930817649071008,
+        "ci95": [
+          -0.027015733374048764,
+          0.06424609838229815
+        ]
+      },
+      "unsupported_rate": {
+        "difference": 0.03606557377049181,
+        "ci95": [
+          -0.009317495791490093,
+          0.08050317415642494
+        ]
+      },
+      "supported_correct": {
+        "difference": 0.09856630824372759,
+        "ci95": [
+          0.04796827111917519,
+          0.1519452426254546
+        ]
+      }
+    },
+    "azure_deepseek_native+FB/azure_native+FB": {
+      "macro": {
+        "difference": 0.04669262026048382,
+        "ci95": [
+          0.013841962354322047,
+          0.08170231278825414
+        ]
+      },
+      "unsupported_rate": {
+        "difference": -0.07540983606557378,
+        "ci95": [
+          -0.12131147540983606,
+          -0.031798206378315506
+        ]
+      },
+      "supported_correct": {
+        "difference": 0.07885304659498205,
+        "ci95": [
+          0.03345724907063197,
+          0.12609663226704404
+        ]
+      }
+    }
+  }
+}

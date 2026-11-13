@@ -8,7 +8,7 @@ Step 1 (CPU) picks decision points from the sampled TRAINING rollouts of round 5
 least one search and no shown passage holds the whole answer. The context is the message list before that abstention.
 Step 2 (GPU, scripts/force_answers_round5.py) makes the same system answer at that context, with `<answer>` forced as the first tokens.
 Step 3 (CPU) pairs the canonical abstention (chosen) with that forced answer (rejected) and appends the pairs to the unchanged round-5 pair file.
-No development or test episode is read.
+No development or test rollout is sampled; held-out annotations are read to reject leaking training prompts.
 """
 
 import argparse
@@ -21,7 +21,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_pairs_round5 as B  # noqa: E402
-from ragharness import episodes, protocol, rows  # noqa: E402
+from ragharness import episodes, protocol, rows, lineage  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 MAX_NEW = 160
@@ -38,6 +38,7 @@ def contexts_step(args) -> None:
     tok = tokenizer(args.tokenizer)
     system = json.loads((ROOT / "data" / "processed" / "training" / "main.jsonl").read_text(encoding="utf-8").splitlines()[0])["prompt"][0]["content"]
     worlds, found, why, seen = {}, [], Counter(), set()
+    guard = lineage.PromptGuard(lineage.load_holdouts(ROOT))
     for path in sorted(Path(args.samples).rglob("samples_*.jsonl")):
         set_name = path.stem.removeprefix("samples_")
         corp, qmap = worlds.setdefault(set_name, B.load_world(set_name))
@@ -55,6 +56,9 @@ def contexts_step(args) -> None:
                 why["not_an_abstention_after_a_search"] += 1
                 continue
             prompt = B.context_messages(r, system)
+            if guard.matches(prompt):
+                why["heldout_evidence_or_question"] += 1
+                continue
             key = hashlib.sha1(json.dumps(prompt, ensure_ascii=False).encode()).hexdigest()
             if key in seen:
                 why["duplicate_context"] += 1
@@ -139,6 +143,7 @@ def pairs_step(args) -> None:
         new.append(row)
     old = [json.loads(l) for l in (ROOT / args.old).read_text(encoding="utf-8").splitlines() if l.strip()]
     selected = old + new
+    selected, validation = lineage.clean_rows(selected, lineage.PromptGuard(lineage.load_holdouts(ROOT)))
     rng.shuffle(selected)
     out = ROOT / args.out
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -146,6 +151,7 @@ def pairs_step(args) -> None:
         for row in selected:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
     report = {"old_pairs": len(old), "old_sha256": hashlib.sha256((ROOT / args.old).read_bytes()).hexdigest(), "new_pairs": len(new), "total": len(selected),
+              "training_validation": validation,
               "decisions": dict(why), "new_by_set": dict(Counter(r["meta"]["set"] for r in new)), "new_by_system": dict(Counter(r["meta"]["system"] for r in new)),
               "new_by_depth": dict(sorted(Counter(r["meta"]["depth"] for r in new).items())),
               "total_by_chosen_kind": dict(Counter(r["meta"]["chosen_kind"] for r in selected)),

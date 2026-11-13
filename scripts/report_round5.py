@@ -130,7 +130,9 @@ def main() -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.with_suffix(".json").write_text(json.dumps({"systems": table, "comparisons": comparisons, "episodes": len(keys)}, indent=2), encoding="utf-8")
     comps_all = sorted({c for s in table.values() for c in s["components"]}, key=COMPONENTS.index)
-    lines = ["# Round 5 final test (scorer v2)", "", f"{len(keys)} episodes. Macro = mean of the component rates.", "",
+    lines = ["# Round 5 final test (historical scorer v2)", "",
+             "**13 November 2026 correction:** Original scorer and selection results are preserved. See [corrected replay](round5_corrected.md) and [dated remediation](2026-11-13-evaluation-remediation.md). Main remains submitted.", "",
+             f"{len(keys)} episodes. Macro = mean of the component rates.", "",
              "| configuration | macro | " + " | ".join(comps_all) + " | unsupported / hidden | supported correct | false refusals | invalid before repair |",
              "| --- | ---: | " + " | ".join("---:" for _ in comps_all) + " | ---: | ---: | ---: | ---: |"]
     for name, s in table.items():

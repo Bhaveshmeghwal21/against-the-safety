@@ -37,9 +37,11 @@ def make_jobs(qs: list[Question], split: str, corp: Corpus, tool: CorpusSearchTo
     reachable = 0
     for q in qs:
         if q.natural_unanswerable:
-            # No support to reach or mask: open search, and the correct ending is an abstention.
-            spec = builder.Spec(NATURAL, answerable=False, finish="abstain")
-            ep = episodes.run_scripted(q, corp, tool, NATURAL, budget=3, finish="abstain")
+            # The official label only applies to the original source paragraph.
+            allowed = set(corp.by_question[q.qid].values())
+            masked = frozenset(set(corp._by_id) - allowed)
+            spec = builder.Spec(NATURAL, masked=masked, answerable=False, finish="abstain")
+            ep = episodes.run_scripted(q, corp, tool, NATURAL, masked=masked, budget=3, finish="abstain")
             jobs.append(Job(q, NATURAL, spec, [s.text for s in ep.steps]))
             continue
         built = builder.build_question(q, split, corp, tool, search)
@@ -163,7 +165,7 @@ def score_results(
         s = metrics.score_episode(ep, job.q, corp, job.spec.answerable)
         from .round4 import aspect_coverage
         s.update(aspect_coverage(job.q, corp, ep))
-        s["evidence_supported_good"] = bool(s["good"] and (not job.spec.answerable or s["all_aspects_cited"]))
+        s["evidence_supported_good"] = s["strong_v3"]
         s["qtype"] = job.q.qtype
         if audit.CHUNK_META and audit.DECISION_DATE:  # dated documents: did the answer cite an edition that was already superseded?
             cited = ep.final.turn.citations if ep.final.turn.kind == "answer" else []

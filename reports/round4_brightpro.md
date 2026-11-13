@@ -1,5 +1,8 @@
 # Round 4 Bright-Pro pilot
 
+**13 November 2026 correction:** This table preserves the original scorer and selection record. Evidence alternatives, binary answers, fixed eligibility and source offsets are corrected in the [dated remediation report](2026-11-13-evaluation-remediation.md). Later DPO prompts exposed held-out HotpotQA evidence. Annotation-based unsupported flags do not establish semantic hallucination; main remains submitted.
+
+
 Fixed custom robotics sample; document-ID weighted aspect coverage only. Not the official 175-query benchmark, a claim-entailment measure, or a checkpoint-selection set. Supporting facts can lie beyond the 800-character display.
 
 | system | weighted aspect recall | cited aspect recall | invalid / 10 | input truncations |
