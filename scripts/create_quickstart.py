@@ -15,6 +15,7 @@ cells = [
     md('# Quickstart: ask over six passages\n\nRun from the repository root on a CUDA GPU. On Kaggle, attach the project bundle and the Tiny Aya Global model first. Outside Kaggle, accept the base-model terms on Hugging Face and authenticate using your own account. This notebook has not yet been GPU-validated.'),
     code("%pip install --no-deps -r requirements-gpu.lock.txt\n%pip install --no-deps -e ."),
     code("""import json
+import sqlite3
 from dataclasses import asdict
 from pathlib import Path
 
@@ -29,8 +30,11 @@ docs = [
     {'title': 'Packaging', 'text': 'Keep the original packaging when returning a device.'},
     {'title': 'Delivery', 'text': 'A tracking link is sent when an order ships.'},
 ]
-backend, _ = system.index_documents(docs, Path('runs/quickstart/docs.sqlite'))
 model, tokenizer = load_model_for_system('BMEscanor/against-the-safety-tiny-aya-rag-main')
+# Fail loudly if this Python build loses FTS5 after the model libraries load.
+with sqlite3.connect(':memory:') as connection:
+    connection.execute('CREATE VIRTUAL TABLE probe USING fts5(text)')
+backend, _ = system.index_documents(docs, Path('runs/quickstart/docs.sqlite'))
 rag = system.RagSystem(model, tokenizer, backend)
 """),
     md('The next three cells ask an answerable question, one missing from the documents, and a two-part question. The actual decision depends on the model; a refusal on the two-part question is a valid result to inspect.'),
