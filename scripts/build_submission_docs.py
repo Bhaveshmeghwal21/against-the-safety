@@ -37,6 +37,8 @@ if not license_section:
     raise SystemExit('Cannot find the original license section')
 
 trace_path = ROOT / 'runs/account2_round5/ats-eval-jobs-r5test-ref/out/eval/main_bench_r5t_hotpot/lenient/transcripts.jsonl'
+if not trace_path.exists():
+    raise SystemExit(f'Required saved artifact is missing: {trace_path}')
 trace = next(row for line in trace_path.read_text(encoding='utf-8').splitlines() if (row := json.loads(line))['final']['kind'] == 'answer'
              and row['outcome'] == 'supported_correct' and row['n_searches'] > 0)
 queries = '; '.join(f'“{step["query"]}”' for step in trace['steps'] if step['kind'] == 'search')

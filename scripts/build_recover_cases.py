@@ -53,4 +53,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except FileNotFoundError as exc:
+        raise SystemExit(f'Required saved artifact is missing: {exc.filename or exc}') from exc
