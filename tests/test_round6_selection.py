@@ -43,7 +43,8 @@ def test_development_selection_uses_only_complete_named_runs(tmp_path, monkeypat
         transcripts = []
         for qid, answerable, kind in [('right', True, 'answer'), ('hidden', False, 'answer'), ('refusal', False, 'abstain')]:
             outcome = 'supported_correct' if answerable else 'unsupported_wrong' if kind == 'answer' else 'correct_abstain'
-            row = {'qid': qid, 'variant': 'open', 'final': {'kind': kind}, 'mock_score': {
+            row = {'qid': qid, 'variant': 'open', 'final': {'kind': kind},
+                   'provided_evidence': [{'chunk_id': 'c00001'}] if kind == 'abstain' else [], 'steps': [], 'mock_score': {
                 'final': kind, 'answerable': answerable, 'outcome_v3': outcome, 'excluded_v3': False}}
             transcripts.append(row)
             key = {'run': run, 'qid': qid, 'variant': 'open'}
@@ -51,11 +52,13 @@ def test_development_selection_uses_only_complete_named_runs(tmp_path, monkeypat
                 cases.append({**key, 'passages': 'shown', 'deterministic': {'cites_unshown': False, 'answer_part_absent_from_cited': False}})
                 verdicts.append({**key, 'p_pos': .9 if answerable else .1})
             else:
-                contexts.append({**key, 'id': run, 'transcript': row})
+                contexts.append({**key, 'id': run, 'system': run.split('_')[0], 'transcript': row})
         write(tmp_path / 'eval' / run / 'lenient/transcripts.jsonl', transcripts)
     write(tmp_path / 'cases/answers.jsonl', cases)
     write(tmp_path / 'cases/recover_contexts.jsonl', contexts)
     write(tmp_path / 'cases/forced_all.jsonl', [])
+    for actor in ('main', 'candF1'):
+        write(tmp_path / f'forced/forced_{actor}.jsonl', [{'id': c['id']} for c in contexts if c['system'] == actor])
     for checker in ('V', 'V2m', 'V2b'):
         write(tmp_path / f'verify/{checker}/verdicts_A.jsonl', verdicts)
         write(tmp_path / f'verify_forced/{checker}/verdicts_A.jsonl', [])

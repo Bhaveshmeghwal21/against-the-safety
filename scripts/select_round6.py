@@ -100,6 +100,25 @@ def main():
         raise ValueError('Duplicate recovery IDs')
     if not set(forced_by_id) <= {r['id'] for r in contexts}:
         raise ValueError('Forced cases do not belong to development contexts')
+    expected_contexts = set()
+    for run, transcripts in runs.items():
+        for transcript in transcripts:
+            shown = transcript.get('provided_evidence', []) or any(s.get('retrieved', []) for s in transcript.get('steps', [])[:-1])
+            if transcript['final']['kind'] in ('abstain', 'invalid') and shown:
+                expected_contexts.add((run, transcript['qid'], transcript['variant']))
+    context_keys = [(c['run'], c['qid'], c['variant']) for c in contexts]
+    if len(context_keys) != len(set(context_keys)) or set(context_keys) != expected_contexts:
+        raise ValueError('Recovery contexts are duplicated or incomplete')
+    # Invalid forced text is allowed, but every eligible context must have actually
+    # been attempted; otherwise treating a missing output as a rejection biases safety.
+    for actor in ('main', 'candF1'):
+        expected_ids = {c['id'] for c in contexts if c['system'] == actor}
+        if not expected_ids:
+            continue
+        raw = RS.read(root / f'forced/forced_{actor}.jsonl')
+        ids = [item['id'] for item in raw]
+        if len(ids) != len(set(ids)) or set(ids) != expected_ids:
+            raise ValueError(f'Forced responses are duplicated or incomplete for {actor}')
     gates, recovery = {}, {}
     for checker in ('V', 'V2m', 'V2b'):
         predictions = verdicts(root / f'verify/{checker}/verdicts_A.jsonl')
