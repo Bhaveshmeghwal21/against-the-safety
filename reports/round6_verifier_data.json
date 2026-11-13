@@ -1,0 +1,40 @@
+{
+  "seed": 61,
+  "candidate_rows": 2110,
+  "removed": {
+    "deterministic": 231,
+    "heldout_match": 17,
+    "duplicate": 411,
+    "question_cap": 350,
+    "train_balance_or_cap": 177,
+    "val_balance_or_cap": 22
+  },
+  "splits": {
+    "train": {
+      "rows": 820,
+      "questions": 373,
+      "by_source_and_label": {
+        "sampled:0": 181,
+        "swap:0": 184,
+        "gold:1": 322,
+        "sampled:1": 88,
+        "forced:0": 45
+      },
+      "yes_no": 4,
+      "sha256": "03e2ad66e97f85c13c287ee96d89751a6c38268fb12d671133a0709ecfb62786"
+    },
+    "val": {
+      "rows": 82,
+      "questions": 41,
+      "by_source_and_label": {
+        "swap:0": 21,
+        "gold:1": 37,
+        "sampled:1": 4,
+        "sampled:0": 19,
+        "forced:0": 1
+      },
+      "yes_no": 0,
+      "sha256": "ccbef53e9c5bde178d2cca72ce1f06184b44774eb6f2bfff599949e99b619d56"
+    }
+  }
+}

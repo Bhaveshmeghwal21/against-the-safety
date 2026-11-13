@@ -36,3 +36,11 @@ The plan reported the following exploratory checker-threshold table for the open
 | 0.9 | 44% | 2% | 8% |
 
 The checker training examples will come from saved training rollouts, forced training answers, displayed gold support, and matched swaps. Holdout fingerprints will remove cases that match prior or Round 6 evaluation questions and evidence. A question-disjoint validation split will be used. Data hashes and any implementation departures will be recorded as an amendment before the checker is trained.
+
+## Amendment 1: verifier data
+
+Recorded before GPU training. The builder removes held-out matches, deterministic failures, duplicate cases and conflicting labels. Swap negatives are weak labels and may contain remaining noise.
+
+- Train: 820 cases, 373 questions; SHA256 `03e2ad66e97f85c13c287ee96d89751a6c38268fb12d671133a0709ecfb62786`.
+- Validation: 82 cases, 41 questions; SHA256 `ccbef53e9c5bde178d2cca72ce1f06184b44774eb6f2bfff599949e99b619d56`.
+- Yes/no cases: 4 train and 0 validation; the validation set cannot establish yes/no performance.
