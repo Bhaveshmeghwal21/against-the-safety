@@ -63,7 +63,12 @@ def test_aspect_coverage_requires_every_part(environment):
     assert not coverage['all_aspects_cited']
 
 
-@pytest.mark.skipif(not (ROOT / 'reports/round4_data.json').exists(), reason='round-4 data not prepared')
+@pytest.mark.skipif(
+    not (ROOT / 'reports/round4_data.json').exists()
+    or not (ROOT / 'data/processed/training/candE.jsonl').exists()
+    or not (ROOT / 'data/processed/episodes').is_dir(),
+    reason='round-4 training rows not built',
+)
 def test_saved_pairs_are_complete_and_groups_disjoint():
     report = json.loads((ROOT / 'reports/round4_data.json').read_text())
     groups = report['groups']
