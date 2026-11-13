@@ -20,6 +20,8 @@ Stages
   force-r5               round 5b: the system answers at the abstention contexts of round 5 with `<answer>` forced (main on GPU 0, candA on GPU 1)
   check-system           packaging check: src/ragharness/system.py with main's adapter on sealed-test parts, to compare with the offline evaluation
   train-dpo2             round 5b: DPO on the abstention-augmented pairs, candI (from main) and candK (from the round-4 checkpoint candF1); candI1/candI2/candK1/candK2
+  train-verifier         round 6: train V2m and V2b concurrently on the two GPUs
+  r6-system              round 6: evaluate actors, check answers, and check forced second looks
   interp                 third round probe (plan section 25): --from main --to candD --alphas 0.2,0.35 --splits bench_r3dev:30,dev:11 builds the
                          blends (1 - alpha) * from + alpha * to inside the kernel and evaluates them
   eval-dev | eval-test | eval-test2 | eval-product
@@ -191,6 +193,74 @@ def main() -> None:
     rc = 0
     if stage == "smoke":
         sh(f"{py} scripts/smoke_test.py --out {OUT}/smoke {extra}", check=False)
+    elif stage == 'train-verifier':
+        import hashlib
+        if 'main/adapter' not in adapters:
+            raise SystemExit('train-verifier needs the main adapter')
+        data_report = json.loads((REPO / 'reports/round6_verifier_data.json').read_text())
+        for split in ('train', 'val'):
+            path = REPO / f'data/processed/verifier/{split}_v2.jsonl'
+            actual = hashlib.sha256(path.read_bytes()).hexdigest()
+            if actual != data_report['splits'][split]['sha256']:
+                raise SystemExit(f'verifier {split} data does not match preregistered hash')
+        common = f'--cases {REPO}/data/processed/verifier/train_v2.jsonl --val {REPO}/data/processed/verifier/val_v2.jsonl'
+        rc = run_parallel([
+            (f"{py} scripts/train_verifier.py {common} --out {OUT}/V2m --name V2m --init-adapter {adapters['main/adapter']} --lr 3e-5 {extra}", g0, 'train_V2m.log'),
+            (f'{py} scripts/train_verifier.py {common} --out {OUT}/V2b --name V2b --lr 1e-4 {extra}', g1, 'train_V2b.log'),
+        ])
+    elif stage == 'r6-system':
+        job_match = re.search(r'--jobs\s+(\S+)', extra)
+        checker_match = re.search(r'--checkers\s+(\S+)', extra)
+        if not job_match or not checker_match:
+            raise SystemExit('r6-system requires --jobs and --checkers')
+        spec = job_match.group(1)
+        names = list(dict.fromkeys(item.split(':')[0] for item in spec.split(',')))
+        checks = list(dict.fromkeys(checker_match.group(1).split(',')))
+        if not set(checks) <= {'V', 'V2m', 'V2b'} or not checks:
+            raise SystemExit('unknown checker')
+        for check in checks:
+            key = ('main' if check == 'V' else check) + '/adapter'
+            if key not in adapters:
+                raise SystemExit(f'checker adapter missing: {key}')
+        rc = eval_jobs(py, spec, '--parse lenient --extra-questions 0', adapters)
+        if rc:
+            raise SystemExit(rc)
+        cases = OUT / 'cases'
+        cases.mkdir(parents=True, exist_ok=True)
+        systems = ','.join(names)
+        sh(f'{py} scripts/build_verifier_cases.py --eval {OUT}/eval --system {systems} --out {cases}/answers.jsonl')
+        ctx = cases / 'recover_contexts.jsonl'
+        sh(f'{py} scripts/build_recover_contexts.py --eval {OUT}/eval --system {systems} --out {ctx}')
+        contexts = [json.loads(line) for line in ctx.read_text().splitlines() if line.strip()]
+        checks_chains = {0: [], 1: []}
+        for i, check in enumerate(checks):
+            adapter = adapters[('main' if check == 'V' else check) + '/adapter']
+            checks_chains[i % 2].append(f'{py} scripts/verify_round5.py --cases {cases}/answers.jsonl --tag {check} --adapter {adapter} --out {OUT}/verify/{check} --wordings A')
+        rc = run_parallel([(' && '.join(cmds), {'CUDA_VISIBLE_DEVICES': str(g)}, f'r6_verify_gpu{g}.log') for g, cmds in checks_chains.items() if cmds])
+        if rc:
+            raise SystemExit(rc)
+        force_chains = {0: [], 1: []}
+        for i, name in enumerate(names):
+            if not any(c['system'] == name for c in contexts):
+                continue
+            adapter_arg = '' if name == 'base' else f"--adapter {adapters[name + '/adapter']}"
+            force_chains[i % 2].append(f'{py} scripts/force_answers_round5.py {adapter_arg} --tag {name} --contexts {ctx} --out {OUT}/forced --greedy')
+        rc = run_parallel([(' && '.join(cmds), {'CUDA_VISIBLE_DEVICES': str(g)}, f'r6_force_gpu{g}.log') for g, cmds in force_chains.items() if cmds])
+        if rc:
+            raise SystemExit(rc)
+        combined = []
+        for name in names:
+            forced = OUT / f'forced/forced_{name}.jsonl'
+            if forced.exists():
+                out = cases / f'forced_{name}.jsonl'
+                sh(f'{py} scripts/build_recover_cases.py --contexts {ctx} --forced {forced} --out {out}')
+                combined.extend(out.read_text(encoding='utf-8').splitlines())
+        (cases / 'forced_all.jsonl').write_text(''.join(line + '\n' for line in combined), encoding='utf-8')
+        checks_chains = {0: [], 1: []}
+        for i, check in enumerate(checks):
+            adapter = adapters[('main' if check == 'V' else check) + '/adapter']
+            checks_chains[i % 2].append(f'{py} scripts/verify_round5.py --cases {cases}/forced_all.jsonl --tag {check} --adapter {adapter} --out {OUT}/verify_forced/{check} --wordings A')
+        rc = run_parallel([(' && '.join(cmds), {'CUDA_VISIBLE_DEVICES': str(g)}, f'r6_verify_forced_gpu{g}.log') for g, cmds in checks_chains.items() if cmds])
     elif stage == "train-both":
         rc = run_parallel([
             (f"{py} scripts/train.py --set main --out {OUT}/main {extra}", g0, "train_main.log"),

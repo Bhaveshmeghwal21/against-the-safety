@@ -15,6 +15,16 @@ and `scripts/verify_model.py` / the smoke test check every shard against the has
 
 ## Commands
 
+Round 6 uses `train-verifier` to train the two checkers on separate GPUs, then
+`r6-system` to evaluate the actors and their checked second looks. The bundle must
+include the pre-registered data and the named adapters; do not use the sealed test
+until the development selection is recorded.
+
+```powershell
+.\.venv\Scripts\python.exe scripts/kaggle_launch.py --credentials-env <VARIABLE> --bundle-dir runs/kaggle_bundle_round6 run train-verifier --tag r6 --timeout 14400
+.\.venv\Scripts\python.exe scripts/kaggle_launch.py --credentials-env <VARIABLE> --bundle-dir runs/kaggle_bundle_round6 run r6-system --tag dev "--extra=--jobs main:bench_r4dev,main:dev,candF1:bench_r4dev,candF1:dev --checkers V,V2m,V2b"
+```
+
 ```powershell
 . .\scripts\env.ps1
 python scripts/kaggle_launch.py dataset                    # bundle code + exact data, upload, wait until Kaggle serves it
