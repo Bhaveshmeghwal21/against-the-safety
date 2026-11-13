@@ -18,20 +18,21 @@ def ceiling(values, minimum, step):
 
 def tradeoff(data):
     systems = data['systems']; n = data['coverage']['common']
+    assert data['scorer'] == 'v3'
     assert all(systems[k]['n'] == n for k, _, _ in ROWS)
     hidden = systems[ROWS[0][0]]['hidden_n']
     assert all(systems[k]['hidden_n'] == hidden for k, _, _ in ROWS)
     good_max = ceiling([100*systems[k]['supported_correct'] for k, _, _ in ROWS], 50, 10)
     bad_max = ceiling([100*systems[k]['unsupported_rate'] for k, _, _ in ROWS], 30, 10)
-    desc = 'Supported correct rates and unsupported-answer rates for the four systems: ' + '; '.join(
+    desc = f'Corrected scorer v3 on {n} shared episodes: ' + '; '.join(
         f"{label} {systems[k]['supported_correct']*100:.1f}% supported correct, "
-        f"{systems[k]['unsupported']}/{hidden} unsupported" for k, label, _ in ROWS)
-    svg = F.begin('DeepSeek, GPT-6 and Tiny Aya', desc, 390)
+        f"{systems[k]['unsupported']}/{hidden} answers with cited support not established" for k, label, _ in ROWS)
+    svg = F.begin('DeepSeek, GPT-6 and Tiny Aya: corrected evidence scoring', desc, 414)
     svg += [F.text(30, 34, 'DeepSeek, GPT-6 and Tiny Aya', 23, F.INK, 700),
-            F.text(30, 58, f'Shared round-5 sample · {n} episodes · score after the listed repairs', 13, F.MUTED),
+            F.text(30, 58, f'Corrected scorer v3 · {n} shared episodes · 13 November 2026', 13, F.MUTED),
             F.text(223, 100, 'Supported correct', 16, F.INK, 700),
             F.text(223, 121, 'Answerable cases · higher is better', 12, F.MUTED),
-            F.text(570, 100, 'Unsupported answers', 16, F.INK, 700),
+            F.text(570, 100, 'Flagged answers', 16, F.INK, 700),
             F.text(570, 121, 'Hidden-evidence cases · lower is better', 12, F.MUTED)]
     F.axis(svg, 223, 255, 138, 315, good_max, (0, good_max//2, good_max))
     F.axis(svg, 570, 255, 138, 315, bad_max, (0, bad_max//2, bad_max))
@@ -44,7 +45,8 @@ def tradeoff(data):
             svg.append(f'<rect x="{left}" y="{y}" width="{width:.1f}" height="23" rx="4" fill="{color}"/>')
             svg.append(F.text(f'{left+width+7:.1f}', y+17, f'{value:.1f}%', 13, F.INK, 700))
         svg.append(F.text(852, y+17, f"{row['unsupported']}/{hidden}", 12, F.MUTED))
-    svg += [F.text(30, 361, 'Adapters use a saved verifier; hosted models use fail-closed only. FB converts invalid actions to refusals.', 12, F.MUTED), '</svg>']
+    svg += [F.text(30, 361, 'Adapters use a saved verifier; hosted models use fail-closed only. Saved outputs are unchanged.', 12, F.MUTED),
+            F.text(30, 383, 'Flags mean cited support is not established by annotations; other evidence needs adjudication.', 12, F.MUTED), '</svg>']
     return '\n'.join(svg)+'\n'
 
 
@@ -55,9 +57,9 @@ def cost(data):
               'azure_deepseek_native+FB':data['deepseek_round5']['native']['estimated_usd_per_10000']}
     maximum = ceiling(list(amount.values()), 8, 2)
     desc = 'Estimated cost for 10,000 episodes: ' + '; '.join(f'{label} ${amount[k]:.2f}' for k,label,_ in ROWS)
-    svg = F.begin('Illustrative cost for 10,000 episodes', desc, 360)
+    svg = F.begin('Illustrative cost for 10,000 episodes', desc, 408)
     svg += [F.text(30, 34, 'Illustrative cost for 10,000 episodes', 23, F.INK, 700),
-            F.text(30, 58, 'T4 busy time versus Azure token billing · USD · estimates, not an invoice', 13, F.MUTED)]
+            F.text(30, 58, 'Recorded round-5 workload · T4 busy time versus Azure token billing · USD estimates', 13, F.MUTED)]
     F.axis(svg, 223, 390, 87, 264, maximum, (0, maximum//2, maximum), money=True)
     for i, (key, label, color) in enumerate(ROWS):
         y = 98+i*40; width = 390*amount[key]/maximum
@@ -70,12 +72,14 @@ def cost(data):
             F.text(692, 174, 'per 730-hour month', 12, F.MUTED),
             F.text(692, 197, 'before other costs', 12, F.MUTED),
             F.text(30, 310, 'T4 estimate assumes perfect utilization; API estimates assume observed tokens and cache patterns.', 12, F.MUTED),
-            F.text(30, 332, 'Storage, network, retrieval, taxes, and operations are excluded. Quality and model sizes differ.', 12, F.MUTED), '</svg>']
+            F.text(30, 332, 'Storage, network, retrieval, taxes, and operations are excluded. Quality and model sizes differ.', 12, F.MUTED),
+            F.text(30, 354, 'Costs use all 938 recorded episodes; the quality chart uses the eligible shared sample.', 12, F.MUTED),
+            F.text(30, 376, 'Scoring corrections do not change recorded tokens or GPU time. Estimates are not an invoice.', 12, F.MUTED), '</svg>']
     return '\n'.join(svg)+'\n'
 
 
 def main():
-    results = json.loads((ROOT/'reports/deepseek_comparison.json').read_text(encoding='utf-8'))
+    results = json.loads((ROOT/'reports/deepseek_comparison_corrected.json').read_text(encoding='utf-8'))
     costs = json.loads((ROOT/'reports/deepseek_roi.json').read_text(encoding='utf-8'))
     F.FIGURES.mkdir(parents=True, exist_ok=True)
     for name, content in [('deepseek_tradeoff.svg', tradeoff(results)), ('deepseek_cost.svg', cost(costs))]:

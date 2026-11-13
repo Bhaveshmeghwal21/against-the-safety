@@ -2,6 +2,8 @@
 
 The scenario scales observed round-5 usage to 10,000 episodes with the same workload and cache pattern. Prices are illustrative retail rates, not the account invoice; quality and verifier settings differ between systems.
 
+**Checked 13 November 2026:** These estimates use all 938 recorded episodes per system, rather than the 925 eligible [corrected quality-comparison cases](deepseek_comparison_corrected.md). Scoring corrections leave recorded token usage and GPU time unchanged, so the dollar estimates are unchanged. They describe the saved workload and checker decisions; a new run with revised prompts or checker coverage needs new metering.
+
 | system | recorded round-5 cases | estimated cost / 10,000 |
 | --- | ---: | ---: |
 | DeepSeek via Azure, exact | 938 | $1.65 |

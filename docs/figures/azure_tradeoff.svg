@@ -1,44 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="920" height="348" viewBox="0 0 920 348" role="img" aria-labelledby="title desc" font-family="Segoe UI, Helvetica, Arial, sans-serif">
-<title id="title">Accuracy and unsupported answers</title>
-<desc id="desc">On 876 shared episodes, main has 27.6% supported correct answers and 25 of 315 unsupported; candF1 has 32.4% and 26 of 315; Azure native has 39.2% and 62 of 315. The local systems include a verifier; Azure does not.</desc>
-<rect width="920" height="348" fill="#ffffff"/>
-<text x="30" y="34" font-size="23" fill="#172b3a" font-weight="700" text-anchor="start">Accuracy and unsupported answers</text>
-<text x="30" y="58" font-size="13" fill="#546b79" font-weight="400" text-anchor="start">Shared round-5 sample · 876 episodes · score after the listed repairs</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="373" viewBox="0 0 920 373" role="img" aria-labelledby="title desc" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<title id="title">GPT-6 Luna and Tiny Aya: corrected evidence scoring</title>
+<desc id="desc">Corrected scorer v3 on 931 shared episodes: Main + repairs 46.5% supported correct, 42/374 answers with cited support not established; candF1 + repairs 53.5% supported correct, 40/374 answers with cited support not established; GPT-6 Luna + FB 55.3% supported correct, 91/374 answers with cited support not established</desc>
+<rect width="920" height="373" fill="#ffffff"/>
+<text x="30" y="34" font-size="23" fill="#172b3a" font-weight="700" text-anchor="start">GPT-6 Luna and Tiny Aya</text>
+<text x="30" y="58" font-size="13" fill="#546b79" font-weight="400" text-anchor="start">Corrected scorer v3 · 931 shared episodes · 13 November 2026</text>
 <text x="223" y="100" font-size="16" fill="#172b3a" font-weight="700" text-anchor="start">Supported correct</text>
 <text x="223" y="121" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Answerable cases · higher is better</text>
-<text x="570" y="100" font-size="16" fill="#172b3a" font-weight="700" text-anchor="start">Unsupported answers</text>
+<text x="570" y="100" font-size="16" fill="#172b3a" font-weight="700" text-anchor="start">Flagged answers</text>
 <text x="570" y="121" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Hidden-evidence cases · lower is better</text>
 <line x1="223.0" x2="223.0" y1="138" y2="278" stroke="#dfe8e8"/>
 <text x="223.0" y="298" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">0%</text>
 <line x1="350.5" x2="350.5" y1="138" y2="278" stroke="#dfe8e8"/>
-<text x="350.5" y="298" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">25%</text>
+<text x="350.5" y="298" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">30%</text>
 <line x1="478.0" x2="478.0" y1="138" y2="278" stroke="#dfe8e8"/>
-<text x="478.0" y="298" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">50%</text>
+<text x="478.0" y="298" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">60%</text>
 <line x1="570.0" x2="570.0" y1="138" y2="278" stroke="#dfe8e8"/>
 <text x="570.0" y="298" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">0%</text>
-<line x1="672.0" x2="672.0" y1="138" y2="278" stroke="#dfe8e8"/>
-<text x="672.0" y="298" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">10%</text>
-<line x1="774.0" x2="774.0" y1="138" y2="278" stroke="#dfe8e8"/>
-<text x="774.0" y="298" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">20%</text>
+<line x1="697.5" x2="697.5" y1="138" y2="278" stroke="#dfe8e8"/>
+<text x="697.5" y="298" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">15%</text>
 <line x1="825.0" x2="825.0" y1="138" y2="278" stroke="#dfe8e8"/>
-<text x="825.0" y="298" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">25%</text>
+<text x="825.0" y="298" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">30%</text>
 <text x="205" y="173" font-size="14" fill="#172b3a" font-weight="600" text-anchor="end">Main + repairs</text>
-<rect x="223" y="156" width="140.9" height="23" rx="4" fill="#315a75"/>
-<text x="370.9" y="173" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">27.6%</text>
-<rect x="570" y="156" width="81.0" height="23" rx="4" fill="#315a75"/>
-<text x="658.0" y="173" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">7.9%</text>
-<text x="852" y="173" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">25/315</text>
+<rect x="223" y="156" width="197.6" height="23" rx="4" fill="#315a75"/>
+<text x="427.6" y="173" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">46.5%</text>
+<rect x="570" y="156" width="95.5" height="23" rx="4" fill="#315a75"/>
+<text x="672.5" y="173" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">11.2%</text>
+<text x="852" y="173" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">42/374</text>
 <text x="205" y="218" font-size="14" fill="#172b3a" font-weight="600" text-anchor="end">candF1 + repairs</text>
-<rect x="223" y="201" width="165.5" height="23" rx="4" fill="#218a80"/>
-<text x="395.5" y="218" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">32.4%</text>
-<rect x="570" y="201" width="84.2" height="23" rx="4" fill="#218a80"/>
-<text x="661.2" y="218" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">8.3%</text>
-<text x="852" y="218" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">26/315</text>
-<text x="205" y="263" font-size="14" fill="#172b3a" font-weight="600" text-anchor="end">Azure native + FB</text>
-<rect x="223" y="246" width="200.0" height="23" rx="4" fill="#c27b34"/>
-<text x="430.0" y="263" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">39.2%</text>
-<rect x="570" y="246" width="200.8" height="23" rx="4" fill="#c27b34"/>
-<text x="777.8" y="263" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">19.7%</text>
-<text x="852" y="263" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">62/315</text>
-<text x="30" y="325" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Local adapters use a saved verifier; Azure has fail-closed only. Results are not an equal-verifier test.</text>
+<rect x="223" y="201" width="227.4" height="23" rx="4" fill="#218a80"/>
+<text x="457.4" y="218" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">53.5%</text>
+<rect x="570" y="201" width="90.9" height="23" rx="4" fill="#218a80"/>
+<text x="667.9" y="218" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">10.7%</text>
+<text x="852" y="218" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">40/374</text>
+<text x="205" y="263" font-size="14" fill="#172b3a" font-weight="600" text-anchor="end">GPT-6 Luna + FB</text>
+<rect x="223" y="246" width="235.0" height="23" rx="4" fill="#c27b34"/>
+<text x="465.0" y="263" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">55.3%</text>
+<rect x="570" y="246" width="206.8" height="23" rx="4" fill="#c27b34"/>
+<text x="783.8" y="263" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">24.3%</text>
+<text x="852" y="263" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">91/374</text>
+<text x="30" y="325" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Adapters use a saved verifier; GPT-6 Luna uses fail-closed only. Saved outputs are unchanged.</text>
+<text x="30" y="347" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Flags mean cited support is not established by annotations; other evidence needs adjudication.</text>
 </svg>

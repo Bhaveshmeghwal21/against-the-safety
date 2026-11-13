@@ -64,7 +64,8 @@ def main():
     out=ROOT/'reports/azure_roi'
     out.with_suffix('.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
     lines=['# Azure versus self-hosting: illustrative ROI', '',
-      'Workload: 10,000 episodes per month with the same mix, average token lengths, tool calls and cache-hit pattern as the three round-5 test sets. The quality comparison is in [azure_round5_comparison.md](azure_round5_comparison.md); the systems have different quality and the estimates are not a like-for-like outcome guarantee.', '',
+      'Workload: 10,000 episodes per month with the same mix, average token lengths, tool calls and cache-hit pattern as the three round-5 test sets. The quality comparison is in [the corrected replay](azure_round5_comparison_corrected.md); the systems have different quality and the estimates are not a like-for-like outcome guarantee.', '',
+      '**Checked 13 November 2026:** These estimates use all 938 recorded episodes per system, rather than the 931 eligible quality-comparison cases. Scoring corrections leave recorded token usage and GPU time unchanged, so the dollar estimates are unchanged. They describe the saved workload and checker decisions; a new run with revised prompts or checker coverage needs new metering.', '',
       '| System | Recorded episodes | Estimated GPU hours / 10,000 | Estimated compute or token cost / 10,000 |', '| --- | ---: | ---: | ---: |']
     for n,v in local_data.items():
         lines.append(f"| {n}, busy T4 | {v['episodes']} | {v['estimated_gpu_hours_per_10000']:.2f} | ${v['estimated_busy_gpu_usd_per_10000']:.2f} |")

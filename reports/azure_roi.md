@@ -1,6 +1,8 @@
 # Azure versus self-hosting: illustrative ROI
 
-Workload: 10,000 episodes per month with the same mix, average token lengths, tool calls and cache-hit pattern as the three round-5 test sets. The quality comparison is in [azure_round5_comparison.md](azure_round5_comparison.md); the systems have different quality and the estimates are not a like-for-like outcome guarantee.
+Workload: 10,000 episodes per month with the same mix, average token lengths, tool calls and cache-hit pattern as the three round-5 test sets. The quality comparison is in [the corrected replay](azure_round5_comparison_corrected.md); the systems have different quality and the estimates are not a like-for-like outcome guarantee.
+
+**Checked 13 November 2026:** These estimates use all 938 recorded episodes per system, rather than the 931 eligible quality-comparison cases. Scoring corrections leave recorded token usage and GPU time unchanged, so the dollar estimates are unchanged. They describe the saved workload and checker decisions; a new run with revised prompts or checker coverage needs new metering.
 
 | System | Recorded episodes | Estimated GPU hours / 10,000 | Estimated compute or token cost / 10,000 |
 | --- | ---: | ---: | ---: |

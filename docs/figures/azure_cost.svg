@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="920" height="335" viewBox="0 0 920 335" role="img" aria-labelledby="title desc" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="383" viewBox="0 0 920 383" role="img" aria-labelledby="title desc" font-family="Segoe UI, Helvetica, Arial, sans-serif">
 <title id="title">Illustrative cost for 10,000 episodes</title>
 <desc id="desc">For 10,000 episodes, main costs an estimated $6.30 in busy GPU time, candF1 $5.99, and Azure native $2.66 in tokens. An always-on T4 VM costs an estimated $383.98 for 730 hours, excluding other costs. This is a scenario, not an invoice.</desc>
-<rect width="920" height="335" fill="#ffffff"/>
+<rect width="920" height="383" fill="#ffffff"/>
 <text x="30" y="34" font-size="23" fill="#172b3a" font-weight="700" text-anchor="start">Illustrative cost for 10,000 episodes</text>
-<text x="30" y="58" font-size="13" fill="#546b79" font-weight="400" text-anchor="start">T4 busy time versus Azure token billing · USD · estimates, not an invoice</text>
+<text x="30" y="58" font-size="13" fill="#546b79" font-weight="400" text-anchor="start">Recorded round-5 workload · T4 busy time versus Azure token billing · USD estimates</text>
 <line x1="223.0" x2="223.0" y1="87" y2="235" stroke="#dfe8e8"/>
 <text x="223.0" y="255" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">$0</text>
 <line x1="320.5" x2="320.5" y1="87" y2="235" stroke="#dfe8e8"/>
@@ -20,7 +20,7 @@
 <text x="205" y="165" font-size="14" fill="#172b3a" font-weight="600" text-anchor="end">candF1 + repairs</text>
 <rect x="223" y="148" width="292.2" height="23" rx="4" fill="#218a80"/>
 <text x="522.2" y="165" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">$5.99</text>
-<text x="205" y="210" font-size="14" fill="#172b3a" font-weight="600" text-anchor="end">Azure native + FB</text>
+<text x="205" y="210" font-size="14" fill="#172b3a" font-weight="600" text-anchor="end">GPT-6 Luna + FB</text>
 <rect x="223" y="193" width="129.7" height="23" rx="4" fill="#c27b34"/>
 <text x="359.7" y="210" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">$2.66</text>
 <rect x="676" y="90" width="214" height="130" rx="10" fill="#f1f7f6"/>
@@ -30,4 +30,6 @@
 <text x="692" y="197" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">before other costs</text>
 <text x="30" y="283" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">GPU bars assume perfect utilization and no idle time; API assumes the recorded token and cache mix.</text>
 <text x="30" y="305" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Disk, network, retrieval, taxes, and operating costs are excluded. Model outputs and quality differ.</text>
+<text x="30" y="327" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Costs use all 938 recorded episodes; the quality chart uses the eligible shared sample.</text>
+<text x="30" y="349" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Scoring corrections do not change recorded tokens or GPU time. Estimates are not an invoice.</text>
 </svg>

@@ -67,6 +67,8 @@ In the corrected local replay, candF1's upper 95% bound on the difference in fla
 
 The native prompt now states the three-search budget and the required final action after it. Original saved outputs are not changed. On the historical 305-case hidden subset, DeepSeek had no model abstentions and fallback converted 269 invalid endings to refusals. Across the 863 shared cases, 316/320 invalid endings exceeded the budget. Its reported score describes the full fallback pipeline.
 
+The README's DeepSeek and GPT-6 Luna performance figures now read the corrected scorer-v3 JSON reports, using 925 and 931 shared cases respectively. Both figures show annotated-support flags and distinguish them from semantic hallucination judgments. Cost figures retain the verified dollar amounts from all 938 recorded episodes per system: labels and eligibility corrections do not change recorded tokens or GPU time. Revised prompts or checker coverage would need fresh metering.
+
 The article now calls the 1,611 training rows assistant decisions from 488 selected parent questions, drawn from a 600-question sample. Historical Markdown tables are labeled and linked to corrected replays. The local episodes dataset card and card generator now list both CC BY-SA 4.0 and RGB's CC BY-NC-SA 4.0; 1,096 released verifier rows contain RGB-derived evidence. Source licenses and attribution apply per file. Existing remote uploads were not inspected or republished by this remediation.
 
 ## Verification and reproduction

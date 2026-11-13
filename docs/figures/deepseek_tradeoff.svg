@@ -1,19 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="920" height="390" viewBox="0 0 920 390" role="img" aria-labelledby="title desc" font-family="Segoe UI, Helvetica, Arial, sans-serif">
-<title id="title">DeepSeek, GPT-6 and Tiny Aya</title>
-<desc id="desc">Supported correct rates and unsupported-answer rates for the four systems: Main + repairs 27.8% supported correct, 22/305 unsupported; candF1 + repairs 32.6% supported correct, 25/305 unsupported; GPT-6 Luna + FB 39.4% supported correct, 59/305 unsupported; DeepSeek + FB 53.6% supported correct, 36/305 unsupported</desc>
-<rect width="920" height="390" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="414" viewBox="0 0 920 414" role="img" aria-labelledby="title desc" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<title id="title">DeepSeek, GPT-6 and Tiny Aya: corrected evidence scoring</title>
+<desc id="desc">Corrected scorer v3 on 925 shared episodes: Main + repairs 46.8% supported correct, 42/371 answers with cited support not established; candF1 + repairs 53.8% supported correct, 40/371 answers with cited support not established; GPT-6 Luna + FB 55.6% supported correct, 90/371 answers with cited support not established; DeepSeek + FB 63.5% supported correct, 59/371 answers with cited support not established</desc>
+<rect width="920" height="414" fill="#ffffff"/>
 <text x="30" y="34" font-size="23" fill="#172b3a" font-weight="700" text-anchor="start">DeepSeek, GPT-6 and Tiny Aya</text>
-<text x="30" y="58" font-size="13" fill="#546b79" font-weight="400" text-anchor="start">Shared round-5 sample · 863 episodes · score after the listed repairs</text>
+<text x="30" y="58" font-size="13" fill="#546b79" font-weight="400" text-anchor="start">Corrected scorer v3 · 925 shared episodes · 13 November 2026</text>
 <text x="223" y="100" font-size="16" fill="#172b3a" font-weight="700" text-anchor="start">Supported correct</text>
 <text x="223" y="121" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Answerable cases · higher is better</text>
-<text x="570" y="100" font-size="16" fill="#172b3a" font-weight="700" text-anchor="start">Unsupported answers</text>
+<text x="570" y="100" font-size="16" fill="#172b3a" font-weight="700" text-anchor="start">Flagged answers</text>
 <text x="570" y="121" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Hidden-evidence cases · lower is better</text>
 <line x1="223.0" x2="223.0" y1="138" y2="315" stroke="#dfe8e8"/>
 <text x="223.0" y="335" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">0%</text>
 <line x1="350.5" x2="350.5" y1="138" y2="315" stroke="#dfe8e8"/>
-<text x="350.5" y="335" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">30%</text>
+<text x="350.5" y="335" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">35%</text>
 <line x1="478.0" x2="478.0" y1="138" y2="315" stroke="#dfe8e8"/>
-<text x="478.0" y="335" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">60%</text>
+<text x="478.0" y="335" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">70%</text>
 <line x1="570.0" x2="570.0" y1="138" y2="315" stroke="#dfe8e8"/>
 <text x="570.0" y="335" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">0%</text>
 <line x1="697.5" x2="697.5" y1="138" y2="315" stroke="#dfe8e8"/>
@@ -21,28 +21,29 @@
 <line x1="825.0" x2="825.0" y1="138" y2="315" stroke="#dfe8e8"/>
 <text x="825.0" y="335" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">30%</text>
 <text x="205" y="168" font-size="14" fill="#172b3a" font-weight="600" text-anchor="end">Main + repairs</text>
-<rect x="223" y="151" width="118.1" height="23" rx="4" fill="#315a75"/>
-<text x="348.1" y="168" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">27.8%</text>
-<rect x="570" y="151" width="61.3" height="23" rx="4" fill="#315a75"/>
-<text x="638.3" y="168" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">7.2%</text>
-<text x="852" y="168" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">22/305</text>
+<rect x="223" y="151" width="170.3" height="23" rx="4" fill="#315a75"/>
+<text x="400.3" y="168" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">46.8%</text>
+<rect x="570" y="151" width="96.2" height="23" rx="4" fill="#315a75"/>
+<text x="673.2" y="168" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">11.3%</text>
+<text x="852" y="168" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">42/371</text>
 <text x="205" y="209" font-size="14" fill="#172b3a" font-weight="600" text-anchor="end">candF1 + repairs</text>
-<rect x="223" y="192" width="138.6" height="23" rx="4" fill="#218a80"/>
-<text x="368.6" y="209" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">32.6%</text>
-<rect x="570" y="192" width="69.7" height="23" rx="4" fill="#218a80"/>
-<text x="646.7" y="209" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">8.2%</text>
-<text x="852" y="209" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">25/305</text>
+<rect x="223" y="192" width="196.0" height="23" rx="4" fill="#218a80"/>
+<text x="426.0" y="209" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">53.8%</text>
+<rect x="570" y="192" width="91.6" height="23" rx="4" fill="#218a80"/>
+<text x="668.6" y="209" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">10.8%</text>
+<text x="852" y="209" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">40/371</text>
 <text x="205" y="250" font-size="14" fill="#172b3a" font-weight="600" text-anchor="end">GPT-6 Luna + FB</text>
-<rect x="223" y="233" width="167.6" height="23" rx="4" fill="#c27b34"/>
-<text x="397.6" y="250" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">39.4%</text>
-<rect x="570" y="233" width="164.4" height="23" rx="4" fill="#c27b34"/>
-<text x="741.4" y="250" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">19.3%</text>
-<text x="852" y="250" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">59/305</text>
+<rect x="223" y="233" width="202.5" height="23" rx="4" fill="#c27b34"/>
+<text x="432.5" y="250" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">55.6%</text>
+<rect x="570" y="233" width="206.2" height="23" rx="4" fill="#c27b34"/>
+<text x="783.2" y="250" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">24.3%</text>
+<text x="852" y="250" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">90/371</text>
 <text x="205" y="291" font-size="14" fill="#172b3a" font-weight="600" text-anchor="end">DeepSeek + FB</text>
-<rect x="223" y="274" width="227.7" height="23" rx="4" fill="#8055a1"/>
-<text x="457.7" y="291" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">53.6%</text>
-<rect x="570" y="274" width="100.3" height="23" rx="4" fill="#8055a1"/>
-<text x="677.3" y="291" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">11.8%</text>
-<text x="852" y="291" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">36/305</text>
-<text x="30" y="361" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Adapters use a saved verifier; hosted models use fail-closed only. FB converts invalid actions to refusals.</text>
+<rect x="223" y="274" width="231.5" height="23" rx="4" fill="#8055a1"/>
+<text x="461.5" y="291" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">63.5%</text>
+<rect x="570" y="274" width="135.2" height="23" rx="4" fill="#8055a1"/>
+<text x="712.2" y="291" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">15.9%</text>
+<text x="852" y="291" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">59/371</text>
+<text x="30" y="361" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Adapters use a saved verifier; hosted models use fail-closed only. Saved outputs are unchanged.</text>
+<text x="30" y="383" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Flags mean cited support is not established by annotations; other evidence needs adjudication.</text>
 </svg>

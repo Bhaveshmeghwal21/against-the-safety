@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="920" height="360" viewBox="0 0 920 360" role="img" aria-labelledby="title desc" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="408" viewBox="0 0 920 408" role="img" aria-labelledby="title desc" font-family="Segoe UI, Helvetica, Arial, sans-serif">
 <title id="title">Illustrative cost for 10,000 episodes</title>
 <desc id="desc">Estimated cost for 10,000 episodes: Main + repairs $6.30; candF1 + repairs $5.99; GPT-6 Luna + FB $2.66; DeepSeek + FB $5.57</desc>
-<rect width="920" height="360" fill="#ffffff"/>
+<rect width="920" height="408" fill="#ffffff"/>
 <text x="30" y="34" font-size="23" fill="#172b3a" font-weight="700" text-anchor="start">Illustrative cost for 10,000 episodes</text>
-<text x="30" y="58" font-size="13" fill="#546b79" font-weight="400" text-anchor="start">T4 busy time versus Azure token billing · USD · estimates, not an invoice</text>
+<text x="30" y="58" font-size="13" fill="#546b79" font-weight="400" text-anchor="start">Recorded round-5 workload · T4 busy time versus Azure token billing · USD estimates</text>
 <line x1="223.0" x2="223.0" y1="87" y2="264" stroke="#dfe8e8"/>
 <text x="223.0" y="284" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">$0</text>
 <line x1="418.0" x2="418.0" y1="87" y2="264" stroke="#dfe8e8"/>
@@ -29,4 +29,6 @@
 <text x="692" y="197" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">before other costs</text>
 <text x="30" y="310" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">T4 estimate assumes perfect utilization; API estimates assume observed tokens and cache patterns.</text>
 <text x="30" y="332" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Storage, network, retrieval, taxes, and operations are excluded. Quality and model sizes differ.</text>
+<text x="30" y="354" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Costs use all 938 recorded episodes; the quality chart uses the eligible shared sample.</text>
+<text x="30" y="376" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Scoring corrections do not change recorded tokens or GPU time. Estimates are not an invoice.</text>
 </svg>

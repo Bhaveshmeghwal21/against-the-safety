@@ -1,6 +1,7 @@
 """Draw README comparison figures from the saved Azure reports, without a plotting dependency."""
 from html import escape
 import json
+import math
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -9,7 +10,7 @@ INK, MUTED, GRID = '#172b3a', '#546b79', '#dfe8e8'
 NAVY, TEAL, GOLD = '#315a75', '#218a80', '#c27b34'
 ROWS = [('main+FB+V', 'Main + repairs', NAVY),
         ('candF1+FB+V', 'candF1 + repairs', TEAL),
-        ('azure_native+FB', 'Azure native + FB', GOLD)]
+        ('azure_native+FB', 'GPT-6 Luna + FB', GOLD)]
 
 
 def text(x, y, label, size=14, color=INK, weight=400, anchor='start'):
@@ -32,32 +33,38 @@ def axis(svg, left, width, y, bottom, maximum, ticks, money=False):
 
 def tradeoff(data):
     systems = data['systems']
-    assert data['coverage']['common'] == 876
-    assert all(systems[k]['hidden_n'] == 315 and systems[k]['n'] == 876 for k, _, _ in ROWS)
-    desc = ('On 876 shared episodes, main has 27.6% supported correct answers and 25 of 315 unsupported; '
-            'candF1 has 32.4% and 26 of 315; Azure native has 39.2% and 62 of 315. '
-            'The local systems include a verifier; Azure does not.')
-    svg = begin('Accuracy and unsupported answers', desc, 348)
-    svg += [text(30, 34, 'Accuracy and unsupported answers', 23, INK, 700),
-            text(30, 58, 'Shared round-5 sample · 876 episodes · score after the listed repairs', 13, MUTED),
+    n = data['coverage']['common']
+    hidden = systems[ROWS[0][0]]['hidden_n']
+    assert data['scorer'] == 'v3'
+    assert all(systems[k]['hidden_n'] == hidden and systems[k]['n'] == n for k, _, _ in ROWS)
+    good_max = max(50, math.ceil(max(100*systems[k]['supported_correct'] for k, _, _ in ROWS)/10)*10)
+    bad_max = max(30, math.ceil(max(100*systems[k]['unsupported_rate'] for k, _, _ in ROWS)/10)*10)
+    desc = f'Corrected scorer v3 on {n} shared episodes: ' + '; '.join(
+        f"{label} {100*systems[k]['supported_correct']:.1f}% supported correct, "
+        f"{systems[k]['unsupported']}/{hidden} answers with cited support not established"
+        for k, label, _ in ROWS)
+    svg = begin('GPT-6 Luna and Tiny Aya: corrected evidence scoring', desc, 373)
+    svg += [text(30, 34, 'GPT-6 Luna and Tiny Aya', 23, INK, 700),
+            text(30, 58, f'Corrected scorer v3 · {n} shared episodes · 13 November 2026', 13, MUTED),
             text(223, 100, 'Supported correct', 16, INK, 700),
             text(223, 121, 'Answerable cases · higher is better', 12, MUTED),
-            text(570, 100, 'Unsupported answers', 16, INK, 700),
+            text(570, 100, 'Flagged answers', 16, INK, 700),
             text(570, 121, 'Hidden-evidence cases · lower is better', 12, MUTED)]
-    axis(svg, 223, 255, 138, 278, 50, (0, 25, 50))
-    axis(svg, 570, 255, 138, 278, 25, (0, 10, 20, 25))
+    axis(svg, 223, 255, 138, 278, good_max, (0, good_max//2, good_max))
+    axis(svg, 570, 255, 138, 278, bad_max, (0, bad_max//2, bad_max))
     for i, (key, label, color) in enumerate(ROWS):
         y = 156 + i * 45
         row = systems[key]
         correct, unsupported = 100 * row['supported_correct'], 100 * row['unsupported_rate']
-        assert 0 <= correct <= 50 and 0 <= unsupported <= 25
+        assert 0 <= correct <= good_max and 0 <= unsupported <= bad_max
         svg.append(text(205, y + 17, label, 14, INK, 600, 'end'))
-        for left, width, value, limit in ((223, 255, correct, 50), (570, 255, unsupported, 25)):
+        for left, width, value, limit in ((223, 255, correct, good_max), (570, 255, unsupported, bad_max)):
             length = width * value / limit
             svg.append(f'<rect x="{left}" y="{y}" width="{length:.1f}" height="23" rx="4" fill="{color}"/>')
             svg.append(text(f'{left + length + 7:.1f}', y + 17, f'{value:.1f}%', 13, INK, 700))
-        svg.append(text(852, y + 17, f"{row['unsupported']}/315", 12, MUTED))
-    svg += [text(30, 325, 'Local adapters use a saved verifier; Azure has fail-closed only. Results are not an equal-verifier test.', 12, MUTED), '</svg>']
+        svg.append(text(852, y + 17, f"{row['unsupported']}/{hidden}", 12, MUTED))
+    svg += [text(30, 325, 'Adapters use a saved verifier; GPT-6 Luna uses fail-closed only. Saved outputs are unchanged.', 12, MUTED),
+            text(30, 347, 'Flags mean cited support is not established by annotations; other evidence needs adjudication.', 12, MUTED), '</svg>']
     return '\n'.join(svg) + '\n'
 
 
@@ -71,9 +78,9 @@ def costs(data):
     desc = ('For 10,000 episodes, main costs an estimated $6.30 in busy GPU time, candF1 $5.99, '
             'and Azure native $2.66 in tokens. An always-on T4 VM costs an estimated $383.98 for 730 hours, '
             'excluding other costs. This is a scenario, not an invoice.')
-    svg = begin('Illustrative cost for 10,000 episodes', desc, 335)
+    svg = begin('Illustrative cost for 10,000 episodes', desc, 383)
     svg += [text(30, 34, 'Illustrative cost for 10,000 episodes', 23, INK, 700),
-            text(30, 58, 'T4 busy time versus Azure token billing · USD · estimates, not an invoice', 13, MUTED)]
+            text(30, 58, 'Recorded round-5 workload · T4 busy time versus Azure token billing · USD estimates', 13, MUTED)]
     axis(svg, 223, 390, 87, 235, 8, (0, 2, 4, 6, 8), money=True)
     for i, (key, label, color) in enumerate(ROWS):
         y = 103 + i * 45
@@ -88,12 +95,14 @@ def costs(data):
             text(692, 197, 'before other costs', 12, MUTED),
             text(30, 283, 'GPU bars assume perfect utilization and no idle time; API assumes the recorded token and cache mix.', 12, MUTED),
             text(30, 305, 'Disk, network, retrieval, taxes, and operating costs are excluded. Model outputs and quality differ.', 12, MUTED),
+            text(30, 327, 'Costs use all 938 recorded episodes; the quality chart uses the eligible shared sample.', 12, MUTED),
+            text(30, 349, 'Scoring corrections do not change recorded tokens or GPU time. Estimates are not an invoice.', 12, MUTED),
             '</svg>']
     return '\n'.join(svg) + '\n'
 
 
 def main():
-    performance = json.loads((ROOT / 'reports/azure_round5_comparison.json').read_text(encoding='utf-8'))
+    performance = json.loads((ROOT / 'reports/azure_round5_comparison_corrected.json').read_text(encoding='utf-8'))
     roi = json.loads((ROOT / 'reports/azure_roi.json').read_text(encoding='utf-8'))
     FIGURES.mkdir(parents=True, exist_ok=True)
     for name, content in [('azure_tradeoff.svg', tradeoff(performance)), ('azure_cost.svg', costs(roi))]:
