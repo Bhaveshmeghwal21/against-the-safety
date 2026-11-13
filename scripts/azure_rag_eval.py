@@ -31,6 +31,11 @@ NATIVE_TOOL = {'type': 'function', 'function': {'name': 'search_corpus',
     'description': 'Search the supplied document corpus with a query.',
     'parameters': {'type': 'object', 'properties': {'query': {'type': 'string'}},
                    'required': ['query'], 'additionalProperties': False}}}
+NATIVE_INSTRUCTIONS = (' Use the native search_corpus tool for searches. Issue one search call at a time. '
+                       'You may make at most three search calls. After the third search, answer with citations or '
+                       'abstain from the available evidence. Follow the final-answer tags exactly. '
+                       'Give the shortest exact answer phrase from the passages, not a sentence. If the question asks '
+                       'for two things, give both, separated by a semicolon, and cite a passage for each.')
 R5 = ROOT / 'runs/account2_round5/ats-eval-jobs-r5test-ref/out/eval'
 OLD = ROOT / 'runs/kaggle/ats-eval-bench-a/out/eval'
 SUITES = ('r5t_squad', 'r5t_hotpot', 'r5t_rgb', '2wiki', 'musique', 'squad2', 'rgb', 'rgb_int')
@@ -171,10 +176,7 @@ def one(job, corp, backend, system, api, mode='exact'):
     co = rollout.rollout_steps(job.q, corp, tool, system, job.variant, job.spec.masked,
                                job.spec.first_search_masked, job.spec.prefill, 3, lenient=True)
     messages = next(co)
-    native_messages = [{'role': 'system', 'content': protocol.ANSWER_PROTOCOL +
-                        ' Use the native search_corpus tool for searches. Issue one search call at a time. You may make at most three search calls. '
-                        'After the third search, answer with citations or abstain from the available evidence. '
-                        'Follow the final-answer tags exactly.'}, messages[1]]
+    native_messages = [{'role': 'system', 'content': protocol.ANSWER_PROTOCOL + NATIVE_INSTRUCTIONS}, messages[1]]
     calls, start = [], time.time()
     while True:
         try:
@@ -267,6 +269,7 @@ def main():
                   'search_budget': 3, 'top_k': 3, 'passage_chars': 800, 'parser': 'lenient', 'mode': args.mode}
         if args.mode == 'native':
             config['reasoning_effort'] = 'none'
+            config['native_instructions'] = NATIVE_INSTRUCTIONS
         config_path = folder / 'run_config.json'
         if config_path.exists():
             stored_config = json.loads(config_path.read_text(encoding='utf-8'))
