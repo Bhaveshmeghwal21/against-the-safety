@@ -1,0 +1,46 @@
+{
+  "seed": 61,
+  "sets": {
+    "r6t_squad": {
+      "questions": 75,
+      "index_hash": "947ca9b3dd07b5ce333eb5c55c8768730dc69b65f40e16afeab60bfc47a9c473",
+      "file_sha256": {
+        "questions.jsonl": "c1a6fc276716f3aa3cd10e34c12191f332b96db81592812ccc6161c98619e418",
+        "corpus.json": "0f36b090eaa1f4f2f662fcfc93251b26925ff31251ae0a2c762ee743afaf538a",
+        "manifest.json": "f2b0ebe7693398b61fbf5bd94e90c31af69dd7eea5ba3862e624c6d56ef6fd6a",
+        "prompt_variants.json": "84f9eaddcd58228031221310ff5a5529e814ac2d070ec64d52c6cceffcf2bc3f",
+        "corpus.sqlite": "51909547e2af91284e5917405a075f90f0f518f922bb103f7a7bf52a8a01dac0"
+      },
+      "episodes": 448,
+      "eligible": 448,
+      "oracle_success": 448
+    },
+    "r6t_hotpot": {
+      "questions": 60,
+      "index_hash": "3d73f78d6c3fe1f11ef4ffb58eea04a1b4d4ba1c2f24f42b98a39a27c6ad6daa",
+      "file_sha256": {
+        "questions.jsonl": "b555ec567bd29e646e10a1657a5e77dc36a8effabfbd56bf17b297fd4e7cdd08",
+        "corpus.json": "d286bb5ee7a8eba70314d527aedbdfdafaa99b01e122a0a48cc50262e9a80c00",
+        "manifest.json": "cd331f337afc5c88d7048030e73d93417c77aed1134fff3683eca53c40c410f6",
+        "corpus.sqlite": "c32adf64928b02c626907ba6747da7e9bae1500daf276bedb9422e6aea86300b"
+      },
+      "episodes": 90,
+      "eligible": 90,
+      "oracle_success": 90
+    },
+    "r6t_rgb": {
+      "questions": 29,
+      "index_hash": "cb14fe1c283ea0e9efe034c8cf9b641a62b3efaf732877229ac31619a9fa9907",
+      "file_sha256": {
+        "questions.jsonl": "5c0ba51aea69708291629edd17a1722eab99e91e56ea063d61e024dfe5f5b960",
+        "corpus.json": "6cb05ebc93e7fa6fe885212740ffe8f4a8bcbc39d782b4215863aaec9c4ce611",
+        "manifest.json": "ddc52400f8c63c6944bea8575e9d7f15b9c6de60de4c7cf4cbd4a725cb499087",
+        "prompt_variants.json": "4f9d53163dca975423e06809d67ecf85530ca4c630113b41acc6d0dd14dd4350",
+        "corpus.sqlite": "6993c20cade8da9354061721a2522de9f0c287d71dd7eaf5644e98993d85238b"
+      },
+      "episodes": 141,
+      "eligible": 141,
+      "oracle_success": 141
+    }
+  }
+}

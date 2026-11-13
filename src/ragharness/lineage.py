@@ -84,7 +84,8 @@ def clean_rows(rows, guard):
 def load_holdouts(root: Path):
     paths = {f"hotpot_{name}": root / "data/processed" / f"questions_{name}.jsonl" for name in ("dev", "test", "test2")}
     paths.update({p.parent.name: p for p in (root / "data/bench").glob("*/questions.jsonl") if p.parent.name != "r5train"})
-    required = ("hotpot_dev", "hotpot_test", "r4dev", "r4test", "r5t_squad", "r5t_hotpot", "r5t_rgb")
+    required = ("hotpot_dev", "hotpot_test", "r4dev", "r4test", "r5t_squad", "r5t_hotpot", "r5t_rgb",
+                "r6t_squad", "r6t_hotpot", "r6t_rgb")
     missing = [name for name in required if name not in paths or not paths[name].is_file()]
     if missing:
         raise FileNotFoundError(f"held-out manifests required for training validation: {missing}")

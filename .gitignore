@@ -34,6 +34,7 @@ data/index/
 data/bench/*/corpus.json
 data/bench/*/questions.jsonl
 data/bench/*/prompt_variants.json
+data/bench/r6t_*/
 tests/fixtures/
 *.egg-info/
 *.sqlite
