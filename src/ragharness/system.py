@@ -11,6 +11,7 @@ gold answers. Decoding is greedy, one episode at a time.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import math
 
 from . import checker, episodes, protocol
 from .retrieval import Hit, render_observation
@@ -55,7 +56,7 @@ def index_documents(docs: list[dict], db_path) -> tuple[object, list[dict]]:
 
 class RagSystem:
     def __init__(self, model, tokenizer, backend, *, budget: int = 3, top_k: int = 3, max_chars: int | None = 800, threshold: float = checker.THRESHOLD,
-                 generate=None, support_fn=None):
+                 generate=None, support_fn=None, force_generate=None, recover_threshold: float | None = None):
         """`generate(messages) -> str` and `support_fn(question, passages, answer) -> float` default to the model; tests pass stubs."""
         self.model, self.tokenizer, self.backend = model, tokenizer, backend
         self.budget, self.top_k, self.max_chars, self.threshold = budget, top_k, max_chars, threshold
@@ -65,6 +66,13 @@ class RagSystem:
             generate = HFGenerator(model, tokenizer, max_new_tokens=160)
         self.generate = generate
         self.support_fn = support_fn or (lambda q, p, a: checker.support_probability(self.model, self.tokenizer, q, p, a))
+        if recover_threshold is not None and not 0 <= recover_threshold <= 1:
+            raise ValueError('recover_threshold must be between 0 and 1')
+        self.recover_threshold = recover_threshold
+        if force_generate is None and recover_threshold is not None:
+            from .generate import forced_answer
+            force_generate = lambda messages: forced_answer(self.model, self.tokenizer, messages)
+        self.force_generate = force_generate
         self.system_prompt = protocol.system_prompt(self._tool())
 
     def _tool(self) -> CorpusSearchTool:
@@ -107,6 +115,28 @@ class RagSystem:
             final = protocol.Turn("invalid", error="no final turn")
         base = dict(model_final=final.kind, model_text=last_text, queries=queries, shown_chunk_ids=list(shown), model_calls=calls)
         abstain_text = protocol.format_abstain(episodes.ABSTAIN_TEXT.format(question=question))
+        if final.kind != 'answer' and self.recover_threshold is not None and shown:
+            raw_forced = self.force_generate(messages)
+            forced, forced_text = protocol.parse_turn_lenient(raw_forced)
+            failure, probability = '', None
+            if forced.kind != 'answer' or not forced.citations:
+                failure = 'second look did not produce an answer with citations'
+            else:
+                flags = checker.deterministic_flags(forced.answer or '', forced.citations, list(shown.values()), self.max_chars)
+                if flags['cites_unshown']:
+                    failure = 'second look cites a passage that was never shown'
+                elif flags['answer_part_absent_from_cited']:
+                    failure = 'second look answer parts absent from cited passages'
+                else:
+                    probability = self.support_fn(question, flags['passages'], forced.answer or '')
+                    if not math.isfinite(probability) or probability < self.recover_threshold:
+                        failure = 'second look support probability below threshold or invalid'
+            if not failure:
+                return Decision('answer', forced_text, answer=forced.answer, citations=list(forced.citations),
+                                repaired_by='second_look', p_supported=probability, **base)
+            text = last_text if final.kind == 'abstain' else abstain_text
+            repair = None if final.kind == 'abstain' else 'fail_closed'
+            return Decision('abstain', text, repaired_by=repair, reason=failure, p_supported=probability, **base)
         if final.kind == "abstain":
             return Decision("abstain", last_text, **base)
         if final.kind != "answer":

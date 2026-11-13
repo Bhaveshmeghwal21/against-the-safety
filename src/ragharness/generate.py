@@ -146,6 +146,18 @@ class HFGenerator:
         return results  # type: ignore[return-value]
 
 
+def forced_input(generator, messages):
+    """Encode the same prefix for both live recovery and batched experiments."""
+    return generator._encode(messages) + generator.tokenizer.encode('<answer>', add_special_tokens=False)
+
+
+def forced_answer(model, tokenizer, messages, max_new_tokens: int = 160) -> str:
+    """Continue the actor's exact prompt from an answer tag, using greedy decoding."""
+    gen = HFGenerator(model, tokenizer, max_new_tokens=max_new_tokens)
+    encoded = forced_input(gen, messages)
+    return '<answer>' + gen._run([encoded])[0].text
+
+
 def load_model(model_id: str, revision: str | None = None, adapter: str | None = None, quantize: bool = True, dtype: str = "float16"):
     """Base model in 4-bit NF4 (or full precision for CPU/stand-in), with an optional PEFT adapter."""
     import torch

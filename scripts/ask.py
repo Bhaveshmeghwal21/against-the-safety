@@ -33,6 +33,8 @@ def main() -> None:
     ap.add_argument("--docs", required=True)
     ap.add_argument("--question", action="append", required=True, help="repeat to ask several questions")
     ap.add_argument("--adapter", default="BMEscanor/against-the-safety-tiny-aya-rag-main")
+    ap.add_argument('--verifier', default=None, help='optional separate verifier adapter')
+    ap.add_argument('--recover-threshold', type=float, default=None, help='enable the experimental second look')
     ap.add_argument("--index", default=None, help="where to write the SQLite index (default: a temporary folder)")
     args = ap.parse_args()
 
@@ -46,7 +48,17 @@ def main() -> None:
     backend, chunks = system.index_documents(docs, db)
     by_id = {c["chunk_id"]: c["title"] for c in chunks}
     model, tok = load_model_for_system(args.adapter)
-    rag = system.RagSystem(model, tok, backend)
+    support_fn = None
+    if args.verifier:
+        from ragharness import checker
+        model.load_adapter(args.verifier, adapter_name='verifier', is_trainable=False)
+        def support_fn(question, passages, answer):
+            model.set_adapter('verifier')
+            try:
+                return checker.support_probability(model, tok, question, passages, answer)
+            finally:
+                model.set_adapter('default')
+    rag = system.RagSystem(model, tok, backend, support_fn=support_fn, recover_threshold=args.recover_threshold)
     for question in args.question:
         d = rag.ask(question)
         out = {"question": question, "decision": d.decision, "text": d.text, "answer": d.answer, "citations": [{"chunk_id": c, "title": by_id.get(c)} for c in d.citations],
