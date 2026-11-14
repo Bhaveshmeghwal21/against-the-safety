@@ -134,7 +134,7 @@ GPT-6 Luna and DeepSeek V4 Flash on `xq_hi` only, with the existing format-aware
 3. Optional: the hosted Hindi comparison, about $1.
 4. Republishing the Hugging Face cards at the end with the results.
 
-## 14. Amendments made before any model ran on these questions (15 November 2026, about 04:00 IST)
+## 14. Amendments made before any model ran on these questions (15 November 2026, about 02:20 IST)
 
 The data was built and the CPU checks of section 8 were run first. They changed four things, all decided before the Kaggle launch. Each is labelled here so it can be told apart from the original plan.
 
