@@ -51,11 +51,27 @@ Steps 3 and 4 are code and need no training. Training used 600 HotpotQA question
 The web demo ships with 24 fictional product-support passages ([`examples/nimbus_home.jsonl`](examples/nimbus_home.jsonl)) and eight example questions: two answerable, two with a newer and an older policy edition in the documents, two that need two passages, two the documents cannot answer ([`examples/nimbus_questions.json`](examples/nimbus_questions.json)). To run it on a free Kaggle T4 from this repository:
 
 ```powershell
-python scripts/kaggle_launch.py dataset
+python scripts/bundle_for_kaggle.py --adapter main=<folder with the main adapter>
+python scripts/kaggle_launch.py dataset --existing
 python scripts/kaggle_launch.py run demo --tag try --timeout 5400
 ```
 
-The kernel first answers the eight example questions, then prints a `DEMO LINK:` line to its log for about 50 minutes. Tiny Aya is gated: accept its terms on Hugging Face first. Expect several seconds per answer on a T4, and longer for the first.
+The kernel first answers the eight example questions, then prints a `DEMO LINK:` line to its log every minute for about 50 minutes; open the kernel's page on kaggle.com to read it. The main adapter is on [Hugging Face](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-main), and the base model is gated, so accept its terms first. More options are in [`kaggle/README.md`](kaggle/README.md).
+
+**A real run.** The eight example questions on a Kaggle T4, with the submitted system (adapter, fail-closed rule and self-check). The full output is in [`docs/examples/demo_smoke_t4.json`](docs/examples/demo_smoke_t4.json).
+
+| Kind | Question | Expected | The system | Result |
+| --- | --- | --- | --- | ---: |
+| one passage | Seconds to hold the Hub H2 reset pin | 8 | answered 8 | right |
+| one passage | Batteries in the Lock L1 | 4 AA alkaline | answered 4 AA alkaline batteries | right |
+| two editions | Lock L1 body warranty in months | 24 | answered 24 | right |
+| two editions | Cam C3 return window in days | 45 | answered 30, from the 2025 edition | wrong |
+| two passages | Does firmware 5.0 local-only mode stop Cam C3 cloud uploads | yes | answered no | wrong |
+| two passages | Firmware release that added the protocol Apple Home uses | 4.2 | refused | over-refusal |
+| missing | Hub H2 Bluetooth version | refuse | refused | right |
+| missing | Lock L1 fingerprint unlocking | refuse | refused | right |
+
+Five of eight match what the documents support, both missing-evidence questions correctly refused. The Cam C3 answer cited both editions and picked the older one, and the self-check let it through (support score 0.90). That is the weakness the Limits section names. An answer took about 10 seconds and a refusal about 20, because a refusal follows three searches. The kernel also served the web page behind a public link, but nobody opened that link in this run, so the page itself has not been clicked through.
 
 ![Four recorded episodes: an answer with citations, a refusal on hidden evidence, an answer withheld by the self-check, a fail-closed refusal](docs/figures/trace_examples.svg)
 
@@ -128,7 +144,7 @@ Training and evaluation ran on Kaggle T4s: see [`kaggle/README.md`](kaggle/READM
 - The sealed test was opened before the scoring corrections, and candF1 was tested on it after its gate was written, so further model selection needs a fresh test.
 - Hidden-evidence answers are annotation-based flags. An unannotated alternative source could make a flagged answer correct, and no one has hand-checked them.
 - The self-check withholds some correct answers. The submitted system refuses 39% of answerable questions.
-- There is no hosted live endpoint: the web demo needs a GPU you start yourself. Its logic is tested with scripted model replies; its GPU run is not yet verified.
+- There is no hosted live endpoint: the web demo needs a GPU you start yourself. Its GPU run answered the eight example questions as shown above (five right, two wrong, one over-refusal); eight questions say little about accuracy, which the sealed test measures.
 
 ## Artifacts and licenses
 

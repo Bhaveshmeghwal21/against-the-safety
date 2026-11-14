@@ -55,7 +55,7 @@ Training and evaluation use HotpotQA and SQuAD 2.0 (CC BY-SA 4.0), RGB (CC BY-NC
 - Models: https://huggingface.co/collections/BMEscanor/against-the-safety-tiny-aya-rag-adapters-6aec1fda812ed14d9f60bfbc
 - Data, traces and demo: https://huggingface.co/collections/BMEscanor/against-the-safety-rag-episodes-traces-and-demo-6aec1fdb994e3b036c6c958d
 - Trace viewer (recorded episodes, the model does not run): https://huggingface.co/spaces/BMEscanor/against-the-safety-trace-viewer
-- Web demo that runs the model on a GPU: `scripts/demo_app.py`, described in the repository README.
+- Web demo that runs the model on a GPU: `scripts/demo_app.py`, described in the repository README. Its eight example questions ran on a Kaggle T4: five right, two wrong answers, one over-refusal.
 
 ## 6. Experiments and findings
 
@@ -129,7 +129,7 @@ The repository README has the commands: tests, the audit that rebuilds the corre
 
 ## 11. Declarations
 
-- **Work outside the hackathon:** none of the submitted work predates the hackathon. The base model, AgentTune, AuditKIT and the public datasets are third-party.
+- **Work outside the hackathon:** none of the submitted work predates the hackathon. The repository history starts on 4 November 2026, one day after the kickoff-day planning note in `research/`. The base model, AgentTune, AuditKIT and the public datasets are third-party.
 - **LLM usage:** AI coding assistants drafted a large share of the code, tests and prose under the team's direction. Every number here comes from a script run on saved transcripts and appears in a file under `reports/`.
 - **Acknowledgements:** a friend lent Kaggle compute. Cohere Labs, Lexsi Labs and the dataset authors made the models, libraries and data used here.
 

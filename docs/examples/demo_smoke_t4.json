@@ -1,0 +1,381 @@
+[
+  {
+    "question": "How many seconds do I hold the reset pin to factory reset the Nimbus Hub H2?",
+    "decision": "answer",
+    "answer": "8",
+    "text": "<answer>8</answer><citations>c00013,c00016</citations>",
+    "why": "The model answered, and the self-check agreed the cited passages support it.",
+    "repaired_by": null,
+    "p_supported": 0.8056321740150452,
+    "citations": [
+      {
+        "chunk_id": "c00013",
+        "title": "Nimbus Hub H2 Setup Guide",
+        "text": "The Nimbus Hub H2 connects to 2.4 GHz Wi-Fi networks only. Install the Nimbus app, plug in the hub and wait for the light to pulse white, which means the hub is ready to pair. A solid amber light means the hub has no internet connection. To restore factory settings, press and hold the recessed reset pin for 8 seconds until the light flashes red twice. Resetting removes every paired device and the saved Wi-Fi password."
+      },
+      {
+        "chunk_id": "c00016",
+        "title": "Nimbus Hub H2 Troubleshooting",
+        "text": "If the hub shows a solid amber light, restart your router and then unplug the hub for 10 seconds. If the light stays amber, move the hub closer to the router and confirm the network is 2.4 GHz, because 5 GHz-only networks are not supported. A solid red light means the hub is in recovery mode; hold the button for 15 seconds while plugging in power to reload the last stable firmware. Do not cover the hub, because it can overheat."
+      }
+    ],
+    "searches": [
+      "How many seconds do I hold the reset pin to factory reset the Nimbus Hub H2?"
+    ],
+    "passages_seen": [
+      {
+        "chunk_id": "c00013",
+        "title": "Nimbus Hub H2 Setup Guide",
+        "text": "The Nimbus Hub H2 connects to 2.4 GHz Wi-Fi networks only. Install the Nimbus app, plug in the hub and wait for the light to pulse white, which means the hub is ready to pair. A solid amber light means the hub has no internet connection. To restore factory settings, press and hold the recessed reset pin for 8 seconds until the light flashes red twice. Resetting removes every paired device and the saved Wi-Fi password."
+      },
+      {
+        "chunk_id": "c00006",
+        "title": "Nimbus Cam C3 Troubleshooting",
+        "text": "If the Cam C3 goes offline, move it within 15 meters of the router. A blinking green light means a firmware update is running and takes up to 10 minutes; do not unplug the camera. For a blurry night image, clean the lens and remove reflective surfaces near the camera. To reset the camera, hold the reset button for 10 seconds."
+      },
+      {
+        "chunk_id": "c00016",
+        "title": "Nimbus Hub H2 Troubleshooting",
+        "text": "If the hub shows a solid amber light, restart your router and then unplug the hub for 10 seconds. If the light stays amber, move the hub closer to the router and confirm the network is 2.4 GHz, because 5 GHz-only networks are not supported. A solid red light means the hub is in recovery mode; hold the button for 15 seconds while plugging in power to reload the last stable firmware. Do not cover the hub, because it can overheat."
+      }
+    ],
+    "withheld_draft": null,
+    "model_calls": 2,
+    "notes": [],
+    "kind": "ordinary",
+    "expected": "8",
+    "seconds": 10.9
+  },
+  {
+    "question": "What type of batteries does the Nimbus Lock L1 use?",
+    "decision": "answer",
+    "answer": "4 AA alkaline batteries",
+    "text": "<answer>4 AA alkaline batteries</answer><citations>c00019,c00018</citations>",
+    "why": "The model answered, and the self-check agreed the cited passages support it.",
+    "repaired_by": null,
+    "p_supported": 0.961533784866333,
+    "citations": [
+      {
+        "chunk_id": "c00019",
+        "title": "Nimbus Lock L1 Troubleshooting",
+        "text": "If the keypad does not respond, replace all four batteries first. If the app reports that the lock is jammed, open the door and hold the Nimbus button for 5 seconds to recalibrate the bolt. In an emergency, touch a 9 V battery to the contacts on the underside of the keypad to power the lock temporarily. A spare mechanical key is included only with units whose serial number starts with K."
+      },
+      {
+        "chunk_id": "c00018",
+        "title": "Nimbus Lock L1 Setup Guide",
+        "text": "The Nimbus Lock L1 runs on 4 AA alkaline batteries. Insert them with the door open, then hold the Nimbus button for 3 seconds to pair the lock with the Hub H2 over Bluetooth within 5 meters. Codes can be 4 to 8 digits. The auto-lock timer can be set to 30 seconds, 60 seconds or 5 minutes. The app shows a low battery warning when charge falls to 20 percent; expect about 9 months of battery life at 10 uses per day."
+      }
+    ],
+    "searches": [
+      "What type of batteries does the Nimbus Lock L1 use?"
+    ],
+    "passages_seen": [
+      {
+        "chunk_id": "c00019",
+        "title": "Nimbus Lock L1 Troubleshooting",
+        "text": "If the keypad does not respond, replace all four batteries first. If the app reports that the lock is jammed, open the door and hold the Nimbus button for 5 seconds to recalibrate the bolt. In an emergency, touch a 9 V battery to the contacts on the underside of the keypad to power the lock temporarily. A spare mechanical key is included only with units whose serial number starts with K."
+      },
+      {
+        "chunk_id": "c00018",
+        "title": "Nimbus Lock L1 Setup Guide",
+        "text": "The Nimbus Lock L1 runs on 4 AA alkaline batteries. Insert them with the door open, then hold the Nimbus button for 3 seconds to pair the lock with the Hub H2 over Bluetooth within 5 meters. Codes can be 4 to 8 digits. The auto-lock timer can be set to 30 seconds, 60 seconds or 5 minutes. The app shows a low battery warning when charge falls to 20 percent; expect about 9 months of battery life at 10 uses per day."
+      },
+      {
+        "chunk_id": "c00021",
+        "title": "Nimbus Lock L1 Warranty Terms (2026 edition)",
+        "text": "Nimbus Lock L1 warranty. The lock body is covered for 24 months from the purchase date and the keypad for 12 months. Damage from forced entry is covered only for customers who subscribe to Lock Protect. Warranty claims require proof of purchase."
+      }
+    ],
+    "withheld_draft": null,
+    "model_calls": 2,
+    "notes": [],
+    "kind": "ordinary",
+    "expected": "4 AA alkaline batteries",
+    "seconds": 10.0
+  },
+  {
+    "question": "How many months is the Lock L1 body covered by the warranty?",
+    "decision": "answer",
+    "answer": "24",
+    "text": "<answer>24</answer><citations>c00021,c00020</citations>",
+    "why": "The model answered, and the self-check agreed the cited passages support it.",
+    "repaired_by": null,
+    "p_supported": 0.8558511734008789,
+    "citations": [
+      {
+        "chunk_id": "c00021",
+        "title": "Nimbus Lock L1 Warranty Terms (2026 edition)",
+        "text": "Nimbus Lock L1 warranty. The lock body is covered for 24 months from the purchase date and the keypad for 12 months. Damage from forced entry is covered only for customers who subscribe to Lock Protect. Warranty claims require proof of purchase."
+      },
+      {
+        "chunk_id": "c00020",
+        "title": "Nimbus Lock L1 Warranty Terms (2025 edition)",
+        "text": "Nimbus Lock L1 warranty. The lock body is covered for 12 months from the purchase date and the keypad for 6 months. Damage from forced entry or tampering is excluded. Warranty claims require proof of purchase."
+      }
+    ],
+    "searches": [
+      "How many months is the Lock L1 body covered by the warranty?"
+    ],
+    "passages_seen": [
+      {
+        "chunk_id": "c00021",
+        "title": "Nimbus Lock L1 Warranty Terms (2026 edition)",
+        "text": "Nimbus Lock L1 warranty. The lock body is covered for 24 months from the purchase date and the keypad for 12 months. Damage from forced entry is covered only for customers who subscribe to Lock Protect. Warranty claims require proof of purchase."
+      },
+      {
+        "chunk_id": "c00020",
+        "title": "Nimbus Lock L1 Warranty Terms (2025 edition)",
+        "text": "Nimbus Lock L1 warranty. The lock body is covered for 12 months from the purchase date and the keypad for 6 months. Damage from forced entry or tampering is excluded. Warranty claims require proof of purchase."
+      },
+      {
+        "chunk_id": "c00022",
+        "title": "Nimbus Lock Protect Plan Terms",
+        "text": "Lock Protect costs 2 dollars per month. It covers repair or replacement of a Lock L1 damaged by forced entry, up to 400 dollars per incident, with one claim per 12 months. A 30-day waiting period applies after you subscribe."
+      }
+    ],
+    "withheld_draft": null,
+    "model_calls": 2,
+    "notes": [],
+    "kind": "dated",
+    "expected": "24",
+    "seconds": 9.8
+  },
+  {
+    "question": "How many days do I have to return a Cam C3?",
+    "decision": "answer",
+    "answer": "30",
+    "text": "<answer>30</answer><citations>c00003,c00004</citations>",
+    "why": "The model answered, and the self-check agreed the cited passages support it.",
+    "repaired_by": null,
+    "p_supported": 0.8991213440895081,
+    "citations": [
+      {
+        "chunk_id": "c00003",
+        "title": "Nimbus Cam C3 Return Policy (2025 edition)",
+        "text": "The Cam C3 can be returned within 30 days of delivery. An opened camera is subject to a 15 percent restocking fee. Refunds go to the original payment method."
+      },
+      {
+        "chunk_id": "c00004",
+        "title": "Nimbus Cam C3 Return Policy (2026 edition)",
+        "text": "The Cam C3 can be returned within 45 days of delivery. The restocking fee is waived when the device is returned in its original packaging. Refunds go to the original payment method."
+      }
+    ],
+    "searches": [
+      "How many days do I have to return a Cam C3?"
+    ],
+    "passages_seen": [
+      {
+        "chunk_id": "c00003",
+        "title": "Nimbus Cam C3 Return Policy (2025 edition)",
+        "text": "The Cam C3 can be returned within 30 days of delivery. An opened camera is subject to a 15 percent restocking fee. Refunds go to the original payment method."
+      },
+      {
+        "chunk_id": "c00004",
+        "title": "Nimbus Cam C3 Return Policy (2026 edition)",
+        "text": "The Cam C3 can be returned within 45 days of delivery. The restocking fee is waived when the device is returned in its original packaging. Refunds go to the original payment method."
+      },
+      {
+        "chunk_id": "c00006",
+        "title": "Nimbus Cam C3 Troubleshooting",
+        "text": "If the Cam C3 goes offline, move it within 15 meters of the router. A blinking green light means a firmware update is running and takes up to 10 minutes; do not unplug the camera. For a blurry night image, clean the lens and remove reflective surfaces near the camera. To reset the camera, hold the reset button for 10 seconds."
+      }
+    ],
+    "withheld_draft": null,
+    "model_calls": 2,
+    "notes": [],
+    "kind": "dated",
+    "expected": "45",
+    "seconds": 9.6
+  },
+  {
+    "question": "Does the local-only mode from hub firmware 5.0 stop the Cam C3 from uploading clips to the cloud?",
+    "decision": "answer",
+    "answer": "no",
+    "text": "<answer>no</answer><citations>c00011,c00002</citations>",
+    "why": "The model answered, and the self-check agreed the cited passages support it.",
+    "repaired_by": null,
+    "p_supported": 0.8499711751937866,
+    "citations": [
+      {
+        "chunk_id": "c00011",
+        "title": "Nimbus Hub Firmware 5.0 Release Notes",
+        "text": "Hub firmware 5.0 introduces local-only mode, which keeps video and automations on your home network. Local-only mode requires Cam C3 firmware 2.1 or later. Firmware 5.0 drops support for the discontinued Hub H1. Matter support is unchanged. The update takes about 8 minutes."
+      },
+      {
+        "chunk_id": "c00002",
+        "title": "Nimbus Cam C3 Privacy and Data Retention",
+        "text": "Clips are encrypted before they leave the camera. Clips on the microSD card are overwritten oldest first when the card is full. Cloud clips are deleted when they pass the history window of your cloud plan. When local-only mode is turned on, the camera stops uploading clips to the cloud entirely."
+      }
+    ],
+    "searches": [
+      "Does the local-only mode from hub firmware 5.0 stop the Cam C3 from uploading clips to the cloud?"
+    ],
+    "passages_seen": [
+      {
+        "chunk_id": "c00011",
+        "title": "Nimbus Hub Firmware 5.0 Release Notes",
+        "text": "Hub firmware 5.0 introduces local-only mode, which keeps video and automations on your home network. Local-only mode requires Cam C3 firmware 2.1 or later. Firmware 5.0 drops support for the discontinued Hub H1. Matter support is unchanged. The update takes about 8 minutes."
+      },
+      {
+        "chunk_id": "c00002",
+        "title": "Nimbus Cam C3 Privacy and Data Retention",
+        "text": "Clips are encrypted before they leave the camera. Clips on the microSD card are overwritten oldest first when the card is full. Cloud clips are deleted when they pass the history window of your cloud plan. When local-only mode is turned on, the camera stops uploading clips to the cloud entirely."
+      },
+      {
+        "chunk_id": "c00010",
+        "title": "Nimbus Hub Firmware 4.2 Release Notes",
+        "text": "Hub firmware 4.2 adds Matter 1.3 support, which lets the Hub H2 work with Apple Home and other Matter controllers. It raises the paired device limit and fixes Wi-Fi drops on router channels 12 and 13. Update from the Nimbus app under Hub, then Firmware. The update takes about 6 minutes."
+      }
+    ],
+    "withheld_draft": null,
+    "model_calls": 2,
+    "notes": [],
+    "kind": "two_doc",
+    "expected": "yes",
+    "seconds": 11.1
+  },
+  {
+    "question": "Which hub firmware release added the protocol that Apple Home uses to connect to the Hub H2?",
+    "decision": "abstain",
+    "answer": null,
+    "text": "<abstain>The accessible passages do not contain the evidence needed to answer: Which hub firmware release added the protocol that Apple Home uses to connect to the Hub H2?</abstain>",
+    "why": "The model searched and said the documents do not hold the answer.",
+    "repaired_by": null,
+    "p_supported": null,
+    "citations": [],
+    "searches": [
+      "Which hub firmware release added the protocol that Apple Home uses to connect to the Hub H2?",
+      "Hub H2",
+      "Hub firmware release added protocol Apple Home uses connect Hub H2"
+    ],
+    "passages_seen": [
+      {
+        "chunk_id": "c00010",
+        "title": "Nimbus Hub Firmware 4.2 Release Notes",
+        "text": "Hub firmware 4.2 adds Matter 1.3 support, which lets the Hub H2 work with Apple Home and other Matter controllers. It raises the paired device limit and fixes Wi-Fi drops on router channels 12 and 13. Update from the Nimbus app under Hub, then Firmware. The update takes about 6 minutes."
+      },
+      {
+        "chunk_id": "c00011",
+        "title": "Nimbus Hub Firmware 5.0 Release Notes",
+        "text": "Hub firmware 5.0 introduces local-only mode, which keeps video and automations on your home network. Local-only mode requires Cam C3 firmware 2.1 or later. Firmware 5.0 drops support for the discontinued Hub H1. Matter support is unchanged. The update takes about 8 minutes."
+      },
+      {
+        "chunk_id": "c00009",
+        "title": "Nimbus Device Compatibility",
+        "text": "The Hub H2 works with the Lock L1 and the Cam C3. The discontinued Hub H1 works with the Lock L1 only and cannot connect to the Cam C3. Amazon Alexa and Google Assistant are supported directly. Apple Home is supported through Matter."
+      },
+      {
+        "chunk_id": "c00014",
+        "title": "Nimbus Hub H2 Specifications (2025 edition)",
+        "text": "Nimbus Hub H2 specifications. Power: 12 V, 1.5 A adapter. Operating temperature: 0 to 40 degrees Celsius. Wireless: Wi-Fi 2.4 GHz and Bluetooth. Paired devices: up to 40. Zigbee is not supported. Use only the supplied power adapter."
+      },
+      {
+        "chunk_id": "c00012",
+        "title": "Nimbus Hub H1 Trade-in Program",
+        "text": "Trade in a Hub H1 and receive a credit of 20 dollars toward a Hub H2. The credit is valid for 90 days. Traded-in hubs are recycled."
+      },
+      {
+        "chunk_id": "c00015",
+        "title": "Nimbus Hub H2 Specifications (2026 edition)",
+        "text": "Nimbus Hub H2 specifications. Power: 12 V, 1.5 A adapter. Operating temperature: 0 to 40 degrees Celsius. Wireless: Wi-Fi 2.4 GHz, Bluetooth and a Thread border router. Paired devices: up to 64. Zigbee is not supported. Use only the supplied power adapter."
+      }
+    ],
+    "withheld_draft": null,
+    "model_calls": 4,
+    "notes": [],
+    "kind": "two_doc",
+    "expected": "4.2",
+    "seconds": 21.0
+  },
+  {
+    "question": "Which Bluetooth version does the Hub H2 use?",
+    "decision": "abstain",
+    "answer": null,
+    "text": "<abstain>The accessible passages do not contain the evidence needed to answer: Which Bluetooth version does the Hub H2 use?</abstain>",
+    "why": "The model searched and said the documents do not hold the answer.",
+    "repaired_by": null,
+    "p_supported": null,
+    "citations": [],
+    "searches": [
+      "Which Bluetooth version does the Hub H2 use?",
+      "Hub H2",
+      "Bluetooth version Hub H2 use"
+    ],
+    "passages_seen": [
+      {
+        "chunk_id": "c00014",
+        "title": "Nimbus Hub H2 Specifications (2025 edition)",
+        "text": "Nimbus Hub H2 specifications. Power: 12 V, 1.5 A adapter. Operating temperature: 0 to 40 degrees Celsius. Wireless: Wi-Fi 2.4 GHz and Bluetooth. Paired devices: up to 40. Zigbee is not supported. Use only the supplied power adapter."
+      },
+      {
+        "chunk_id": "c00015",
+        "title": "Nimbus Hub H2 Specifications (2026 edition)",
+        "text": "Nimbus Hub H2 specifications. Power: 12 V, 1.5 A adapter. Operating temperature: 0 to 40 degrees Celsius. Wireless: Wi-Fi 2.4 GHz, Bluetooth and a Thread border router. Paired devices: up to 64. Zigbee is not supported. Use only the supplied power adapter."
+      },
+      {
+        "chunk_id": "c00010",
+        "title": "Nimbus Hub Firmware 4.2 Release Notes",
+        "text": "Hub firmware 4.2 adds Matter 1.3 support, which lets the Hub H2 work with Apple Home and other Matter controllers. It raises the paired device limit and fixes Wi-Fi drops on router channels 12 and 13. Update from the Nimbus app under Hub, then Firmware. The update takes about 6 minutes."
+      },
+      {
+        "chunk_id": "c00012",
+        "title": "Nimbus Hub H1 Trade-in Program",
+        "text": "Trade in a Hub H1 and receive a credit of 20 dollars toward a Hub H2. The credit is valid for 90 days. Traded-in hubs are recycled."
+      },
+      {
+        "chunk_id": "c00018",
+        "title": "Nimbus Lock L1 Setup Guide",
+        "text": "The Nimbus Lock L1 runs on 4 AA alkaline batteries. Insert them with the door open, then hold the Nimbus button for 3 seconds to pair the lock with the Hub H2 over Bluetooth within 5 meters. Codes can be 4 to 8 digits. The auto-lock timer can be set to 30 seconds, 60 seconds or 5 minutes. The app shows a low battery warning when charge falls to 20 percent; expect about 9 months of battery life at 10 uses per day."
+      }
+    ],
+    "withheld_draft": null,
+    "model_calls": 4,
+    "notes": [],
+    "kind": "missing",
+    "expected": "refuse: the documents do not say",
+    "seconds": 18.0
+  },
+  {
+    "question": "Does the Lock L1 support fingerprint unlocking?",
+    "decision": "abstain",
+    "answer": null,
+    "text": "<abstain>The accessible passages do not contain the evidence needed to answer: Does the Lock L1 support fingerprint unlocking?</abstain>",
+    "why": "The model searched and said the documents do not hold the answer.",
+    "repaired_by": null,
+    "p_supported": null,
+    "citations": [],
+    "searches": [
+      "Does the Lock L1 support fingerprint unlocking?",
+      "Lock L1",
+      "Lock L1 supports fingerprint unlocking"
+    ],
+    "passages_seen": [
+      {
+        "chunk_id": "c00019",
+        "title": "Nimbus Lock L1 Troubleshooting",
+        "text": "If the keypad does not respond, replace all four batteries first. If the app reports that the lock is jammed, open the door and hold the Nimbus button for 5 seconds to recalibrate the bolt. In an emergency, touch a 9 V battery to the contacts on the underside of the keypad to power the lock temporarily. A spare mechanical key is included only with units whose serial number starts with K."
+      },
+      {
+        "chunk_id": "c00021",
+        "title": "Nimbus Lock L1 Warranty Terms (2026 edition)",
+        "text": "Nimbus Lock L1 warranty. The lock body is covered for 24 months from the purchase date and the keypad for 12 months. Damage from forced entry is covered only for customers who subscribe to Lock Protect. Warranty claims require proof of purchase."
+      },
+      {
+        "chunk_id": "c00020",
+        "title": "Nimbus Lock L1 Warranty Terms (2025 edition)",
+        "text": "Nimbus Lock L1 warranty. The lock body is covered for 12 months from the purchase date and the keypad for 6 months. Damage from forced entry or tampering is excluded. Warranty claims require proof of purchase."
+      },
+      {
+        "chunk_id": "c00009",
+        "title": "Nimbus Device Compatibility",
+        "text": "The Hub H2 works with the Lock L1 and the Cam C3. The discontinued Hub H1 works with the Lock L1 only and cannot connect to the Cam C3. Amazon Alexa and Google Assistant are supported directly. Apple Home is supported through Matter."
+      }
+    ],
+    "withheld_draft": null,
+    "model_calls": 4,
+    "notes": [],
+    "kind": "missing",
+    "expected": "refuse: the documents do not say",
+    "seconds": 17.6
+  }
+]

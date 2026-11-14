@@ -45,3 +45,22 @@ def test_local_links_in_the_readme_resolve():
         if not (ROOT / target).exists():
             missing.append(target)
     assert not missing, missing
+
+
+def test_the_demo_run_in_the_readme_matches_the_saved_output():
+    import json
+
+    runs = json.loads((ROOT / "docs" / "examples" / "demo_smoke_t4.json").read_text(encoding="utf-8"))
+    text = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert len(runs) == 8
+    right = wrong = over_refusal = 0
+    for run in runs:
+        refused_ok = run["expected"].startswith("refuse")
+        if run["decision"] == "abstain":
+            right, over_refusal = (right + 1, over_refusal) if refused_ok else (right, over_refusal + 1)
+        elif refused_ok or run["answer"].strip().lower() != run["expected"].strip().lower():
+            wrong += 1
+        else:
+            right += 1
+    assert (right, wrong, over_refusal) == (5, 2, 1)
+    assert "Five of eight match" in text and "five right, two wrong, one over-refusal" in text

@@ -19,8 +19,8 @@ def _audited_card(function):
         text = function(*args, **kwargs)
         marker = text.find("\n# ")
         end = text.find("\n", marker + 1)
-        notice = ("\n\n**13 November 2026 correction:** Tables below are historical scores. Scorer v3 fixes evidence alternatives, "
-                  "binary answers and fixed evidence eligibility; later DPO prompts contained held-out HotpotQA support. "
+        notice = ("\n\n**13 November 2026 correction:** The first-round tables below are historical scores. Sealed-test numbers (round 5 and later) use scorer v3, "
+                  "which fixes evidence alternatives, binary answers and fixed evidence eligibility; later DPO prompts contained held-out HotpotQA support. "
                   "The submitted `main` and earlier `candF1` checkpoints are unchanged. "
                   f"See the [dated remediation report]({REPO_URL}/blob/main/reports/2026-11-13-evaluation-remediation.md) "
                   "for corrected replays, training-data quarantine and licensing details.\n")
@@ -165,11 +165,17 @@ CC BY-NC 4.0, inherited from the base model. Cohere Labs' terms for Tiny Aya app
 """
 
 
-ROUND5_NOTE = """## Recommended use: the adapter plus two output-side repairs (round 5)
+def _round5_note() -> str:
+    """Round-5 paragraph of the main card. Every number comes from reports/reference_policies.json (scorer v3, 934 shared episodes)."""
+    ref = json.loads((ROOT / "reports" / "reference_policies.json").read_text(encoding="utf-8"))["sealed_r5test"]
+    cor = json.loads((ROOT / "reports" / "round5_corrected.json").read_text(encoding="utf-8"))["comparisons"]["candF1+FB+V/main+FB+V"]
+    b, m, s, f = ref["base"], ref["main"], ref["main+FB+V"], ref["candF1+FB+V"]
+    hid = lambda x: f"{x['unsupported']} of {x['hidden_n']}"
+    return f"""## Recommended use: the adapter plus two output-side repairs (round 5)
 
 The results above are for the adapter alone. The submitted system adds two repairs that need no training. A rollout that ends without a valid answer or abstention is treated as an abstention (fail-closed). A self-check withholds an answer in three cases: this adapter, asked whether the cited passages state every part of the answer (reply `SUPPORTED` or `NOT`; one forward pass; threshold 0.5), says it is not supported; the cited chunk was never shown; or a part of the answer does not appear in the cited passages.
 
-On a sealed test of 938 fresh episodes (SQuAD, HotpotQA and RGB; scorer version 2; opened for the reference systems and once more for one round-5b candidate), macro success is 0.022 for the base model, 0.414 for the adapter and 0.517 for the adapter with both repairs (+0.103 over the adapter, interval +0.079 to +0.127). Answers given although the evidence was hidden fall from 276 of 369 episodes (base) to 108 of 364 (adapter) and 37 of 364 (with repairs). The repairs cost caution: refusals of answerable episodes rise from 22% to 39%, and supported correct answers do not increase (29.0% to 27.5%). The scorer is stricter than the one above and the questions are harder, so these numbers do not compare with the first-round table. Code and tables: `reports/round5_final.md` and `scripts/verify_round5.py` in the repository. To run the whole system on your own documents (needs a CUDA GPU and access to the gated base model), use `scripts/ask.py` (`src/ragharness/system.py`); on 182 sealed-test episodes it ended every episode the same way as the offline evaluation. A second round of preference training (round 5b) produced one eligible checkpoint, [candF1](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-cand-f1). With the same repairs it scored 0.570 macro against 0.517 on the sealed test, but its unsupported-answer difference from this system (-0.008, interval -0.047 to +0.030) did not meet the registered safety bound (upper end at most +0.02), so this adapter stays the submitted model."""
+On a sealed test of {m['n']} fresh episodes (SQuAD, HotpotQA and RGB; scorer v3; opened for the reference systems and once more for one round-5b candidate), macro success is {b['macro']:.1%} for the base model, {m['macro']:.1%} for the adapter and {s['macro']:.1%} for the adapter with both repairs. Answers given although the evidence was hidden fall from {hid(b)} episodes (base) to {hid(m)} (adapter) and {hid(s)} (with repairs). The repairs cost caution: refusals of answerable episodes rise from {m['false_abstain']:.0%} to {s['false_abstain']:.0%}, and correct, cited answers do not increase ({m['supported_correct']:.1%} to {s['supported_correct']:.1%}). Among the answers that remain, {s['correct_among_answered']:.1%} are correct and cited (adapter alone: {m['correct_among_answered']:.1%}). The scorer is stricter than the one in the first-round table and the questions are harder, so these numbers do not compare with it. Code and tables: `reports/reference_policies.md` and `scripts/verify_round5.py` in the repository. To run the whole system on your own documents (needs a CUDA GPU and access to the gated base model), use `scripts/ask.py` (`src/ragharness/system.py`) or the web demo `scripts/demo_app.py`. A second round of preference training (round 5b) produced one eligible checkpoint, [candF1](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-cand-f1). With the same repairs it scored {f['macro']:.1%} macro against {s['macro']:.1%} on the same test, but its unsupported-answer difference from this system ({cor['unsupported_rate']['difference']:+.3f}, interval {cor['unsupported_rate']['ci95'][0]:+.3f} to {cor['unsupported_rate']['ci95'][1]:+.3f}) did not meet the registered safety bound (upper end at most +0.02), so this adapter stays the submitted model."""
 
 
 @_audited_card
@@ -212,7 +218,7 @@ paired intervals are in the repository (`reports/`) and in the dataset repositor
 
 {"A decoding-time sweep on the development split (`reports/bias_sweep.md`) added a bias to the logit of `abstain` after `<`: from 0 to -3 the results barely change; at -6 false abstains on answerable questions halve (20 to 10 of 86) but unsupported answers on unanswerable ones rise from 2 to 26 of 73; from -9 it never abstains, as with the control. No setting removed the false abstains without losing the correct ones." if is_main else ""}
 
-{ROUND5_NOTE if is_main else ""}
+{_round5_note() if is_main else ""}
 
 ## Five external benchmarks (never trained on or used for any choice)
 
@@ -355,22 +361,13 @@ BENCH_SOURCES = {  # folder -> (benchmark, license, citation)
 
 
 def r5_final_table() -> str:
-    """Sealed round-5 test (938 episodes): macro success, unsupported answers, supported correct answers and refusals, from reports/round5_final.json (and 5b)."""
-    tables = []
-    for name in ("round5_final", "round5b_final"):
-        p = ROOT / "reports" / f"{name}.json"
-        if p.exists():
-            tables.append(json.loads(p.read_text(encoding="utf-8"))["systems"])
-    if not tables:
-        return ""
-    lines = ["| configuration | macro success | unsupported answers / hidden-evidence episodes | supported correct (answerable) | refusals (answerable) |", "| --- | ---: | ---: | ---: | ---: |"]
-    seen = set()
-    for systems in tables:
-        for k, s in systems.items():
-            if k in seen:
-                continue
-            seen.add(k)
-            lines.append(f"| {k} | {s['macro']:.3f} | {s['unsupported']} / {s['hidden_n']} | {s['supported_correct']:.3f} | {s['false_abstain']:.3f} |")
+    """Sealed round-5 test (934 episodes shared by the local systems, scorer v3), read from reports/reference_policies.json."""
+    ref = json.loads((ROOT / "reports" / "reference_policies.json").read_text(encoding="utf-8"))["sealed_r5test"]
+    names = [("base", "base"), ("main", "main, no repairs"), ("main+FB+V", "main + fail-closed + self-check (submitted)"), ("candF1+FB+V", "candF1 + fail-closed + self-check"), ("always_refuse", "refuse every question")]
+    lines = ["| configuration | macro success | unsupported answers / hidden-evidence episodes | correct and cited (answerable) | refusals (answerable) |", "| --- | ---: | ---: | ---: | ---: |"]
+    for key, label in names:
+        s = ref[key]
+        lines.append(f"| {label} | {s['macro']:.3f} | {s['unsupported']} / {s['hidden_n']} | {s['supported_correct']:.3f} | {s['false_abstain']:.3f} |")
     return "\n".join(lines)
 
 
@@ -419,12 +416,12 @@ Pooled unsupported answers are dominated by RGB's on-topic-passage setting, wher
 
 `r5t_squad`, `r5t_hotpot` and `r5t_rgb` are the sealed round-5 test: 938 episodes built before any round-5 training from questions no earlier round used, opened for the reference systems and once more for candF1 (round 5b). The oracle's 1.0 was the weaker success metric; strict scorer-v2 evidence success was 372/471 on RGB and 78/82 on HotpotQA.
 The manifests carry the file hashes. The traces are the raw model runs. The two repairs of the submitted system are applied offline by `scripts/report_round5.py`: a rollout that ends without a valid
-answer or abstention becomes an abstention (fail-closed, FB), and an answer the self-check withholds becomes an abstention (V; the verdicts are in the episodes dataset under `verifier/`). Scorer version 2.
+answer or abstention becomes an abstention (fail-closed, FB), and an answer the self-check withholds becomes an abstention (V; the verdicts are in the episodes dataset under `verifier/`). Scorer v3, the 13 November corrected replay; the historical scorer-v2 tables stay in `reports/round5_final.md`.
 
 {r5_final_table()}
 
 Macro success is the mean of four component rates (SQuAD single, SQuAD two-part, HotpotQA, RGB); the scorer is stricter than the one used for the first-round tables, so the numbers do not compare with them.
-Paired intervals and the per-part numbers are in `reports/round5_final.md`. `r4dev` and `r4test` are the round-4 development set and final holdout.
+Paired intervals and the per-part numbers are in `reports/reference_policies.md` and `reports/round5_corrected.md`. `r4dev` and `r4test` are the round-4 development set and final holdout.
 
 ## Contents
 
@@ -540,7 +537,7 @@ CC BY-NC 4.0, inherited from the base model. Cohere Labs' terms for Tiny Aya app
 
 @_audited_card
 def cand_f1_card(user: str) -> str:
-    final = json.loads((ROOT / "reports" / "round5b_final.json").read_text(encoding="utf-8"))
+    final = json.loads((ROOT / "reports" / "round5_corrected.json").read_text(encoding="utf-8"))
     sysm, cmp_ = final["systems"], final["comparisons"]["candF1+FB+V/main+FB+V"]
 
     def row(label: str, key: str) -> str:
@@ -554,7 +551,7 @@ def cand_f1_card(user: str) -> str:
         return f"{d['difference']:+.3f} [{d['ci95'][0]:+.3f}, {d['ci95'][1]:+.3f}]"
 
     table = "\n".join([
-        "| sealed test (938 episodes) | macro | SQuAD single | SQuAD two-part | HotpotQA | RGB | unsupported / hidden | supported correct | refusals of answerable |",
+        "| sealed test (934 shared episodes, scorer v3) | macro | SQuAD single | SQuAD two-part | HotpotQA | RGB | unsupported / hidden | supported correct | refusals of answerable |",
         "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
         row("main + fail-closed + self-check (submitted)", "main+FB+V"), row("**candF1 + fail-closed + self-check**", "candF1+FB+V"),
         row("main, no repairs", "main"), row("candF1, no repairs", "candF1")])
@@ -577,14 +574,14 @@ Hackathon, Track 3, problem statement 4. Team **Against-the-safety**. Code and p
 
 **Status: the documented alternative, not the submitted system.** The submitted system is [the main adapter](https://huggingface.co/{user}/against-the-safety-tiny-aya-rag-main) with a fail-closed rule and a self-check.
 Round 5b opened the sealed test once for this adapter, because it was the only one of twelve checkpoints that passed the development gate. The gate was written after its development results were known, so
-it was not chosen blind. The registered rule for replacing main needed, besides a macro gain, an unsupported-answer difference below zero with an upper bound of at most +0.02. That bound was +0.030, so the rule failed.
+it was not chosen blind. The registered rule for replacing main needed, besides a macro gain, an unsupported-answer difference below zero with an upper bound of at most +0.02. Under scorer v3 that bound is {cmp_["unsupported_rate"]["ci95"][1]:+.3f} (+0.030 under the original scorer v2), so the rule failed.
 
-## Sealed test (938 fresh SQuAD, HotpotQA and RGB episodes; scorer version 2; opened for this adapter once)
+## Sealed test (934 fresh SQuAD, HotpotQA and RGB episodes shared by both systems; scorer v3; opened for this adapter once)
 
 {table}
 
 candF1 minus main, both with the repairs, paired 95% intervals from resampling whole questions: macro **{ci("macro")}**; unsupported-answer rate {ci("unsupported_rate")}; supported correct answers {ci("supported_correct")}.
-Read it as: more answers are correct (two-part questions in particular), and the data cannot say whether it is safer or less safe than main. The unsupported counts are small.
+Read it as: more answers are correct, and the data cannot say whether it is safer or less safe than main. The unsupported counts are small. This is a post-hoc correction on an opened holdout: it does not change which model was submitted, and a new selection claim would need a fresh holdout.
 
 ## Use
 
@@ -595,7 +592,7 @@ roles, so running it with this adapter would use candF1 as its own checker, whic
 ## Limits
 
 The main adapter's limits apply. On the development set this checkpoint had more unsupported HotpotQA answers than main (2 against 1) and slightly more unsupported answers overall (7 of 131 against 5) with the repairs.
-Refusals of answerable episodes are still high (0.378 with the repairs). English, short factual questions. Not for safety-critical or legal use.
+Refusals of answerable episodes are still high ({sysm["candF1+FB+V"]["false_abstain"]:.3f} with the repairs). English, short factual questions. Not for safety-critical or legal use.
 
 ## License
 
