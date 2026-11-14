@@ -1,0 +1,1633 @@
+{
+  "training": {
+    "method": "evidence_balanced_passage_order",
+    "world_size": 4,
+    "effective_global_batch_size": 16,
+    "model_source": "local:/kaggle/input/notebooks/mlsingh1234/lexsi-comp/ats-four-l4-assets/base_model",
+    "rows_trained": 541,
+    "optimizer_steps": 34,
+    "warmup_steps": 2,
+    "train_loss": 0.052025743157548064,
+    "wall_seconds": 646.8,
+    "adapter": {
+      "method": "dora",
+      "use_dora": true,
+      "rank": 16,
+      "alpha": 32,
+      "dropout": 0.05,
+      "target_modules": [
+        "down_proj",
+        "gate_proj",
+        "k_proj",
+        "o_proj",
+        "q_proj",
+        "up_proj",
+        "v_proj"
+      ],
+      "trainable_parameters": 31279104,
+      "direction_parameters": 30228480,
+      "magnitude_parameters": 1050624
+    },
+    "data_sha256": "891fad654ba921b7384ba2231d05514a1d57189b905747e7bef3205f5e34c1ed",
+    "processed_tokens": 757435,
+    "supervised_tokens": 18166,
+    "peak_rank0_gpu_memory_gb": 6.094027519226074,
+    "args": {
+      "data": "/kaggle/working/ats-evidence/dora_evidence_order/data/train.jsonl",
+      "init_adapter": "/kaggle/input/notebooks/mlsingh1234/training-l4x4/ats-experiments/dora_lr5e5/dora/adapter",
+      "out": "/kaggle/working/ats-evidence/dora_evidence_order/dora",
+      "lr": 2e-05,
+      "epochs": 1.0,
+      "grad_accum": 4,
+      "max_length": 2560,
+      "seed": 47,
+      "max_steps": -1
+    },
+    "versions": {
+      "torch": "2.11.0+cu126",
+      "peft": "0.21.2",
+      "transformers": "5.22.1",
+      "trl": "1.7.1"
+    }
+  },
+  "curriculum": {
+    "method": "evidence_balanced_passage_order",
+    "seed": 47,
+    "pairs": 128,
+    "rows": 541,
+    "paired_tokens": 378168,
+    "replay_tokens": 379267,
+    "replay_by_kind": {
+      "search": 95,
+      "answer": 95,
+      "abstain": 95
+    },
+    "by_kind": {
+      "abstain": 223,
+      "answer": 223,
+      "search": 95
+    },
+    "rejected": {},
+    "pair_lengths": [
+      {
+        "parent": "5ab5bfc2554299637185c601",
+        "original": [
+          1222,
+          1796
+        ],
+        "augmented": [
+          1222,
+          1796
+        ]
+      },
+      {
+        "parent": "5adccbae5542990d50227d26",
+        "original": [
+          1141,
+          1303
+        ],
+        "augmented": [
+          1141,
+          1303
+        ]
+      },
+      {
+        "parent": "5a824a98554299676cceb24d",
+        "original": [
+          1511,
+          1631
+        ],
+        "augmented": [
+          1511,
+          1631
+        ]
+      },
+      {
+        "parent": "5a7cfc9955429909bec768de",
+        "original": [
+          1486,
+          1449
+        ],
+        "augmented": [
+          1486,
+          1449
+        ]
+      },
+      {
+        "parent": "5ac3ab8c5542995ef918c1d7",
+        "original": [
+          1847,
+          1652
+        ],
+        "augmented": [
+          1847,
+          1652
+        ]
+      },
+      {
+        "parent": "5ab7f28055429928e1fe3953",
+        "original": [
+          1469,
+          1498
+        ],
+        "augmented": [
+          1469,
+          1498
+        ]
+      },
+      {
+        "parent": "5a87672e5542993e715abf27",
+        "original": [
+          1413,
+          1719
+        ],
+        "augmented": [
+          1413,
+          1719
+        ]
+      },
+      {
+        "parent": "5a8339ea55429966c78a6b51",
+        "original": [
+          1107,
+          2153
+        ],
+        "augmented": [
+          1107,
+          2153
+        ]
+      },
+      {
+        "parent": "5a773e1d55429972597f14c7",
+        "original": [
+          1001,
+          1473
+        ],
+        "augmented": [
+          1001,
+          1473
+        ]
+      },
+      {
+        "parent": "5adf698f5542993a75d264e2",
+        "original": [
+          1637,
+          1573
+        ],
+        "augmented": [
+          1637,
+          1573
+        ]
+      },
+      {
+        "parent": "5adbc7d85542996e6852522c",
+        "original": [
+          1100,
+          1449
+        ],
+        "augmented": [
+          1100,
+          1449
+        ]
+      },
+      {
+        "parent": "5add3a0c5542997545bbbcc5",
+        "original": [
+          1868,
+          1572
+        ],
+        "augmented": [
+          1868,
+          1572
+        ]
+      },
+      {
+        "parent": "5ae0f683554299422ee99581",
+        "original": [
+          1235,
+          1378
+        ],
+        "augmented": [
+          1235,
+          1378
+        ]
+      },
+      {
+        "parent": "5a8085c25542992bc0c4a74d",
+        "original": [
+          1063,
+          1985
+        ],
+        "augmented": [
+          1063,
+          1985
+        ]
+      },
+      {
+        "parent": "5a7520d95542993748c897c5",
+        "original": [
+          1180,
+          1599
+        ],
+        "augmented": [
+          1180,
+          1599
+        ]
+      },
+      {
+        "parent": "5a8ccb6a554299441c6b9f0b",
+        "original": [
+          1294,
+          1392
+        ],
+        "augmented": [
+          1294,
+          1392
+        ]
+      },
+      {
+        "parent": "5a8351d255429954d2e2ec96",
+        "original": [
+          1330,
+          1570
+        ],
+        "augmented": [
+          1330,
+          1570
+        ]
+      },
+      {
+        "parent": "5a73653855429901807db026",
+        "original": [
+          1263,
+          1539
+        ],
+        "augmented": [
+          1263,
+          1539
+        ]
+      },
+      {
+        "parent": "5ab7cac955429928e1fe38f7",
+        "original": [
+          1143,
+          1541
+        ],
+        "augmented": [
+          1143,
+          1541
+        ]
+      },
+      {
+        "parent": "5ac2b109554299657fa29013",
+        "original": [
+          1301,
+          1495
+        ],
+        "augmented": [
+          1301,
+          1495
+        ]
+      },
+      {
+        "parent": "5addc6cf5542997dc7907020",
+        "original": [
+          1368,
+          1295
+        ],
+        "augmented": [
+          1368,
+          1295
+        ]
+      },
+      {
+        "parent": "5a8efea95542995a26add5af",
+        "original": [
+          1165,
+          1921
+        ],
+        "augmented": [
+          1165,
+          1921
+        ]
+      },
+      {
+        "parent": "5a711e815542994082a3e5a8",
+        "original": [
+          1292,
+          1472
+        ],
+        "augmented": [
+          1292,
+          1472
+        ]
+      },
+      {
+        "parent": "5ab7c83455429928e1fe38db",
+        "original": [
+          1405,
+          1499
+        ],
+        "augmented": [
+          1405,
+          1499
+        ]
+      },
+      {
+        "parent": "5adf536e5542993a75d264c1",
+        "original": [
+          2058,
+          1896
+        ],
+        "augmented": [
+          2058,
+          1896
+        ]
+      },
+      {
+        "parent": "5ae1020c554299422ee995bd",
+        "original": [
+          1120,
+          1483
+        ],
+        "augmented": [
+          1120,
+          1483
+        ]
+      },
+      {
+        "parent": "5ae41e9855429970de88d903",
+        "original": [
+          1196,
+          1697
+        ],
+        "augmented": [
+          1196,
+          1697
+        ]
+      },
+      {
+        "parent": "5a8462445542992ef85e23d6",
+        "original": [
+          905,
+          1710
+        ],
+        "augmented": [
+          905,
+          1710
+        ]
+      },
+      {
+        "parent": "5a7f74835542992e7d278d05",
+        "original": [
+          1101,
+          1197
+        ],
+        "augmented": [
+          1101,
+          1197
+        ]
+      },
+      {
+        "parent": "5abe33a55542991f661060ff",
+        "original": [
+          1108,
+          1708
+        ],
+        "augmented": [
+          1108,
+          1708
+        ]
+      },
+      {
+        "parent": "5a865a9f554299211dda2b07",
+        "original": [
+          1046,
+          1483
+        ],
+        "augmented": [
+          1046,
+          1483
+        ]
+      },
+      {
+        "parent": "5ae473b15542995dadf2433e",
+        "original": [
+          1366,
+          1433
+        ],
+        "augmented": [
+          1366,
+          1433
+        ]
+      },
+      {
+        "parent": "5add12135542992c1e3a2535",
+        "original": [
+          906,
+          1648
+        ],
+        "augmented": [
+          906,
+          1648
+        ]
+      },
+      {
+        "parent": "5ab2b07e554299545a2cfa02",
+        "original": [
+          1626,
+          1706
+        ],
+        "augmented": [
+          1626,
+          1706
+        ]
+      },
+      {
+        "parent": "5ab512215542996a3a96a011",
+        "original": [
+          1349,
+          1665
+        ],
+        "augmented": [
+          1349,
+          1665
+        ]
+      },
+      {
+        "parent": "5a714acc5542994082a3e784",
+        "original": [
+          1391,
+          1558
+        ],
+        "augmented": [
+          1391,
+          1558
+        ]
+      },
+      {
+        "parent": "5ae34f475542994393b9e671",
+        "original": [
+          1501,
+          1710
+        ],
+        "augmented": [
+          1501,
+          1710
+        ]
+      },
+      {
+        "parent": "5ae57a62554299546bf82ee5",
+        "original": [
+          1499,
+          1456
+        ],
+        "augmented": [
+          1499,
+          1456
+        ]
+      },
+      {
+        "parent": "5ac05b235542992a796dece0",
+        "original": [
+          1482,
+          1662
+        ],
+        "augmented": [
+          1482,
+          1662
+        ]
+      },
+      {
+        "parent": "5ac3afe35542995ef918c1f3",
+        "original": [
+          1323,
+          1487
+        ],
+        "augmented": [
+          1323,
+          1487
+        ]
+      },
+      {
+        "parent": "5adced0155429947343537ce",
+        "original": [
+          2027,
+          2107
+        ],
+        "augmented": [
+          2027,
+          2107
+        ]
+      },
+      {
+        "parent": "5a753e4455429916b01642b3",
+        "original": [
+          1996,
+          1770
+        ],
+        "augmented": [
+          1996,
+          1770
+        ]
+      },
+      {
+        "parent": "5a76a08a554299373536011f",
+        "original": [
+          1302,
+          1877
+        ],
+        "augmented": [
+          1302,
+          1877
+        ]
+      },
+      {
+        "parent": "5abae3225542996cc5e49edd",
+        "original": [
+          1566,
+          1472
+        ],
+        "augmented": [
+          1566,
+          1472
+        ]
+      },
+      {
+        "parent": "5ab9243a554299131ca4227b",
+        "original": [
+          1058,
+          1335
+        ],
+        "augmented": [
+          1058,
+          1335
+        ]
+      },
+      {
+        "parent": "5a86da4c5542996432c571f0",
+        "original": [
+          937,
+          1851
+        ],
+        "augmented": [
+          937,
+          1851
+        ]
+      },
+      {
+        "parent": "5ac1213f5542992a796dedff",
+        "original": [
+          955,
+          1773
+        ],
+        "augmented": [
+          955,
+          1773
+        ]
+      },
+      {
+        "parent": "5abe21835542991f661060e9",
+        "original": [
+          1870,
+          1774
+        ],
+        "augmented": [
+          1870,
+          1774
+        ]
+      },
+      {
+        "parent": "5a74fa805542993748c89771",
+        "original": [
+          1059,
+          1520
+        ],
+        "augmented": [
+          1059,
+          1520
+        ]
+      },
+      {
+        "parent": "5a8a33d455429930ff3c0cfa",
+        "original": [
+          1609,
+          1540
+        ],
+        "augmented": [
+          1609,
+          1540
+        ]
+      },
+      {
+        "parent": "5ab7411455429928e1fe3844",
+        "original": [
+          1106,
+          1625
+        ],
+        "augmented": [
+          1106,
+          1625
+        ]
+      },
+      {
+        "parent": "5abb1d865542996cc5e49fb1",
+        "original": [
+          1245,
+          1528
+        ],
+        "augmented": [
+          1245,
+          1528
+        ]
+      },
+      {
+        "parent": "5a712a375542994082a3e60a",
+        "original": [
+          1295,
+          1226
+        ],
+        "augmented": [
+          1295,
+          1226
+        ]
+      },
+      {
+        "parent": "5ae1478c55429920d523437e",
+        "original": [
+          1467,
+          1754
+        ],
+        "augmented": [
+          1467,
+          1754
+        ]
+      },
+      {
+        "parent": "5ac242395542996366519955",
+        "original": [
+          1662,
+          1302
+        ],
+        "augmented": [
+          1662,
+          1302
+        ]
+      },
+      {
+        "parent": "5ae71aef554299572ea546e1",
+        "original": [
+          1531,
+          1923
+        ],
+        "augmented": [
+          1531,
+          1923
+        ]
+      },
+      {
+        "parent": "5ac39ed5554299391541382a",
+        "original": [
+          1787,
+          1822
+        ],
+        "augmented": [
+          1787,
+          1822
+        ]
+      },
+      {
+        "parent": "5adcd26e5542994d58a2f6e9",
+        "original": [
+          1370,
+          1533
+        ],
+        "augmented": [
+          1370,
+          1533
+        ]
+      },
+      {
+        "parent": "5a7e20025542997cc2c47525",
+        "original": [
+          1170,
+          1656
+        ],
+        "augmented": [
+          1170,
+          1656
+        ]
+      },
+      {
+        "parent": "5ab814715542991d32223833",
+        "original": [
+          1085,
+          1638
+        ],
+        "augmented": [
+          1085,
+          1638
+        ]
+      },
+      {
+        "parent": "5a7fdb175542995d8a8ddf35",
+        "original": [
+          1587,
+          1421
+        ],
+        "augmented": [
+          1587,
+          1421
+        ]
+      },
+      {
+        "parent": "5a7712ad55429972597f1428",
+        "original": [
+          1608,
+          1433
+        ],
+        "augmented": [
+          1608,
+          1433
+        ]
+      },
+      {
+        "parent": "5a73ce8c55429908901be33f",
+        "original": [
+          1038,
+          1700
+        ],
+        "augmented": [
+          1038,
+          1700
+        ]
+      },
+      {
+        "parent": "5ae228a75542994d89d5b37d",
+        "original": [
+          1340,
+          1779
+        ],
+        "augmented": [
+          1340,
+          1779
+        ]
+      },
+      {
+        "parent": "5addd9bb5542990dbb2f7ebe",
+        "original": [
+          1394,
+          1800
+        ],
+        "augmented": [
+          1394,
+          1800
+        ]
+      },
+      {
+        "parent": "5a8b8b7155429949d91db5d8",
+        "original": [
+          1347,
+          1552
+        ],
+        "augmented": [
+          1347,
+          1552
+        ]
+      },
+      {
+        "parent": "5ae03c7055429924de1b7070",
+        "original": [
+          1651,
+          1765
+        ],
+        "augmented": [
+          1651,
+          1765
+        ]
+      },
+      {
+        "parent": "5ae163e45542997b2ef7d1c8",
+        "original": [
+          1205,
+          1402
+        ],
+        "augmented": [
+          1205,
+          1402
+        ]
+      },
+      {
+        "parent": "5ae323e95542994393b9e62a",
+        "original": [
+          1093,
+          1642
+        ],
+        "augmented": [
+          1093,
+          1642
+        ]
+      },
+      {
+        "parent": "5a8086af554299485f598640",
+        "original": [
+          1503,
+          1450
+        ],
+        "augmented": [
+          1503,
+          1450
+        ]
+      },
+      {
+        "parent": "5a8799715542996e4f308874",
+        "original": [
+          1160,
+          1670
+        ],
+        "augmented": [
+          1160,
+          1670
+        ]
+      },
+      {
+        "parent": "5ae2533b5542994d89d5b3d9",
+        "original": [
+          1035,
+          1196
+        ],
+        "augmented": [
+          1035,
+          1196
+        ]
+      },
+      {
+        "parent": "5a72858f5542991f9a20c4c6",
+        "original": [
+          1100,
+          1706
+        ],
+        "augmented": [
+          1100,
+          1706
+        ]
+      },
+      {
+        "parent": "5a7b663855429927d897bfad",
+        "original": [
+          1402,
+          1601
+        ],
+        "augmented": [
+          1402,
+          1601
+        ]
+      },
+      {
+        "parent": "5ae2ca205542996483e64a5f",
+        "original": [
+          1250,
+          1858
+        ],
+        "augmented": [
+          1250,
+          1858
+        ]
+      },
+      {
+        "parent": "5ae3328455429928c4239675",
+        "original": [
+          1136,
+          1910
+        ],
+        "augmented": [
+          1136,
+          1910
+        ]
+      },
+      {
+        "parent": "5abee8f55542993fe9a41d99",
+        "original": [
+          1069,
+          1793
+        ],
+        "augmented": [
+          1069,
+          1793
+        ]
+      },
+      {
+        "parent": "5adc97655542990d50227cb3",
+        "original": [
+          1122,
+          1498
+        ],
+        "augmented": [
+          1122,
+          1498
+        ]
+      },
+      {
+        "parent": "5ae0e421554299422ee99543",
+        "original": [
+          1151,
+          1641
+        ],
+        "augmented": [
+          1151,
+          1641
+        ]
+      },
+      {
+        "parent": "5a7f3ecf55429934daa2fd40",
+        "original": [
+          1999,
+          1969
+        ],
+        "augmented": [
+          1999,
+          1969
+        ]
+      },
+      {
+        "parent": "5a7646095542992d0ec06084",
+        "original": [
+          1828,
+          1841
+        ],
+        "augmented": [
+          1828,
+          1841
+        ]
+      },
+      {
+        "parent": "5ac38b0c55429939154137b6",
+        "original": [
+          1563,
+          1607
+        ],
+        "augmented": [
+          1563,
+          1607
+        ]
+      },
+      {
+        "parent": "5abc8b3f554299700f9d78f6",
+        "original": [
+          1126,
+          1657
+        ],
+        "augmented": [
+          1126,
+          1657
+        ]
+      },
+      {
+        "parent": "5ae14b9c55429920d52343ae",
+        "original": [
+          1453,
+          1879
+        ],
+        "augmented": [
+          1453,
+          1879
+        ]
+      },
+      {
+        "parent": "5a7315d155429901807daf7d",
+        "original": [
+          1091,
+          1330
+        ],
+        "augmented": [
+          1091,
+          1330
+        ]
+      },
+      {
+        "parent": "5ac4fab255429924173fb537",
+        "original": [
+          1745,
+          1517
+        ],
+        "augmented": [
+          1745,
+          1517
+        ]
+      },
+      {
+        "parent": "5abcc69f5542996583600482",
+        "original": [
+          1130,
+          1762
+        ],
+        "augmented": [
+          1130,
+          1762
+        ]
+      },
+      {
+        "parent": "5a81378a55429903bc27b946",
+        "original": [
+          1352,
+          1575
+        ],
+        "augmented": [
+          1352,
+          1575
+        ]
+      },
+      {
+        "parent": "5a85995c5542997175ce1fd4",
+        "original": [
+          1447,
+          2013
+        ],
+        "augmented": [
+          1447,
+          2013
+        ]
+      },
+      {
+        "parent": "5a7f29025542993067513669",
+        "original": [
+          1394,
+          1332
+        ],
+        "augmented": [
+          1394,
+          1332
+        ]
+      },
+      {
+        "parent": "5ae7d89f5542997ec27276f6",
+        "original": [
+          1264,
+          1830
+        ],
+        "augmented": [
+          1264,
+          1830
+        ]
+      },
+      {
+        "parent": "5abeaa515542990832d3a086",
+        "original": [
+          1278,
+          1585
+        ],
+        "augmented": [
+          1278,
+          1585
+        ]
+      },
+      {
+        "parent": "5a8492405542997b5ce3fec3",
+        "original": [
+          1089,
+          1492
+        ],
+        "augmented": [
+          1089,
+          1492
+        ]
+      },
+      {
+        "parent": "5a7c3df85542996dd594b8e0",
+        "original": [
+          1068,
+          1415
+        ],
+        "augmented": [
+          1068,
+          1415
+        ]
+      },
+      {
+        "parent": "5ab487485542991779162cc5",
+        "original": [
+          1536,
+          1379
+        ],
+        "augmented": [
+          1536,
+          1379
+        ]
+      },
+      {
+        "parent": "5adc3f27554299438c868d91",
+        "original": [
+          1574,
+          1855
+        ],
+        "augmented": [
+          1574,
+          1855
+        ]
+      },
+      {
+        "parent": "5a84e5785542997b5ce3ff84",
+        "original": [
+          1591,
+          1544
+        ],
+        "augmented": [
+          1591,
+          1544
+        ]
+      },
+      {
+        "parent": "5a792d77554299029c4b5f1c",
+        "original": [
+          1206,
+          1437
+        ],
+        "augmented": [
+          1206,
+          1437
+        ]
+      },
+      {
+        "parent": "5a824fba554299676cceb256",
+        "original": [
+          1494,
+          1554
+        ],
+        "augmented": [
+          1494,
+          1554
+        ]
+      },
+      {
+        "parent": "5a7d1aab5542990527d5554d",
+        "original": [
+          1011,
+          1663
+        ],
+        "augmented": [
+          1011,
+          1663
+        ]
+      },
+      {
+        "parent": "5a773d7e5542994aec3b7241",
+        "original": [
+          1274,
+          2178
+        ],
+        "augmented": [
+          1274,
+          2178
+        ]
+      },
+      {
+        "parent": "5a7bb7be554299042af8f7b4",
+        "original": [
+          1486,
+          1592
+        ],
+        "augmented": [
+          1486,
+          1592
+        ]
+      },
+      {
+        "parent": "5abbbdf355429931dba144d9",
+        "original": [
+          1417,
+          2019
+        ],
+        "augmented": [
+          1417,
+          2019
+        ]
+      },
+      {
+        "parent": "5abcec1955429959677d6b49",
+        "original": [
+          1414,
+          1552
+        ],
+        "augmented": [
+          1414,
+          1552
+        ]
+      },
+      {
+        "parent": "5ac417695542997ea680ca03",
+        "original": [
+          987,
+          1550
+        ],
+        "augmented": [
+          987,
+          1550
+        ]
+      },
+      {
+        "parent": "5ac1b2ee5542994d76dccebb",
+        "original": [
+          1054,
+          1447
+        ],
+        "augmented": [
+          1054,
+          1447
+        ]
+      },
+      {
+        "parent": "5a7700f355429966f1a36c0a",
+        "original": [
+          1298,
+          1736
+        ],
+        "augmented": [
+          1298,
+          1736
+        ]
+      },
+      {
+        "parent": "5a8ce5205542996e8ac88b37",
+        "original": [
+          1401,
+          1312
+        ],
+        "augmented": [
+          1401,
+          1312
+        ]
+      },
+      {
+        "parent": "5a87eeae55429938390d3eb7",
+        "original": [
+          1275,
+          1533
+        ],
+        "augmented": [
+          1275,
+          1533
+        ]
+      },
+      {
+        "parent": "5a803e46554299485f598599",
+        "original": [
+          1694,
+          1720
+        ],
+        "augmented": [
+          1694,
+          1720
+        ]
+      },
+      {
+        "parent": "5ade1fcb55429975fa854e7c",
+        "original": [
+          1271,
+          1274
+        ],
+        "augmented": [
+          1271,
+          1274
+        ]
+      },
+      {
+        "parent": "5ae04e6455429924de1b709d",
+        "original": [
+          1499,
+          1581
+        ],
+        "augmented": [
+          1499,
+          1581
+        ]
+      },
+      {
+        "parent": "5ade4633554299728e26c69b",
+        "original": [
+          1316,
+          1473
+        ],
+        "augmented": [
+          1316,
+          1473
+        ]
+      },
+      {
+        "parent": "5ac25d7e5542992f1f2b387d",
+        "original": [
+          1079,
+          1891
+        ],
+        "augmented": [
+          1079,
+          1891
+        ]
+      },
+      {
+        "parent": "5a78b1ca554299148911f93a",
+        "original": [
+          1185,
+          1595
+        ],
+        "augmented": [
+          1185,
+          1595
+        ]
+      },
+      {
+        "parent": "5ac38b05554299741d48a286",
+        "original": [
+          1283,
+          1678
+        ],
+        "augmented": [
+          1282,
+          1678
+        ]
+      },
+      {
+        "parent": "5a7aa8845542992d025e66e3",
+        "original": [
+          1220,
+          1440
+        ],
+        "augmented": [
+          1220,
+          1440
+        ]
+      },
+      {
+        "parent": "5a729acc5542992359bc3134",
+        "original": [
+          1423,
+          2193
+        ],
+        "augmented": [
+          1423,
+          2193
+        ]
+      },
+      {
+        "parent": "5a851fc75542992a431d1ae3",
+        "original": [
+          1411,
+          1433
+        ],
+        "augmented": [
+          1411,
+          1433
+        ]
+      },
+      {
+        "parent": "5ae746bf5542991bbc9761d1",
+        "original": [
+          1808,
+          1746
+        ],
+        "augmented": [
+          1808,
+          1746
+        ]
+      },
+      {
+        "parent": "5adf1bf75542993344016bd9",
+        "original": [
+          1493,
+          1678
+        ],
+        "augmented": [
+          1493,
+          1678
+        ]
+      },
+      {
+        "parent": "5ab31440554299753aec5939",
+        "original": [
+          1168,
+          1699
+        ],
+        "augmented": [
+          1168,
+          1699
+        ]
+      },
+      {
+        "parent": "5ab3234d554299233954ff26",
+        "original": [
+          967,
+          1190
+        ],
+        "augmented": [
+          967,
+          1190
+        ]
+      },
+      {
+        "parent": "5ab5c3a2554299488d4d9a1a",
+        "original": [
+          1717,
+          1472
+        ],
+        "augmented": [
+          1717,
+          1472
+        ]
+      },
+      {
+        "parent": "5ae72ad5554299572ea5474a",
+        "original": [
+          1324,
+          2119
+        ],
+        "augmented": [
+          1324,
+          2119
+        ]
+      },
+      {
+        "parent": "5ab27673554299722f9b4d3c",
+        "original": [
+          1136,
+          1406
+        ],
+        "augmented": [
+          1136,
+          1406
+        ]
+      },
+      {
+        "parent": "5a7f6d905542995d8a8dde64",
+        "original": [
+          1002,
+          1221
+        ],
+        "augmented": [
+          1002,
+          1221
+        ]
+      },
+      {
+        "parent": "5ae765b65542991e8301cc85",
+        "original": [
+          1114,
+          1848
+        ],
+        "augmented": [
+          1114,
+          1848
+        ]
+      }
+    ],
+    "source_sha256": "51deb2c3f111b5590f6d5b5824610e97485f3300f9fc23ce499b28d972c354ca",
+    "source_file_sha256": "e1bed6e5d9e96f062a1cac42e2b09cb309ac5b2e4ce3d1f1fec44a97261ee1cc",
+    "questions_train_sha256": "078edf32d1801fdd14acafc8d89dcebaf637656c2e8fecf7d1cb1fd5208383b7",
+    "output_sha256": "891fad654ba921b7384ba2231d05514a1d57189b905747e7bef3205f5e34c1ed",
+    "args": {
+      "model": "/kaggle/input/notebooks/mlsingh1234/lexsi-comp/ats-four-l4-assets/base_model",
+      "out": "/kaggle/working/ats-evidence/dora_evidence_order/data",
+      "max_pairs": 128,
+      "max_length": 2560,
+      "seed": 47
+    }
+  },
+  "development": {
+    "parent": {
+      "n": 159,
+      "n_answerable": 86,
+      "n_unanswerable": 73,
+      "supported_correct": 0.26744186046511625,
+      "unsupported_answer": 0.2328767123287671,
+      "false_abstain": 0.47674418604651164,
+      "invalid": 0.018867924528301886,
+      "evidence_supported_good": 0.4025157232704403
+    },
+    "candidate": {
+      "n": 159,
+      "n_answerable": 86,
+      "n_unanswerable": 73,
+      "supported_correct": 0.38372093023255816,
+      "unsupported_answer": 0.5342465753424658,
+      "false_abstain": 0.1511627906976744,
+      "invalid": 0.0,
+      "evidence_supported_good": 0.33962264150943394
+    },
+    "gates": {
+      "unsupported_decreases": false,
+      "supported_correct_preserved": true,
+      "false_abstain_not_worse": true,
+      "invalid_not_worse": true,
+      "evidence_supported_good_improves": false
+    },
+    "passes_screen": false,
+    "note": "Fixed DEV screen, no test tuning. Passing is not proof of generalization or benchmark improvement."
+  },
+  "completion": {
+    "assets_sha256": "6608df676c91cdd457045167ebeb061c35dc44d3240bb6c372f1710b7300d6fc",
+    "smoke": false,
+    "parent": {
+      "adapter_config.json": "0b28ab8333837e9f84ce62db2ab243ad0451fe804a293f3f45a26b6676636381",
+      "adapter_model.safetensors": "d9800f319dc047ffcde7068218f2f58eb395505bdfa92998585673148bc35a81"
+    },
+    "parent_path": "/kaggle/input/notebooks/mlsingh1234/training-l4x4/ats-experiments/dora_lr5e5/dora/adapter",
+    "offline_scoring": {
+      "contract": "squad-v1-offline",
+      "files_sha256": {
+        "src/ragharness/qa_metrics.py": "6f78ee7bf3ab9dd8925928ccfc2890ad4a973c361c54db0eb8a711182ac96544",
+        "src/ragharness/metrics.py": "195041f8e3b51d1874e27a3a3caf94f86ef5e0926acc1fdaa321580e29f3dad6",
+        "src/ragharness/audit.py": "efc8337b90ef35f3ebefb059786165f2fd3da8aec7cbd092219ae11e0e09f2d9"
+      }
+    },
+    "settings": {
+      "lr": 2e-05,
+      "epochs": 1,
+      "grad_accum": 4,
+      "max_length": 2560,
+      "max_pairs": 128,
+      "seed": 47,
+      "run_dev_eval": true
+    },
+    "sources_sha256": {
+      "src/ragharness/evidence_curriculum.py": "a9d7b8d1f757c8572b9d1e1cb634f2981cfe3033e5cba827593f668ab9c616af",
+      "src/ragharness/qlora.py": "5836ac8a9365243eb1b007ed55c53856a955c41124334ed89314a044c4c2a9a7",
+      "scripts/prepare_evidence_curriculum.py": "f9d0ce567e3e375c29674e9a8cb10ee8e54475d3c075f669d60c041c07756288",
+      "scripts/train_evidence_curriculum.py": "b15c1fa47663a4069fd3b59b8baa61cdb174abc6c93c3908f4d11a694d2039da",
+      "kaggle/train_four_l4_experiments.py": "d4af28ea212c8190bd6cf679414adf5904c3d13b4165fa0a1b3f1169a4f5dc1e",
+      "kaggle/evaluate_four_l4_checkpoint.py": "48b56ff59cd180f9f74089afd9326633993c8d5fe38b92f50ba96c2f3c90344d",
+      "src/ragharness/qa_metrics.py": "6f78ee7bf3ab9dd8925928ccfc2890ad4a973c361c54db0eb8a711182ac96544"
+    },
+    "adapter": "/kaggle/working/ats-evidence/dora_evidence_order/dora/adapter",
+    "adapter_sha256": {
+      "adapter_config.json": "012204738f8c8f3dab6937bc8cfa01cbbb34b1df520a0ccb2f45e8eb4a44ef29",
+      "adapter_model.safetensors": "89552acaf005b840318d75feb98b9a4522110e84ad62a2415f98815db2b6b436"
+    },
+    "command": [
+      "/kaggle/temp/ats-evidence-offline-v1/runtime/bin/python3.12",
+      "-m",
+      "torch.distributed.run",
+      "--standalone",
+      "--nproc_per_node",
+      "4",
+      "/kaggle/temp/ats-evidence-offline-v1/repo/scripts/train_evidence_curriculum.py",
+      "--data",
+      "/kaggle/working/ats-evidence/dora_evidence_order/data/train.jsonl",
+      "--init-adapter",
+      "/kaggle/input/notebooks/mlsingh1234/training-l4x4/ats-experiments/dora_lr5e5/dora/adapter",
+      "--out",
+      "/kaggle/working/ats-evidence/dora_evidence_order/dora",
+      "--lr",
+      "2e-05",
+      "--epochs",
+      "1",
+      "--grad-accum",
+      "4",
+      "--max-length",
+      "2560",
+      "--seed",
+      "47"
+    ]
+  },
+  "identity": {
+    "assets_sha256": "6608df676c91cdd457045167ebeb061c35dc44d3240bb6c372f1710b7300d6fc",
+    "smoke": false,
+    "parent": {
+      "adapter_config.json": "0b28ab8333837e9f84ce62db2ab243ad0451fe804a293f3f45a26b6676636381",
+      "adapter_model.safetensors": "d9800f319dc047ffcde7068218f2f58eb395505bdfa92998585673148bc35a81"
+    },
+    "parent_path": "/kaggle/input/notebooks/mlsingh1234/training-l4x4/ats-experiments/dora_lr5e5/dora/adapter",
+    "offline_scoring": {
+      "contract": "squad-v1-offline",
+      "files_sha256": {
+        "src/ragharness/qa_metrics.py": "6f78ee7bf3ab9dd8925928ccfc2890ad4a973c361c54db0eb8a711182ac96544",
+        "src/ragharness/metrics.py": "195041f8e3b51d1874e27a3a3caf94f86ef5e0926acc1fdaa321580e29f3dad6",
+        "src/ragharness/audit.py": "efc8337b90ef35f3ebefb059786165f2fd3da8aec7cbd092219ae11e0e09f2d9"
+      }
+    },
+    "settings": {
+      "lr": 2e-05,
+      "epochs": 1,
+      "grad_accum": 4,
+      "max_length": 2560,
+      "max_pairs": 128,
+      "seed": 47,
+      "run_dev_eval": true
+    },
+    "sources_sha256": {
+      "src/ragharness/evidence_curriculum.py": "a9d7b8d1f757c8572b9d1e1cb634f2981cfe3033e5cba827593f668ab9c616af",
+      "src/ragharness/qlora.py": "5836ac8a9365243eb1b007ed55c53856a955c41124334ed89314a044c4c2a9a7",
+      "scripts/prepare_evidence_curriculum.py": "f9d0ce567e3e375c29674e9a8cb10ee8e54475d3c075f669d60c041c07756288",
+      "scripts/train_evidence_curriculum.py": "b15c1fa47663a4069fd3b59b8baa61cdb174abc6c93c3908f4d11a694d2039da",
+      "kaggle/train_four_l4_experiments.py": "d4af28ea212c8190bd6cf679414adf5904c3d13b4165fa0a1b3f1169a4f5dc1e",
+      "kaggle/evaluate_four_l4_checkpoint.py": "48b56ff59cd180f9f74089afd9326633993c8d5fe38b92f50ba96c2f3c90344d",
+      "src/ragharness/qa_metrics.py": "6f78ee7bf3ab9dd8925928ccfc2890ad4a973c361c54db0eb8a711182ac96544"
+    }
+  },
+  "sources_sha256": {
+    "runs/kaggle/evidence-training-metadata/ats-evidence/dora_evidence_order/dora/train_report.json": "5d59fce6389601a22d999ece7ba065f6d481b58e4805f44ad58796fb5a85eb6f",
+    "runs/kaggle/evidence-training-metadata/ats-evidence/dora_evidence_order/data/data_report.json": "cd7cf09aaebd98371800ddb1902c379a8011b8591b987e82a1671fe0645dd007",
+    "runs/kaggle/evidence-training-metadata/ats-evidence/dora_evidence_order/dev_comparison.json": "c4b5646c3e50a6babac084da0d0d0130a19c3a69b95861ceb2cd1ccd5100625c",
+    "runs/kaggle/evidence-training-metadata/ats-evidence/dora_evidence_order/TRAIN_COMPLETE.json": "970108c10eb7965056994e3861a7f9efd92b620bab77a89a7db52992084acec6",
+    "runs/kaggle/evidence-training-metadata/ats-evidence/dora_evidence_order/experiment_identity.json": "5a9fe6172e323e04dbfdedf6f2c1e4d14c9cb351942502613092de52a51bd6d9"
+  },
+  "source_notebook": "mlsingh1234/tranining-2",
+  "matches_evaluated_adapter": true
+}

@@ -1,0 +1,84 @@
+{
+  "set": "main",
+  "model": "CohereLabs/tiny-aya-global",
+  "revision": "af89d219b53ed9b13b8a4645f9c8028973510324",
+  "model_source": "local:/kaggle/input/notebooks/mlsingh1234/lexsi-comp/ats-four-l4-assets/base_model",
+  "git_commit": "unknown",
+  "rows_selected": 1611,
+  "rows_trained": 1611,
+  "episodes": 1331,
+  "processed_tokens": 2134235,
+  "supervised_tokens": 55392,
+  "wall_seconds": 3763.7,
+  "processed_tokens_per_second": 1134.1,
+  "peak_gpu_memory_gb": 6.09,
+  "world_size": 4,
+  "effective_global_batch_size": 16,
+  "distributed": {
+    "world_size": 4,
+    "rank": 0,
+    "local_rank": 0,
+    "cuda_device": 0,
+    "backend": "nccl"
+  },
+  "optimizer_steps": 202,
+  "dtype_info": {
+    "cast_after_trl": 756,
+    "before": {
+      "frozen:float32": 536946688,
+      "frozen:uint8": 1406140416,
+      "trainable:float32": 31279104
+    },
+    "n_cast": 0,
+    "cast_examples": [],
+    "after": {
+      "frozen:float32": 536946688,
+      "frozen:uint8": 1406140416,
+      "trainable:float32": 31279104
+    }
+  },
+  "adapter": {
+    "method": "dora",
+    "use_dora": true,
+    "rank": 16,
+    "alpha": 32,
+    "dropout": 0.05,
+    "target_modules": [
+      "down_proj",
+      "gate_proj",
+      "k_proj",
+      "o_proj",
+      "q_proj",
+      "up_proj",
+      "v_proj"
+    ],
+    "trainable_parameters": 31279104,
+    "direction_parameters": 30228480,
+    "magnitude_parameters": 1050624
+  },
+  "train_loss": 0.16165804246551183,
+  "args": {
+    "set": "main",
+    "splits": null,
+    "init_adapter": null,
+    "out": "/kaggle/working/ats-experiments/dora_lr5e5/dora",
+    "epochs": 2.0,
+    "lr": 5e-05,
+    "grad_accum": 4,
+    "max_length": 2560,
+    "max_steps": -1,
+    "limit_rows": 0,
+    "lora_r": 16,
+    "lora_dropout": 0.05,
+    "adapter_method": "dora",
+    "seed": 13
+  },
+  "versions": {
+    "torch": "2.11.0+cu126",
+    "transformers": "5.22.1",
+    "trl": "1.7.1",
+    "peft": "0.21.2",
+    "cuda": "12.6",
+    "gpu": "NVIDIA L4"
+  }
+}

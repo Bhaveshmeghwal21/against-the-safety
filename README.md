@@ -65,6 +65,14 @@ We also evaluated the existing Azure-hosted DeepSeek-V4-Flash deployment using t
 
 <sub>Costs use the recorded token mix and published Microsoft prices; actual Azure bills and cache rates may differ. T4 bars assume perfectly utilized busy time, and all figures exclude other infrastructure costs. See the [cost report](reports/deepseek_roi.md) and [methodology](research/2026-11-10-deepseek-v4-flash-comparison.md). Generate both figures with <code>python scripts/make_deepseek_figures.py</code>.</sub>
 
+## Latest DoRA results and cost versus efficiency
+
+Three completed DoRA runs were evaluated on the published 938-input round-5 suite. Their raw macro scores are **44.71%** (original Modal), **34.00%** (Kaggle lr5e-5), and **27.82%** (evidence-order continuation); with fail-closed plus the fixed main-LoRA verifier they score **50.09%**, **47.34%**, and **45.41%**. Historical main, candA and candF1 LoRA score **51.74%**, **54.10%** and **56.97%** with the same repairs. Checkpoint-specific scorer exclusions differ, so these are descriptive comparisons. The evidence-order candidate also failed its development screen and is not a replacement for the selected main system.
+
+Training consumed **3.6514 GPU-hours** for original Modal DoRA, **4.1819** for the four-L4 Kaggle parent, and **0.7187 additional GPU-hours** for the continuation (**4.9006 cumulative** with its parent). Four GPUs reduce elapsed training time without necessarily reducing total compute. Dollar figures in the report use explicitly historical GPU-price scenarios, not Kaggle invoices or current quotes; serving measurements are batch-amortized generation time rather than request latency.
+
+[All previous benchmark comparisons](reports/evidence_order_all_previous_comparison.md) · [README LoRA versus every DoRA run](reports/readme_lora_vs_all_dora.md) · [Cost, throughput and resource efficiency](reports/dora_lora_cost_efficiency.md) · [Verified training and development records](reports/evidence_order_training_data.json).
+
 ## Results
 
 This section reports the first round, on a HotpotQA test split. The final system's results, on a larger sealed test with a stricter scorer, are in [Round 5](#round-5-two-repairs-that-need-no-training-and-a-preference-training-negative-result).

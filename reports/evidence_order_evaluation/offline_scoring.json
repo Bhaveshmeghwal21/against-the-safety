@@ -1,0 +1,8 @@
+{
+  "contract": "squad-v1-offline",
+  "files_sha256": {
+    "src/ragharness/qa_metrics.py": "6f78ee7bf3ab9dd8925928ccfc2890ad4a973c361c54db0eb8a711182ac96544",
+    "src/ragharness/metrics.py": "195041f8e3b51d1874e27a3a3caf94f86ef5e0926acc1fdaa321580e29f3dad6",
+    "src/ragharness/audit.py": "efc8337b90ef35f3ebefb059786165f2fd3da8aec7cbd092219ae11e0e09f2d9"
+  }
+}

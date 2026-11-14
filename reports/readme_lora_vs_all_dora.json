@@ -1,0 +1,2915 @@
+{
+  "report_date": "2026-11-14",
+  "source_sha256": {
+    "README.md": "61ee3e3a445a67c59292c8755b3c18de4f5a8e76d4f3abd6f7b91a8f25b8d66d",
+    "reports/evidence_order_all_previous_comparison.json": "d98a3fcc0aa01ef0fac7c9b5a215aa601c9d50ed902dc0644ff5a53e2733fc5d",
+    "reports/scorecard_test_lenient.json": "41af55a35b1f5e303a2436ce953633bcd67e707f2894919070b4ceabfce26dab",
+    "reports/benchmarks_lenient.json": "6ff0e66a0926dcfbd161ef7bf17c7b4acf05ad613dd9e96a0694526f36e573f4"
+  },
+  "matching_suite": "round-5, 938 input episodes",
+  "dora_minus_lora_macro_pp": [
+    {
+      "dora": "Modal DoRA",
+      "lora_reference": "Main LoRA",
+      "raw_delta_pp": 3.28248015681738,
+      "fb_delta_pp": 0.808428934091715,
+      "fb_v_delta_pp": -1.6491532504257833
+    },
+    {
+      "dora": "Modal DoRA",
+      "lora_reference": "candA LoRA",
+      "raw_delta_pp": -2.629158575606083,
+      "fb_delta_pp": -1.2051720813650857,
+      "fb_v_delta_pp": -4.005740636175414
+    },
+    {
+      "dora": "Modal DoRA",
+      "lora_reference": "candF1 LoRA",
+      "raw_delta_pp": -0.21579867803018238,
+      "fb_delta_pp": -3.9751015045139058,
+      "fb_v_delta_pp": -6.875735218292811
+    },
+    {
+      "dora": "Kaggle DoRA lr5e-5",
+      "lora_reference": "Main LoRA",
+      "raw_delta_pp": -7.427707829164176,
+      "fb_delta_pp": -11.460125385229446,
+      "fb_v_delta_pp": -4.402666943424266
+    },
+    {
+      "dora": "Kaggle DoRA lr5e-5",
+      "lora_reference": "candA LoRA",
+      "raw_delta_pp": -13.33934656158764,
+      "fb_delta_pp": -13.473726400686248,
+      "fb_v_delta_pp": -6.759254329173897
+    },
+    {
+      "dora": "Kaggle DoRA lr5e-5",
+      "lora_reference": "candF1 LoRA",
+      "raw_delta_pp": -10.925986664011738,
+      "fb_delta_pp": -16.24365582383507,
+      "fb_v_delta_pp": -9.629248911291294
+    },
+    {
+      "dora": "Evidence-order DoRA",
+      "lora_reference": "Main LoRA",
+      "raw_delta_pp": -13.60559978066352,
+      "fb_delta_pp": -18.93682829057708,
+      "fb_v_delta_pp": -6.336295367200578
+    },
+    {
+      "dora": "Evidence-order DoRA",
+      "lora_reference": "candA LoRA",
+      "raw_delta_pp": -19.517238513086983,
+      "fb_delta_pp": -20.95042930603388,
+      "fb_v_delta_pp": -8.69288275295021
+    },
+    {
+      "dora": "Evidence-order DoRA",
+      "lora_reference": "candF1 LoRA",
+      "raw_delta_pp": -17.103878615511082,
+      "fb_delta_pp": -23.7203587291827,
+      "fb_v_delta_pp": -11.562877335067606
+    }
+  ],
+  "matching_benchmark_rows": [
+    {
+      "model": "Main LoRA",
+      "configuration": "raw",
+      "input_n": 938,
+      "macro": 0.41428267296506954,
+      "n": 927,
+      "hidden_n": 364,
+      "unsupported": 108,
+      "unsupported_rate": 0.2967032967032967,
+      "supported_correct": 0.2895204262877442,
+      "false_abstain": 0.22202486678507993,
+      "invalid_before_repair": 0.08528784648187633,
+      "answerable_n": 563,
+      "single": 0.5454545454545454,
+      "compound": 0.22424242424242424,
+      "hotpot": 0.524390243902439,
+      "rgb": 0.3630434782608696
+    },
+    {
+      "model": "Main LoRA",
+      "configuration": "FB",
+      "input_n": 938,
+      "macro": 0.4736925190398149,
+      "n": 927,
+      "hidden_n": 364,
+      "unsupported": 108,
+      "unsupported_rate": 0.2967032967032967,
+      "supported_correct": 0.2895204262877442,
+      "false_abstain": 0.2699822380106572,
+      "invalid_before_repair": 0.08528784648187633,
+      "answerable_n": 563,
+      "single": 0.6,
+      "compound": 0.32727272727272727,
+      "hotpot": 0.5609756097560976,
+      "rgb": 0.40652173913043477
+    },
+    {
+      "model": "Main LoRA",
+      "configuration": "FB+V",
+      "input_n": 938,
+      "macro": 0.5174342845207108,
+      "n": 927,
+      "hidden_n": 364,
+      "unsupported": 37,
+      "unsupported_rate": 0.10164835164835165,
+      "supported_correct": 0.2753108348134991,
+      "false_abstain": 0.3907637655417407,
+      "invalid_before_repair": 0.08528784648187633,
+      "answerable_n": 563,
+      "single": 0.5909090909090909,
+      "compound": 0.3939393939393939,
+      "hotpot": 0.5609756097560976,
+      "rgb": 0.5239130434782608
+    },
+    {
+      "model": "candA LoRA",
+      "configuration": "raw",
+      "input_n": 938,
+      "macro": 0.4733990602893042,
+      "n": 928,
+      "hidden_n": 365,
+      "unsupported": 129,
+      "unsupported_rate": 0.35342465753424657,
+      "supported_correct": 0.33747779751332146,
+      "false_abstain": 0.15985790408525755,
+      "invalid_before_repair": 0.021321961620469083,
+      "answerable_n": 563,
+      "single": 0.6363636363636364,
+      "compound": 0.25,
+      "hotpot": 0.6219512195121951,
+      "rgb": 0.3852813852813853
+    },
+    {
+      "model": "candA LoRA",
+      "configuration": "FB",
+      "input_n": 938,
+      "macro": 0.4938285291943829,
+      "n": 928,
+      "hidden_n": 365,
+      "unsupported": 129,
+      "unsupported_rate": 0.35342465753424657,
+      "supported_correct": 0.33747779751332146,
+      "false_abstain": 0.1669626998223801,
+      "invalid_before_repair": 0.021321961620469083,
+      "answerable_n": 563,
+      "single": 0.6545454545454545,
+      "compound": 0.2926829268292683,
+      "hotpot": 0.6341463414634146,
+      "rgb": 0.3939393939393939
+    },
+    {
+      "model": "candA LoRA",
+      "configuration": "FB+V",
+      "input_n": 938,
+      "macro": 0.5410001583782071,
+      "n": 928,
+      "hidden_n": 365,
+      "unsupported": 45,
+      "unsupported_rate": 0.1232876712328767,
+      "supported_correct": 0.30905861456483125,
+      "false_abstain": 0.32326820603907636,
+      "invalid_before_repair": 0.021321961620469083,
+      "answerable_n": 563,
+      "single": 0.6136363636363636,
+      "compound": 0.3902439024390244,
+      "hotpot": 0.6341463414634146,
+      "rgb": 0.525974025974026
+    },
+    {
+      "model": "candF1 LoRA",
+      "configuration": "raw",
+      "input_n": 938,
+      "macro": 0.44926546131354517,
+      "n": 927,
+      "hidden_n": 364,
+      "unsupported": 114,
+      "unsupported_rate": 0.3131868131868132,
+      "supported_correct": 0.35346358792184723,
+      "false_abstain": 0.15808170515097691,
+      "invalid_before_repair": 0.0906183368869936,
+      "answerable_n": 563,
+      "single": 0.5409090909090909,
+      "compound": 0.3333333333333333,
+      "hotpot": 0.5432098765432098,
+      "rgb": 0.3796095444685466
+    },
+    {
+      "model": "candF1 LoRA",
+      "configuration": "FB",
+      "input_n": 938,
+      "macro": 0.5215278234258711,
+      "n": 927,
+      "hidden_n": 364,
+      "unsupported": 114,
+      "unsupported_rate": 0.3131868131868132,
+      "supported_correct": 0.35346358792184723,
+      "false_abstain": 0.20959147424511546,
+      "invalid_before_repair": 0.0906183368869936,
+      "answerable_n": 563,
+      "single": 0.6272727272727273,
+      "compound": 0.46060606060606063,
+      "hotpot": 0.5925925925925926,
+      "rgb": 0.40563991323210413
+    },
+    {
+      "model": "candF1 LoRA",
+      "configuration": "FB+V",
+      "input_n": 938,
+      "macro": 0.5697001041993811,
+      "n": 927,
+      "hidden_n": 364,
+      "unsupported": 34,
+      "unsupported_rate": 0.09340659340659341,
+      "supported_correct": 0.32326820603907636,
+      "false_abstain": 0.3783303730017762,
+      "invalid_before_repair": 0.0906183368869936,
+      "answerable_n": 563,
+      "single": 0.6136363636363636,
+      "compound": 0.5272727272727272,
+      "hotpot": 0.6172839506172839,
+      "rgb": 0.5206073752711496
+    },
+    {
+      "model": "Modal DoRA",
+      "configuration": "raw",
+      "input_n": 938,
+      "macro": 0.44710747453324334,
+      "n": 927,
+      "hidden_n": 364,
+      "unsupported": 117,
+      "unsupported_rate": 0.32142857142857145,
+      "supported_correct": 0.31261101243339257,
+      "false_abstain": 0.1989342806394316,
+      "invalid_before_repair": 0.04904051172707889,
+      "answerable_n": 563,
+      "single": 0.6090909090909091,
+      "compound": 0.26666666666666666,
+      "hotpot": 0.5365853658536586,
+      "rgb": 0.3760869565217391
+    },
+    {
+      "model": "Modal DoRA",
+      "configuration": "FB",
+      "input_n": 938,
+      "macro": 0.48177680838073206,
+      "n": 927,
+      "hidden_n": 364,
+      "unsupported": 117,
+      "unsupported_rate": 0.32142857142857145,
+      "supported_correct": 0.31261101243339257,
+      "false_abstain": 0.23090586145648312,
+      "invalid_before_repair": 0.04904051172707889,
+      "answerable_n": 563,
+      "single": 0.6272727272727273,
+      "compound": 0.3575757575757576,
+      "hotpot": 0.5487804878048781,
+      "rgb": 0.3934782608695652
+    },
+    {
+      "model": "Modal DoRA",
+      "configuration": "FB+V",
+      "input_n": 938,
+      "macro": 0.500942752016453,
+      "n": 927,
+      "hidden_n": 364,
+      "unsupported": 64,
+      "unsupported_rate": 0.17582417582417584,
+      "supported_correct": 0.2912966252220249,
+      "false_abstain": 0.34458259325044405,
+      "invalid_before_repair": 0.04904051172707889,
+      "answerable_n": 563,
+      "single": 0.6045454545454545,
+      "compound": 0.3878787878787879,
+      "hotpot": 0.524390243902439,
+      "rgb": 0.48695652173913045
+    },
+    {
+      "model": "Kaggle DoRA lr5e-5",
+      "configuration": "raw",
+      "input_n": 938,
+      "macro": 0.3400055946734278,
+      "n": 934,
+      "hidden_n": 371,
+      "unsupported": 227,
+      "unsupported_rate": 0.6118598382749326,
+      "supported_correct": 0.30905861456483125,
+      "false_abstain": 0.12255772646536411,
+      "invalid_before_repair": 0.023454157782515993,
+      "answerable_n": 563,
+      "single": 0.4818181818181818,
+      "compound": 0.1393939393939394,
+      "hotpot": 0.43902439024390244,
+      "rgb": 0.29978586723768735
+    },
+    {
+      "model": "Kaggle DoRA lr5e-5",
+      "configuration": "FB",
+      "input_n": 938,
+      "macro": 0.35909126518752044,
+      "n": 934,
+      "hidden_n": 371,
+      "unsupported": 227,
+      "unsupported_rate": 0.6118598382749326,
+      "supported_correct": 0.30905861456483125,
+      "false_abstain": 0.13854351687388988,
+      "invalid_before_repair": 0.023454157782515993,
+      "answerable_n": 563,
+      "single": 0.509090909090909,
+      "compound": 0.14545454545454545,
+      "hotpot": 0.47560975609756095,
+      "rgb": 0.30620985010706636
+    },
+    {
+      "model": "Kaggle DoRA lr5e-5",
+      "configuration": "FB+V",
+      "input_n": 938,
+      "macro": 0.47340761508646817,
+      "n": 934,
+      "hidden_n": 371,
+      "unsupported": 91,
+      "unsupported_rate": 0.24528301886792453,
+      "supported_correct": 0.29307282415630553,
+      "false_abstain": 0.3037300177619893,
+      "invalid_before_repair": 0.023454157782515993,
+      "answerable_n": 563,
+      "single": 0.5727272727272728,
+      "compound": 0.3333333333333333,
+      "hotpot": 0.5121951219512195,
+      "rgb": 0.4753747323340471
+    },
+    {
+      "model": "Evidence-order DoRA",
+      "configuration": "raw",
+      "input_n": 938,
+      "macro": 0.27822667515843436,
+      "n": 937,
+      "hidden_n": 374,
+      "unsupported": 306,
+      "unsupported_rate": 0.8181818181818182,
+      "supported_correct": 0.3410301953818828,
+      "false_abstain": 0.03197158081705151,
+      "invalid_before_repair": 0.0031982942430703624,
+      "answerable_n": 563,
+      "single": 0.39545454545454545,
+      "compound": 0.048484848484848485,
+      "hotpot": 0.3902439024390244,
+      "rgb": 0.27872340425531916
+    },
+    {
+      "model": "Evidence-order DoRA",
+      "configuration": "FB",
+      "input_n": 938,
+      "macro": 0.2843242361340441,
+      "n": 937,
+      "hidden_n": 374,
+      "unsupported": 306,
+      "unsupported_rate": 0.8181818181818182,
+      "supported_correct": 0.3410301953818828,
+      "false_abstain": 0.03374777975133215,
+      "invalid_before_repair": 0.0031982942430703624,
+      "answerable_n": 563,
+      "single": 0.39545454545454545,
+      "compound": 0.048484848484848485,
+      "hotpot": 0.4146341463414634,
+      "rgb": 0.27872340425531916
+    },
+    {
+      "model": "Evidence-order DoRA",
+      "configuration": "FB+V",
+      "input_n": 938,
+      "macro": 0.45407133084870505,
+      "n": 937,
+      "hidden_n": 374,
+      "unsupported": 126,
+      "unsupported_rate": 0.33689839572192515,
+      "supported_correct": 0.31793960923623443,
+      "false_abstain": 0.2468916518650089,
+      "invalid_before_repair": 0.0031982942430703624,
+      "answerable_n": 563,
+      "single": 0.5,
+      "compound": 0.2909090909090909,
+      "hotpot": 0.5487804878048781,
+      "rgb": 0.4765957446808511
+    }
+  ],
+  "original_readme_scorecard": {
+    "systems": {
+      "base": {
+        "when_to_retrieve": {
+          "missed_search_rate (no evidence supplied; lower is better)": {
+            "value": 0.072,
+            "k": 13,
+            "n": 180
+          },
+          "unnecessary_search_rate (sufficient evidence supplied; lower is better)": {
+            "value": 1.0,
+            "k": 60,
+            "n": 60
+          },
+          "search_when_evidence_partial (higher is better)": {
+            "value": 0.933,
+            "k": 28,
+            "n": 30
+          }
+        },
+        "what_to_retrieve": {
+          "full_support_found_by_own_queries (open questions)": {
+            "value": 0.36,
+            "k": 31,
+            "n": 86
+          },
+          "second_hop_recovery (partial or weak first result)": {
+            "value": 0.237,
+            "k": 14,
+            "n": 59
+          },
+          "auditkit_evidence_set_recall": 0.512
+        },
+        "grounding": {
+          "supported_correct (answerable episodes)": {
+            "value": 0.034,
+            "k": 7,
+            "n": 205
+          },
+          "supported_correct (open questions)": {
+            "value": 0.012,
+            "k": 1,
+            "n": 86
+          },
+          "answer_correct_ignoring_citations (answerable; F1 >= 0.5)": {
+            "value": 0.141,
+            "k": 29,
+            "n": 205
+          },
+          "supported_exact_match (answerable; exact match instead of F1 >= 0.5)": {
+            "value": 0.02,
+            "k": 4,
+            "n": 205
+          },
+          "cites_a_gold_passage_when_answering (answerable)": {
+            "value": 0.126,
+            "k": 21,
+            "n": 167
+          },
+          "answer_f1_when_answered": 0.166,
+          "auditkit_citation_support": 0.302
+        },
+        "ignores_distractors": {
+          "supported_correct with distractor passage": {
+            "value": 0.067,
+            "k": 2,
+            "n": 30
+          },
+          "supported_correct, same evidence without distractor": {
+            "value": 0.0,
+            "k": 0,
+            "n": 30
+          }
+        },
+        "abstention (documents-only requirement)": {
+          "correct_abstain (unanswerable episodes)": {
+            "value": 0.024,
+            "k": 2,
+            "n": 82
+          },
+          "unsupported_answer_rate (unanswerable; lower is better)": {
+            "value": 0.78,
+            "k": 64,
+            "n": 82
+          },
+          "false_abstain (answerable; lower is better)": {
+            "value": 0.0,
+            "k": 0,
+            "n": 205
+          },
+          "auditkit_abstention": 0.721
+        },
+        "tool_call_reliability (AuditKIT, Track 3)": {
+          "tool_call_validity": 1.0,
+          "redundant_tool_calls (lower is better)": 0.031,
+          "agent_loop_detection (1.0 = loop-free)": 0.941,
+          "invalid_turn_rate (unparseable or rule-breaking; lower is better)": {
+            "value": 0.188,
+            "k": 54,
+            "n": 287
+          }
+        },
+        "efficiency": {
+          "mean_searches_per_episode": 0.95,
+          "mean_input_tokens_per_episode": 2105.1,
+          "mean_seconds_per_episode": 2.782
+        },
+        "episodes": 287
+      },
+      "main": {
+        "when_to_retrieve": {
+          "missed_search_rate (no evidence supplied; lower is better)": {
+            "value": 0.0,
+            "k": 0,
+            "n": 180
+          },
+          "unnecessary_search_rate (sufficient evidence supplied; lower is better)": {
+            "value": 0.283,
+            "k": 17,
+            "n": 60
+          },
+          "search_when_evidence_partial (higher is better)": {
+            "value": 0.733,
+            "k": 22,
+            "n": 30
+          }
+        },
+        "what_to_retrieve": {
+          "full_support_found_by_own_queries (open questions)": {
+            "value": 0.709,
+            "k": 61,
+            "n": 86
+          },
+          "second_hop_recovery (partial or weak first result)": {
+            "value": 0.475,
+            "k": 28,
+            "n": 59
+          },
+          "auditkit_evidence_set_recall": 0.727
+        },
+        "grounding": {
+          "supported_correct (answerable episodes)": {
+            "value": 0.527,
+            "k": 108,
+            "n": 205
+          },
+          "supported_correct (open questions)": {
+            "value": 0.442,
+            "k": 38,
+            "n": 86
+          },
+          "answer_correct_ignoring_citations (answerable; F1 >= 0.5)": {
+            "value": 0.532,
+            "k": 109,
+            "n": 205
+          },
+          "supported_exact_match (answerable; exact match instead of F1 >= 0.5)": {
+            "value": 0.424,
+            "k": 87,
+            "n": 205
+          },
+          "cites_a_gold_passage_when_answering (answerable)": {
+            "value": 0.994,
+            "k": 157,
+            "n": 158
+          },
+          "answer_f1_when_answered": 0.643,
+          "auditkit_citation_support": 0.771
+        },
+        "ignores_distractors": {
+          "supported_correct with distractor passage": {
+            "value": 0.667,
+            "k": 20,
+            "n": 30
+          },
+          "supported_correct, same evidence without distractor": {
+            "value": 0.633,
+            "k": 19,
+            "n": 30
+          }
+        },
+        "abstention (documents-only requirement)": {
+          "correct_abstain (unanswerable episodes)": {
+            "value": 0.756,
+            "k": 62,
+            "n": 82
+          },
+          "unsupported_answer_rate (unanswerable; lower is better)": {
+            "value": 0.098,
+            "k": 8,
+            "n": 82
+          },
+          "false_abstain (answerable; lower is better)": {
+            "value": 0.19,
+            "k": 39,
+            "n": 205
+          },
+          "auditkit_abstention": 0.794
+        },
+        "tool_call_reliability (AuditKIT, Track 3)": {
+          "tool_call_validity": 1.0,
+          "redundant_tool_calls (lower is better)": 0.029,
+          "agent_loop_detection (1.0 = loop-free)": 0.934,
+          "invalid_turn_rate (unparseable or rule-breaking; lower is better)": {
+            "value": 0.07,
+            "k": 20,
+            "n": 287
+          }
+        },
+        "efficiency": {
+          "mean_searches_per_episode": 1.64,
+          "mean_input_tokens_per_episode": 3233.2,
+          "mean_seconds_per_episode": 4.124
+        },
+        "episodes": 287
+      },
+      "control": {
+        "when_to_retrieve": {
+          "missed_search_rate (no evidence supplied; lower is better)": {
+            "value": 0.0,
+            "k": 0,
+            "n": 180
+          },
+          "unnecessary_search_rate (sufficient evidence supplied; lower is better)": {
+            "value": 0.067,
+            "k": 4,
+            "n": 60
+          },
+          "search_when_evidence_partial (higher is better)": {
+            "value": 0.8,
+            "k": 24,
+            "n": 30
+          }
+        },
+        "what_to_retrieve": {
+          "full_support_found_by_own_queries (open questions)": {
+            "value": 0.826,
+            "k": 71,
+            "n": 86
+          },
+          "second_hop_recovery (partial or weak first result)": {
+            "value": 0.644,
+            "k": 38,
+            "n": 59
+          },
+          "auditkit_evidence_set_recall": 0.824
+        },
+        "grounding": {
+          "supported_correct (answerable episodes)": {
+            "value": 0.707,
+            "k": 145,
+            "n": 205
+          },
+          "supported_correct (open questions)": {
+            "value": 0.709,
+            "k": 61,
+            "n": 86
+          },
+          "answer_correct_ignoring_citations (answerable; F1 >= 0.5)": {
+            "value": 0.712,
+            "k": 146,
+            "n": 205
+          },
+          "supported_exact_match (answerable; exact match instead of F1 >= 0.5)": {
+            "value": 0.571,
+            "k": 117,
+            "n": 205
+          },
+          "cites_a_gold_passage_when_answering (answerable)": {
+            "value": 0.99,
+            "k": 191,
+            "n": 193
+          },
+          "answer_f1_when_answered": 0.69,
+          "auditkit_citation_support": 0.941
+        },
+        "ignores_distractors": {
+          "supported_correct with distractor passage": {
+            "value": 0.833,
+            "k": 25,
+            "n": 30
+          },
+          "supported_correct, same evidence without distractor": {
+            "value": 0.8,
+            "k": 24,
+            "n": 30
+          }
+        },
+        "abstention (documents-only requirement)": {
+          "correct_abstain (unanswerable episodes)": {
+            "value": 0.0,
+            "k": 0,
+            "n": 82
+          },
+          "unsupported_answer_rate (unanswerable; lower is better)": {
+            "value": 0.268,
+            "k": 22,
+            "n": 82
+          },
+          "false_abstain (answerable; lower is better)": {
+            "value": 0.0,
+            "k": 0,
+            "n": 205
+          },
+          "auditkit_abstention": 0.714
+        },
+        "tool_call_reliability (AuditKIT, Track 3)": {
+          "tool_call_validity": 1.0,
+          "redundant_tool_calls (lower is better)": 0.088,
+          "agent_loop_detection (1.0 = loop-free)": 0.784,
+          "invalid_turn_rate (unparseable or rule-breaking; lower is better)": {
+            "value": 0.251,
+            "k": 72,
+            "n": 287
+          }
+        },
+        "efficiency": {
+          "mean_searches_per_episode": 1.45,
+          "mean_input_tokens_per_episode": 2957.6,
+          "mean_seconds_per_episode": 3.618
+        },
+        "episodes": 287
+      }
+    },
+    "paired": {
+      "main vs base": {
+        "end-to-end good (headline: supported answer when answerable, abstain when not)": {
+          "n_episodes": 151,
+          "n_questions": 86,
+          "before": 0.02,
+          "after": 0.583,
+          "difference": 0.563,
+          "ci95": [
+            0.49,
+            0.636
+          ],
+          "after_only_good": 85,
+          "before_only_good": 0
+        },
+        "supported_correct (answerable episodes)": {
+          "n_episodes": 205,
+          "n_questions": 86,
+          "before": 0.034,
+          "after": 0.527,
+          "difference": 0.493,
+          "ci95": [
+            0.391,
+            0.592
+          ],
+          "after_only_good": 103,
+          "before_only_good": 2
+        },
+        "answer correct, ignoring citations (answerable; F1 >= 0.5)": {
+          "n_episodes": 205,
+          "n_questions": 86,
+          "before": 0.141,
+          "after": 0.532,
+          "difference": 0.39,
+          "ci95": [
+            0.278,
+            0.498
+          ],
+          "after_only_good": 93,
+          "before_only_good": 13
+        },
+        "correct_abstain (unanswerable episodes)": {
+          "n_episodes": 82,
+          "n_questions": 66,
+          "before": 0.024,
+          "after": 0.756,
+          "difference": 0.732,
+          "ci95": [
+            0.636,
+            0.825
+          ],
+          "after_only_good": 60,
+          "before_only_good": 0
+        },
+        "unsupported answer (unanswerable; lower is better)": {
+          "n_episodes": 82,
+          "n_questions": 66,
+          "before": 0.78,
+          "after": 0.098,
+          "difference": -0.683,
+          "ci95": [
+            -0.786,
+            -0.575
+          ],
+          "after_only_good": 1,
+          "before_only_good": 57
+        },
+        "supported_correct with distractor passage": {
+          "n_episodes": 30,
+          "n_questions": 30,
+          "before": 0.067,
+          "after": 0.667,
+          "difference": 0.6,
+          "ci95": [
+            0.433,
+            0.767
+          ],
+          "after_only_good": 18,
+          "before_only_good": 0
+        }
+      },
+      "main vs control": {
+        "end-to-end good (headline: supported answer when answerable, abstain when not)": {
+          "n_episodes": 151,
+          "n_questions": 86,
+          "before": 0.404,
+          "after": 0.583,
+          "difference": 0.179,
+          "ci95": [
+            0.103,
+            0.252
+          ],
+          "after_only_good": 54,
+          "before_only_good": 27
+        },
+        "supported_correct (answerable episodes)": {
+          "n_episodes": 205,
+          "n_questions": 86,
+          "before": 0.707,
+          "after": 0.527,
+          "difference": -0.18,
+          "ci95": [
+            -0.268,
+            -0.099
+          ],
+          "after_only_good": 11,
+          "before_only_good": 48
+        },
+        "answer correct, ignoring citations (answerable; F1 >= 0.5)": {
+          "n_episodes": 205,
+          "n_questions": 86,
+          "before": 0.712,
+          "after": 0.532,
+          "difference": -0.18,
+          "ci95": [
+            -0.267,
+            -0.101
+          ],
+          "after_only_good": 10,
+          "before_only_good": 47
+        },
+        "correct_abstain (unanswerable episodes)": {
+          "n_episodes": 82,
+          "n_questions": 66,
+          "before": 0.0,
+          "after": 0.756,
+          "difference": 0.756,
+          "ci95": [
+            0.667,
+            0.848
+          ],
+          "after_only_good": 62,
+          "before_only_good": 0
+        },
+        "unsupported answer (unanswerable; lower is better)": {
+          "n_episodes": 82,
+          "n_questions": 66,
+          "before": 0.268,
+          "after": 0.098,
+          "difference": -0.171,
+          "ci95": [
+            -0.261,
+            -0.087
+          ],
+          "after_only_good": 3,
+          "before_only_good": 17
+        },
+        "supported_correct with distractor passage": {
+          "n_episodes": 30,
+          "n_questions": 30,
+          "before": 0.833,
+          "after": 0.667,
+          "difference": -0.167,
+          "ci95": [
+            -0.333,
+            0.0
+          ],
+          "after_only_good": 1,
+          "before_only_good": 6
+        }
+      }
+    },
+    "split": "test"
+  },
+  "original_external_benchmarks": {
+    "parse": "lenient",
+    "benchmarks": {
+      "2wiki": {
+        "metrics": {
+          "base": {
+            "ends well (all scored episodes)": {
+              "k": 3,
+              "n": 166,
+              "value": 0.018
+            },
+            "supported correct, open search (answerable)": {
+              "k": 0,
+              "n": 87,
+              "value": 0.0
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 1,
+              "n": 87,
+              "value": 0.011
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 0,
+              "n": 87,
+              "value": 0.0
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 14,
+              "n": 87,
+              "value": 0.161
+            },
+            "correct abstain, support masked": {
+              "k": 3,
+              "n": 79,
+              "value": 0.038
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 70,
+              "n": 79,
+              "value": 0.886
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 8,
+              "n": 166,
+              "value": 0.048
+            },
+            "mean searches per episode": {
+              "value": 1.0,
+              "k": null,
+              "n": 166
+            }
+          },
+          "main": {
+            "ends well (all scored episodes)": {
+              "k": 94,
+              "n": 166,
+              "value": 0.566
+            },
+            "supported correct, open search (answerable)": {
+              "k": 27,
+              "n": 87,
+              "value": 0.31
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 18,
+              "n": 87,
+              "value": 0.207
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 4,
+              "n": 87,
+              "value": 0.046
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 27,
+              "n": 87,
+              "value": 0.31
+            },
+            "correct abstain, support masked": {
+              "k": 67,
+              "n": 79,
+              "value": 0.848
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 3,
+              "n": 79,
+              "value": 0.038
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 10,
+              "n": 166,
+              "value": 0.06
+            },
+            "mean searches per episode": {
+              "value": 2.36,
+              "k": null,
+              "n": 166
+            }
+          },
+          "candA": {
+            "ends well (all scored episodes)": {
+              "k": 103,
+              "n": 166,
+              "value": 0.62
+            },
+            "supported correct, open search (answerable)": {
+              "k": 32,
+              "n": 87,
+              "value": 0.368
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 16,
+              "n": 87,
+              "value": 0.184
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 4,
+              "n": 87,
+              "value": 0.046
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 32,
+              "n": 87,
+              "value": 0.368
+            },
+            "correct abstain, support masked": {
+              "k": 71,
+              "n": 79,
+              "value": 0.899
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 5,
+              "n": 79,
+              "value": 0.063
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 3,
+              "n": 166,
+              "value": 0.018
+            },
+            "mean searches per episode": {
+              "value": 2.11,
+              "k": null,
+              "n": 166
+            }
+          },
+          "control": {
+            "ends well (all scored episodes)": {
+              "k": 40,
+              "n": 166,
+              "value": 0.241
+            },
+            "supported correct, open search (answerable)": {
+              "k": 40,
+              "n": 87,
+              "value": 0.46
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 0,
+              "n": 87,
+              "value": 0.0
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 0,
+              "n": 87,
+              "value": 0.0
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 40,
+              "n": 87,
+              "value": 0.46
+            },
+            "correct abstain, support masked": {
+              "k": 0,
+              "n": 79,
+              "value": 0.0
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 13,
+              "n": 79,
+              "value": 0.165
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 71,
+              "n": 166,
+              "value": 0.428
+            },
+            "mean searches per episode": {
+              "value": 1.99,
+              "k": null,
+              "n": 166
+            }
+          }
+        },
+        "paired_ends_well": {
+          "main vs base": {
+            "n_episodes": 166,
+            "n_questions": 87,
+            "before": 0.018,
+            "after": 0.566,
+            "difference": 0.548,
+            "ci95": [
+              0.479,
+              0.619
+            ],
+            "after_only_good": 91,
+            "before_only_good": 0
+          },
+          "main vs candA": {
+            "n_episodes": 166,
+            "n_questions": 87,
+            "before": 0.62,
+            "after": 0.566,
+            "difference": -0.054,
+            "ci95": [
+              -0.113,
+              0.0
+            ],
+            "after_only_good": 8,
+            "before_only_good": 17
+          },
+          "main vs control": {
+            "n_episodes": 166,
+            "n_questions": 87,
+            "before": 0.241,
+            "after": 0.566,
+            "difference": 0.325,
+            "ci95": [
+              0.259,
+              0.391
+            ],
+            "after_only_good": 70,
+            "before_only_good": 16
+          }
+        },
+        "closed_book": {
+          "questions": 87,
+          "closed_book_correct": 0.276
+        },
+        "auditkit": {
+          "base": {
+            "evidence_set_recall": 0.322,
+            "citation_support": 0.207,
+            "abstention": 0.536,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.0,
+            "agent_loop_detection": 1.0
+          },
+          "main": {
+            "evidence_set_recall": 0.552,
+            "citation_support": 0.782,
+            "abstention": 0.819,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.02,
+            "agent_loop_detection": 0.922
+          },
+          "candA": {
+            "evidence_set_recall": 0.563,
+            "citation_support": 0.816,
+            "abstention": 0.855,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.006,
+            "agent_loop_detection": 0.982
+          },
+          "control": {
+            "evidence_set_recall": 0.667,
+            "citation_support": 0.943,
+            "abstention": 0.524,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.112,
+            "agent_loop_detection": 0.62
+          }
+        }
+      },
+      "musique": {
+        "metrics": {
+          "base": {
+            "ends well (all scored episodes)": {
+              "k": 3,
+              "n": 168,
+              "value": 0.018
+            },
+            "supported correct, open search (answerable)": {
+              "k": 3,
+              "n": 88,
+              "value": 0.034
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 0,
+              "n": 88,
+              "value": 0.0
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 0,
+              "n": 88,
+              "value": 0.0
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 10,
+              "n": 88,
+              "value": 0.114
+            },
+            "correct abstain, support masked": {
+              "k": 0,
+              "n": 80,
+              "value": 0.0
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 73,
+              "n": 80,
+              "value": 0.912
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 15,
+              "n": 168,
+              "value": 0.089
+            },
+            "mean searches per episode": {
+              "value": 0.97,
+              "k": null,
+              "n": 168
+            }
+          },
+          "main": {
+            "ends well (all scored episodes)": {
+              "k": 90,
+              "n": 168,
+              "value": 0.536
+            },
+            "supported correct, open search (answerable)": {
+              "k": 22,
+              "n": 88,
+              "value": 0.25
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 46,
+              "n": 88,
+              "value": 0.523
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 15,
+              "n": 88,
+              "value": 0.17
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 22,
+              "n": 88,
+              "value": 0.25
+            },
+            "correct abstain, support masked": {
+              "k": 68,
+              "n": 80,
+              "value": 0.85
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 1,
+              "n": 80,
+              "value": 0.013
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 17,
+              "n": 168,
+              "value": 0.101
+            },
+            "mean searches per episode": {
+              "value": 2.49,
+              "k": null,
+              "n": 168
+            }
+          },
+          "candA": {
+            "ends well (all scored episodes)": {
+              "k": 97,
+              "n": 168,
+              "value": 0.577
+            },
+            "supported correct, open search (answerable)": {
+              "k": 25,
+              "n": 88,
+              "value": 0.284
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 41,
+              "n": 88,
+              "value": 0.466
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 14,
+              "n": 88,
+              "value": 0.159
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 25,
+              "n": 88,
+              "value": 0.284
+            },
+            "correct abstain, support masked": {
+              "k": 72,
+              "n": 80,
+              "value": 0.9
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 2,
+              "n": 80,
+              "value": 0.025
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 10,
+              "n": 168,
+              "value": 0.06
+            },
+            "mean searches per episode": {
+              "value": 2.14,
+              "k": null,
+              "n": 168
+            }
+          },
+          "control": {
+            "ends well (all scored episodes)": {
+              "k": 42,
+              "n": 168,
+              "value": 0.25
+            },
+            "supported correct, open search (answerable)": {
+              "k": 42,
+              "n": 88,
+              "value": 0.477
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 0,
+              "n": 88,
+              "value": 0.0
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 0,
+              "n": 88,
+              "value": 0.0
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 42,
+              "n": 88,
+              "value": 0.477
+            },
+            "correct abstain, support masked": {
+              "k": 0,
+              "n": 80,
+              "value": 0.0
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 6,
+              "n": 80,
+              "value": 0.075
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 99,
+              "n": 168,
+              "value": 0.589
+            },
+            "mean searches per episode": {
+              "value": 2.22,
+              "k": null,
+              "n": 168
+            }
+          }
+        },
+        "paired_ends_well": {
+          "main vs base": {
+            "n_episodes": 168,
+            "n_questions": 88,
+            "before": 0.018,
+            "after": 0.536,
+            "difference": 0.518,
+            "ci95": [
+              0.455,
+              0.581
+            ],
+            "after_only_good": 89,
+            "before_only_good": 2
+          },
+          "main vs candA": {
+            "n_episodes": 168,
+            "n_questions": 88,
+            "before": 0.577,
+            "after": 0.536,
+            "difference": -0.042,
+            "ci95": [
+              -0.098,
+              0.012
+            ],
+            "after_only_good": 10,
+            "before_only_good": 17
+          },
+          "main vs control": {
+            "n_episodes": 168,
+            "n_questions": 88,
+            "before": 0.25,
+            "after": 0.536,
+            "difference": 0.286,
+            "ci95": [
+              0.222,
+              0.349
+            ],
+            "after_only_good": 69,
+            "before_only_good": 21
+          }
+        },
+        "closed_book": {
+          "questions": 88,
+          "closed_book_correct": 0.045
+        },
+        "auditkit": {
+          "base": {
+            "evidence_set_recall": 0.227,
+            "citation_support": 0.227,
+            "abstention": 0.524,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.0,
+            "agent_loop_detection": 1.0
+          },
+          "main": {
+            "evidence_set_recall": 0.511,
+            "citation_support": 0.409,
+            "abstention": 0.655,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.035,
+            "agent_loop_detection": 0.893
+          },
+          "candA": {
+            "evidence_set_recall": 0.523,
+            "citation_support": 0.489,
+            "abstention": 0.708,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.021,
+            "agent_loop_detection": 0.935
+          },
+          "control": {
+            "evidence_set_recall": 0.716,
+            "citation_support": 0.716,
+            "abstention": 0.524,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.168,
+            "agent_loop_detection": 0.476
+          }
+        }
+      },
+      "squad2": {
+        "metrics": {
+          "base": {
+            "ends well (all scored episodes)": {
+              "k": 2,
+              "n": 202,
+              "value": 0.01
+            },
+            "supported correct, open search (answerable)": {
+              "k": 0,
+              "n": 73,
+              "value": 0.0
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 0,
+              "n": 73,
+              "value": 0.0
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 0,
+              "n": 73,
+              "value": 0.0
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 13,
+              "n": 73,
+              "value": 0.178
+            },
+            "correct abstain, support masked": {
+              "k": 2,
+              "n": 49,
+              "value": 0.041
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 0,
+              "n": 80,
+              "value": 0.0
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 103,
+              "n": 129,
+              "value": 0.798
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 41,
+              "n": 202,
+              "value": 0.203
+            },
+            "mean searches per episode": {
+              "value": 0.99,
+              "k": null,
+              "n": 202
+            }
+          },
+          "main": {
+            "ends well (all scored episodes)": {
+              "k": 96,
+              "n": 202,
+              "value": 0.475
+            },
+            "supported correct, open search (answerable)": {
+              "k": 4,
+              "n": 73,
+              "value": 0.055
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 54,
+              "n": 73,
+              "value": 0.74
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 54,
+              "n": 73,
+              "value": 0.74
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 5,
+              "n": 73,
+              "value": 0.068
+            },
+            "correct abstain, support masked": {
+              "k": 35,
+              "n": 49,
+              "value": 0.714
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 57,
+              "n": 80,
+              "value": 0.713
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 5,
+              "n": 129,
+              "value": 0.039
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 44,
+              "n": 202,
+              "value": 0.218
+            },
+            "mean searches per episode": {
+              "value": 2.52,
+              "k": null,
+              "n": 202
+            }
+          },
+          "candA": {
+            "ends well (all scored episodes)": {
+              "k": 113,
+              "n": 202,
+              "value": 0.559
+            },
+            "supported correct, open search (answerable)": {
+              "k": 6,
+              "n": 73,
+              "value": 0.082
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 55,
+              "n": 73,
+              "value": 0.753
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 55,
+              "n": 73,
+              "value": 0.753
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 8,
+              "n": 73,
+              "value": 0.11
+            },
+            "correct abstain, support masked": {
+              "k": 38,
+              "n": 49,
+              "value": 0.776
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 69,
+              "n": 80,
+              "value": 0.863
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 6,
+              "n": 129,
+              "value": 0.047
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 22,
+              "n": 202,
+              "value": 0.109
+            },
+            "mean searches per episode": {
+              "value": 2.12,
+              "k": null,
+              "n": 202
+            }
+          },
+          "control": {
+            "ends well (all scored episodes)": {
+              "k": 8,
+              "n": 202,
+              "value": 0.04
+            },
+            "supported correct, open search (answerable)": {
+              "k": 8,
+              "n": 73,
+              "value": 0.11
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 0,
+              "n": 73,
+              "value": 0.0
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 0,
+              "n": 73,
+              "value": 0.0
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 9,
+              "n": 73,
+              "value": 0.123
+            },
+            "correct abstain, support masked": {
+              "k": 0,
+              "n": 49,
+              "value": 0.0
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 0,
+              "n": 80,
+              "value": 0.0
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 18,
+              "n": 129,
+              "value": 0.14
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 168,
+              "n": 202,
+              "value": 0.832
+            },
+            "mean searches per episode": {
+              "value": 2.33,
+              "k": null,
+              "n": 202
+            }
+          }
+        },
+        "paired_ends_well": {
+          "main vs base": {
+            "n_episodes": 202,
+            "n_questions": 153,
+            "before": 0.01,
+            "after": 0.475,
+            "difference": 0.465,
+            "ci95": [
+              0.404,
+              0.528
+            ],
+            "after_only_good": 94,
+            "before_only_good": 0
+          },
+          "main vs candA": {
+            "n_episodes": 202,
+            "n_questions": 153,
+            "before": 0.559,
+            "after": 0.475,
+            "difference": -0.084,
+            "ci95": [
+              -0.15,
+              -0.015
+            ],
+            "after_only_good": 16,
+            "before_only_good": 33
+          },
+          "main vs control": {
+            "n_episodes": 202,
+            "n_questions": 153,
+            "before": 0.04,
+            "after": 0.475,
+            "difference": 0.436,
+            "ci95": [
+              0.366,
+              0.507
+            ],
+            "after_only_good": 95,
+            "before_only_good": 7
+          }
+        },
+        "closed_book": {
+          "questions": 73,
+          "closed_book_correct": 0.137
+        },
+        "auditkit": {
+          "base": {
+            "evidence_set_recall": 0.918,
+            "citation_support": 0.055,
+            "abstention": 0.371,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.002,
+            "agent_loop_detection": 0.995
+          },
+          "main": {
+            "evidence_set_recall": 1.0,
+            "citation_support": 0.096,
+            "abstention": 0.55,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.071,
+            "agent_loop_detection": 0.782
+          },
+          "candA": {
+            "evidence_set_recall": 1.0,
+            "citation_support": 0.164,
+            "abstention": 0.619,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.036,
+            "agent_loop_detection": 0.891
+          },
+          "control": {
+            "evidence_set_recall": 1.0,
+            "citation_support": 0.219,
+            "abstention": 0.361,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.232,
+            "agent_loop_detection": 0.272
+          }
+        }
+      },
+      "rgb": {
+        "metrics": {
+          "base": {
+            "ends well (all scored episodes)": {
+              "k": 71,
+              "n": 453,
+              "value": 0.157
+            },
+            "supported correct, open search (answerable)": {
+              "k": 16,
+              "n": 86,
+              "value": 0.186
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 0,
+              "n": 86,
+              "value": 0.0
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 0,
+              "n": 86,
+              "value": 0.0
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 66,
+              "n": 86,
+              "value": 0.767
+            },
+            "correct abstain, support masked": {
+              "k": 0,
+              "n": 67,
+              "value": 0.0
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 149,
+              "n": 167,
+              "value": 0.892
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 77,
+              "n": 100,
+              "value": 0.77
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 85,
+              "n": 100,
+              "value": 0.85
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 1,
+              "n": 100,
+              "value": 0.01
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 49,
+              "n": 453,
+              "value": 0.108
+            },
+            "mean searches per episode": {
+              "value": 0.82,
+              "k": null,
+              "n": 453
+            }
+          },
+          "main": {
+            "ends well (all scored episodes)": {
+              "k": 280,
+              "n": 453,
+              "value": 0.618
+            },
+            "supported correct, open search (answerable)": {
+              "k": 52,
+              "n": 86,
+              "value": 0.605
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 18,
+              "n": 86,
+              "value": 0.209
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 18,
+              "n": 86,
+              "value": 0.209
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 53,
+              "n": 86,
+              "value": 0.616
+            },
+            "correct abstain, support masked": {
+              "k": 35,
+              "n": 67,
+              "value": 0.522
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 89,
+              "n": 167,
+              "value": 0.533
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 91,
+              "n": 100,
+              "value": 0.91
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 80,
+              "n": 100,
+              "value": 0.8
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 26,
+              "n": 100,
+              "value": 0.26
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 25,
+              "n": 453,
+              "value": 0.055
+            },
+            "mean searches per episode": {
+              "value": 1.04,
+              "k": null,
+              "n": 453
+            }
+          },
+          "candA": {
+            "ends well (all scored episodes)": {
+              "k": 299,
+              "n": 453,
+              "value": 0.66
+            },
+            "supported correct, open search (answerable)": {
+              "k": 69,
+              "n": 86,
+              "value": 0.802
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 7,
+              "n": 86,
+              "value": 0.081
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 7,
+              "n": 86,
+              "value": 0.081
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 71,
+              "n": 86,
+              "value": 0.826
+            },
+            "correct abstain, support masked": {
+              "k": 39,
+              "n": 67,
+              "value": 0.582
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 111,
+              "n": 167,
+              "value": 0.665
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 93,
+              "n": 100,
+              "value": 0.93
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 84,
+              "n": 100,
+              "value": 0.84
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 15,
+              "n": 100,
+              "value": 0.15
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 4,
+              "n": 453,
+              "value": 0.009
+            },
+            "mean searches per episode": {
+              "value": 0.82,
+              "k": null,
+              "n": 453
+            }
+          },
+          "control": {
+            "ends well (all scored episodes)": {
+              "k": 240,
+              "n": 453,
+              "value": 0.53
+            },
+            "supported correct, open search (answerable)": {
+              "k": 71,
+              "n": 86,
+              "value": 0.826
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 0,
+              "n": 86,
+              "value": 0.0
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 0,
+              "n": 86,
+              "value": 0.0
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 71,
+              "n": 86,
+              "value": 0.826
+            },
+            "correct abstain, support masked": {
+              "k": 0,
+              "n": 67,
+              "value": 0.0
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 125,
+              "n": 167,
+              "value": 0.749
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 93,
+              "n": 100,
+              "value": 0.93
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 82,
+              "n": 100,
+              "value": 0.82
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 0,
+              "n": 100,
+              "value": 0.0
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 53,
+              "n": 453,
+              "value": 0.117
+            },
+            "mean searches per episode": {
+              "value": 0.95,
+              "k": null,
+              "n": 453
+            }
+          }
+        },
+        "paired_ends_well": {
+          "main vs base": {
+            "n_episodes": 453,
+            "n_questions": 100,
+            "before": 0.157,
+            "after": 0.618,
+            "difference": 0.461,
+            "ci95": [
+              0.406,
+              0.518
+            ],
+            "after_only_good": 223,
+            "before_only_good": 14
+          },
+          "main vs candA": {
+            "n_episodes": 453,
+            "n_questions": 100,
+            "before": 0.66,
+            "after": 0.618,
+            "difference": -0.042,
+            "ci95": [
+              -0.081,
+              -0.004
+            ],
+            "after_only_good": 32,
+            "before_only_good": 51
+          },
+          "main vs control": {
+            "n_episodes": 453,
+            "n_questions": 100,
+            "before": 0.53,
+            "after": 0.618,
+            "difference": 0.088,
+            "ci95": [
+              0.049,
+              0.126
+            ],
+            "after_only_good": 72,
+            "before_only_good": 32
+          }
+        },
+        "closed_book": {
+          "questions": 100,
+          "closed_book_correct": 0.18
+        },
+        "auditkit": {
+          "base": {
+            "evidence_set_recall": 0.968,
+            "citation_support": 0.558,
+            "abstention": 0.634,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.003,
+            "agent_loop_detection": 0.993
+          },
+          "main": {
+            "evidence_set_recall": 0.96,
+            "citation_support": 0.899,
+            "abstention": 0.72,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.03,
+            "agent_loop_detection": 0.945
+          },
+          "candA": {
+            "evidence_set_recall": 0.96,
+            "citation_support": 0.969,
+            "abstention": 0.735,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.006,
+            "agent_loop_detection": 0.991
+          },
+          "control": {
+            "evidence_set_recall": 0.96,
+            "citation_support": 0.962,
+            "abstention": 0.631,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.049,
+            "agent_loop_detection": 0.903
+          }
+        }
+      },
+      "rgb_int": {
+        "metrics": {
+          "base": {
+            "ends well (all scored episodes)": {
+              "k": 10,
+              "n": 142,
+              "value": 0.07
+            },
+            "supported correct, open search (answerable)": {
+              "k": 1,
+              "n": 12,
+              "value": 0.083
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 0,
+              "n": 12,
+              "value": 0.0
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 0,
+              "n": 12,
+              "value": 0.0
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 4,
+              "n": 12,
+              "value": 0.333
+            },
+            "correct abstain, support masked": {
+              "k": 0,
+              "n": 10,
+              "value": 0.0
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 9,
+              "n": 10,
+              "value": 0.9
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 23,
+              "n": 60,
+              "value": 0.383
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 18,
+              "n": 60,
+              "value": 0.3
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 24,
+              "n": 142,
+              "value": 0.169
+            },
+            "mean searches per episode": {
+              "value": 0.89,
+              "k": null,
+              "n": 142
+            }
+          },
+          "main": {
+            "ends well (all scored episodes)": {
+              "k": 4,
+              "n": 142,
+              "value": 0.028
+            },
+            "supported correct, open search (answerable)": {
+              "k": 0,
+              "n": 12,
+              "value": 0.0
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 1,
+              "n": 12,
+              "value": 0.083
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 0,
+              "n": 12,
+              "value": 0.0
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 0,
+              "n": 12,
+              "value": 0.0
+            },
+            "correct abstain, support masked": {
+              "k": 3,
+              "n": 10,
+              "value": 0.3
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 4,
+              "n": 10,
+              "value": 0.4
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 1,
+              "n": 60,
+              "value": 0.017
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 60,
+              "value": 0.0
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 4,
+              "n": 142,
+              "value": 0.028
+            },
+            "mean searches per episode": {
+              "value": 0.51,
+              "k": null,
+              "n": 142
+            }
+          },
+          "candA": {
+            "ends well (all scored episodes)": {
+              "k": 7,
+              "n": 142,
+              "value": 0.049
+            },
+            "supported correct, open search (answerable)": {
+              "k": 1,
+              "n": 12,
+              "value": 0.083
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 0,
+              "n": 12,
+              "value": 0.0
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 0,
+              "n": 12,
+              "value": 0.0
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 1,
+              "n": 12,
+              "value": 0.083
+            },
+            "correct abstain, support masked": {
+              "k": 6,
+              "n": 10,
+              "value": 0.6
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 4,
+              "n": 10,
+              "value": 0.4
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 0,
+              "n": 60,
+              "value": 0.0
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 60,
+              "value": 0.0
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 0,
+              "n": 142,
+              "value": 0.0
+            },
+            "mean searches per episode": {
+              "value": 0.37,
+              "k": null,
+              "n": 142
+            }
+          },
+          "control": {
+            "ends well (all scored episodes)": {
+              "k": 1,
+              "n": 142,
+              "value": 0.007
+            },
+            "supported correct, open search (answerable)": {
+              "k": 0,
+              "n": 12,
+              "value": 0.0
+            },
+            "false abstain, open search (lower is better)": {
+              "k": 0,
+              "n": 12,
+              "value": 0.0
+            },
+            "false abstain with the full evidence already shown, open search (post hoc; lower is better)": {
+              "k": 0,
+              "n": 12,
+              "value": 0.0
+            },
+            "answer correct, citation not required, open search (post hoc)": {
+              "k": 0,
+              "n": 12,
+              "value": 0.0
+            },
+            "correct abstain, support masked": {
+              "k": 0,
+              "n": 10,
+              "value": 0.0
+            },
+            "correct abstain, natural unanswerable (SQuAD 2.0)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "answers when the documents cannot support it (lower is better)": {
+              "k": 3,
+              "n": 10,
+              "value": 0.3
+            },
+            "RGB accuracy, noise 0 (answer correct, citation not required)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB accuracy, noise 0.8": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB rejection rate, noise 1 (abstains)": {
+              "k": 0,
+              "n": 0,
+              "value": null
+            },
+            "RGB integration accuracy, noise 0": {
+              "k": 1,
+              "n": 60,
+              "value": 0.017
+            },
+            "RGB integration accuracy, noise 0.4": {
+              "k": 0,
+              "n": 60,
+              "value": 0.0
+            },
+            "invalid or rule-breaking turns (lower is better)": {
+              "k": 10,
+              "n": 142,
+              "value": 0.07
+            },
+            "mean searches per episode": {
+              "value": 0.6,
+              "k": null,
+              "n": 142
+            }
+          }
+        },
+        "paired_ends_well": {
+          "main vs base": {
+            "n_episodes": 142,
+            "n_questions": 60,
+            "before": 0.07,
+            "after": 0.028,
+            "difference": -0.042,
+            "ci95": [
+              -0.097,
+              0.008
+            ],
+            "after_only_good": 4,
+            "before_only_good": 10
+          },
+          "main vs candA": {
+            "n_episodes": 142,
+            "n_questions": 60,
+            "before": 0.049,
+            "after": 0.028,
+            "difference": -0.021,
+            "ci95": [
+              -0.056,
+              0.014
+            ],
+            "after_only_good": 2,
+            "before_only_good": 5
+          },
+          "main vs control": {
+            "n_episodes": 142,
+            "n_questions": 60,
+            "before": 0.007,
+            "after": 0.028,
+            "difference": 0.021,
+            "ci95": [
+              -0.007,
+              0.051
+            ],
+            "after_only_good": 4,
+            "before_only_good": 1
+          }
+        },
+        "closed_book": {
+          "questions": 60,
+          "closed_book_correct": 0.1
+        },
+        "auditkit": {
+          "base": {
+            "evidence_set_recall": 0.889,
+            "citation_support": 0.527,
+            "abstention": 0.93,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.0,
+            "agent_loop_detection": 1.0
+          },
+          "main": {
+            "evidence_set_recall": 0.889,
+            "citation_support": 0.962,
+            "abstention": 0.923,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.028,
+            "agent_loop_detection": 0.972
+          },
+          "candA": {
+            "evidence_set_recall": 0.889,
+            "citation_support": 0.992,
+            "abstention": 0.965,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.0,
+            "agent_loop_detection": 1.0
+          },
+          "control": {
+            "evidence_set_recall": 0.889,
+            "citation_support": 0.977,
+            "abstention": 0.93,
+            "tool_call_validity": 1.0,
+            "redundant_tool_calls": 0.048,
+            "agent_loop_detection": 0.944
+          }
+        }
+      }
+    },
+    "pooled": {
+      "ends_well": {
+        "base": {
+          "k": 89,
+          "n": 1131,
+          "value": 0.079
+        },
+        "main": {
+          "k": 564,
+          "n": 1131,
+          "value": 0.499
+        },
+        "candA": {
+          "k": 619,
+          "n": 1131,
+          "value": 0.547
+        },
+        "control": {
+          "k": 331,
+          "n": 1131,
+          "value": 0.293
+        }
+      },
+      "paired": {
+        "main vs base": {
+          "n_episodes": 1131,
+          "n_questions": 488,
+          "before": 0.079,
+          "after": 0.499,
+          "difference": 0.42,
+          "ci95": [
+            0.386,
+            0.453
+          ],
+          "after_only_good": 501,
+          "before_only_good": 26
+        },
+        "main vs candA": {
+          "n_episodes": 1131,
+          "n_questions": 488,
+          "before": 0.547,
+          "after": 0.499,
+          "difference": -0.049,
+          "ci95": [
+            -0.072,
+            -0.026
+          ],
+          "after_only_good": 68,
+          "before_only_good": 123
+        },
+        "main vs control": {
+          "n_episodes": 1131,
+          "n_questions": 488,
+          "before": 0.293,
+          "after": 0.499,
+          "difference": 0.206,
+          "ci95": [
+            0.179,
+            0.234
+          ],
+          "after_only_good": 310,
+          "before_only_good": 77
+        }
+      }
+    }
+  },
+  "cross_suite_deltas_computed": false
+}

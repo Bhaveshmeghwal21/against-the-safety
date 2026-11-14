@@ -1,0 +1,45 @@
+{
+  "episodes": 938,
+  "actor_seconds": 9492.283,
+  "input_tokens": 1711877,
+  "output_tokens": 42946,
+  "model_calls": 1467,
+  "verifier_seconds": 192.79999999999998,
+  "verifier_cases": 851,
+  "by_suite": [
+    {
+      "suite": "squad",
+      "episodes": 385,
+      "actor_seconds": 3997.7400000000002,
+      "input_tokens": 701889,
+      "output_tokens": 17498,
+      "model_calls": 585
+    },
+    {
+      "suite": "hotpot",
+      "episodes": 82,
+      "actor_seconds": 1605.444,
+      "input_tokens": 212525,
+      "output_tokens": 7049,
+      "model_calls": 206
+    },
+    {
+      "suite": "rgb",
+      "episodes": 471,
+      "actor_seconds": 3889.099,
+      "input_tokens": 797463,
+      "output_tokens": 18399,
+      "model_calls": 676
+    }
+  ],
+  "sources_sha256": {
+    "runs/kaggle/evaluation/evidence-order-v369426017/dora-evaluation/eval/dora_bench_r5t_squad/lenient/scores.jsonl": "7e5989d6a1d0b8c2affcc6fdbe7d9a58f11d59aa12d615a1aef25ed4fa9db63c",
+    "runs/kaggle/evaluation/evidence-order-v369426017/dora-evaluation/eval/dora_bench_r5t_hotpot/lenient/scores.jsonl": "b57f2be089a7283d13a4c543f090b4feb0e39cb8ebc6b184063e391ab39b279c",
+    "runs/kaggle/evaluation/evidence-order-v369426017/dora-evaluation/eval/dora_bench_r5t_rgb/lenient/scores.jsonl": "40801c73ce9e1933755a99ba8677ddcf2a3f4fc301f4c7342c2980b197d20b67",
+    "runs/kaggle/evaluation/evidence-order-v369426017/dora-evaluation/verifier/shard0/summary.json": "f9ee2b18d6e00d16feb20fa51f628321bd075aeb28f1ef0d7573e4bc86932d7f",
+    "runs/kaggle/evaluation/evidence-order-v369426017/dora-evaluation/verifier/shard1/summary.json": "7d96e0ee1a6309d6d8be454f48093b346e76912797dff3d8e03eacd7f78fb8bc",
+    "runs/kaggle/evaluation/evidence-order-v369426017/dora-evaluation/verifier/shard2/summary.json": "6a51776cefdc193ce51493dbeb111a3489e308653dcf683e12c7fbc31902b8b1",
+    "runs/kaggle/evaluation/evidence-order-v369426017/dora-evaluation/verifier/shard3/summary.json": "c3426803b37a104162f5763e215c4bad57eb558a820afb0aa028d42205d81727"
+  },
+  "timing_contract": "sum of per-episode batch-amortized generation seconds; verifier sum of shard wording-A seconds"
+}
