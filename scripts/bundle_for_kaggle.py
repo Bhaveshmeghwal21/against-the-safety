@@ -43,6 +43,8 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     zpath = out / "against-the-safety.zip"
     files = [ROOT / f for f in INCLUDE_FILES]
+    if args.development_only:
+        files.append(ROOT / 'research/2026-11-14-round6-preregistration.md')
     for d in INCLUDE_DIRS + (["data/brightpro"] if args.brightpro else []):
         base = ROOT / d
         if args.development_only and d == 'data/bench':
