@@ -71,6 +71,18 @@ Three completed DoRA runs were evaluated on the published 938-input round-5 suit
 
 Training consumed **3.6514 GPU-hours** for original Modal DoRA, **4.1819** for the four-L4 Kaggle parent, and **0.7187 additional GPU-hours** for the continuation (**4.9006 cumulative** with its parent). Four GPUs reduce elapsed training time without necessarily reducing total compute. Dollar figures in the report use explicitly historical GPU-price scenarios, not Kaggle invoices or current quotes; serving measurements are batch-amortized generation time rather than request latency.
 
+<p align="center">
+  <img src="docs/figures/dora_lora_cost_efficiency.svg" alt="Six LoRA and DoRA adapters' repaired macro success alongside available historical serving-cost estimates; costs for candA and the Kaggle parent are not measured" width="920">
+</p>
+
+<sub>Same 938 input episodes, with checkpoint-specific scorer exclusions. T4 serving scenarios use $0.526/GPU-hour; L4 scenarios use the historical $0.7992/GPU-hour rate. Hardware and serving assumptions differ, so these bars do not establish a controlled cost/performance ranking. All systems shown use fail-closed plus the fixed main-LoRA verifier.</sub>
+
+<p align="center">
+  <img src="docs/figures/dora_training_efficiency.svg" alt="Training-loop elapsed minutes and allocated GPU-hours for original Modal DoRA, the four-L4 Kaggle parent, and the evidence-order continuation including its parent" width="920">
+</p>
+
+<sub>The evidence-order lineage includes parent training plus continuation; the continuation alone adds 10.78 minutes on four L4s. Preparation and evaluation are excluded. Generate both figures from the published JSON with <code>python scripts/make_dora_efficiency_figures.py</code>.</sub>
+
 [All previous benchmark comparisons](reports/evidence_order_all_previous_comparison.md) · [README LoRA versus every DoRA run](reports/readme_lora_vs_all_dora.md) · [Cost, throughput and resource efficiency](reports/dora_lora_cost_efficiency.md) · [Verified training and development records](reports/evidence_order_training_data.json).
 
 ## Results

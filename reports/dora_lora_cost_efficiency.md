@@ -2,6 +2,12 @@
 
 Prepared 14 November 2026 from saved reports. Training GPU counts, wall times and tokens are measured records. Dollar amounts below are historical scenarios, not invoices or current pricing.
 
+![LoRA and DoRA performance and serving cost](../docs/figures/dora_lora_cost_efficiency.svg)
+
+![DoRA training elapsed time and total GPU compute](../docs/figures/dora_training_efficiency.svg)
+
+Generate figures from the published snapshots with `python scripts/make_dora_efficiency_figures.py`.
+
 ## Benchmark effectiveness
 
 | Model | Raw macro | FB+V macro | Raw unsupported / hidden |

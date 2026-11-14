@@ -207,6 +207,9 @@ def main():
                 "historical_lora_serving": original["historical_cost_scenario"]["local_t4"],
                 "sources_sha256": {p.relative_to(ROOT).as_posix(): sha(p) for p in source_paths}}
     DEST.with_suffix(".json").write_text(json.dumps(snapshot, indent=2), encoding="utf-8")
+    lines[4:4] = ["![LoRA and DoRA performance and serving cost](../docs/figures/dora_lora_cost_efficiency.svg)", "",
+                  "![DoRA training elapsed time and total GPU compute](../docs/figures/dora_training_efficiency.svg)", "",
+                  "Generate figures from the published snapshots with `python scripts/make_dora_efficiency_figures.py`.", ""]
     DEST.with_suffix(".md").write_text("\n".join(lines), encoding="utf-8")
     print("Cost/efficiency report and compact training/inference source snapshots saved.")
 
