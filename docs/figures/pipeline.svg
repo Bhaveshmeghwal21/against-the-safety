@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="424" viewBox="0 0 820 424" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="820" height="424" fill="#ffffff"/>
+<defs><marker id="head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#6e7781"/></marker></defs>
+<text x="20" y="26" font-size="16" font-weight="600" fill="#1f2328" text-anchor="start" >How one question is answered</text>
+<text x="20" y="46" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >Trained with QLoRA through AgentTune (steps 2 and 3). The two repairs (steps 4 and 5) need no training.</text>
+<rect x="20" y="78" width="140" height="214" rx="8" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1.4"/>
+<text x="90.0" y="100" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle" >1  Question</text>
+<text x="90.0" y="120" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >A user question and</text>
+<text x="90.0" y="135" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >a set of documents,</text>
+<text x="90.0" y="150" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >indexed for search.</text>
+<rect x="176" y="78" width="140" height="214" rx="8" fill="#e8f1fb" stroke="#1565c0" stroke-width="1.4"/>
+<text x="246.0" y="100" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle" >2  Search loop</text>
+<text x="246.0" y="120" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >Tiny Aya calls</text>
+<text x="246.0" y="135" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >search_corpus.</text>
+<text x="246.0" y="150" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >Up to 3 searches, 3</text>
+<text x="246.0" y="165" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >passages each, 800</text>
+<text x="246.0" y="180" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >characters per</text>
+<text x="246.0" y="195" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >passage.</text>
+<rect x="332" y="78" width="140" height="214" rx="8" fill="#e8f1fb" stroke="#1565c0" stroke-width="1.4"/>
+<text x="402.0" y="100" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle" >3  Draft ending</text>
+<text x="402.0" y="120" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >&lt;answer&gt; with chunk</text>
+<text x="402.0" y="135" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >citations,</text>
+<text x="402.0" y="150" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >or &lt;abstain&gt; saying</text>
+<text x="402.0" y="165" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >what is missing.</text>
+<rect x="488" y="78" width="140" height="214" rx="8" fill="#fff4e5" stroke="#ef6c00" stroke-width="1.4"/>
+<text x="558.0" y="100" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle" >4  Fail-closed</text>
+<text x="558.0" y="120" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >A rollout with no</text>
+<text x="558.0" y="135" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >valid ending</text>
+<text x="558.0" y="150" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >(repeated query,</text>
+<text x="558.0" y="165" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >search over budget,</text>
+<text x="558.0" y="180" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >bad format) becomes</text>
+<text x="558.0" y="195" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >a refusal.</text>
+<rect x="644" y="78" width="140" height="214" rx="8" fill="#fff4e5" stroke="#ef6c00" stroke-width="1.4"/>
+<text x="714.0" y="100" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle" >5  Self-check</text>
+<text x="714.0" y="120" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >The same model</text>
+<text x="714.0" y="135" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >reads the question,</text>
+<text x="714.0" y="150" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >the cited passages</text>
+<text x="714.0" y="165" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >and the answer.</text>
+<text x="714.0" y="180" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >The answer is shown</text>
+<text x="714.0" y="195" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >only if</text>
+<text x="714.0" y="210" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >P(SUPPORTED) is at</text>
+<text x="714.0" y="225" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >least 0.5, the</text>
+<text x="714.0" y="240" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >cited passage was</text>
+<text x="714.0" y="255" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >shown, and the</text>
+<text x="714.0" y="270" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >answer text appears</text>
+<text x="714.0" y="285" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >in it.</text>
+<line x1="161" y1="185.0" x2="173" y2="185.0" stroke="#6e7781" stroke-width="1.6" marker-end="url(#head)"/>
+<line x1="317" y1="185.0" x2="329" y2="185.0" stroke="#6e7781" stroke-width="1.6" marker-end="url(#head)"/>
+<line x1="473" y1="185.0" x2="485" y2="185.0" stroke="#6e7781" stroke-width="1.6" marker-end="url(#head)"/>
+<line x1="629" y1="185.0" x2="641" y2="185.0" stroke="#6e7781" stroke-width="1.6" marker-end="url(#head)"/>
+<rect x="326" y="340" width="308" height="46" rx="23" fill="#f6f8fa" stroke="#6e7781" stroke-width="1.4"/>
+<text x="480.0" y="360" font-size="12.5" font-weight="700" fill="#1f2328" text-anchor="middle" >Refusal: the documents don't say</text>
+<text x="480.0" y="376" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >from the model itself, fail-closed, or the self-check</text>
+<rect x="652" y="340" width="132" height="46" rx="23" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.4"/>
+<text x="718.0" y="360" font-size="12.5" font-weight="700" fill="#2e7d32" text-anchor="middle" >Answer with</text>
+<text x="718.0" y="376" font-size="12.5" font-weight="700" fill="#2e7d32" text-anchor="middle" >citations</text>
+<line x1="402.0" y1="293" x2="402.0" y2="337" stroke="#6e7781" stroke-width="1.6" marker-end="url(#head)"/>
+<line x1="558.0" y1="293" x2="558.0" y2="337" stroke="#6e7781" stroke-width="1.6" marker-end="url(#head)"/>
+<line x1="672" y1="293" x2="620" y2="337" stroke="#6e7781" stroke-width="1.6" marker-end="url(#head)"/>
+<line x1="738.0" y1="293" x2="738.0" y2="337" stroke="#2e7d32" stroke-width="1.6" marker-end="url(#head)"/>
+<text x="20" y="408" font-size="11" font-weight="400" fill="#57606a" text-anchor="start" >Steps 2 and 3 are one trained LoRA adapter on Tiny Aya Global; steps 4 and 5 are code.</text>
+</svg>

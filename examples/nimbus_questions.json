@@ -1,0 +1,50 @@
+[
+  {
+    "kind": "ordinary",
+    "question": "How many seconds do I hold the reset pin to factory reset the Nimbus Hub H2?",
+    "expected": "8",
+    "note": "One passage holds the answer."
+  },
+  {
+    "kind": "ordinary",
+    "question": "What type of batteries does the Nimbus Lock L1 use?",
+    "expected": "4 AA alkaline batteries",
+    "note": "One passage holds the answer."
+  },
+  {
+    "kind": "dated",
+    "question": "How many months is the Lock L1 body covered by the warranty?",
+    "expected": "24",
+    "note": "An older edition of the policy is also in the documents; the current one should win."
+  },
+  {
+    "kind": "dated",
+    "question": "How many days do I have to return a Cam C3?",
+    "expected": "45",
+    "note": "An older edition of the policy is also in the documents; the current one should win."
+  },
+  {
+    "kind": "two_doc",
+    "question": "Does the local-only mode from hub firmware 5.0 stop the Cam C3 from uploading clips to the cloud?",
+    "expected": "yes",
+    "note": "The answer needs two passages. This is the adapter's weakest case."
+  },
+  {
+    "kind": "two_doc",
+    "question": "Which hub firmware release added the protocol that Apple Home uses to connect to the Hub H2?",
+    "expected": "4.2",
+    "note": "The answer needs two passages. This is the adapter's weakest case."
+  },
+  {
+    "kind": "missing",
+    "question": "Which Bluetooth version does the Hub H2 use?",
+    "expected": "refuse: the documents do not say",
+    "note": "No passage holds the answer. A refusal is correct."
+  },
+  {
+    "kind": "missing",
+    "question": "Does the Lock L1 support fingerprint unlocking?",
+    "expected": "refuse: the documents do not say",
+    "note": "No passage holds the answer. A refusal is correct."
+  }
+]

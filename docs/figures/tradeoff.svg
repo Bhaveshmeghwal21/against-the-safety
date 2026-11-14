@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520" viewBox="0 0 800 520" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="800" height="520" fill="#ffffff"/>
+<text x="20" y="26" font-size="16" font-weight="600" fill="#1f2328" text-anchor="start" >More correct answers, or fewer answers when the evidence is missing</text>
+<text x="20" y="46" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >Up and to the left is better. Same sealed round-5 test as the headline chart; hosted models (*) on the 925-episode format-aware rerun.</text>
+<rect x="80.0" y="64.0" width="165.0" height="211.1" fill="#e8f5e9"/>
+<text x="88.0" y="80.0" font-size="11" font-weight="600" fill="#2e7d32" text-anchor="start" >few unsupported answers,</text>
+<text x="88.0" y="94.0" font-size="11" font-weight="600" fill="#2e7d32" text-anchor="start" >many correct ones</text>
+<line x1="80.0" y1="64" x2="80.0" y2="444" stroke="#d0d7de" stroke-width="0.8"/>
+<text x="80.0" y="462" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >0%</text>
+<line x1="245.0" y1="64" x2="245.0" y2="444" stroke="#d0d7de" stroke-width="0.8"/>
+<text x="245.0" y="462" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >20%</text>
+<line x1="410.0" y1="64" x2="410.0" y2="444" stroke="#d0d7de" stroke-width="0.8"/>
+<text x="410.0" y="462" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >40%</text>
+<line x1="575.0" y1="64" x2="575.0" y2="444" stroke="#d0d7de" stroke-width="0.8"/>
+<text x="575.0" y="462" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >60%</text>
+<line x1="740.0" y1="64" x2="740.0" y2="444" stroke="#d0d7de" stroke-width="0.8"/>
+<text x="740.0" y="462" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >80%</text>
+<line x1="80" y1="444.0" x2="740" y2="444.0" stroke="#d0d7de" stroke-width="0.8"/>
+<text x="72" y="448.0" font-size="11" font-weight="400" fill="#57606a" text-anchor="end" >0%</text>
+<line x1="80" y1="359.6" x2="740" y2="359.6" stroke="#d0d7de" stroke-width="0.8"/>
+<text x="72" y="363.55555555555554" font-size="11" font-weight="400" fill="#57606a" text-anchor="end" >20%</text>
+<line x1="80" y1="275.1" x2="740" y2="275.1" stroke="#d0d7de" stroke-width="0.8"/>
+<text x="72" y="279.1111111111111" font-size="11" font-weight="400" fill="#57606a" text-anchor="end" >40%</text>
+<line x1="80" y1="190.7" x2="740" y2="190.7" stroke="#d0d7de" stroke-width="0.8"/>
+<text x="72" y="194.66666666666669" font-size="11" font-weight="400" fill="#57606a" text-anchor="end" >60%</text>
+<line x1="80" y1="106.2" x2="740" y2="106.2" stroke="#d0d7de" stroke-width="0.8"/>
+<text x="72" y="110.22222222222223" font-size="11" font-weight="400" fill="#57606a" text-anchor="end" >80%</text>
+<text x="410.0" y="486" font-size="12" font-weight="400" fill="#1f2328" text-anchor="middle" >Answers given although the evidence was hidden (share of hidden-evidence episodes; lower is better)</text>
+<text transform="translate(24 254.0) rotate(-90)" font-size="12" fill="#1f2328" text-anchor="middle">Correct and cited (share of answerable episodes)</text>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#1565c0"/></marker></defs>
+<line x1="325.0" y1="237.8" x2="181.4" y2="247.4" stroke="#1565c0" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="249.12499999999997" y="304.66666666666663" font-size="11" font-weight="600" fill="#1565c0" text-anchor="start" >blue arrow: what the two repairs do to the adapter</text>
+<circle cx="698.2" cy="419.8" r="7" fill="#9e9e9e" stroke="#ffffff" stroke-width="1.5"/>
+<text x="688.1999999999999" y="407.8298548996223" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="end" >Tiny Aya base (75%, 6%)</text>
+<circle cx="333.0" cy="237.8" r="7" fill="#81c784" stroke="#ffffff" stroke-width="1.5"/>
+<text x="344.0" y="241.79844961240312" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >main adapter alone (31%, 49%)</text>
+<circle cx="172.4" cy="248.4" r="7" fill="#1565c0" stroke="#ffffff" stroke-width="1.5"/>
+<text x="183.39999999999998" y="266.37288809381835" font-size="11.5" font-weight="600" fill="#1f2328" text-anchor="start" >main + both repairs (11%, 46%)</text>
+<circle cx="168.0" cy="218.9" r="7" fill="#ef6c00" stroke="#ffffff" stroke-width="1.5"/>
+<text x="179.0" y="216.91552375273304" font-size="11.5" font-weight="600" fill="#1f2328" text-anchor="start" >candF1 + both repairs (11%, 53%)</text>
+<circle cx="310.6" cy="114.9" r="7" fill="#8e6bbf" stroke="#ffffff" stroke-width="1.5"/>
+<text x="321.64516129032256" y="118.92626079967857" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >GPT-6 Luna* (28%, 78%)</text>
+<circle cx="253.0" cy="137.1" r="7" fill="#00897b" stroke="#ffffff" stroke-width="1.5"/>
+<text x="263.98387096774195" y="141.0681133212779" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >DeepSeek V4 Flash* (21%, 73%)</text>
+<circle cx="80.0" cy="444.0" r="7" fill="#1f2328" stroke="#ffffff" stroke-width="1.5"/>
+<text x="91.0" y="440.0" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >refuse every question (0%, 0%)</text>
+<text x="20" y="506" font-size="11" font-weight="400" fill="#57606a" text-anchor="start" >Hosted models answer more questions correctly and also answer more often when the evidence is missing. Both axes are annotation-based.</text>
+</svg>

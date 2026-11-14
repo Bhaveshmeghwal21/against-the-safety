@@ -1,4 +1,10 @@
-"""Print the corrected, source-backed submission table."""
+"""Print the two results tables of the README from the saved reports (tests/test_readme_tables.py checks that the README still matches).
+
+  python scripts/make_readme_table.py
+
+Local systems and the refuse-everything line come from reports/reference_policies.json (934 episodes of the sealed round-5 test, scorer v3).
+The hosted models come from reports/fair_rerun.json (925 shared episodes, hosted models told the search limit and answer format).
+"""
 import json
 from pathlib import Path
 
@@ -9,29 +15,35 @@ def load(name):
     return json.loads((ROOT / 'reports' / name).read_text(encoding='utf-8'))
 
 
-def render():
-    reference = load('reference_policies.json')['sealed_r5test']
-    local = load('round5_corrected.json')['systems']
-    azure = load('azure_round5_comparison_corrected.json')['systems']
-    deepseek = load('deepseek_comparison_corrected.json')['systems']
-    entries = [
-        ('Refuses every question', 'always_refuse', None),
-        ('Base Tiny Aya', 'base', local['base']['macro']),
-        ('Main, no repairs', 'main', local['main']['macro']),
-        ('Main with both repairs', 'main+FB+V', local['main+FB+V']['macro']),
-        ('candF1 with both repairs', 'candF1+FB+V', local['candF1+FB+V']['macro']),
-        ('GPT-6 Luna with fail-closed', 'azure_native+FB', azure['azure_native+FB']['macro']),
-        ('DeepSeek V4 Flash with fail-closed', 'azure_deepseek_native+FB', deepseek['azure_deepseek_native+FB']['macro']),
-    ]
-    lines = ['| System | Macro success | Correct and cited, of answerable | Answers on hidden evidence | Answered at all | Correct among answered |',
-             '| --- | ---: | ---: | ---: | ---: | ---: |']
-    pct = lambda value: '—' if value is None else f'{value * 100:.1f}%'
-    for title, key, macro in entries:
-        row = reference[key]
-        lines.append(f"| {title} | {pct(row['macro'] if macro is None else macro)} | {pct(row['supported_correct'])} | "
-                     f"{row['unsupported']}/{row['hidden_n']} | {pct(row['answered_share'])} | {pct(row['correct_among_answered'])} |")
+def pct(value):
+    return 'none' if value is None else f'{value * 100:.1f}%'
+
+
+def results_table():
+    ref = load('reference_policies.json')['sealed_r5test']
+    rows = [('Tiny Aya base', 'base', False), ('Main adapter alone', 'main', False), ('Main + both repairs (submitted)', 'main+FB+V', True),
+            ('candF1 + both repairs (alternative)', 'candF1+FB+V', False), ('Refuse every question', 'always_refuse', False)]
+    lines = ['| System | Macro success | Correct and cited | Answers when evidence was hidden | Correct among answers shown |', '| --- | ---: | ---: | ---: | ---: |']
+    for title, key, bold in rows:
+        r = ref[key]
+        macro, hidden = pct(r['macro']), f"{r['unsupported']} / {r['hidden_n']}"
+        if bold:
+            title, macro, hidden = f'**{title}**', f'**{macro}**', f'**{hidden}**'
+        lines.append(f"| {title} | {macro} | {pct(r['supported_correct'])} | {hidden} | {pct(r['correct_among_answered'])} |")
+    return '\n'.join(lines)
+
+
+def hosted_table():
+    fair = load('fair_rerun.json')['systems']
+    rows = [('Main + both repairs', 'main+FB+V'), ('candF1 + both repairs', 'candF1+FB+V'), ('GPT-6 Luna', 'gpt_fair+FB'), ('DeepSeek V4 Flash', 'deepseek_fair+FB')]
+    lines = ['| System | Macro success | Answered | Correct among answered | Wrong or unsupported shown, of all cases |', '| --- | ---: | ---: | ---: | ---: |']
+    for title, key in rows:
+        r = fair[key]
+        lines.append(f"| {title} | {pct(r['macro'])} | {pct(r['answered_share'])} | {pct(r['correct_among_answered'])} | {pct(r['wrong_or_unsupported_shown_share'])} |")
     return '\n'.join(lines)
 
 
 if __name__ == '__main__':
-    print(render())
+    print(results_table())
+    print()
+    print(hosted_table())

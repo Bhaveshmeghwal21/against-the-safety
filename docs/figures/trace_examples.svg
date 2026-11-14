@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="574" viewBox="0 0 820 574" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="820" height="574" fill="#ffffff"/>
+<text x="20" y="26" font-size="16" font-weight="600" fill="#1f2328" text-anchor="start" >Four recorded episodes of the packaged system</text>
+<text x="20" y="46" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >HotpotQA part of the sealed test, selection rule: the first episode of each kind in file order.</text>
+<rect x="20" y="70" width="390" height="216" rx="8" fill="#ffffff" stroke="#2e7d32" stroke-width="1.6"/>
+<rect x="20" y="70" width="390" height="26" rx="8" fill="#2e7d32"/><rect x="20" y="84" width="390" height="12" fill="#2e7d32"/>
+<text x="32" y="88" font-size="12.5" font-weight="700" fill="#ffffff" text-anchor="start" >Answered with citations</text>
+<text x="32" y="116" font-size="10.5" font-weight="600" fill="#57606a" text-anchor="start" >Question</text>
+<text x="32" y="131" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >Which actress is "Beyond Rangoon" was also in "True Romance"</text>
+<text x="32" y="146" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >and "Ed Wood?"</text>
+<text x="32" y="166" font-size="10.5" font-weight="600" fill="#57606a" text-anchor="start" >Searches</text>
+<text x="32" y="181" font-size="11" font-weight="400" fill="#1f2328" text-anchor="start" >• Which actress is "Beyond Rangoon" was also in "True Romance" ...</text>
+<text x="32" y="196" font-size="11" font-weight="400" fill="#1f2328" text-anchor="start" >• Patricia Arquette</text>
+<text x="32" y="216" font-size="11.5" font-weight="600" fill="#2e7d32" text-anchor="start" >Answer: Patricia Arquette   (P(SUPPORTED) 0.94)</text>
+<text x="32" y="231" font-size="11" font-weight="400" fill="#57606a" text-anchor="start" >Cited: Beyond Rangoon; Patricia Arquette</text>
+<text x="32" y="274" font-size="10.5" font-weight="400" fill="#57606a" text-anchor="start" >Reference answer (not shown to the model): Patricia Arquette</text>
+<rect x="430" y="70" width="390" height="216" rx="8" fill="#ffffff" stroke="#6e7781" stroke-width="1.6"/>
+<rect x="430" y="70" width="390" height="26" rx="8" fill="#6e7781"/><rect x="430" y="84" width="390" height="12" fill="#6e7781"/>
+<text x="442" y="88" font-size="12.5" font-weight="700" fill="#ffffff" text-anchor="start" >Refused: evidence hidden from search</text>
+<text x="442" y="116" font-size="10.5" font-weight="600" fill="#57606a" text-anchor="start" >Question</text>
+<text x="442" y="131" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >What was the rank of the leader of the army defeated by West</text>
+<text x="442" y="146" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >Saxon forces?</text>
+<text x="442" y="166" font-size="10.5" font-weight="600" fill="#57606a" text-anchor="start" >Searches</text>
+<text x="442" y="181" font-size="11" font-weight="400" fill="#1f2328" text-anchor="start" >• What was the rank of the leader of the army defeated by West ...</text>
+<text x="442" y="196" font-size="11" font-weight="400" fill="#1f2328" text-anchor="start" >• King Ethelred</text>
+<text x="442" y="211" font-size="11" font-weight="400" fill="#1f2328" text-anchor="start" >• rank leader army defeated West Saxon forces</text>
+<text x="442" y="231" font-size="11.5" font-weight="600" fill="#1f2328" text-anchor="start" >The model said the documents did not hold the answer.</text>
+<text x="442" y="274" font-size="10.5" font-weight="400" fill="#57606a" text-anchor="start" >Reference answer (not shown to the model): commanders of the Great Army</text>
+<rect x="20" y="302" width="390" height="216" rx="8" fill="#ffffff" stroke="#ef6c00" stroke-width="1.6"/>
+<rect x="20" y="302" width="390" height="26" rx="8" fill="#ef6c00"/><rect x="20" y="316" width="390" height="12" fill="#ef6c00"/>
+<text x="32" y="320" font-size="12.5" font-weight="700" fill="#ffffff" text-anchor="start" >Answer withheld by the self-check</text>
+<text x="32" y="348" font-size="10.5" font-weight="600" fill="#57606a" text-anchor="start" >Question</text>
+<text x="32" y="363" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >Is Rice University or Stanford University further west?</text>
+<text x="32" y="383" font-size="10.5" font-weight="600" fill="#57606a" text-anchor="start" >Searches</text>
+<text x="32" y="398" font-size="11" font-weight="400" fill="#1f2328" text-anchor="start" >• Is Rice University or Stanford University further west?</text>
+<text x="32" y="413" font-size="11" font-weight="400" fill="#1f2328" text-anchor="start" >• Stanford University</text>
+<text x="32" y="433" font-size="11.5" font-weight="600" fill="#ef6c00" text-anchor="start" >Answer withheld: P(SUPPORTED) 0.16 is below 0.5</text>
+<text x="32" y="506" font-size="10.5" font-weight="400" fill="#57606a" text-anchor="start" >Reference answer (not shown to the model): Stanford University</text>
+<rect x="430" y="302" width="390" height="216" rx="8" fill="#ffffff" stroke="#ef6c00" stroke-width="1.6"/>
+<rect x="430" y="302" width="390" height="26" rx="8" fill="#ef6c00"/><rect x="430" y="316" width="390" height="12" fill="#ef6c00"/>
+<text x="442" y="320" font-size="12.5" font-weight="700" fill="#ffffff" text-anchor="start" >Refused by the fail-closed rule</text>
+<text x="442" y="348" font-size="10.5" font-weight="600" fill="#57606a" text-anchor="start" >Question</text>
+<text x="442" y="363" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >Double Dragon starred the actor and martial artist who played</text>
+<text x="442" y="378" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >which character in "Brotherhood of the Wolf"?</text>
+<text x="442" y="398" font-size="10.5" font-weight="600" fill="#57606a" text-anchor="start" >Searches</text>
+<text x="442" y="413" font-size="11" font-weight="400" fill="#1f2328" text-anchor="start" >• Double Dragon starred the actor and martial artist who played...</text>
+<text x="442" y="428" font-size="11" font-weight="400" fill="#1f2328" text-anchor="start" >• Double Dragon starred actor martial artist played character B...</text>
+<text x="442" y="448" font-size="11.5" font-weight="600" fill="#ef6c00" text-anchor="start" >No valid ending: repeated query</text>
+<text x="442" y="506" font-size="10.5" font-weight="400" fill="#57606a" text-anchor="start" >Reference answer (not shown to the model): Mani</text>
+<text x="20" y="560" font-size="10.5" font-weight="400" fill="#57606a" text-anchor="start" >Questions come from HotpotQA (CC BY-SA 4.0). The withheld and fail-closed cases do not say whether the model's own answer would have been right.</text>
+</svg>

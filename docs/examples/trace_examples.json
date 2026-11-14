@@ -1,0 +1,70 @@
+[
+  {
+    "kind": "answered",
+    "label": "Answered with citations",
+    "question": "Which actress is \"Beyond Rangoon\" was also in \"True Romance\" and \"Ed Wood?\"",
+    "gold": "Patricia Arquette",
+    "variant": "open",
+    "queries": [
+      "Which actress is \"Beyond Rangoon\" was also in \"True Romance\" and \"Ed Wood\"?",
+      "Patricia Arquette"
+    ],
+    "answer": "Patricia Arquette",
+    "cited": [
+      "Beyond Rangoon",
+      "Patricia Arquette"
+    ],
+    "p_supported": 0.9449946880340576,
+    "reason": "",
+    "model_final": "answer"
+  },
+  {
+    "kind": "refused_hidden",
+    "label": "Refused: evidence hidden from search",
+    "question": "What was the rank of the leader of the army defeated by West Saxon forces?",
+    "gold": "commanders of the Great Army",
+    "variant": "support_masked",
+    "queries": [
+      "What was the rank of the leader of the army defeated by West Saxon forces?",
+      "King Ethelred",
+      "rank leader army defeated West Saxon forces"
+    ],
+    "answer": null,
+    "cited": [],
+    "p_supported": null,
+    "reason": "",
+    "model_final": "abstain"
+  },
+  {
+    "kind": "self_check",
+    "label": "Answer withheld by the self-check",
+    "question": "Is Rice University or Stanford University further west?",
+    "gold": "Stanford University",
+    "variant": "open",
+    "queries": [
+      "Is Rice University or Stanford University further west?",
+      "Stanford University"
+    ],
+    "answer": null,
+    "cited": [],
+    "p_supported": 0.15817435085773468,
+    "reason": "self-check: probability of SUPPORTED 0.16 below 0.5",
+    "model_final": "answer"
+  },
+  {
+    "kind": "fail_closed",
+    "label": "Refused by the fail-closed rule",
+    "question": "Double Dragon starred the actor and martial artist who played which character in \"Brotherhood of the Wolf\"?",
+    "gold": "Mani",
+    "variant": "open",
+    "queries": [
+      "Double Dragon starred the actor and martial artist who played which character in \"Brotherhood of the Wolf\"?",
+      "Double Dragon starred actor martial artist played character Brotherhood Wolf"
+    ],
+    "answer": null,
+    "cited": [],
+    "p_supported": null,
+    "reason": "invalid turn: repeated query",
+    "model_final": "invalid"
+  }
+]

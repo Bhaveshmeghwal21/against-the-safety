@@ -18,6 +18,7 @@ Stages
   train-dpo              fifth round: DPO on the pairs file, candG (from main) on GPU 0 and candH (from candA) on GPU 1; then --jobs
                          system:split[:weight],... for development evaluation (names candG1/candG2/candH1/candH2 = half and full epoch)
   force-r5               round 5b: the system answers at the abstention contexts of round 5 with `<answer>` forced (main on GPU 0, candA on GPU 1)
+  demo                   web demo of the submitted system (scripts/demo_app.py): a smoke run on the example questions, then a public gradio.live link; the link is printed in the log
   check-system           packaging check: src/ragharness/system.py with main's adapter on sealed-test parts, to compare with the offline evaluation
   train-dpo2             round 5b: DPO on the abstention-augmented pairs, candI (from main) and candK (from the round-4 checkpoint candF1); candI1/candI2/candK1/candK2
   train-verifier         round 6: train V2m and V2b concurrently on the two GPUs
@@ -428,6 +429,14 @@ def main() -> None:
              {"CUDA_VISIBLE_DEVICES": str(i % 2)}, f"check_{b.split(':')[0]}.log")
             for i, b in enumerate(benches)
         ])
+    elif stage == "demo":  # web demo of the submitted system: a smoke run on the example questions, then a public gradio link for --minutes (default 50)
+        if "main/adapter" not in adapters:
+            raise SystemExit("demo needs the main adapter")
+        m = re.search(r"--minutes\s+(\S+)", extra)
+        minutes = m.group(1) if m else "50"
+        sh(f"{py} -m pip install -q gradio")
+        sh(f"{py} scripts/demo_app.py --adapter {adapters['main/adapter']} --smoke --out {OUT}/demo/demo_smoke.json", env=g0)
+        rc = run_parallel([(f"{py} scripts/demo_app.py --adapter {adapters['main/adapter']} --share --minutes {minutes}", g0, "demo_live.log")])
     elif stage == "verify-main-r5":  # round 5: the selected checker (main's adapter, wording A) on another cases file, --cases <name under data/processed/verifier>
         m = re.search(r"--cases\s+(\S+)", extra)
         cases = REPO / "data" / "processed" / "verifier" / (m.group(1) if m else "cases_dev.jsonl")

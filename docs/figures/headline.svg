@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="514" viewBox="0 0 820 514" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="820" height="514" fill="#ffffff"/>
+<text x="20" y="26" font-size="16" font-weight="600" fill="#1f2328" text-anchor="start" >Tiny Aya with search, citations and two repairs, against the base model and two hosted models</text>
+<text x="20" y="46" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >Sealed round-5 test, scorer v3. Local rows: 934 episodes. Hosted rows (*): 925 shared episodes, told the search limit and answer format.</text>
+<text x="20" y="92" font-size="13" font-weight="600" fill="#1f2328" text-anchor="start" >Macro success</text>
+<text x="20" y="107" font-size="11" font-weight="400" fill="#57606a" text-anchor="start" >higher is better</text>
+<rect x="20" y="118" width="9.1" height="14" fill="#9e9e9e"/>
+<text x="34.099663006613994" y="130" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >3.1%</text>
+<rect x="20" y="135" width="138.8" height="14" fill="#81c784"/>
+<text x="163.78546265398597" y="147" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >47.9%</text>
+<rect x="20" y="152" width="168.3" height="14" fill="#1565c0"/>
+<text x="193.2709266106119" y="164" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >58.0%</text>
+<rect x="20" y="169" width="185.6" height="14" fill="#ef6c00"/>
+<text x="210.63156820726428" y="181" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >64.0%</text>
+<rect x="20" y="186" width="205.1" height="14" fill="#8e6bbf"/>
+<text x="230.08682303043383" y="198" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >70.7%</text>
+<rect x="20" y="203" width="199.6" height="14" fill="#00897b"/>
+<text x="224.6474791481829" y="215" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >68.8%</text>
+<line x1="141.7" y1="114" x2="141.7" y2="222" stroke="#1f2328" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="145.67237866230784" y="234" font-size="10.5" font-weight="400" fill="#57606a" text-anchor="start" >refusing every question scores 42.0%</text>
+<text x="420" y="92" font-size="13" font-weight="600" fill="#1f2328" text-anchor="start" >Correct and cited answers</text>
+<text x="420" y="107" font-size="11" font-weight="400" fill="#57606a" text-anchor="start" >share of answerable episodes, higher is better</text>
+<rect x="420" y="118" width="16.6" height="14" fill="#9e9e9e"/>
+<text x="441.6010733452594" y="130" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >5.7%</text>
+<rect x="420" y="135" width="141.6" height="14" fill="#81c784"/>
+<text x="566.6279069767442" y="147" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >48.8%</text>
+<rect x="420" y="152" width="134.4" height="14" fill="#1565c0"/>
+<text x="559.3649373881932" y="164" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >46.3%</text>
+<rect x="420" y="169" width="154.6" height="14" fill="#ef6c00"/>
+<text x="579.5974955277281" y="181" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >53.3%</text>
+<rect x="420" y="186" width="226.0" height="14" fill="#8e6bbf"/>
+<text x="651.0216998191681" y="198" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >77.9%</text>
+<rect x="420" y="203" width="210.8" height="14" fill="#00897b"/>
+<text x="635.8137432188065" y="215" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >72.7%</text>
+<text x="20" y="260" font-size="13" font-weight="600" fill="#1f2328" text-anchor="start" >Answers although the evidence was hidden</text>
+<text x="20" y="275" font-size="11" font-weight="400" fill="#57606a" text-anchor="start" >share of hidden-evidence episodes, lower is better</text>
+<rect x="20" y="286" width="217.3" height="14" fill="#9e9e9e"/>
+<text x="242.30666666666664" y="298" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >74.9%  (281/375)</text>
+<rect x="20" y="303" width="88.9" height="14" fill="#81c784"/>
+<text x="113.93333333333332" y="315" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >30.7%  (115/375)</text>
+<rect x="20" y="320" width="32.5" height="14" fill="#1565c0"/>
+<text x="57.480000000000004" y="332" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >11.2%  (42/375)</text>
+<rect x="20" y="337" width="30.9" height="14" fill="#ef6c00"/>
+<text x="55.93333333333334" y="349" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >10.7%  (40/375)</text>
+<rect x="20" y="354" width="81.1" height="14" fill="#8e6bbf"/>
+<text x="106.07526881720429" y="366" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >28.0%  (104/372)</text>
+<rect x="20" y="371" width="60.8" height="14" fill="#00897b"/>
+<text x="85.80645161290323" y="383" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >21.0%  (78/372)</text>
+<text x="420" y="260" font-size="13" font-weight="600" fill="#1f2328" text-anchor="start" >Correct among the answers shown</text>
+<text x="420" y="275" font-size="11" font-weight="400" fill="#57606a" text-anchor="start" >higher is better</text>
+<rect x="420" y="286" width="12.8" height="14" fill="#9e9e9e"/>
+<text x="437.8" y="298" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >4.4%</text>
+<rect x="420" y="303" width="150.5" height="14" fill="#81c784"/>
+<text x="575.5133079847909" y="315" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >51.9%</text>
+<rect x="420" y="320" width="195.1" height="14" fill="#1565c0"/>
+<text x="620.0909090909091" y="332" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >67.3%</text>
+<rect x="420" y="337" width="221.6" height="14" fill="#ef6c00"/>
+<text x="646.5897435897435" y="349" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >76.4%</text>
+<rect x="420" y="354" width="191.7" height="14" fill="#8e6bbf"/>
+<text x="616.70245398773" y="366" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >66.1%</text>
+<rect x="420" y="371" width="196.3" height="14" fill="#00897b"/>
+<text x="621.2626262626263" y="383" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >67.7%</text>
+<line x1="20" y1="418" x2="800" y2="418" stroke="#d0d7de"/>
+<rect x="20" y="428" width="12" height="12" fill="#9e9e9e"/>
+<text x="37" y="438" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >Tiny Aya base</text>
+<rect x="141.2" y="428" width="12" height="12" fill="#81c784"/>
+<text x="158.2" y="438" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >main adapter alone</text>
+<rect x="294.4" y="428" width="12" height="12" fill="#1565c0"/>
+<text x="311.4" y="438" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >main + both repairs (submitted)</text>
+<rect x="530.8" y="428" width="12" height="12" fill="#ef6c00"/>
+<text x="547.8" y="438" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >candF1 + both repairs (alternative)</text>
+<rect x="20" y="448" width="12" height="12" fill="#8e6bbf"/>
+<text x="37" y="458" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >GPT-6 Luna*</text>
+<rect x="128.4" y="448" width="12" height="12" fill="#00897b"/>
+<text x="145.4" y="458" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >DeepSeek V4 Flash*</text>
+<text x="20" y="482" font-size="10.5" font-weight="400" fill="#57606a" text-anchor="start" >Bars in every panel follow the legend order. Hidden-evidence answers are support flags from annotations, not human-checked hallucinations.</text>
+</svg>

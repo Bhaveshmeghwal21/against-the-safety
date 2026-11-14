@@ -1,6 +1,22 @@
 # Experimental history
 
-Historical scorer v1/v2 results follow unchanged in substance. The [13 November remediation](../reports/2026-11-13-evaluation-remediation.md) corrects evidence eligibility, source offsets and later training-data exposure.
+Historical scorer v1/v2 results follow unchanged in substance. The [13 November remediation](../reports/2026-11-13-evaluation-remediation.md) corrects evidence eligibility, source offsets and later training-data exposure. The current numbers are in the [README](../README.md).
+
+## Overview
+
+| Round | What we tried | Outcome | Record |
+| --- | --- | --- | --- |
+| 1 | Main adapter (with refusal examples) against a control (without) | Main adopted | [plan](../research/2026-11-04-fine-tuning-for-rag.md) |
+| 2 | candA and candB: fewer refusal examples | Rule kept main; candA published as an alternative | [plan, sections 20 and 21](../research/2026-11-04-fine-tuning-for-rag.md) |
+| 3 | A SQuAD patch for single-passage and two-part questions | Failed its safety guard | [plan, sections 24 to 26](../research/2026-11-04-fine-tuning-for-rag.md) |
+| 4 | Matched-evidence curriculum (candE, candF) | No checkpoint met the release rules; candF1 kept | [results](../research/2026-11-06-round4-results.md) |
+| 5 | Fail-closed rule and self-check; preference training (DPO) | Repairs adopted; DPO checkpoints stopped abstaining | [pre-registration](../research/2026-11-07-round5-preregistration.md) |
+| 5b | DPO again with abstention pairs added | One eligible checkpoint (candF1) missed the safety bound | [pre-registration](../research/2026-11-07-round5b-preregistration.md) |
+| 6 | Two trained answer checkers (V2m, V2b) and a second look at refusals | No checker passed the development gate; sealed test unopened | [pre-registration](../research/2026-11-14-round6-preregistration.md) |
+
+## Round 1: abstention training works, and costs answers
+
+First-round test split (100 HotpotQA questions, opened once; scorer before the corrections, so read these as historical). The share of episodes that ended well, meaning a supported answer when the documents held it and a refusal when they did not, was 0.020 for the base model, 0.583 for main and 0.404 for the control. Answers given although the evidence was missing: 0.780, 0.098 and 0.268. Main declined 19% of answerable episodes. The control answered more often and never refused; it kept searching until its budget ran out. Figures: [`outcomes_test.svg`](figures/outcomes_test.svg).
 
 ## Round 2: a fresh test split, and an attempt to cut the refusals
 
@@ -244,3 +260,18 @@ The round-5 failure had a specific cause, so the second attempt made a specific 
 **The rule fails.** It needed the macro interval above zero, which holds, and the unsupported-rate difference below zero with an upper bound of at most +0.02. The point estimate is −0.008 and the upper bound is +0.030. **Main with both repairs stays the submitted system.** candF1 with the same repairs is the alternative for a reader who values answers over caution: it answers more correctly (0.323 against 0.275) and its two-part questions improve from 0.394 to 0.527. The data cannot say whether it is safer or less safe than main. Two cautions: candF1 was selected by a gate written after its development results were known, so this is one checkpoint tested once, not a family; and the unsupported counts (34 and 37) are small.
 
 Reports for rounds 5 and 5b: [`round5b_selection.md`](../reports/round5b_selection.md), [`round5b_final.md`](../reports/round5b_final.md) (also holds every round-5 comparison), [`round5_final.md`](../reports/round5_final.md), [`round5_verifier.md`](../reports/round5_verifier.md), [`round5_selection.md`](../reports/round5_selection.md), [`round5_selection_r4cands_with_V.md`](../reports/round5_selection_r4cands_with_V.md), [`round5_rescore_r4.md`](../reports/round5_rescore_r4.md), [`round5_r4test_wrappers.md`](../reports/round5_r4test_wrappers.md), [`round5_pairs.json`](../reports/round5_pairs.json) and [`round5_test_manifest.json`](../reports/round5_test_manifest.json). Narrative: [`research/2026-11-07-round5-results.md`](../research/2026-11-07-round5-results.md).
+
+
+## Round 5b: DPO again, with abstention pairs
+
+The round-5 pairs almost never chose an abstention, so the checkpoints stopped abstaining. Round 5b forced the system to answer at 195 hidden-evidence contexts where it had abstained, and built 163 pairs that choose the abstention and reject the forced answer. With the 335 round-5 pairs that made 498 pairs. candI (from main) and candK (from candF1) trained with the round-5 recipe.
+
+The development gate was replaced before training with seven conditions measured against main with both repairs. We had seen the earlier development table when we wrote it, and candF1 was known to pass, so the selection was not blind. candI restored the model's own abstention (83% and 63% of hidden-evidence episodes at the two epochs) but failed the development gate; candK did not keep abstention (16% to 17%). candF1 was the only eligible checkpoint.
+
+The sealed test was opened once for it. Under the scorer of the time, candF1 with both repairs scored 0.570 macro against 0.517 for main (+0.052, interval +0.021 to +0.085), and its hidden-evidence answer rate was −0.008 against main (interval −0.047 to +0.030). The rule needed the upper end at +0.02 or below, so main stayed. Under scorer v3 the same comparison is +6.0 points macro (+3.0 to +9.2) and −0.5 points (−4.6 to +3.4). Main stays the submitted system and candF1 is the alternative. Record: [pre-registration with three amendments](../research/2026-11-07-round5b-preregistration.md), [`reports/round5b_selection.md`](../reports/round5b_selection.md), [`reports/round5b_final.md`](../reports/round5b_final.md).
+
+## Round 6: trained answer checkers
+
+The existing self-check lets through 37% of the hidden-evidence answers it sees and a large share of wrong answers. We trained two checker adapters on 820 labelled cases (373 questions) from saved rollouts, forced answers, displayed gold support and matched swaps, with 82 validation cases: V2m continues main's adapter and V2b is a fresh LoRA. After seeing the validation results at threshold 0.50, we widened the threshold grid to 0.20 to 0.95 before any development output existed (the amendment says so).
+
+The gate asked for a threshold at which at most 15% of hidden-evidence answers pass while at least 90% of correct and cited answers survive. No threshold of either checker qualified. At 0.95, V2m kept 113 of 173 correct answers and passed 8 of 40 hidden-evidence answers; V2b kept 105 and passed 8. The existing checker is retained and the second look is off. The Round 6 sealed test was built and hashed before any output and has not been opened. Record: [pre-registration with three amendments](../research/2026-11-14-round6-preregistration.md), [`reports/round6_selection.md`](../reports/round6_selection.md).

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="490" viewBox="0 0 820 490" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="820" height="490" fill="#ffffff"/>
+<text x="20" y="26" font-size="16" font-weight="600" fill="#1f2328" text-anchor="start" >What we tried, and what we kept</text>
+<text x="20" y="46" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >Every rule was written down before the data it applied to. Details in docs/HISTORY.md.</text>
+<line x1="20" y1="66" x2="800" y2="66" stroke="#d0d7de" stroke-width="0.8"/>
+<circle cx="34" cy="92" r="6" fill="#1565c0"/>
+<text x="52" y="88" font-size="12.5" font-weight="700" fill="#1f2328" text-anchor="start" >Round 1</text>
+<text x="52" y="104" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >Main adapter, with refusal examples, against a control without them</text>
+<rect x="470" y="75" width="330" height="32" rx="6" fill="#1565c0" fill-opacity="0.12" stroke="#1565c0" stroke-width="1"/>
+<text x="480" y="96" font-size="11" font-weight="600" fill="#1f2328" text-anchor="start" >Adopted: main</text>
+<line x1="20" y1="116" x2="800" y2="116" stroke="#d0d7de" stroke-width="0.8"/>
+<circle cx="34" cy="142" r="6" fill="#ef6c00"/>
+<text x="52" y="138" font-size="12.5" font-weight="700" fill="#1f2328" text-anchor="start" >Round 2</text>
+<text x="52" y="154" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >candA: fewer refusal examples in training</text>
+<rect x="470" y="125" width="330" height="32" rx="6" fill="#ef6c00" fill-opacity="0.12" stroke="#ef6c00" stroke-width="1"/>
+<text x="480" y="140" font-size="11" font-weight="600" fill="#1f2328" text-anchor="start" >Alternative: fewer refusals, more unsupported</text>
+<text x="480" y="153" font-size="11" font-weight="400" fill="#1f2328" text-anchor="start" >answers</text>
+<line x1="20" y1="166" x2="800" y2="166" stroke="#d0d7de" stroke-width="0.8"/>
+<circle cx="34" cy="192" r="6" fill="#b42318"/>
+<text x="52" y="188" font-size="12.5" font-weight="700" fill="#1f2328" text-anchor="start" >Round 3</text>
+<text x="52" y="204" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >A SQuAD patch for single-passage and two-part questions</text>
+<rect x="470" y="175" width="330" height="32" rx="6" fill="#b42318" fill-opacity="0.12" stroke="#b42318" stroke-width="1"/>
+<text x="480" y="190" font-size="11" font-weight="600" fill="#1f2328" text-anchor="start" >Rejected: failed its safety guard (6 to 31</text>
+<text x="480" y="203" font-size="11" font-weight="400" fill="#1f2328" text-anchor="start" >unsupported SQuAD answers of 109)</text>
+<line x1="20" y1="216" x2="800" y2="216" stroke="#d0d7de" stroke-width="0.8"/>
+<circle cx="34" cy="242" r="6" fill="#ef6c00"/>
+<text x="52" y="238" font-size="12.5" font-weight="700" fill="#1f2328" text-anchor="start" >Round 4</text>
+<text x="52" y="254" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >Matched-evidence curriculum (candE, candF)</text>
+<rect x="470" y="225" width="330" height="32" rx="6" fill="#ef6c00" fill-opacity="0.12" stroke="#ef6c00" stroke-width="1"/>
+<text x="480" y="240" font-size="11" font-weight="600" fill="#1f2328" text-anchor="start" >No checkpoint met the release rules; candF1 kept as</text>
+<text x="480" y="253" font-size="11" font-weight="400" fill="#1f2328" text-anchor="start" >an alternative</text>
+<line x1="20" y1="266" x2="800" y2="266" stroke="#d0d7de" stroke-width="0.8"/>
+<circle cx="34" cy="292" r="6" fill="#1565c0"/>
+<text x="52" y="288" font-size="12.5" font-weight="700" fill="#1f2328" text-anchor="start" >Round 5</text>
+<text x="52" y="304" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >Fail-closed rule and self-check on the output</text>
+<rect x="470" y="275" width="330" height="32" rx="6" fill="#1565c0" fill-opacity="0.12" stroke="#1565c0" stroke-width="1"/>
+<text x="480" y="296" font-size="11" font-weight="600" fill="#1f2328" text-anchor="start" >Adopted: macro 47.9% to 58.0%, no retraining</text>
+<line x1="20" y1="316" x2="800" y2="316" stroke="#d0d7de" stroke-width="0.8"/>
+<circle cx="34" cy="342" r="6" fill="#b42318"/>
+<text x="52" y="338" font-size="12.5" font-weight="700" fill="#1f2328" text-anchor="start" >Round 5</text>
+<text x="52" y="354" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >Preference training (DPO) on 335 pairs</text>
+<rect x="470" y="325" width="330" height="32" rx="6" fill="#b42318" fill-opacity="0.12" stroke="#b42318" stroke-width="1"/>
+<text x="480" y="346" font-size="11" font-weight="600" fill="#1f2328" text-anchor="start" >Rejected: the checkpoints stopped abstaining</text>
+<line x1="20" y1="366" x2="800" y2="366" stroke="#d0d7de" stroke-width="0.8"/>
+<circle cx="34" cy="392" r="6" fill="#b42318"/>
+<text x="52" y="388" font-size="12.5" font-weight="700" fill="#1f2328" text-anchor="start" >Round 5b</text>
+<text x="52" y="404" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >DPO again, with abstention pairs added</text>
+<rect x="470" y="375" width="330" height="32" rx="6" fill="#b42318" fill-opacity="0.12" stroke="#b42318" stroke-width="1"/>
+<text x="480" y="390" font-size="11" font-weight="600" fill="#1f2328" text-anchor="start" >Rejected: one eligible checkpoint, candF1, missed</text>
+<text x="480" y="403" font-size="11" font-weight="400" fill="#1f2328" text-anchor="start" >the safety bound</text>
+<line x1="20" y1="416" x2="800" y2="416" stroke="#d0d7de" stroke-width="0.8"/>
+<circle cx="34" cy="442" r="6" fill="#b42318"/>
+<text x="52" y="438" font-size="12.5" font-weight="700" fill="#1f2328" text-anchor="start" >Round 6</text>
+<text x="52" y="454" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >Trained answer checkers V2m and V2b</text>
+<rect x="470" y="425" width="330" height="32" rx="6" fill="#b42318" fill-opacity="0.12" stroke="#b42318" stroke-width="1"/>
+<text x="480" y="446" font-size="11" font-weight="600" fill="#1f2328" text-anchor="start" >Rejected: no threshold met the hidden-evidence limit</text>
+</svg>
