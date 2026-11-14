@@ -25,7 +25,10 @@ PRECISION_MIN = 0.5
 _STOP = set(policy.STOPWORDS) | {"a", "an", "the"}
 
 
-def tokens(text: str) -> list[str]:
+def tokens(text: str, lang: str = "") -> list[str]:
+    if lang:  # multilingual suites (ragharness.textnorm); English keeps the stop-word list below, Spanish and Hindi drop articles only
+        from . import textnorm
+        return textnorm.tokens(text, lang, _STOP if lang == "en" else frozenset())
     return [t for t in metrics._norm_text(text).split() if t not in _STOP]
 
 
@@ -35,7 +38,7 @@ def _overlap(a: list[str], b: list[str]) -> int:
 
 def _precision_v2(pred: str, q) -> tuple[bool, float]:
     """(passes, precision of the prediction against the closest accepted gold form)."""
-    p = tokens(pred)
+    p = tokens(pred, q.lang)
     if not p:
         return False, 0.0
     if q.answer_parts:  # RGB: every part must be present; precision is measured against the union of the matched forms
@@ -49,7 +52,7 @@ def _precision_v2(pred: str, q) -> tuple[bool, float]:
         return prec >= PRECISION_MIN, prec
     best = (-1.0, 0.0)
     for g in [q.answer] + [a for a in q.aliases if a]:
-        gt = tokens(g)
+        gt = tokens(g, q.lang)
         common = _overlap(p, gt)
         prec, rec = common / len(p), (common / len(gt) if gt else 0.0)
         f1 = 2 * prec * rec / (prec + rec) if prec + rec else 0.0
@@ -59,10 +62,15 @@ def _precision_v2(pred: str, q) -> tuple[bool, float]:
 
 def precision_ok(pred: str, q) -> tuple[bool, float]:
     """Preserve exact accepted answers, including binary answers and stopwords."""
-    normalized = metrics._norm_text(pred)
-    literal = evidence.normalize(pred)
+    if q.lang:
+        from . import textnorm
+        norm = lambda s: textnorm.normalize(s, q.lang)
+    else:
+        norm = metrics._norm_text
+    normalized = norm(pred)
+    literal = None if q.lang else evidence.normalize(pred)  # `\w+` splits Devanagari at vowel signs, so Hindi uses `norm` only
     if (literal and any(literal == evidence.normalize(g) for g in (q.answer, *q.aliases) if g)) or (
-            normalized and any(normalized == metrics._norm_text(g) for g in (q.answer, *q.aliases) if g)):
+            normalized and any(normalized == norm(g) for g in (q.answer, *q.aliases) if g)):
         return True, 1.0
     return _precision_v2(pred, q)
 

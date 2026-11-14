@@ -233,7 +233,14 @@ def main() -> None:
             key = ('main' if check == 'V' else check) + '/adapter'
             if key not in adapters:
                 raise SystemExit(f'checker adapter missing: {key}')
-        rc = eval_jobs(py, spec, '--parse lenient --extra-questions 0', adapters)
+        # Multilingual check (research/2026-11-15-multilingual-plan.md): --no-second-look skips the forced second look and its check;
+        # --max-input-tokens N raises the generator's input limit (the default 4096 would cut Hindi prompts).
+        no_second_look = '--no-second-look' in extra
+        limit_match = re.search(r'--max-input-tokens\s+(\d+)', extra)
+        eval_args = '--parse lenient --extra-questions 0' + (f' --max-input-tokens {limit_match.group(1)}' if limit_match else '')
+        if any(item.split(':')[1] == 'bench_xq_hi' for item in spec.split(',')):
+            sh(f'{py} scripts/probe_hindi_index.py')  # the FTS5 tokenizer option must work here, or every Hindi search would come back empty
+        rc = eval_jobs(py, spec, eval_args, adapters)
         if rc:
             raise SystemExit(rc)
         cases = OUT / 'cases'
@@ -241,14 +248,19 @@ def main() -> None:
         systems = ','.join(names)
         sh(f'{py} scripts/build_verifier_cases.py --eval {OUT}/eval --system {systems} --out {cases}/answers.jsonl')
         ctx = cases / 'recover_contexts.jsonl'
-        sh(f'{py} scripts/build_recover_contexts.py --eval {OUT}/eval --system {systems} --out {ctx}')
-        contexts = [json.loads(line) for line in ctx.read_text().splitlines() if line.strip()]
+        contexts = []
+        if not no_second_look:
+            sh(f'{py} scripts/build_recover_contexts.py --eval {OUT}/eval --system {systems} --out {ctx}')
+            contexts = [json.loads(line) for line in ctx.read_text().splitlines() if line.strip()]
         checks_chains = {0: [], 1: []}
         for i, check in enumerate(checks):
             adapter = adapters[('main' if check == 'V' else check) + '/adapter']
             checks_chains[i % 2].append(f'{py} scripts/verify_round5.py --cases {cases}/answers.jsonl --tag {check} --adapter {adapter} --out {OUT}/verify/{check} --wordings A')
         rc = run_parallel([(' && '.join(cmds), {'CUDA_VISIBLE_DEVICES': str(g)}, f'r6_verify_gpu{g}.log') for g, cmds in checks_chains.items() if cmds])
         if rc:
+            raise SystemExit(rc)
+        if no_second_look:
+            print("done; outputs in", OUT, "exit", rc)
             raise SystemExit(rc)
         force_chains = {0: [], 1: []}
         for i, name in enumerate(names):

@@ -59,7 +59,11 @@ def judge_answer(pred: str, q: Question) -> tuple[float, bool, bool]:
     the answer is correct when every part has one of its accepted forms contained in it.
     """
     golds = [q.answer] + [a for a in q.aliases if a]
-    qa = [_answer_scores(pred, g) for g in golds]
+    if q.lang:  # multilingual suites: MLQA-style normalization instead of the English SQuAD metric
+        from . import textnorm
+        qa = [textnorm.f1_em(pred, g, q.lang) for g in golds]
+    else:
+        qa = [_answer_scores(pred, g) for g in golds]
     f1 = max(s[0] for s in qa)
     em = max(s[1] for s in qa)
     if q.answer_parts:

@@ -24,11 +24,20 @@ from pathlib import Path
 from .data import Paragraph, Question, stratified_order
 
 _SENT = re.compile(r"(?<=[.!?])\s+(?=[A-Z0-9\"\u201c(])")
+# Multilingual suites (research/2026-11-15-multilingual-plan.md). Hindi ends a sentence with the danda or double danda; a full stop only
+# counts when a Latin capital, digit or quote follows (it also appears in abbreviations such as "डॉ. स्मिथ"). Spanish adds its inverted openers.
+_SENT_BY_LANG = {
+    "hi": re.compile(r"(?<=[\u0964\u0965!?])\s+|(?<=\.)\s+(?=[A-Z0-9\"\u201c(])"),
+    "es": re.compile(r"(?<=[.!?])\s+(?=[A-Z\u00c1\u00c9\u00cd\u00d3\u00da\u00dc\u00d10-9\"\u201c(\u00bf\u00a1\u00ab])"),
+    "en": _SENT,
+}
 MAX_CHARS = 800  # the per-passage display limit of the search tool
 
 
-def sentences(text: str) -> list[str]:
-    parts = [s.strip() for s in _SENT.split(" ".join(text.split())) if s.strip()]
+def sentences(text: str, lang: str = "") -> list[str]:
+    """Split at sentence ends. `lang` ("hi", "es", "en") picks that language's rule; the default is the original English-only regex."""
+    pattern = _SENT_BY_LANG.get(lang, _SENT)
+    parts = [s.strip() for s in pattern.split(" ".join(text.split())) if s and s.strip()]
     return parts or [text.strip()]
 
 
@@ -127,7 +136,7 @@ def load_musique(jsonl: Path) -> tuple[list[Question], Counter]:
 # ---------------------------------------------------------------- SQuAD 2.0
 
 
-def annotated_span(context: str, answer: str, offset: int):
+def annotated_span(context: str, answer: str, offset: int, lang: str = ""):
     """Map the official source offset through whitespace normalization and splitting."""
     if offset < 0 or context[offset:offset + len(answer)] != answer:
         return None
@@ -142,7 +151,7 @@ def annotated_span(context: str, answer: str, offset: int):
     form = " ".join(answer.split())
     if normalized[start:start + len(form)] != form:
         return None
-    parts = sentences(context)
+    parts = sentences(context, lang)
     cursor = 0
     for i, sentence in enumerate(parts):
         end = cursor + len(sentence)
@@ -196,6 +205,88 @@ def load_squad2(parquet: Path) -> tuple[list[Question], list[Question], Counter]
         used.add((r["context"], kind))
         out.append(q)
     return out, list(corpus_q.values()), rej
+
+
+# ---------------------------------------------------------------- XQuAD (multilingual check)
+
+
+def xquad_passages(parts: list[str], max_chars: int = MAX_CHARS) -> list[list[int]]:
+    """Group consecutive sentence indices into passages whose joined text is at most `max_chars`; a longer sentence stands alone."""
+    groups: list[list[int]] = []
+    length = 0
+    for i, sentence in enumerate(parts):
+        if groups and length + 1 + len(sentence) <= max_chars:
+            groups[-1].append(i)
+            length += 1 + len(sentence)
+        else:
+            groups.append([i])
+            length = len(sentence)
+    return groups
+
+
+def load_xquad(parquet: Path, lang: str) -> tuple[list[Question], list[Question], Counter]:
+    """XQuAD validation in one language (Artetxe et al., 2020; CC BY-SA 4.0): returns (questions, passage holders, rejections).
+
+    Every paragraph is split into passages of at most 800 characters (the search tool's display limit). A passage is titled with its own
+    first eight words, in its own language, so no English title appears in Hindi or Spanish documents. A question's support is the passage
+    holding its official answer; the question is rejected when the answer span crosses a sentence end or is cut by the display limit.
+    """
+    import pyarrow.parquet as pq
+
+    from .retrieval import visible_text
+
+    rows = pq.read_table(parquet).to_pylist()
+    rej: Counter = Counter()
+    by_context: dict[str, list[tuple[Paragraph, int, int]]] = {}  # context -> [(passage, first sentence index, start offset)] in order
+    sentence_passage: dict[str, list[tuple[int, int]]] = {}  # context -> per sentence (passage index, local sentence index)
+    holders: list[Question] = []
+    used_titles: Counter = Counter()
+    for r in rows:
+        ctx = r["context"]
+        if ctx in by_context:
+            continue
+        parts = sentences(ctx, lang)
+        starts, cursor = [], 0
+        for s in parts:
+            starts.append(cursor)
+            cursor += len(s) + 1
+        passages, where = [], [(0, 0)] * len(parts)
+        for pi, group in enumerate(xquad_passages(parts)):
+            title = " ".join(" ".join(parts[i] for i in group).split()[:8])
+            used_titles[title.casefold()] += 1
+            if used_titles[title.casefold()] > 1:
+                rej["title_collision_suffixed"] += 1
+                title = f"{title} ({used_titles[title.casefold()]})"
+            para = Paragraph(title, [parts[i] for i in group])
+            passages.append((para, group[0], starts[group[0]]))
+            for li, i in enumerate(group):
+                where[i] = (pi, li)
+            holders.append(Question(qid=f"ctx-{len(holders)}", question="", answer="", qtype="paragraph", level="dev", paragraphs=[para], lang=lang))
+        by_context[ctx], sentence_passage[ctx] = passages, where
+    out = []
+    for r in rows:
+        texts = [t for t in r["answers"]["text"]]
+        offsets = r["answers"].get("answer_start", [])
+        if not texts or not offsets:
+            rej["no_answer"] += 1
+            continue
+        span = annotated_span(r["context"], texts[0], int(offsets[0]), lang)
+        if span is None:
+            rej["invalid_official_answer_offset"] += 1
+            continue
+        sid, (start, end) = span
+        pi, li = sentence_passage[r["context"]][sid]
+        para, _, passage_start = by_context[r["context"]][pi]
+        local = [start - passage_start, end - passage_start]
+        displayed = visible_text(para.text, MAX_CHARS)
+        if local[1] > len(displayed.removesuffix(" ...")) or para.sentences[li] not in displayed:
+            rej["annotated_answer_beyond_display"] += 1
+            continue
+        aliases = sorted({t.strip() for t in texts[1:] if t.strip()} - {texts[0].strip()})
+        out.append(Question(qid=r["id"], question=r["question"].strip(), answer=texts[0].strip(), qtype="single", level="dev",
+                            paragraphs=[para], support={para.title: [li]}, aliases=aliases, evidence_scope="corpus",
+                            support_spans={para.title: [local]}, lang=lang))
+    return out, holders, rej
 
 
 # ---------------------------------------------------------------- RGB

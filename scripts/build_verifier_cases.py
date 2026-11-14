@@ -22,12 +22,13 @@ def answer_parts(answer: str) -> list[str]:
     return [p.strip() for p in answer.split(";") if p.strip()]
 
 
-def contained(part: str, text: str) -> bool | None:
-    """Every content token of the answer part occurs in the cited text; None when there is nothing to check (yes/no, only stop words)."""
-    toks = rescore.tokens(part)
+def contained(part: str, text: str, lang: str = "") -> bool | None:
+    """Every content token of the answer part occurs in the cited text; None when there is nothing to check (yes/no, only stop words).
+    `lang` ("hi", "en", "es") switches on the multilingual normalization; the default keeps the English-only behaviour."""
+    toks = rescore.tokens(part, lang)
     if not toks or part.strip().lower() in ("yes", "no"):
         return None
-    have = set(rescore.tokens(text))
+    have = set(rescore.tokens(text, lang))
     return all(t in have for t in toks)
 
 
@@ -58,7 +59,7 @@ def main() -> None:
                 passages = render_observation(hits, frozenset(), 800) if hits else ""
                 cited_text = " ".join(visible_text(corp.chunk(c)["text"], 800) for c in seen)
                 parts = answer_parts(t["final"]["answer"] or "")
-                missing = [p for p in parts if contained(p, cited_text) is False]
+                missing = [p for p in parts if contained(p, cited_text, q.lang) is False]
                 cases.append({
                     "run": run, "world": kind, "qid": t["qid"], "variant": t["variant"], "question": t["question"], "answer": t["final"]["answer"],
                     "citations": cited, "passages": passages,

@@ -133,3 +133,24 @@ GPT-6 Luna and DeepSeek V4 Flash on `xq_hi` only, with the existing format-aware
 2. The Kaggle run on account 1, about 2.5 GPU-hours.
 3. Optional: the hosted Hindi comparison, about $1.
 4. Republishing the Hugging Face cards at the end with the results.
+
+## 14. Amendments made before any model ran on these questions (15 November 2026, about 04:00 IST)
+
+The data was built and the CPU checks of section 8 were run first. They changed four things, all decided before the Kaggle launch. Each is labelled here so it can be told apart from the original plan.
+
+1. **Prompt limit raised from 4,096 to 8,000 tokens, for all three languages and both systems.** Check 3 failed for Hindi. The Tiny Aya tokenizer needs a median 432 tokens for a Hindi passage, against 128 in English and 139 in Spanish (the passages have about the same length in characters, 606, 605 and 615). The worst-case Hindi prompt is 7,058 tokens, against 3,106 for English and 3,377 for Spanish. With the old limit the generator would cut the oldest tokens, which are the system prompt, and the run would measure the input limit instead of Hindi. Tiny Aya supports about 8K tokens of context, so 8,000 input tokens plus the 160 new tokens stay inside it. English and Spanish prompts never exceed 3,377 tokens, so their runs are unaffected. The number of truncated prompts is reported; we expect 0. Run option: `--max-input-tokens 8000`.
+2. **The language tag defaults to empty, not `en`.** An empty tag keeps the old English-only code path, byte for byte. XQuAD English carries the tag `en`, so all three languages are scored with the same rule. The plan's table said "default `en`"; that would have sent XQuAD English down the old path.
+3. **Scoring normalization, stated exactly.** It follows the official XQuAD/MLQA script: lower-case, remove every Unicode punctuation character and every ASCII punctuation character, remove the language's articles, collapse white space, then compare white-space-separated tokens (F1 and exact match). Two additions to section 5: Unicode NFC, and Devanagari digits read as ASCII digits. The Hindi gold answers use ASCII digits throughout (checked: 0 of 1,190 use Devanagari digits, 246 contain ASCII digits), so the digit mapping only protects against a model answering in Devanagari digits. The old `\w`-based exact-match shortcut is not used for tagged questions, because `\w` splits Devanagari words at vowel signs.
+4. **Passage counts.** The plan expected Hindi to have more passages than the other languages. It has fewer: 328 for Hindi, 339 for English and 377 for Spanish, because the Hindi text is not longer in characters than the English across all 240 paragraphs; only the first paragraph is.
+
+Results of the checks of section 8, recorded in `reports/xquad_checks.json` and `reports/xquad_selection.json`:
+
+- Selection: 1,190 questions per language; 1,159 are valid in all three languages; 25 of those were already in `squad2` or `r3t_squad2` and were removed; 1,134 remained; 300 were drawn across all 48 articles. Hindi rejected 15 questions for an invalid offset and 3 because the answer sits beyond the display limit; English and Spanish rejected 19 each for an invalid offset.
+- Check 1 (English unchanged): 177 existing tests pass, and `remediate_audit.py` prints `sealed hashes 11 / 11`.
+- Check 2 (search reaches the evidence): the oracle reaches the answer passage within three searches in 95.0% of Hindi questions (285 of 300), 98.3% of English (295) and 95.0% of Spanish (285). All are above the 80% bar, so no search fix was needed. The very first search, with the question as the query, already has the answer passage in its top three for 94.7%, 97.0% and 94.7%. No passage title is shared by two passages, so every hidden-evidence episode for a reachable question is kept: 285, 295 and 285.
+- Check 3: Hindi fails the old 4,096-token limit (amendment 1). English and Spanish pass.
+- Check 4: a Hindi query returns Hindi passages from the Hindi index, with the answer passage in the top three. The same probe runs at the start of the Kaggle kernel and stops the run if it fails there.
+
+Consequences for the numbers: the episodes that count are the oracle-reachable questions of each language. The Hindi-versus-English and Hindi-versus-Spanish comparisons use the questions that are reachable in both languages of the pair, and the report states how many.
+
+The hosted Hindi comparison of section 11 will be run only if its cost, recomputed from the Hindi prompt sizes, stays within about $1.5; otherwise it is skipped and the Article says so.

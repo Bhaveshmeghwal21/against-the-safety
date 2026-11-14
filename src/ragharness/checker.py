@@ -25,16 +25,17 @@ def answer_parts(answer: str) -> list[str]:
     return [p.strip() for p in answer.split(";") if p.strip()]
 
 
-def contained(part: str, text: str) -> bool | None:
-    """Every content token of the answer part occurs in the cited text; None when there is nothing to check (yes/no, only stop words)."""
-    toks = rescore.tokens(part)
+def contained(part: str, text: str, lang: str = "") -> bool | None:
+    """Every content token of the answer part occurs in the cited text; None when there is nothing to check (yes/no, only stop words).
+    `lang` ("hi", "en", "es") switches on the multilingual normalization; the default keeps the English-only behaviour."""
+    toks = rescore.tokens(part, lang)
     if not toks or part.strip().lower() in ("yes", "no"):
         return None
-    have = set(rescore.tokens(text))
+    have = set(rescore.tokens(text, lang))
     return all(t in have for t in toks)
 
 
-def deterministic_flags(answer: str, citations: list[str], shown: list[Hit], max_chars: int | None = 800) -> dict:
+def deterministic_flags(answer: str, citations: list[str], shown: list[Hit], max_chars: int | None = 800, lang: str = "") -> dict:
     """`shown` are the passages the model saw (pre-supplied and retrieved). Returns the flags and the cited passages as the tool rendered them."""
     by_id = {h.chunk_id: h for h in shown}
     cited = list(citations or [])
@@ -43,7 +44,7 @@ def deterministic_flags(answer: str, citations: list[str], shown: list[Hit], max
     hits = [by_id[c] for c in seen]
     passages = render_observation(hits, frozenset(), max_chars) if hits else ""
     cited_text = " ".join(visible_text(h.text, max_chars) for h in hits)
-    missing = [p for p in answer_parts(answer or "") if contained(p, cited_text) is False]
+    missing = [p for p in answer_parts(answer or "") if contained(p, cited_text, lang) is False]
     return {"cites_unshown": bool(unseen) or not seen, "answer_part_absent_from_cited": bool(missing), "absent_parts": missing, "passages": passages}
 
 

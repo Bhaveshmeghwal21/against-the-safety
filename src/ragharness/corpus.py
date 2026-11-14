@@ -79,13 +79,28 @@ def build_corpus(questions: list[Question], seed: int, id_start: int = 0) -> Cor
     return Corpus(chunks=chunks, by_question=by_question, index_hash=digest.hexdigest())
 
 
-def build_index(corpus: Corpus, db_path: Path):
-    """Create a fresh SQLite FTS5 index with AgentTune's backend, OR-semantics BM25 (match_all=False)."""
+def build_index(corpus: Corpus, db_path: Path, tokenizer: str | None = None):
+    """Create a fresh SQLite FTS5 index with AgentTune's backend, OR-semantics BM25 (match_all=False).
+
+    `tokenizer` (multilingual suites only) is an FTS5 tokenizer specification such as `unicode61 categories 'L* N* Co M*'`. The default
+    tokenizer splits Devanagari words at vowel signs. The table is created first with that tokenizer; AgentTune's `CREATE ... IF NOT
+    EXISTS` then leaves it alone, so the search code runs unchanged. With `tokenizer=None` nothing differs from before.
+    """
     from agenttune.rag.retrieval.sqlite_fts import SQLiteFTSBackend
 
     db_path.parent.mkdir(parents=True, exist_ok=True)
     for suffix in ("", "-wal", "-shm", "-journal"):
         Path(str(db_path) + suffix).unlink(missing_ok=True)
+    if tokenizer:
+        import sqlite3
+
+        con = sqlite3.connect(str(db_path))
+        try:
+            con.execute("CREATE TABLE chunks (id INTEGER PRIMARY KEY AUTOINCREMENT, chunk_id TEXT UNIQUE, doc_id TEXT, title TEXT, text TEXT, chunk_index INTEGER)")
+            con.execute(f"CREATE VIRTUAL TABLE chunks_fts USING fts5(title, text, content='chunks', content_rowid='id', tokenize=\"{tokenizer}\")")
+            con.commit()
+        finally:
+            con.close()
     backend = SQLiteFTSBackend(str(db_path), match_all=False)
     backend.index(corpus.chunks)
     return backend

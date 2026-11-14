@@ -48,6 +48,9 @@ class Question:
     natural_unanswerable: bool = False  # SQuAD 2.0: written so the documents do not hold the answer; correct ending is abstain
     evidence_scope: str = "corpus"  # SQuAD labels apply to its original paragraph
     support_spans: dict[str, list[list[int]]] = field(default_factory=dict)  # offsets in normalized paragraph text
+    # Multilingual check (research/2026-11-15-multilingual-plan.md): "hi", "en" or "es" for XQuAD questions, which are normalized,
+    # tokenized and matched by ragharness.textnorm. Empty for every other suite, which keeps its original English-only code path.
+    lang: str = ""
 
     @property
     def support_titles(self) -> list[str]:
