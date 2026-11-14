@@ -14,10 +14,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 import azure_rag_eval as A
 import report_azure_compare as R
 import remediate_audit as audit
+import report_fair_rerun as fair
 from ragharness import protocol
 
 
 class ComparisonTests(unittest.TestCase):
+    def test_fair_report_rejects_wrong_model_or_old_prompt(self):
+        cfg = {'model': A.VERSION, 'mode': 'native', 'search_budget': 3, 'top_k': 3,
+               'passage_chars': 800, 'native_instructions': A.NATIVE_INSTRUCTIONS}
+        fair.validate_fair_config(cfg, A.VERSION)
+        with self.assertRaisesRegex(ValueError, 'native_instructions'):
+            fair.validate_fair_config({**cfg, 'native_instructions': 'old instructions'}, A.VERSION)
+        with self.assertRaisesRegex(ValueError, 'model'):
+            fair.validate_fair_config(cfg, 'another deployment')
+
     def test_reference_matching_keeps_original_order_and_rejects_drift(self):
         def job(qid, variant='open', answerable=True):
             return SimpleNamespace(q=SimpleNamespace(qid=qid), variant=variant,

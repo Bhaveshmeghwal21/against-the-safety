@@ -32,9 +32,18 @@ The refuse-everything row shows why macro success alone can be misleading when m
 
 ## Against hosted models
 
-The saved GPT-6 Luna and DeepSeek V4 Flash native-tool runs used the same retrieval environment, but their prompts omitted the three-search limit and the answer-format details; invalid endings became refusals. They used no verifier and different decoding, so these are provisional comparisons. DeepSeek's corrected shared-set macro exceeds the selected main system. See the [paired comparison](reports/deepseek_comparison_corrected.md).
+In the format-aware rerun, all four systems below use the same 925 eligible episodes. Hosted prompts stated the three-search limit and exact answer format; the adapters learned the format from training. Hosted models used fail-closed handling without V. The systems still differ in decoding and checking, so this is a system comparison.
 
-For 10,000 episodes, the illustrative estimate is $6.30 for the main system's busy T4 time, $2.66 for GPT-6 Luna and $5.57 for DeepSeek. The T4 uses $0.526/hour and assumes perfect utilization; storage, retrieval infrastructure, operations and taxes are excluded. API estimates use recorded token mix and published prices, not invoices. See [GPU and GPT costs](reports/azure_roi.md) and [DeepSeek costs](reports/deepseek_roi.md).
+| System | Macro success | Answered | Correct among answered | Wrong or unsupported shown / all cases |
+| --- | ---: | ---: | ---: | ---: |
+| Main with both repairs | 58.4% | 41.3% | 67.8% | 13.3% |
+| candF1 with both repairs | 64.5% | 42.1% | 76.6% | 9.8% |
+| GPT-6 Luna with fail-closed | 70.7% | 70.5% | 66.1% | 23.9% |
+| DeepSeek V4 Flash with fail-closed | 68.8% | 64.2% | 67.7% | 20.8% |
+
+See the [full comparison](reports/fair_rerun.md).
+
+For 10,000 episodes, the illustrative estimate is $6.30 for the main system's busy T4 time, $2.67 for GPT-6 Luna and $6.09 for DeepSeek. The T4 uses $0.526/hour and assumes perfect utilization; storage, retrieval infrastructure, operations and taxes are excluded. API estimates use the format-aware runs' recorded token mix and earlier published prices, not invoices. See [GPU and GPT costs](reports/azure_roi.md), [DeepSeek costs](reports/deepseek_roi.md), and [format-aware run costs](reports/fair_rerun_cost.json).
 
 ## Try it
 

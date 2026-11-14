@@ -10,7 +10,7 @@ We fine-tuned Tiny Aya Global (3.35B) with QLoRA through AgentTune to make up to
 
 On the opened round-5 evaluation, correct and cited answers on answerable episodes rose from 5.7% for the base model to 46.3% for main with both repairs. Answers given when evidence was hidden fell from 281/375 to 42/375. Of the answers shown by the repaired system, 67.3% counted as correct. Its macro success was 58.0%, compared with 42.0% for a policy that refuses every question.
 
-Preference training did not produce a checkpoint that met the release gate. In saved native-tool runs, GPT-6 Luna and DeepSeek V4 Flash scored 60.4% and 64.9% macro success on their own available cases. Their prompts omitted the search budget and required answer format, and invalid endings were converted to refusals. These comparisons are provisional.
+Preference training did not produce a checkpoint that met the release gate. On 925 shared, previously opened episodes, macro success was 58.4% for main, 64.5% for candF1, 70.7% for GPT-6 Luna and 68.8% for DeepSeek V4 Flash. Correct among answers shown was 67.8%, 76.6%, 66.1% and 67.7%, respectively. Answer coverage and checker settings differed; hosted models were told the search limit and answer format.
 
 The test is English and uses short factual questions. Evidence labels are annotation-based and need human review. Corrected scores were calculated after the test was opened, so further model selection needs a fresh holdout.
 
@@ -50,7 +50,18 @@ The viewer displays saved traces and does not run the model. The GitHub reposito
 
 Corrected scorer v3; hosted macro scores use the respective shared subsets while their remaining columns use each model's own available cases. Macro averages four task components and counts correct refusals as success, so the refuse-everything reference is essential. Coverage and correct-among-answered expose the tradeoff. Hidden-evidence answers are annotation-based support flags, not human-verified hallucinations. The held-out test was opened before the correction, so further selection needs a fresh test.
 
-The hosted prompts in the saved runs omitted the search limit and exact answer format; a fair rerun has been prepared but not performed. Both hosted systems used fail-closed handling without V. The illustrative cost at 10,000 episodes is $6.30 for busy T4 time, $2.66 for GPT-6 Luna and $5.57 for DeepSeek; the GPU assumption is $0.526/hour at perfect utilization, excluding other infrastructure costs.
+In the format-aware rerun, all four systems below use the same 925 eligible episodes. Hosted prompts stated the three-search limit and exact answer format; the adapters learned the format from training. Hosted models used fail-closed handling without V. The systems still differ in decoding and checking, so this is a system comparison.
+
+| System | Macro success | Answered | Correct among answered | Wrong or unsupported shown / all cases |
+| --- | ---: | ---: | ---: | ---: |
+| Main with both repairs | 58.4% | 41.3% | 67.8% | 13.3% |
+| candF1 with both repairs | 64.5% | 42.1% | 76.6% | 9.8% |
+| GPT-6 Luna with fail-closed | 70.7% | 70.5% | 66.1% | 23.9% |
+| DeepSeek V4 Flash with fail-closed | 68.8% | 64.2% | 67.7% | 20.8% |
+
+The full report includes paired clustered-bootstrap intervals.
+
+The illustrative cost at 10,000 episodes is $6.30 for busy T4 time, $2.67 for GPT-6 Luna and $6.09 for DeepSeek; the API estimates use the format-aware runs' recorded token mix and earlier published rates. The GPU assumption is $0.526/hour at perfect utilization, excluding other infrastructure costs.
 
 Training without refusal examples increased coverage but weakened abstention. The reading patch and preference-training checkpoints failed their registered release conditions. Some later preference-training prompts exposed held-out HotpotQA evidence; main and candF1 were trained earlier. The checker blocks some unsupported outputs but also removes correct answers. English factual questions, annotation coverage and small subsets limit generalization.
 

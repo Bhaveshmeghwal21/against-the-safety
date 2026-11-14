@@ -29,6 +29,14 @@ deep = json.loads(read('reports/deepseek_roi.json'))
 local_cost = roi['local']['main+FB+V']['estimated_busy_gpu_usd_per_10000']
 azure_cost = roi['cloud']['native']['estimated_usd_per_10000']
 deep_cost = deep['deepseek_round5']['native']['estimated_usd_per_10000']
+fair_cost_path = ROOT / 'reports/fair_rerun_cost.json'
+if fair_cost_path.exists():
+    fair_cost = json.loads(fair_cost_path.read_text(encoding='utf-8'))
+    azure_cost = fair_cost['gpt_full']['estimated_usd_per_10000']
+    deep_cost = fair_cost['deepseek_full']['estimated_usd_per_10000']
+    cost_basis = 'the format-aware runs\' recorded token mix'
+else:
+    cost_basis = 'the earlier runs\' recorded token mix'
 volume = roi['volume_per_month']
 price = roi['gpu_usd_per_hour']
 table = render()
@@ -63,6 +71,35 @@ else:
     round6_text = ('A fresh checker and second-look experiment is being prepared; it has not yet produced a development result.')
     credits_text = ('A separately preregistered experiment would train an answer checker and test guarded second looks on a fresh holdout.')
     readme_diagnostic = article_diagnostic = ''
+fair_path = ROOT / 'reports/fair_rerun.json'
+if fair_path.exists():
+    fair = json.loads(fair_path.read_text(encoding='utf-8'))
+    def pct(value):
+        return '—' if value is None else f'{100 * value:.1f}%'
+    fair_rows = []
+    for name, label in (('main+FB+V', 'Main with both repairs'),
+                        ('candF1+FB+V', 'candF1 with both repairs'),
+                        ('gpt_fair+FB', 'GPT-6 Luna with fail-closed'),
+                        ('deepseek_fair+FB', 'DeepSeek V4 Flash with fail-closed')):
+        result = fair['systems'][name]
+        fair_rows.append(f"| {label} | {pct(result['macro'])} | {pct(result['answered_share'])} | "
+                         f"{pct(result['correct_among_answered'])} | {pct(result['wrong_or_unsupported_shown_share'])} |")
+    fair_table = ('| System | Macro success | Answered | Correct among answered | Wrong or unsupported shown / all cases |\n'
+                  '| --- | ---: | ---: | ---: | ---: |\n' + '\n'.join(fair_rows))
+    fair_intro = (f"In the format-aware rerun, all four systems below use the same {fair['coverage']['common']} "
+                  'eligible episodes. Hosted prompts stated the three-search limit and exact answer format; '
+                  'the adapters learned the format from training. Hosted models used fail-closed handling without V. '
+                  'The systems still differ in decoding and checking, so this is a system comparison.')
+    readme_hosted = fair_intro + '\n\n' + fair_table + '\n\nSee the [full comparison](reports/fair_rerun.md).'
+    article_hosted = fair_intro + '\n\n' + fair_table + '\n\nThe full report includes paired clustered-bootstrap intervals.'
+else:
+    readme_hosted = ("The saved GPT-6 Luna and DeepSeek V4 Flash native-tool runs used the same retrieval environment, "
+                     "but their prompts omitted the three-search limit and the answer-format details; invalid endings "
+                     "became refusals. They used no verifier and different decoding, so these are provisional "
+                     "comparisons. DeepSeek's corrected shared-set macro exceeds the selected main system. See the "
+                     "[paired comparison](reports/deepseek_comparison_corrected.md).")
+    article_hosted = ('The hosted prompts in the saved runs omitted the search limit and exact answer format; a fair '
+                      'rerun has been prepared but not performed. Both hosted systems used fail-closed handling without V.')
 license_section = old[old.index('## Licenses'):].split('\n---\n')[0] if '## Licenses' in old else ''
 if not license_section:
     raise SystemExit('Cannot find the original license section')
@@ -102,9 +139,9 @@ The refuse-everything row shows why macro success alone can be misleading when m
 
 ## Against hosted models
 
-The saved GPT-6 Luna and DeepSeek V4 Flash native-tool runs used the same retrieval environment, but their prompts omitted the three-search limit and the answer-format details; invalid endings became refusals. They used no verifier and different decoding, so these are provisional comparisons. DeepSeek's corrected shared-set macro exceeds the selected main system. See the [paired comparison](reports/deepseek_comparison_corrected.md).
+{readme_hosted}
 
-For {volume:,} episodes, the illustrative estimate is ${local_cost:.2f} for the main system's busy T4 time, ${azure_cost:.2f} for GPT-6 Luna and ${deep_cost:.2f} for DeepSeek. The T4 uses ${price:.3f}/hour and assumes perfect utilization; storage, retrieval infrastructure, operations and taxes are excluded. API estimates use recorded token mix and published prices, not invoices. See [GPU and GPT costs](reports/azure_roi.md) and [DeepSeek costs](reports/deepseek_roi.md).
+For {volume:,} episodes, the illustrative estimate is ${local_cost:.2f} for the main system's busy T4 time, ${azure_cost:.2f} for GPT-6 Luna and ${deep_cost:.2f} for DeepSeek. The T4 uses ${price:.3f}/hour and assumes perfect utilization; storage, retrieval infrastructure, operations and taxes are excluded. API estimates use {cost_basis} and earlier published prices, not invoices. See [GPU and GPT costs](reports/azure_roi.md), [DeepSeek costs](reports/deepseek_roi.md), and [format-aware run costs](reports/fair_rerun_cost.json).
 
 ## Try it
 
@@ -147,6 +184,23 @@ The evaluation covers English short factual questions. The test has already been
 (ROOT / 'README.md').write_text(readme.rstrip() + '\n', encoding='utf-8')
 
 abstract = read('article/ABSTRACT.md').strip()
+if fair_path.exists():
+    systems = fair['systems']
+    main_fair, cand_fair = systems['main+FB+V'], systems['candF1+FB+V']
+    gpt_fair, deep_fair = systems['gpt_fair+FB'], systems['deepseek_fair+FB']
+    comparison = (f"Preference training did not produce a checkpoint that met the release gate. On "
+                  f"{fair['coverage']['common']} shared, previously opened episodes, macro success was "
+                  f"{pct(main_fair['macro'])} for main, {pct(cand_fair['macro'])} for candF1, "
+                  f"{pct(gpt_fair['macro'])} for GPT-6 Luna and {pct(deep_fair['macro'])} for DeepSeek V4 Flash. "
+                  f"Correct among answers shown was {pct(main_fair['correct_among_answered'])}, "
+                  f"{pct(cand_fair['correct_among_answered'])}, {pct(gpt_fair['correct_among_answered'])} and "
+                  f"{pct(deep_fair['correct_among_answered'])}, respectively. Answer coverage and checker settings "
+                  f"differed; hosted models were told the search limit and answer format.")
+    abstract, count = re.subn(r'Preference training did not produce a checkpoint.*?(?=\n\nThe test is English)',
+                              comparison, abstract, count=1, flags=re.DOTALL)
+    if count != 1:
+        raise SystemExit('Cannot locate the abstract comparison paragraph')
+    (ROOT / 'article/ABSTRACT.md').write_text(abstract + '\n', encoding='utf-8')
 article = f'''# Teaching a small model to search, cite and refuse when evidence is missing
 
 **Team Against-the-safety** · Lexsi AI Safety and Alignment Hackathon · Track 3, PS 4: fine-tuning for RAG
@@ -183,7 +237,9 @@ The viewer displays saved traces and does not run the model. The GitHub reposito
 
 Corrected scorer v3; hosted macro scores use the respective shared subsets while their remaining columns use each model's own available cases. Macro averages four task components and counts correct refusals as success, so the refuse-everything reference is essential. Coverage and correct-among-answered expose the tradeoff. Hidden-evidence answers are annotation-based support flags, not human-verified hallucinations. The held-out test was opened before the correction, so further selection needs a fresh test.
 
-The hosted prompts in the saved runs omitted the search limit and exact answer format; a fair rerun has been prepared but not performed. Both hosted systems used fail-closed handling without V. The illustrative cost at {volume:,} episodes is ${local_cost:.2f} for busy T4 time, ${azure_cost:.2f} for GPT-6 Luna and ${deep_cost:.2f} for DeepSeek; the GPU assumption is ${price:.3f}/hour at perfect utilization, excluding other infrastructure costs.
+{article_hosted}
+
+The illustrative cost at {volume:,} episodes is ${local_cost:.2f} for busy T4 time, ${azure_cost:.2f} for GPT-6 Luna and ${deep_cost:.2f} for DeepSeek; the API estimates use {cost_basis} and earlier published rates. The GPU assumption is ${price:.3f}/hour at perfect utilization, excluding other infrastructure costs.
 
 Training without refusal examples increased coverage but weakened abstention. The reading patch and preference-training checkpoints failed their registered release conditions. Some later preference-training prompts exposed held-out HotpotQA evidence; main and candF1 were trained earlier. The checker blocks some unsupported outputs but also removes correct answers. English factual questions, annotation coverage and small subsets limit generalization.
 

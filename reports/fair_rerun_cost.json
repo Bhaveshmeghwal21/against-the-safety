@@ -1,0 +1,37 @@
+{
+  "gpt_pilot": {
+    "episodes": 60,
+    "blocked": 2,
+    "calls": 173,
+    "input_tokens": 125260,
+    "cached_read_tokens": 11813,
+    "cache_write_tokens": 33747,
+    "output_tokens_including_reasoning": 4686,
+    "estimated_recorded_usd": 0.014649505,
+    "estimated_usd_per_10000": 2.441584166666667
+  },
+  "gpt_full": {
+    "episodes": 938,
+    "blocked": 2,
+    "calls": 2520,
+    "input_tokens": 2650719,
+    "cached_read_tokens": 826112,
+    "cache_write_tokens": 945117,
+    "output_tokens_including_reasoning": 72562,
+    "estimated_recorded_usd": 0.250630745,
+    "estimated_usd_per_10000": 2.6719695628997866
+  },
+  "deepseek_full": {
+    "episodes": 938,
+    "provider_blocked": 1,
+    "recorded_calls": 2768,
+    "input_tokens": 3545882,
+    "cached_input_tokens": 1179392,
+    "reported_cache_write_tokens": 0,
+    "output_tokens": 174326,
+    "recorded_estimate_usd": 0.5715623360000001,
+    "estimated_usd_per_10000": 6.093415095948828
+  },
+  "note": "Estimates use the previously recorded per-token prices, not an Azure invoice. Failed or interrupted unrecorded requests, regional pricing and discounts can differ.",
+  "estimated_recorded_total_usd": 0.836842586
+}
