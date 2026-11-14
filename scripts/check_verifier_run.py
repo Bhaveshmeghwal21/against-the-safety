@@ -7,10 +7,23 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def assess(report):
+def assess(report, expected_name=None):
     errors = []
     if report.get('stand_in') is not False:
         errors.append('not a real GPU training report')
+    memory = report.get('peak_gpu_memory_gb')
+    if not isinstance(memory, (int, float)) or not math.isfinite(memory) or memory <= 0:
+        errors.append('missing or invalid GPU memory measurement')
+    if expected_name:
+        args = report.get('args', {})
+        if report.get('name') != expected_name or args.get('name') != expected_name:
+            errors.append('checker identity does not match')
+        expected_lr = 3e-5 if expected_name == 'V2m' else 1e-4
+        if args.get('lr') != expected_lr or bool(args.get('init_adapter')) != (expected_name == 'V2m'):
+            errors.append('initial adapter or learning rate differs from preregistration')
+        for key, value in (('epochs', 2), ('grad_accum', 8), ('max_length', 2560), ('seed', 61)):
+            if args.get(key) != value:
+                errors.append(f'{key} differs from preregistration')
     epochs = report.get('epochs', [])
     if len(epochs) != 2:
         errors.append('expected two completed epochs')
@@ -34,7 +47,7 @@ def assess(report):
 
 
 def decision(reports):
-    results = {name: assess(reports[name]) for name in ('V2m', 'V2b')}
+    results = {name: assess(reports[name], name) for name in ('V2m', 'V2b')}
     if not all(result['valid'] for result in results.values()):
         status = 'manual_review_invalid_or_incomplete_report'
     elif all(result['final_auroc'] < .86 for result in results.values()):
