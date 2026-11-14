@@ -64,6 +64,25 @@ def read_jsonl(path):
     return [json.loads(line) for line in path.read_text(encoding='utf-8').splitlines() if line.strip()]
 
 
+def reference_ordered_jobs(jobs, refs, *, allow_extra_masked=False):
+    """Match the saved local episodes exactly; never silently omit a reference job."""
+    lookup = {(j.q.qid, j.variant): j for j in jobs}
+    if len(lookup) != len(jobs):
+        raise ValueError('Generated job IDs are not unique')
+    keys = [(r['qid'], r['variant']) for r in refs]
+    if len(set(keys)) != len(keys):
+        raise ValueError('Reference job IDs are not unique')
+    missing, extra = set(keys) - set(lookup), set(lookup) - set(keys)
+    if missing:
+        raise ValueError(f'{len(missing)} reference jobs are missing from the current harness')
+    if extra and (not allow_extra_masked or any(variant != 'support_masked' for _, variant in extra)):
+        raise ValueError(f'{len(extra)} unexpected generated jobs')
+    for row in refs:
+        if bool(row['answerable']) != bool(lookup[(row['qid'], row['variant'])].spec.answerable):
+            raise ValueError('A reference job has a different answerability label')
+    return [lookup[k] for k in keys]
+
+
 def build_jobs(name, reference_eval=None):
     if name.startswith('r6t_') and reference_eval is None:
         raise ValueError('Round 6 requires --reference-eval pointing to the completed local sealed-test eval directory')
@@ -79,13 +98,8 @@ def build_jobs(name, reference_eval=None):
     reference_root = Path(reference_eval) if name.startswith('r6t_') else (R5 if name.startswith('r5t_') else OLD)
     reference = reference_root / f'main_bench_{name}/lenient/scores.jsonl'
     refs = read_jsonl(reference)
-    lookup = {(j.q.qid, j.variant): j for j in jobs}
-    assert len(lookup) == len(jobs) == len(refs), (name, len(jobs), len(refs))
-    keys = [(r['qid'], r['variant']) for r in refs]
-    assert len(set(keys)) == len(keys) and set(keys) == set(lookup), name
-    for row in refs:
-        assert bool(row['answerable']) == bool(lookup[(row['qid'], row['variant'])].spec.answerable)
-    return corp, backend, [lookup[k] for k in keys], protocol.system_prompt(tool)
+    matched = reference_ordered_jobs(jobs, refs, allow_extra_masked=name.startswith('r5t_'))
+    return corp, backend, matched, protocol.system_prompt(tool)
 
 
 class Azure:

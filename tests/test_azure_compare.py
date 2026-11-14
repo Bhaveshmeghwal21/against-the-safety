@@ -3,6 +3,7 @@ import sys
 import tempfile
 import time
 import unittest
+from types import SimpleNamespace
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from pathlib import Path
@@ -17,6 +18,26 @@ from ragharness import protocol
 
 
 class ComparisonTests(unittest.TestCase):
+    def test_reference_matching_keeps_original_order_and_rejects_drift(self):
+        def job(qid, variant='open', answerable=True):
+            return SimpleNamespace(q=SimpleNamespace(qid=qid), variant=variant,
+                                   spec=SimpleNamespace(answerable=answerable))
+        rows = [{'qid': 'b', 'variant': 'open', 'answerable': True},
+                {'qid': 'a', 'variant': 'open', 'answerable': True}]
+        jobs = [job('a'), job('b'), job('a', 'support_masked', False)]
+        matched = A.reference_ordered_jobs(jobs, rows, allow_extra_masked=True)
+        self.assertEqual([j.q.qid for j in matched], ['b', 'a'])
+        with self.assertRaisesRegex(ValueError, 'unexpected generated'):
+            A.reference_ordered_jobs(jobs, rows)
+        with self.assertRaisesRegex(ValueError, 'missing'):
+            A.reference_ordered_jobs(jobs[:1], rows, allow_extra_masked=True)
+        with self.assertRaisesRegex(ValueError, 'not unique'):
+            A.reference_ordered_jobs(jobs + [jobs[0]], rows, allow_extra_masked=True)
+        with self.assertRaisesRegex(ValueError, 'answerability'):
+            A.reference_ordered_jobs(jobs, [{**rows[0], 'answerable': False}, rows[1]], allow_extra_masked=True)
+        with self.assertRaisesRegex(ValueError, 'unexpected generated'):
+            A.reference_ordered_jobs(jobs + [job('a', 'other')], rows, allow_extra_masked=True)
+
     def test_hosted_scoring_preserves_corrected_evidence_decision(self):
         with patch.object(A.metrics, 'score_episode', return_value={'scorer': 'v3', 'good': True, 'evidence_supported_good': True}), \
              patch('ragharness.round4.aspect_coverage', return_value={'all_aspects_cited': False}):

@@ -1,0 +1,26 @@
+{
+  "suites": {
+    "r5t_squad": {
+      "episodes": 385,
+      "searches": 624,
+      "different_searches": 0,
+      "episodes_with_different_search": 0,
+      "different_prefill_episodes": 0
+    },
+    "r5t_hotpot": {
+      "episodes": 82,
+      "searches": 179,
+      "different_searches": 0,
+      "episodes_with_different_search": 0,
+      "different_prefill_episodes": 0
+    },
+    "r5t_rgb": {
+      "episodes": 471,
+      "searches": 524,
+      "different_searches": 0,
+      "episodes_with_different_search": 0,
+      "different_prefill_episodes": 0
+    }
+  },
+  "scope": "Replayed recorded main-model search queries and checked prefill IDs and titles. This cannot establish equivalence on new queries or prove identical masks."
+}
