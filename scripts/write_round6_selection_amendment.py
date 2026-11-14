@@ -61,7 +61,7 @@ def render_amendment(report, selection_sha=None):
             lines.append(f"- {checker}: threshold {row['threshold']:.2f}; correct kept {row['correct_kept']}/{row['correct_total']}; "
                          f"hidden answers passed {row['hidden_passed']}/{row['hidden_total']}; "
                          f"checker gate {'passed' if gate['passes'] else 'failed'}.")
-    lines += ['', f"Selected checker: {chosen or 'none; retain V'}. "]
+    lines += ['', f"Selected checker: {chosen or 'none; retain V'}."]
     if chosen:
         row = recovery['chosen']
         if report['second_look_enabled']:

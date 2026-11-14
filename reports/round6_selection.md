@@ -133,4 +133,3 @@ Diagnostic only, on eligible answers that passed deterministic checks; not a sel
 | 0.85 | 0/4 | 0/0 | 0/7 | 0/4 | 0/1 | 0/3 |
 | 0.90 | 0/4 | 0/0 | 0/7 | 0/4 | 0/1 | 0/3 |
 | 0.95 | 0/4 | 0/0 | 0/7 | 0/4 | 0/1 | 0/3 |
-

@@ -65,7 +65,7 @@ Selection report SHA256: `0d3b185ac4c5f8125784291511577b0cdfb6981baff89e4e6e5d25
 - V2m: no threshold passed the hidden-evidence limit; at 0.95, correct kept 113/173 and hidden answers passed 8/40.
 - V2b: no threshold passed the hidden-evidence limit; at 0.95, correct kept 105/173 and hidden answers passed 8/40.
 
-Selected checker: none; retain V. 
+Selected checker: none; retain V.
 Second look: off; no trained checker passed the development gate.
 
 Yes/no answers are listed separately for each checker and threshold in the selection report; they are diagnostics only and did not change either gate.

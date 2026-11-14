@@ -83,7 +83,3 @@ The evaluation covers English short factual questions. The test has already been
 | Nimbus Home suite | CC BY 4.0 (written by us, fictional) |
 | Benchmark traces | per benchmark, as the source: 2WikiMultihopQA Apache-2.0, MuSiQue CC BY 4.0, SQuAD 2.0 CC BY-SA 4.0, RGB CC BY-NC-SA 4.0 |
 | AgentTune (LSAL v1.1), AuditKIT (LSAL v1.2) | source-available, used as dependencies, not redistributed |
-
-
-
-

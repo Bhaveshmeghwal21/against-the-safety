@@ -197,7 +197,7 @@ def main():
         lines += ['## Second look', '', '| Threshold | Correct added | Hidden added / hidden refusals |', '| ---: | ---: | ---: |']
         for row in recovery[chosen]['thresholds']:
             lines.append(f"| {row['threshold']:.2f} | {row['correct_added']} | {row['hidden_added']}/{row['hidden_total']} |")
-    out.with_suffix('.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+    out.with_suffix('.md').write_text('\n'.join(lines).rstrip() + '\n', encoding='utf-8')
     print(json.dumps({'chosen_checker': chosen, 'second_look_enabled': report['second_look_enabled']}))
 
 

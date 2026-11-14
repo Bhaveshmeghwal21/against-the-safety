@@ -144,7 +144,7 @@ The evaluation covers English short factual questions. The test has already been
 
 {license_section}
 '''
-(ROOT / 'README.md').write_text(readme, encoding='utf-8')
+(ROOT / 'README.md').write_text(readme.rstrip() + '\n', encoding='utf-8')
 
 abstract = read('article/ABSTRACT.md').strip()
 article = f'''# Teaching a small model to search, cite and refuse when evidence is missing
