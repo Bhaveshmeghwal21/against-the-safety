@@ -1,0 +1,35 @@
+{
+  "status": "eligible_for_development_gate",
+  "checkers": {
+    "V2m": {
+      "valid": true,
+      "errors": [],
+      "final_auroc": 0.9262343842950624,
+      "train_rows": 820,
+      "val_rows": 82,
+      "train_dropped_for_length": 0,
+      "val_dropped_for_length": 0
+    },
+    "V2b": {
+      "valid": true,
+      "errors": [],
+      "final_auroc": 0.9405116002379535,
+      "train_rows": 820,
+      "val_rows": 82,
+      "train_dropped_for_length": 0,
+      "val_dropped_for_length": 0
+    }
+  },
+  "adapters": {
+    "V2m": {
+      "valid": true,
+      "errors": [],
+      "weight_tensors": 504
+    },
+    "V2b": {
+      "valid": true,
+      "errors": [],
+      "weight_tensors": 504
+    }
+  }
+}

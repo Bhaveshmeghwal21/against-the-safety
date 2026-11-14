@@ -1,0 +1,42 @@
+{
+  "name": "V2m",
+  "stand_in": false,
+  "train_rows": 820,
+  "val_rows": 82,
+  "train_dropped_for_length": 0,
+  "val_dropped_for_length": 0,
+  "peak_gpu_memory_gb": 5.183265686035156,
+  "epochs": [
+    {
+      "rows": 82,
+      "auroc": 0.9199881023200476,
+      "supported_kept_at_0_5": 0.8536585365853658,
+      "unsupported_passed_at_0_5": 0.07317073170731707,
+      "epoch": 1,
+      "train_loss": 0.40971090250610226,
+      "seconds": 1492.9
+    },
+    {
+      "rows": 82,
+      "auroc": 0.9262343842950624,
+      "supported_kept_at_0_5": 0.8536585365853658,
+      "unsupported_passed_at_0_5": 0.07317073170731707,
+      "epoch": 2,
+      "train_loss": 0.16851685738179434,
+      "seconds": 1503.5
+    }
+  ],
+  "args": {
+    "cases": "/tmp/repo/data/processed/verifier/train_v2.jsonl",
+    "val": "/tmp/repo/data/processed/verifier/val_v2.jsonl",
+    "out": "/kaggle/working/out/V2m",
+    "name": "V2m",
+    "init_adapter": "/tmp/repo/initial_adapters/main/adapter",
+    "lr": 3e-05,
+    "epochs": 2,
+    "grad_accum": 8,
+    "max_length": 2560,
+    "seed": 61,
+    "stand_in": false
+  }
+}
