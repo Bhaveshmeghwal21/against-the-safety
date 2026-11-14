@@ -1,11 +1,12 @@
 """Report a completed Round 6 test after the committed development selection.
 
 This script does not start a model or change the registered test. It refuses to
-read test outputs until Amendment 2 and the exact selection report are committed.
+read test outputs until Amendment 3 (development selection) and the exact selection report are committed.
 """
 import argparse
 import json
 import math
+import re
 import subprocess
 from pathlib import Path
 
@@ -31,8 +32,8 @@ def committed_selection(path):
         if result.returncode:
             raise ValueError(f'Not committed at HEAD: {name}')
         return result.stdout.decode('utf-8').replace('\r\n', '\n')
-    if '## Amendment 2' not in committed(prereg):
-        raise ValueError('Commit the preregistration Amendment 2 before reading test outputs')
+    if not re.search(r'(?mi)^## Amendment 3:\s*development selection\s*$', committed(prereg)):
+        raise ValueError('Commit the preregistration Amendment 3: development selection before reading test outputs')
     saved = committed(rel)
     if saved != path.read_text(encoding='utf-8').replace('\r\n', '\n'):
         raise ValueError('The local development selection differs from the committed selection')

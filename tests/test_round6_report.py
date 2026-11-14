@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from scripts.report_round6 import checked
+from scripts.report_round6 import checked, committed_selection
 
 
 def row(answerable=True):
@@ -29,3 +29,12 @@ def test_deterministic_rejection_never_needs_a_probability():
     assert checked(row(), case(missing=True), None, .5)['outcome_v3'] == 'false_abstain'
     with pytest.raises(ValueError, match='probability'):
         checked(row(), case(), None, .5)
+
+
+def test_grid_amendment_does_not_unlock_sealed_test(monkeypatch):
+    from types import SimpleNamespace
+    from scripts import report_round6
+    monkeypatch.setattr(report_round6.subprocess, 'run', lambda *a, **kw: SimpleNamespace(
+        returncode=0, stdout=b'## Amendment 2: threshold-grid revision\n'))
+    with pytest.raises(ValueError, match='Amendment 3'):
+        committed_selection(report_round6.ROOT / 'reports/round6_selection.json')

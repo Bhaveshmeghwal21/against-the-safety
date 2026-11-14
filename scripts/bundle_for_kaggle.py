@@ -18,6 +18,16 @@ OUT = ROOT / "runs" / "kaggle_bundle"
 INCLUDE_DIRS = ["src", "scripts", "tests", "kaggle", "data/manifests", "data/processed", "data/index", "data/product", "data/bench", "reports"]
 INCLUDE_FILES = ["pyproject.toml", "requirements-gpu.lock.txt", "requirements-cpu.lock.txt", "README.md"]
 SKIP = ("__pycache__", ".pyc", "tests/fixtures", "trajectories.sqlite")
+SEALED_REPORTS = {"reports/round6_test_manifest.json", "reports/round6_allocation.json"}
+
+
+def permitted_path(rel, development_only):
+    """Exclude actual Round 6 test inputs and their allocation from a dev bundle."""
+    rel = Path(rel)
+    if not development_only:
+        return True
+    return not (len(rel.parts) >= 3 and rel.parts[:2] == ('data', 'bench') and rel.parts[2].startswith('r6t_')) \
+        and rel.as_posix() not in SEALED_REPORTS
 
 
 def main() -> None:
@@ -25,14 +35,26 @@ def main() -> None:
     ap.add_argument("--out", default=str(OUT))
     ap.add_argument("--adapter", action="append", default=[], help="NAME=local adapter directory; credentials are never included")
     ap.add_argument("--brightpro", action="store_true", help="include the optional evaluation-only full robotics corpus")
+    ap.add_argument('--development-only', action='store_true', help='exclude Round 6 sealed-test inputs and restrict permitted jobs')
     args = ap.parse_args()
-    out = Path(args.out)
+    out = (ROOT / args.out).resolve()
+    if not out.is_relative_to(ROOT.resolve()):
+        raise ValueError('Bundle output must stay within the workspace')
     out.mkdir(parents=True, exist_ok=True)
     zpath = out / "against-the-safety.zip"
     files = [ROOT / f for f in INCLUDE_FILES]
     for d in INCLUDE_DIRS + (["data/brightpro"] if args.brightpro else []):
-        files += [p for p in (ROOT / d).rglob("*") if p.is_file()]
-    files = [p for p in files if not any(s in p.as_posix() for s in SKIP)]
+        base = ROOT / d
+        if args.development_only and d == 'data/bench':
+            # Do not descend into a sealed-test directory at all.
+            for child in base.iterdir():
+                if child.name.startswith('r6t_'):
+                    continue
+                files.extend(p for p in (child.rglob('*') if child.is_dir() else [child]) if p.is_file())
+        else:
+            files += [p for p in base.rglob("*") if p.is_file()]
+    files = [p for p in files if not any(s in p.as_posix() for s in SKIP)
+             and permitted_path(p.relative_to(ROOT), args.development_only)]
     with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
         content = hashlib.sha256()
         for p in sorted(files):
@@ -51,6 +73,10 @@ def main() -> None:
                 rel = f"initial_adapters/{name}/adapter/{filename}"
                 z.write(p, rel)
                 content.update(rel.encode() + b"\0" + hashlib.sha256(p.read_bytes()).digest())
+        if args.development_only:
+            marker = b'Only the preregistered development jobs are permitted.\n'
+            z.writestr('DEVELOPMENT_ONLY', marker)
+            content.update(b'DEVELOPMENT_ONLY\0' + hashlib.sha256(marker).digest())
         # the kernel compares this id with the one it was launched with, so a stale dataset mount fails fast
         z.writestr("BUNDLE_ID", content.hexdigest()[:20])
     digest = hashlib.sha256(zpath.read_bytes()).hexdigest()

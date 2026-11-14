@@ -3,7 +3,36 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from scripts.select_round6 import checker_gate, recovery_gate
+from scripts.select_round6 import THRESHOLDS, binary_diagnostics, checker_gate, recovery_gate
+
+
+def test_checker_grid_starts_at_twenty_percent_and_keeps_gate_boundaries():
+    assert THRESHOLDS == [i / 100 for i in range(20, 100, 5)]
+    correct = [{'answerable': True, 'outcome': 'supported_correct', 'p': .20}] * 9
+    correct += [{'answerable': True, 'outcome': 'supported_correct', 'p': .10}]
+    hidden = [{'answerable': False, 'outcome': 'unsupported_wrong', 'p': .80}] * 3
+    hidden += [{'answerable': False, 'outcome': 'unsupported_wrong', 'p': .10}] * 17
+    result = checker_gate(correct + hidden)
+    assert result['chosen']['threshold'] == .20
+    assert (result['chosen']['correct_kept'], result['chosen']['hidden_passed']) == (9, 3)
+    assert result['passes']  # exactly 90% retained and 15% hidden passed
+
+
+def test_yes_and_no_diagnostics_are_separate_and_do_not_change_gate():
+    rows = [
+        {'answer': 'Yes.', 'answerable': True, 'outcome': 'supported_correct', 'p': .60},
+        {'answer': 'yes', 'answerable': False, 'outcome': 'unsupported_wrong', 'p': .30},
+        {'answer': 'no', 'answerable': True, 'outcome': 'wrong_answer', 'p': .80},
+        {'answer': 'no', 'answerable': False, 'outcome': 'unsupported_wrong', 'p': .10},
+        {'answer': 'yes, perhaps', 'answerable': True, 'outcome': 'wrong_answer', 'p': .90},
+    ]
+    before = checker_gate(rows)
+    diagnostic = binary_diagnostics(rows)
+    yes = next(r for r in diagnostic['yes'] if r['threshold'] == .50)
+    no = next(r for r in diagnostic['no'] if r['threshold'] == .50)
+    assert (yes['correct_kept'], yes['correct_total'], yes['hidden_passed'], yes['hidden_total']) == (1, 1, 0, 1)
+    assert (no['wrong_passed'], no['wrong_total'], no['hidden_passed'], no['hidden_total']) == (1, 1, 0, 1)
+    assert checker_gate(rows) == before
 
 
 def test_checker_uses_first_safe_threshold_then_tests_retention():
@@ -49,7 +78,8 @@ def test_development_selection_uses_only_complete_named_runs(tmp_path, monkeypat
             transcripts.append(row)
             key = {'run': run, 'qid': qid, 'variant': 'open'}
             if kind == 'answer':
-                cases.append({**key, 'passages': 'shown', 'deterministic': {'cites_unshown': False, 'answer_part_absent_from_cited': False}})
+                cases.append({**key, 'answer': 'yes' if answerable else 'no', 'passages': 'shown',
+                              'deterministic': {'cites_unshown': False, 'answer_part_absent_from_cited': False}})
                 verdicts.append({**key, 'p_pos': .9 if answerable else .1})
             else:
                 contexts.append({**key, 'id': run, 'system': run.split('_')[0], 'transcript': row})
@@ -68,3 +98,9 @@ def test_development_selection_uses_only_complete_named_runs(tmp_path, monkeypat
     result = json.loads((tmp_path / 'result.json').read_text(encoding='utf-8'))
     assert result['chosen_checker'] == 'V2m'  # fixed tie break
     assert not result['second_look_enabled']
+    for checker in ('V', 'V2m', 'V2b'):
+        binary = result['binary_answer_diagnostics'][checker]
+        assert binary['yes'][0]['correct_total'] == 4
+        assert binary['no'][0]['hidden_total'] == 4
+    text = (tmp_path / 'result.md').read_text(encoding='utf-8')
+    assert all(f'### {checker}: yes/no answers' in text for checker in ('V', 'V2m', 'V2b'))

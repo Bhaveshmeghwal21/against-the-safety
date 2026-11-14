@@ -44,3 +44,13 @@ Recorded before GPU training. The builder removes held-out matches, deterministi
 - Train: 820 cases, 373 questions; SHA256 `03e2ad66e97f85c13c287ee96d89751a6c38268fb12d671133a0709ecfb62786`.
 - Validation: 82 cases, 41 questions; SHA256 `ccbef53e9c5bde178d2cca72ce1f06184b44774eb6f2bfff599949e99b619d56`.
 - Yes/no cases: 4 train and 0 validation; the validation set cannot establish yes/no performance.
+
+## Amendment 2: threshold-grid revision
+
+Recorded before any Round 6 development-model output existed, after inspecting the final held-out training-validation results at threshold 0.50. V2m kept 85% of positive cases and passed 7% of negative cases; V2b kept 88% and passed 10%, respectively. These are internal validation examples, not the development gate; the validation set contains 0 yes/no examples. The grid change is therefore informed by validation and is not a blind preregistration relative to that validation.
+
+Replace only the checker-gate threshold grid with `{0.20, 0.25, ..., 0.95}`, inclusive, in increments of 0.05. For each checker, choose the smallest threshold at which at most 15% of hidden-evidence answers pass; the checker is eligible only if at least 90% of correct and cited answers are kept at that threshold. The actor pool, deterministic checks, checker tie break, second-look threshold grid and second-look gate are unchanged.
+
+The selection report will also show exact yes and no answers separately for every checker and every checker threshold, among eligible answers that passed deterministic checks. Terminal punctuation is ignored when identifying yes/no. These counts are diagnostic only and do not affect either gate.
+
+The eventual committed development decision will be recorded separately as `## Amendment 3: development selection` along with the exact selection report, before any sealed-test output is opened.

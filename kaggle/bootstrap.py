@@ -140,6 +140,14 @@ def run_parallel(jobs: list[tuple[str, dict, str]]) -> int:
     return worst
 
 
+def development_jobs_only(spec: str) -> bool:
+    """The development-only bundle cannot run any sealed-test job."""
+    allowed = {(actor, split) for actor in ('main', 'candF1') for split in ('bench_r4dev', 'dev')}
+    items = [item.split(':') for item in spec.split(',')]
+    jobs = [(item[0], item[1]) for item in items if len(item) in (2, 3)]
+    return len(jobs) == len(items) == len(allowed) and set(jobs) == allowed
+
+
 def eval_jobs(py: str, spec: str, rest: str, adapters: dict[str, str]) -> int:
     """Round 3 (plan section 24): a list of system:split[:weight] jobs spread over the two GPUs.
 
@@ -214,6 +222,8 @@ def main() -> None:
         if not job_match or not checker_match:
             raise SystemExit('r6-system requires --jobs and --checkers')
         spec = job_match.group(1)
+        if (REPO / 'DEVELOPMENT_ONLY').exists() and not development_jobs_only(spec):
+            raise SystemExit('The development-only bundle permits only the four registered development jobs')
         names = list(dict.fromkeys(item.split(':')[0] for item in spec.split(',')))
         checks = list(dict.fromkeys(checker_match.group(1).split(',')))
         if not set(checks) <= {'V', 'V2m', 'V2b'} or not checks:

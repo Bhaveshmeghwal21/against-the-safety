@@ -8,7 +8,7 @@ import rescore_round5 as RS
 from ragharness import rescore
 
 ALLOWED_RUNS = {'main_bench_r4dev', 'main_dev', 'candF1_bench_r4dev', 'candF1_dev'}
-THRESHOLDS = [i / 100 for i in range(50, 100, 5)]
+THRESHOLDS = [i / 100 for i in range(20, 100, 5)]
 RECOVERY_THRESHOLDS = [i / 100 for i in range(60, 100, 5)]
 
 
@@ -17,22 +17,30 @@ def valid(case):
     return bool(case['passages']) and not flags['cites_unshown'] and not flags['answer_part_absent_from_cited']
 
 
-def checker_gate(cases):
-    """Rows have outcome, answerable, and p; deterministic checks already passed."""
+def threshold_counts(cases, tau):
     correct = [r for r in cases if r['outcome'] == 'supported_correct']
     hidden = [r for r in cases if not r['answerable']]
     wrong = [r for r in cases if r['answerable'] and r['outcome'] != 'supported_correct']
-    table = []
-    for tau in THRESHOLDS:
-        kept = sum(r['p'] >= tau for r in correct)
-        passed = sum(r['p'] >= tau for r in hidden)
-        table.append({'threshold': tau, 'correct_kept': kept, 'correct_total': len(correct),
-                      'hidden_passed': passed, 'hidden_total': len(hidden),
-                      'wrong_passed': sum(r['p'] >= tau for r in wrong), 'wrong_total': len(wrong)})
+    return {'threshold': tau, 'correct_kept': sum(r['p'] >= tau for r in correct), 'correct_total': len(correct),
+            'hidden_passed': sum(r['p'] >= tau for r in hidden), 'hidden_total': len(hidden),
+            'wrong_passed': sum(r['p'] >= tau for r in wrong), 'wrong_total': len(wrong)}
+
+
+def checker_gate(cases):
+    """Rows have outcome, answerable, and p; deterministic checks already passed."""
+    table = [threshold_counts(cases, tau) for tau in THRESHOLDS]
     # Pick the first threshold satisfying the hidden gate, then apply the retention gate there.
     chosen = next((r for r in table if r['hidden_total'] and r['hidden_passed'] / r['hidden_total'] <= .15), None)
     adopted = bool(chosen and chosen['correct_total'] and chosen['correct_kept'] / chosen['correct_total'] >= .9)
     return {'thresholds': table, 'chosen': chosen, 'passes': adopted}
+
+
+def binary_diagnostics(cases):
+    """Exact yes/no answer rows, reported separately and never used for selection."""
+    def answer_class(case):
+        return str(case.get('answer', '')).strip().casefold().rstrip('.!?').strip()
+    return {word: [threshold_counts([case for case in cases if answer_class(case) == word], tau) for tau in THRESHOLDS]
+            for word in ('yes', 'no')}
 
 
 def recovery_gate(rows):
@@ -119,7 +127,7 @@ def main():
         ids = [item['id'] for item in raw]
         if len(ids) != len(set(ids)) or set(ids) != expected_ids:
             raise ValueError(f'Forced responses are duplicated or incomplete for {actor}')
-    gates, recovery = {}, {}
+    gates, binary, recovery = {}, {}, {}
     for checker in ('V', 'V2m', 'V2b'):
         predictions = verdicts(root / f'verify/{checker}/verdicts_A.jsonl')
         rows = []
@@ -132,8 +140,10 @@ def main():
                 continue
             if key not in predictions:
                 raise ValueError(f'Missing verifier prediction: {key}')
-            rows.append({'answerable': truth['answerable'], 'outcome': truth['outcome_v3'], 'p': predictions[key]})
+            rows.append({'answerable': truth['answerable'], 'outcome': truth['outcome_v3'],
+                         'answer': case['answer'], 'p': predictions[key]})
         gates[checker] = checker_gate(rows)
+        binary[checker] = binary_diagnostics(rows)
     passing = [c for c in ('V2m', 'V2b') if gates[c]['passes']]
     chosen = max(passing, key=lambda c: gates[c]['chosen']['correct_kept']) if passing else None
     if chosen:
@@ -159,7 +169,7 @@ def main():
                 outcome = score_transcript(run, replacement)['outcome_v3']
             rows.append({'answerable': truth['answerable'], 'outcome': outcome, 'p': p})
         recovery[chosen] = recovery_gate(rows)
-    report = {'data': 'r4dev and HotpotQA dev only', 'checker_gates': gates, 'chosen_checker': chosen,
+    report = {'data': 'r4dev and HotpotQA dev only', 'checker_gates': gates, 'binary_answer_diagnostics': binary, 'chosen_checker': chosen,
               'second_look_gate': recovery.get(chosen), 'second_look_enabled': bool(chosen and recovery[chosen]['passes'])}
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -170,6 +180,18 @@ def main():
         for row in gate['thresholds']:
             lines.append(f"| {row['threshold']:.2f} | {row['correct_kept']}/{row['correct_total']} | "
                          f"{row['hidden_passed']}/{row['hidden_total']} | {row['wrong_passed']}/{row['wrong_total']} |")
+        lines.append('')
+        lines += [f'### {checker}: yes/no answers', '',
+                  'Diagnostic only, on eligible answers that passed deterministic checks; not a selection gate. '
+                  'Exact yes/no answers allow terminal punctuation.', '',
+                  '| Threshold | Yes: correct kept | Yes: hidden passed | Yes: wrong passed | '
+                  'No: correct kept | No: hidden passed | No: wrong passed |',
+                  '| ---: | ---: | ---: | ---: | ---: | ---: | ---: |']
+        for yes, no in zip(binary[checker]['yes'], binary[checker]['no']):
+            lines.append(f"| {yes['threshold']:.2f} | {yes['correct_kept']}/{yes['correct_total']} | "
+                         f"{yes['hidden_passed']}/{yes['hidden_total']} | {yes['wrong_passed']}/{yes['wrong_total']} | "
+                         f"{no['correct_kept']}/{no['correct_total']} | {no['hidden_passed']}/{no['hidden_total']} | "
+                         f"{no['wrong_passed']}/{no['wrong_total']} |")
         lines.append('')
     if chosen:
         lines += ['## Second look', '', '| Threshold | Correct added | Hidden added / hidden refusals |', '| ---: | ---: | ---: |']
