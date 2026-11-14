@@ -87,3 +87,28 @@ def test_the_auditkit_table_matches_the_first_round_scorecard(document):
         line = next((l for l in text.splitlines() if l.startswith(label)), None)
         assert line is not None, f"{document} has no row {label}"
         assert line.endswith("| " + " | ".join(values) + " |"), f"{document}: {line} does not match {values}"
+
+
+@needs_reports
+@pytest.mark.parametrize("document", ["README.md", "article/ARTICLE.md"])
+def test_the_external_suite_table_and_hosted_claims_match_the_reports(document):
+    import make_readme_table as tables
+
+    text = (ROOT / document).read_text(encoding="utf-8")
+    for line in tables.external_table().splitlines():
+        assert line in text, f"{document} is missing or has changed: {line}"
+    fair = tables.load("fair_rerun.json")["systems"]
+    for key in ("gpt_fair+FB", "deepseek_fair+FB", "main+FB+V", "candF1+FB+V"):
+        assert tables.pct(fair[key]["supported_correct"]) in text, key
+    for key in ("gpt_fair+FB", "deepseek_fair+FB", "main+FB+V"):
+        assert f"{fair[key]['unsupported_rate'] * 100:.0f}%" in text, key
+    for key in ("gpt_fair+FB", "deepseek_fair+FB", "main+FB+V", "candF1+FB+V"):
+        parts = fair[key]["components"]
+        assert tables.pct(parts["single"]) in text and tables.pct(parts["hotpot"]) in text, key
+    assert tables.pct(fair["gpt_old+FB"]["macro"]) in text
+
+
+def test_the_documents_state_that_only_english_was_tested():
+    for document in ("README.md", "article/ARTICLE.md"):
+        text = (ROOT / document).read_text(encoding="utf-8")
+        assert "trained and tested only in English" in text, document

@@ -43,7 +43,22 @@ def hosted_table():
     return '\n'.join(lines)
 
 
+def external_table():
+    """Earlier suites the adapters never trained on, with fail-closed applied to every system (reports/external_benchmarks_corrected.json)."""
+    ext = load('external_benchmarks_corrected.json')
+    refuse = load('reference_policies.json')['external']
+    suites = [('2wiki', '2WikiMultihopQA'), ('musique', 'MuSiQue'), ('squad2', 'SQuAD 2.0'), ('rgb', 'RGB'), ('rgb_int', 'RGB integration')]
+    lines = ['| Suite (cases) | Refuse every question | Main + fail-closed | GPT-6 Luna + fail-closed | DeepSeek V4 Flash + fail-closed |', '| --- | ---: | ---: | ---: | ---: |']
+    for key, title in suites:
+        s = ext[key]['systems']
+        lines.append(f"| {title} ({ext[key]['coverage']['common']}) | {pct(refuse[key]['always_refuse']['success'])} | {pct(s['main+FB']['success'])} "
+                     f"| {pct(s['azure_native+FB']['success'])} | {pct(s['azure_deepseek_native+FB']['success'])} |")
+    return '\n'.join(lines)
+
+
 if __name__ == '__main__':
     print(results_table())
     print()
     print(hosted_table())
+    print()
+    print(external_table())

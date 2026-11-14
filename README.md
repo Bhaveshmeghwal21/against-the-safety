@@ -194,6 +194,20 @@ As a yardstick we ran two large commercial models on the same sealed test: 925 e
 
 GPT-6 Luna is 6.2 points above candF1 on macro (interval +1.1 to +11.1). DeepSeek V4 Flash is 4.4 above (interval −0.3 to +9.1), which is not clearly different. Both hosted models answer far more often, and show a wrong or unsupported answer about twice as often as candF1. [Full comparison](reports/fair_rerun.md).
 
+**Where the hosted models are better.** Of the questions whose documents hold the answer, GPT-6 Luna gives a correct, cited answer 77.9% of the time and DeepSeek V4 Flash 72.7%. Our submitted system does so 46.8% of the time (candF1: 53.9%). Our one advantage is fewer answers when the evidence was hidden: 11% against 21% (DeepSeek) and 28% (GPT-6 Luna). Part of that comes from refusing more often, not from being smarter. On HotpotQA, the question type we trained on, the adapters are level or ahead (main 59.5%, candF1 65.8%, GPT-6 Luna 55.7%, DeepSeek 57.0%). On SQuAD single-passage questions the hosted models are clearly ahead (GPT-6 Luna 86.6%, DeepSeek 84.3%, main 59.7%, candF1 62.0%), and on two-part questions GPT-6 Luna is ahead (62.3% against 40.3% and 54.1%).
+
+**On benchmarks the adapters never trained on.** These are older suites. Every system has the fail-closed rule applied; none has the self-check. The hosted runs predate the fix that told them the answer format, so they understate the hosted models (on the sealed test, GPT-6 Luna's macro success rose from 60.8% to 70.7% once told).
+
+| Suite (cases) | Refuse every question | Main + fail-closed | GPT-6 Luna + fail-closed | DeepSeek V4 Flash + fail-closed |
+| --- | ---: | ---: | ---: | ---: |
+| 2WikiMultihopQA (165) | 47.6% | 57.6% | 58.2% | 64.8% |
+| MuSiQue (164) | 47.6% | 56.1% | 57.9% | 56.1% |
+| SQuAD 2.0 (202) | 63.4% | 63.9% | 55.0% | 71.3% |
+| RGB (450) | 36.9% | 62.2% | 62.7% | 78.4% |
+| RGB integration (142) | 7.0% | 4.9% | 23.2% | 28.9% |
+
+The adapter is within two points of GPT-6 Luna on three of the five suites and ahead on SQuAD 2.0, but it is behind DeepSeek V4 Flash on four, and far behind both on RGB integration (two-part answers). On SQuAD 2.0 it scores the same as refusing every question (63.9% against 63.4%). So the honest summary is that a small adapter gets close to large hosted models on this task, not that it beats them. [Source: `reports/external_benchmarks_corrected.md`](reports/external_benchmarks_corrected.md).
+
 **Cost.** For 10,000 episodes: $6.30 for the adapter's busy T4 time (perfect utilisation, $0.526 per hour, nothing else counted), $2.67 for GPT-6 Luna and $6.09 for DeepSeek, from the recorded token mix and published prices. The adapter is not cheaper. Its case is control: it runs on one GPU you own and shows fewer unsupported answers. See [`reports/azure_roi.md`](reports/azure_roi.md) and [`reports/deepseek_roi.md`](reports/deepseek_roi.md).
 
 ## What we tried, and what we kept
@@ -239,10 +253,11 @@ Training and evaluation ran on Kaggle T4s: see [`kaggle/README.md`](kaggle/READM
 
 ## Limits
 
-- English, short factual questions. Two-part answers and single-passage questions are weak spots; with two documents and dated editions the adapter sometimes cites the older one.
+- English, short factual questions. Tiny Aya is a multilingual model, but we trained and tested only in English, so we do not know how the adapter behaves in other languages. Two-part answers and single-passage questions are weak spots; with two documents and dated editions the adapter sometimes cites the older one.
 - The sealed test was opened before the scoring corrections, and candF1 was tested on it after its gate was written, so further model selection needs a fresh test.
 - Hidden-evidence answers are annotation-based flags. An unannotated alternative source could make a flagged answer correct, and no one has hand-checked them.
 - The self-check withholds some correct answers. The submitted system refuses 39% of answerable questions.
+- On benchmarks the adapters never trained on, the adapter is level with GPT-6 Luna and behind DeepSeek V4 Flash, and on SQuAD 2.0 it scores the same as refusing every question. Large hosted models are more accurate when the documents hold the answer. See [Against hosted models](#against-hosted-models).
 - There is no hosted live endpoint: the web demo needs a GPU you start yourself. Its GPU run answered the eight example questions as shown above (five right, two wrong, one over-refusal); eight questions say little about accuracy, which the sealed test measures.
 
 ## Artifacts and licenses
