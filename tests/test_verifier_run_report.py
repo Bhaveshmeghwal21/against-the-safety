@@ -1,5 +1,10 @@
 """A malformed training result must not silently pass the development gate."""
-from scripts.check_verifier_run import assess, decision
+import json
+
+import torch
+from safetensors.torch import save_file
+
+from scripts.check_verifier_run import assess, assess_adapter, decision
 
 
 def report(auc, name='V2m'):
@@ -21,3 +26,15 @@ def test_registered_floor_applies_to_both_checkers():
     assert decision({'V2m': report(.86), 'V2b': report(.84, 'V2b')})['status'] == 'eligible_for_development_gate'
     assert decision({'V2m': report(.95), 'V2b': report(float('nan'), 'V2b')})['status'] == 'manual_review_invalid_or_incomplete_report'
     assert decision({'V2m': report(.95), 'V2b': report(.95)})['status'] == 'manual_review_invalid_or_incomplete_report'
+
+
+def test_adapter_audit_rejects_nonfinite_weights(tmp_path):
+    config = {'peft_type': 'LORA', 'r': 16, 'lora_alpha': 32, 'lora_dropout': .05}
+    (tmp_path / 'adapter_config.json').write_text(json.dumps(config), encoding='utf-8')
+    for name in ('tokenizer.json', 'tokenizer_config.json', 'chat_template.jinja'):
+        (tmp_path / name).write_text('{}', encoding='utf-8')
+    weights = tmp_path / 'adapter_model.safetensors'
+    save_file({'model.lora_A.weight': torch.tensor([1.0])}, str(weights))
+    assert assess_adapter(tmp_path)['valid']
+    save_file({'model.lora_A.weight': torch.tensor([float('nan')])}, str(weights))
+    assert not assess_adapter(tmp_path)['valid']
