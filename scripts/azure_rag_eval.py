@@ -174,6 +174,17 @@ def canonical_text(raw):
     return protocol.format_answer(m.group(1).strip(), [c.strip() for c in m.group(2).split(',')]) if m else raw
 
 
+def score_hosted_episode(ep, question, corpus, answerable):
+    """Keep corrected v3 support scoring when adding legacy aspect diagnostics."""
+    from ragharness.round4 import aspect_coverage
+
+    score = metrics.score_episode(ep, question, corpus, answerable)
+    score.update(aspect_coverage(question, corpus, ep))
+    if score.get('scorer') != 'v3':
+        score['evidence_supported_good'] = bool(score['good'] and (not answerable or score['all_aspects_cited']))
+    return score
+
+
 def one(job, corp, backend, system, api, mode='exact'):
     tool = CorpusSearchTool(backend, top_k=3)
     co = rollout.rollout_steps(job.q, corp, tool, system, job.variant, job.spec.masked,
@@ -227,10 +238,7 @@ def one(job, corp, backend, system, api, mode='exact'):
         except StopIteration as stop:
             ep = stop.value
             break
-    score = metrics.score_episode(ep, job.q, corp, job.spec.answerable)
-    from ragharness.round4 import aspect_coverage
-    score.update(aspect_coverage(job.q, corp, ep))
-    score['evidence_supported_good'] = bool(score['good'] and (not job.spec.answerable or score['all_aspects_cited']))
+    score = score_hosted_episode(ep, job.q, corp, job.spec.answerable)
     score.update(qtype=job.q.qtype, seconds=round(time.time()-start, 3), model_calls=len(calls),
                  input_tokens=sum(c['usage'].get('prompt_tokens', 0) for c in calls),
                  output_tokens=sum(c['usage'].get('completion_tokens', 0) for c in calls))

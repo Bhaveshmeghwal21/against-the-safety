@@ -12,10 +12,25 @@ from urllib.error import HTTPError
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 import azure_rag_eval as A
 import report_azure_compare as R
+import remediate_audit as audit
 from ragharness import protocol
 
 
 class ComparisonTests(unittest.TestCase):
+    def test_hosted_scoring_preserves_corrected_evidence_decision(self):
+        with patch.object(A.metrics, 'score_episode', return_value={'scorer': 'v3', 'good': True, 'evidence_supported_good': True}), \
+             patch('ragharness.round4.aspect_coverage', return_value={'all_aspects_cited': False}):
+            result = A.score_hosted_episode(None, None, None, True)
+        self.assertTrue(result['evidence_supported_good'])
+        self.assertFalse(result['all_aspects_cited'])
+
+    def test_audit_replays_the_version_actually_saved(self):
+        row = {'outcome_v1': 'wrong_answer', 'strong_v1': False, 'outcome_v3': 'supported_correct', 'strong_v3': True}
+        audit.validate_stored(row, {'scorer': 'v3', 'outcome': 'supported_correct', 'evidence_supported_good': True}, 'run', 'q', 'open')
+        audit.validate_stored(row, {'outcome': 'wrong_answer', 'evidence_supported_good': False}, 'run', 'q', 'open')
+        with self.assertRaisesRegex(ValueError, 'v3 reproduction mismatch'):
+            audit.validate_stored(row, {'scorer': 'v3', 'outcome': 'wrong_answer'}, 'run', 'q', 'open')
+
     def test_round6_requires_the_actual_local_test_jobs(self):
         with self.assertRaisesRegex(ValueError, '--reference-eval'):
             A.build_jobs('r6t_hotpot')

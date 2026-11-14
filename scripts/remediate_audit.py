@@ -81,6 +81,13 @@ def as_v2(row):
     return {**row, **{f"{key}_v2": row[f"{key}_v3"] for key in ("outcome", "strong", "good", "excluded")}}
 
 
+def validate_stored(row, stored, folder, qid, variant):
+    version = 'v3' if stored.get('scorer') == 'v3' else 'v1'
+    if (row[f'outcome_{version}'] != stored['outcome'] or
+            row[f'strong_{version}'] != stored.get('evidence_supported_good', row[f'strong_{version}'])):
+        raise ValueError(f'{version} reproduction mismatch: {folder}/{qid}/{variant}')
+
+
 def load(folder, part, sources):
     corpus, questions = A.RS.world("bench:" + part)
     variant_path = ROOT / "data/bench" / part / "prompt_variants.json"
@@ -89,8 +96,7 @@ def load(folder, part, sources):
     for t, stored in zip(A.RS.read(folder / "transcripts.jsonl"), A.RS.read(folder / "scores.jsonl"), strict=True):
         q = questions[t["qid"]]
         row = rescore.score(t, q, corpus)
-        if row["outcome_v1"] != stored["outcome"] or row["strong_v1"] != stored.get("evidence_supported_good", row["strong_v1"]):
-            raise ValueError(f"historical reproduction mismatch: {folder}/{q.qid}/{t['variant']}")
+        validate_stored(row, stored, folder, q.qid, t['variant'])
         row.update(part=part, comp=A.R.component(part, q.qtype), stop=t.get("stop"))
         original.append(row)
         diagnosed.append(diagnostic(row, t, q, corpus))
