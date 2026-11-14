@@ -129,7 +129,7 @@ class RagSystem:
                     failure = 'second look answer parts absent from cited passages'
                 else:
                     probability = self.support_fn(question, flags['passages'], forced.answer or '')
-                    if not math.isfinite(probability) or probability < self.recover_threshold:
+                    if not math.isfinite(probability) or not 0 <= probability <= 1 or probability < self.recover_threshold:
                         failure = 'second look support probability below threshold or invalid'
             if not failure:
                 return Decision('answer', forced_text, answer=forced.answer, citations=list(forced.citations),
@@ -150,7 +150,9 @@ class RagSystem:
             reason = f"answer parts not in the cited passages: {flags['absent_parts']}"
         else:
             p = self.support_fn(question, flags["passages"], final.answer or "")
-            if p < self.threshold:
+            if not math.isfinite(p) or not 0 <= p <= 1:
+                reason = "self-check: invalid support probability"
+            elif p < self.threshold:
                 reason = f"self-check: probability of SUPPORTED {p:.2f} below {self.threshold}"
         if reason:
             return Decision("abstain", abstain_text, repaired_by="self_check", reason=reason, p_supported=p, **base)

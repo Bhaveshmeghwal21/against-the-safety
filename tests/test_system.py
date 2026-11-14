@@ -70,6 +70,14 @@ def test_threshold_is_inclusive_of_the_boundary(backend):
     assert rag.ask(QUESTION).decision == "answer"  # blocked only strictly below 0.5, as in the offline evaluation
 
 
+@pytest.mark.parametrize('p', [float('nan'), float('inf'), -0.1, 1.1])
+def test_invalid_self_check_probability_fails_closed(backend, p):
+    rag, _ = make(backend, Script(protocol.format_search('return deadline'), protocol.format_answer('30 days', ['c00001'])), p=p)
+    result = rag.ask(QUESTION)
+    assert result.decision == 'abstain' and result.repaired_by == 'self_check'
+    assert result.reason == 'self-check: invalid support probability'
+
+
 def test_citation_of_an_unshown_chunk_is_blocked_without_a_model_call(backend):
     rag, seen = make(backend, Script(protocol.format_search("return deadline"), protocol.format_answer("30 days", ["c00099"])))
     d = rag.ask(QUESTION)
