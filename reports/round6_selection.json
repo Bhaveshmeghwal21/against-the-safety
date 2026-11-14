@@ -1,0 +1,1350 @@
+{
+  "data": "r4dev and HotpotQA dev only",
+  "checker_gates": {
+    "V": {
+      "thresholds": [
+        {
+          "threshold": 0.2,
+          "correct_kept": 171,
+          "correct_total": 173,
+          "hidden_passed": 34,
+          "hidden_total": 40,
+          "wrong_passed": 124,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.25,
+          "correct_kept": 170,
+          "correct_total": 173,
+          "hidden_passed": 31,
+          "hidden_total": 40,
+          "wrong_passed": 122,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.3,
+          "correct_kept": 168,
+          "correct_total": 173,
+          "hidden_passed": 28,
+          "hidden_total": 40,
+          "wrong_passed": 116,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.35,
+          "correct_kept": 164,
+          "correct_total": 173,
+          "hidden_passed": 25,
+          "hidden_total": 40,
+          "wrong_passed": 113,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.4,
+          "correct_kept": 163,
+          "correct_total": 173,
+          "hidden_passed": 24,
+          "hidden_total": 40,
+          "wrong_passed": 106,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.45,
+          "correct_kept": 156,
+          "correct_total": 173,
+          "hidden_passed": 18,
+          "hidden_total": 40,
+          "wrong_passed": 93,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.5,
+          "correct_kept": 152,
+          "correct_total": 173,
+          "hidden_passed": 17,
+          "hidden_total": 40,
+          "wrong_passed": 89,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.55,
+          "correct_kept": 147,
+          "correct_total": 173,
+          "hidden_passed": 16,
+          "hidden_total": 40,
+          "wrong_passed": 86,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.6,
+          "correct_kept": 136,
+          "correct_total": 173,
+          "hidden_passed": 14,
+          "hidden_total": 40,
+          "wrong_passed": 81,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.65,
+          "correct_kept": 126,
+          "correct_total": 173,
+          "hidden_passed": 13,
+          "hidden_total": 40,
+          "wrong_passed": 73,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.7,
+          "correct_kept": 110,
+          "correct_total": 173,
+          "hidden_passed": 11,
+          "hidden_total": 40,
+          "wrong_passed": 65,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.75,
+          "correct_kept": 96,
+          "correct_total": 173,
+          "hidden_passed": 8,
+          "hidden_total": 40,
+          "wrong_passed": 54,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.8,
+          "correct_kept": 90,
+          "correct_total": 173,
+          "hidden_passed": 6,
+          "hidden_total": 40,
+          "wrong_passed": 44,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.85,
+          "correct_kept": 64,
+          "correct_total": 173,
+          "hidden_passed": 3,
+          "hidden_total": 40,
+          "wrong_passed": 27,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.9,
+          "correct_kept": 43,
+          "correct_total": 173,
+          "hidden_passed": 0,
+          "hidden_total": 40,
+          "wrong_passed": 18,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.95,
+          "correct_kept": 19,
+          "correct_total": 173,
+          "hidden_passed": 0,
+          "hidden_total": 40,
+          "wrong_passed": 9,
+          "wrong_total": 135
+        }
+      ],
+      "chosen": {
+        "threshold": 0.8,
+        "correct_kept": 90,
+        "correct_total": 173,
+        "hidden_passed": 6,
+        "hidden_total": 40,
+        "wrong_passed": 44,
+        "wrong_total": 135
+      },
+      "passes": false
+    },
+    "V2m": {
+      "thresholds": [
+        {
+          "threshold": 0.2,
+          "correct_kept": 157,
+          "correct_total": 173,
+          "hidden_passed": 14,
+          "hidden_total": 40,
+          "wrong_passed": 68,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.25,
+          "correct_kept": 154,
+          "correct_total": 173,
+          "hidden_passed": 12,
+          "hidden_total": 40,
+          "wrong_passed": 64,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.3,
+          "correct_kept": 149,
+          "correct_total": 173,
+          "hidden_passed": 12,
+          "hidden_total": 40,
+          "wrong_passed": 61,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.35,
+          "correct_kept": 148,
+          "correct_total": 173,
+          "hidden_passed": 11,
+          "hidden_total": 40,
+          "wrong_passed": 61,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.4,
+          "correct_kept": 147,
+          "correct_total": 173,
+          "hidden_passed": 11,
+          "hidden_total": 40,
+          "wrong_passed": 59,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.45,
+          "correct_kept": 146,
+          "correct_total": 173,
+          "hidden_passed": 11,
+          "hidden_total": 40,
+          "wrong_passed": 58,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.5,
+          "correct_kept": 142,
+          "correct_total": 173,
+          "hidden_passed": 11,
+          "hidden_total": 40,
+          "wrong_passed": 57,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.55,
+          "correct_kept": 141,
+          "correct_total": 173,
+          "hidden_passed": 11,
+          "hidden_total": 40,
+          "wrong_passed": 53,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.6,
+          "correct_kept": 138,
+          "correct_total": 173,
+          "hidden_passed": 11,
+          "hidden_total": 40,
+          "wrong_passed": 53,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.65,
+          "correct_kept": 138,
+          "correct_total": 173,
+          "hidden_passed": 11,
+          "hidden_total": 40,
+          "wrong_passed": 51,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.7,
+          "correct_kept": 135,
+          "correct_total": 173,
+          "hidden_passed": 11,
+          "hidden_total": 40,
+          "wrong_passed": 51,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.75,
+          "correct_kept": 131,
+          "correct_total": 173,
+          "hidden_passed": 11,
+          "hidden_total": 40,
+          "wrong_passed": 48,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.8,
+          "correct_kept": 127,
+          "correct_total": 173,
+          "hidden_passed": 11,
+          "hidden_total": 40,
+          "wrong_passed": 46,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.85,
+          "correct_kept": 122,
+          "correct_total": 173,
+          "hidden_passed": 11,
+          "hidden_total": 40,
+          "wrong_passed": 40,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.9,
+          "correct_kept": 117,
+          "correct_total": 173,
+          "hidden_passed": 8,
+          "hidden_total": 40,
+          "wrong_passed": 38,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.95,
+          "correct_kept": 113,
+          "correct_total": 173,
+          "hidden_passed": 8,
+          "hidden_total": 40,
+          "wrong_passed": 34,
+          "wrong_total": 135
+        }
+      ],
+      "chosen": null,
+      "passes": false
+    },
+    "V2b": {
+      "thresholds": [
+        {
+          "threshold": 0.2,
+          "correct_kept": 154,
+          "correct_total": 173,
+          "hidden_passed": 18,
+          "hidden_total": 40,
+          "wrong_passed": 67,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.25,
+          "correct_kept": 151,
+          "correct_total": 173,
+          "hidden_passed": 18,
+          "hidden_total": 40,
+          "wrong_passed": 65,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.3,
+          "correct_kept": 147,
+          "correct_total": 173,
+          "hidden_passed": 17,
+          "hidden_total": 40,
+          "wrong_passed": 64,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.35,
+          "correct_kept": 147,
+          "correct_total": 173,
+          "hidden_passed": 16,
+          "hidden_total": 40,
+          "wrong_passed": 63,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.4,
+          "correct_kept": 147,
+          "correct_total": 173,
+          "hidden_passed": 15,
+          "hidden_total": 40,
+          "wrong_passed": 59,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.45,
+          "correct_kept": 144,
+          "correct_total": 173,
+          "hidden_passed": 13,
+          "hidden_total": 40,
+          "wrong_passed": 58,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.5,
+          "correct_kept": 141,
+          "correct_total": 173,
+          "hidden_passed": 13,
+          "hidden_total": 40,
+          "wrong_passed": 57,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.55,
+          "correct_kept": 136,
+          "correct_total": 173,
+          "hidden_passed": 12,
+          "hidden_total": 40,
+          "wrong_passed": 54,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.6,
+          "correct_kept": 133,
+          "correct_total": 173,
+          "hidden_passed": 12,
+          "hidden_total": 40,
+          "wrong_passed": 52,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.65,
+          "correct_kept": 133,
+          "correct_total": 173,
+          "hidden_passed": 12,
+          "hidden_total": 40,
+          "wrong_passed": 51,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.7,
+          "correct_kept": 133,
+          "correct_total": 173,
+          "hidden_passed": 12,
+          "hidden_total": 40,
+          "wrong_passed": 46,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.75,
+          "correct_kept": 131,
+          "correct_total": 173,
+          "hidden_passed": 11,
+          "hidden_total": 40,
+          "wrong_passed": 46,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.8,
+          "correct_kept": 129,
+          "correct_total": 173,
+          "hidden_passed": 10,
+          "hidden_total": 40,
+          "wrong_passed": 45,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.85,
+          "correct_kept": 126,
+          "correct_total": 173,
+          "hidden_passed": 10,
+          "hidden_total": 40,
+          "wrong_passed": 39,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.9,
+          "correct_kept": 120,
+          "correct_total": 173,
+          "hidden_passed": 10,
+          "hidden_total": 40,
+          "wrong_passed": 33,
+          "wrong_total": 135
+        },
+        {
+          "threshold": 0.95,
+          "correct_kept": 105,
+          "correct_total": 173,
+          "hidden_passed": 8,
+          "hidden_total": 40,
+          "wrong_passed": 31,
+          "wrong_total": 135
+        }
+      ],
+      "chosen": null,
+      "passes": false
+    }
+  },
+  "binary_answer_diagnostics": {
+    "V": {
+      "yes": [
+        {
+          "threshold": 0.2,
+          "correct_kept": 4,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 7,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.25,
+          "correct_kept": 4,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 7,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.3,
+          "correct_kept": 4,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 6,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.35,
+          "correct_kept": 4,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 6,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.4,
+          "correct_kept": 4,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 4,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.45,
+          "correct_kept": 4,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 2,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.5,
+          "correct_kept": 4,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 2,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.55,
+          "correct_kept": 4,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 2,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.6,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 2,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.65,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 1,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.7,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 1,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.75,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 1,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.8,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 1,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.85,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.9,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.95,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        }
+      ],
+      "no": [
+        {
+          "threshold": 0.2,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 3,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.25,
+          "correct_kept": 1,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 3,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.3,
+          "correct_kept": 1,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 2,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.35,
+          "correct_kept": 1,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 2,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.4,
+          "correct_kept": 1,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 2,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.45,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.5,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.55,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.6,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.65,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.7,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.75,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.8,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.85,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.9,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.95,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        }
+      ]
+    },
+    "V2m": {
+      "yes": [
+        {
+          "threshold": 0.2,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 1,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.25,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 1,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.3,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.35,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.4,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.45,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.5,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.55,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.6,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.65,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.7,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.75,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.8,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.85,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.9,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.95,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        }
+      ],
+      "no": [
+        {
+          "threshold": 0.2,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 2,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.25,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 2,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.3,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 2,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.35,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 2,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.4,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 2,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.45,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 2,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.5,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 2,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.55,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.6,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.65,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.7,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.75,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.8,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.85,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.9,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.95,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        }
+      ]
+    },
+    "V2b": {
+      "yes": [
+        {
+          "threshold": 0.2,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 2,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.25,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 2,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.3,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 1,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.35,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 1,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.4,
+          "correct_kept": 2,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 1,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.45,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 1,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.5,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 1,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.55,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.6,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.65,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.7,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.75,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.8,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.85,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.9,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        },
+        {
+          "threshold": 0.95,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 0,
+          "wrong_passed": 0,
+          "wrong_total": 7
+        }
+      ],
+      "no": [
+        {
+          "threshold": 0.2,
+          "correct_kept": 3,
+          "correct_total": 4,
+          "hidden_passed": 1,
+          "hidden_total": 1,
+          "wrong_passed": 2,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.25,
+          "correct_kept": 3,
+          "correct_total": 4,
+          "hidden_passed": 1,
+          "hidden_total": 1,
+          "wrong_passed": 2,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.3,
+          "correct_kept": 1,
+          "correct_total": 4,
+          "hidden_passed": 1,
+          "hidden_total": 1,
+          "wrong_passed": 2,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.35,
+          "correct_kept": 1,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 2,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.4,
+          "correct_kept": 1,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 2,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.45,
+          "correct_kept": 1,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 2,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.5,
+          "correct_kept": 1,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 2,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.55,
+          "correct_kept": 1,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.6,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.65,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.7,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.75,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.8,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.85,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.9,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        },
+        {
+          "threshold": 0.95,
+          "correct_kept": 0,
+          "correct_total": 4,
+          "hidden_passed": 0,
+          "hidden_total": 1,
+          "wrong_passed": 0,
+          "wrong_total": 3
+        }
+      ]
+    }
+  },
+  "chosen_checker": null,
+  "second_look_gate": null,
+  "second_look_enabled": false
+}

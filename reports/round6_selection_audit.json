@@ -1,0 +1,42 @@
+{
+  "scope": "r4dev and HotpotQA dev only; no Round 6 test data or outputs",
+  "answered_transcripts": 393,
+  "eligible_checker_cases": 348,
+  "deterministic_flags_and_passages_match": true,
+  "checker_thresholds_and_binary_diagnostics_match": true,
+  "checkers": {
+    "V": {
+      "eligible_checker_cases": 348,
+      "outcomes": {
+        "unsupported_wrong": 35,
+        "wrong_answer": 135,
+        "supported_correct": 173,
+        "unsupported_correct": 5
+      },
+      "verdicts_in_file": 393,
+      "thresholds_checked": 16
+    },
+    "V2m": {
+      "eligible_checker_cases": 348,
+      "outcomes": {
+        "unsupported_wrong": 35,
+        "wrong_answer": 135,
+        "supported_correct": 173,
+        "unsupported_correct": 5
+      },
+      "verdicts_in_file": 393,
+      "thresholds_checked": 16
+    },
+    "V2b": {
+      "eligible_checker_cases": 348,
+      "outcomes": {
+        "unsupported_wrong": 35,
+        "wrong_answer": 135,
+        "supported_correct": 173,
+        "unsupported_correct": 5
+      },
+      "verdicts_in_file": 393,
+      "thresholds_checked": 16
+    }
+  }
+}

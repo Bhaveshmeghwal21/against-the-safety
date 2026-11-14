@@ -1,6 +1,7 @@
 """Record the fixed development decision before any sealed-test output is opened."""
 import hashlib
 import json
+import re
 import subprocess
 from pathlib import Path
 
@@ -52,7 +53,10 @@ def render_amendment(report, selection_sha=None):
         gate = gates[checker]
         row = gate['chosen']
         if row is None:
-            lines.append(f'- {checker}: no threshold passed the hidden-evidence limit.')
+            high = gate['thresholds'][-1]
+            lines.append(f"- {checker}: no threshold passed the hidden-evidence limit; at {high['threshold']:.2f}, "
+                         f"correct kept {high['correct_kept']}/{high['correct_total']} and "
+                         f"hidden answers passed {high['hidden_passed']}/{high['hidden_total']}.")
         else:
             lines.append(f"- {checker}: threshold {row['threshold']:.2f}; correct kept {row['correct_kept']}/{row['correct_total']}; "
                          f"hidden answers passed {row['hidden_passed']}/{row['hidden_total']}; "
@@ -81,7 +85,7 @@ def main():
     original = committed.stdout.decode('utf-8').replace('\r\n', '\n')
     if original != PREREG.read_text(encoding='utf-8').replace('\r\n', '\n'):
         raise ValueError('The preregistration differs from the committed version')
-    if '## Amendment 2:' not in original or '## Amendment 3:' in original:
+    if not re.search(r'(?m)^## Amendment 2:', original) or re.search(r'(?m)^## Amendment 3:', original):
         raise ValueError('Amendment 2 must be committed and Amendment 3 must not already exist')
     saved = SELECTION.read_text(encoding='utf-8').replace('\r\n', '\n')
     report = json.loads(saved)

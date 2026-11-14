@@ -54,3 +54,18 @@ Replace only the checker-gate threshold grid with `{0.20, 0.25, ..., 0.95}`, inc
 The selection report will also show exact yes and no answers separately for every checker and every checker threshold, among eligible answers that passed deterministic checks. Terminal punctuation is ignored when identifying yes/no. These counts are diagnostic only and do not affect either gate.
 
 The eventual committed development decision will be recorded separately as `## Amendment 3: development selection` along with the exact selection report, before any sealed-test output is opened.
+
+## Amendment 3: development selection
+
+Recorded from the fixed development selection before opening any Round 6 sealed-test output.
+
+Selection report SHA256: `0d3b185ac4c5f8125784291511577b0cdfb6981baff89e4e6e5d25c634e0f1ce`
+
+- V: threshold 0.80; correct kept 90/173; hidden answers passed 6/40; checker gate failed.
+- V2m: no threshold passed the hidden-evidence limit; at 0.95, correct kept 113/173 and hidden answers passed 8/40.
+- V2b: no threshold passed the hidden-evidence limit; at 0.95, correct kept 105/173 and hidden answers passed 8/40.
+
+Selected checker: none; retain V. 
+Second look: off; no trained checker passed the development gate.
+
+Yes/no answers are listed separately for each checker and threshold in the selection report; they are diagnostics only and did not change either gate.
