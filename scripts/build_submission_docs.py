@@ -32,6 +32,37 @@ deep_cost = deep['deepseek_round5']['native']['estimated_usd_per_10000']
 volume = roi['volume_per_month']
 price = roi['gpu_usd_per_hour']
 table = render()
+selection_path = ROOT / 'reports/round6_selection.json'
+if selection_path.exists():
+    selection = json.loads(selection_path.read_text(encoding='utf-8'))
+    if selection['chosen_checker'] is not None:
+        raise SystemExit('A checker was selected; explicitly review the development-only write-up before rebuilding')
+    gates = selection['checker_gates']
+    main_gate = gates['V2m']['thresholds'][-1]
+    base_gate = gates['V2b']['thresholds'][-1]
+    if (main_gate['threshold'] != base_gate['threshold'] or
+            (main_gate['hidden_passed'], main_gate['hidden_total']) != (base_gate['hidden_passed'], base_gate['hidden_total'])):
+        raise SystemExit('Development counts changed; explicitly review the write-up before rebuilding')
+    low = gates['V2m']['thresholds'][0]['threshold']
+    default = next(row['threshold'] for row in gates['V2m']['thresholds'] if row['threshold'] == .5)
+    high = main_gate['threshold']
+    round6_text = (f"We trained V2m and V2b as answer checkers and evaluated their decisions on pooled development answers "
+                   f"that passed deterministic checks. After seeing training-validation results, we expanded the checker "
+                   f"threshold grid from {default:.2f} down to {low:.2f} before any Round 6 development-model output, "
+                   f"while keeping both gate conditions unchanged. At {high:.2f}, both passed "
+                   f"{main_gate['hidden_passed']}/{main_gate['hidden_total']} hidden-evidence answers; V2m kept "
+                   f"{main_gate['correct_kept']}/{main_gate['correct_total']} correct answers and V2b kept "
+                   f"{base_gate['correct_kept']}/{base_gate['correct_total']}. Because no tested threshold met the "
+                   f"hidden-evidence limit, neither checker was selected, the second look remains off, and no model "
+                   f"has been evaluated on the Round 6 sealed test.")
+    credits_text = ('Further work would build more grounded yes/no and difficult hidden-evidence examples, retrain the '
+                    'checker on independent data, and evaluate it under a new preregistered selection protocol.')
+    readme_diagnostic = ' The [development selection report](reports/round6_selection.md) includes yes/no diagnostics.'
+    article_diagnostic = ' The development selection report lists yes/no diagnostics separately for each checker; those diagnostics did not affect the gates.'
+else:
+    round6_text = ('A fresh checker and second-look experiment is being prepared; it has not yet produced a development result.')
+    credits_text = ('A separately preregistered experiment would train an answer checker and test guarded second looks on a fresh holdout.')
+    readme_diagnostic = article_diagnostic = ''
 license_section = old[old.index('## Licenses'):].split('\n---\n')[0] if '## Licenses' in old else ''
 if not license_section:
     raise SystemExit('Cannot find the original license section')
@@ -95,9 +126,15 @@ The [Kaggle instructions](kaggle/README.md) describe training, evaluation and en
 - Reweighting reduced some refusals while increasing unsupported answers.
 - A reading-focused patch improved one type of question but failed its safety guard.
 - Preference-training checkpoints did not meet the release gate; later training prompts also exposed some held-out evidence. The earlier main and candF1 adapters predate those runs.
-- The checker reduces unsupported answers but also withholds some correct answers. A fresh, preregistered checker experiment is being prepared; no result is claimed yet.
+- The existing checker reduces unsupported answers but also withholds some correct answers.
+
+{round6_text}{readme_diagnostic}
 
 The detailed [experimental history](docs/HISTORY.md) preserves earlier results and corrections.
+
+## What more credits would enable
+
+{credits_text}
 
 ## Artifacts and limits
 
@@ -150,9 +187,13 @@ The hosted prompts in the saved runs omitted the search limit and exact answer f
 
 Training without refusal examples increased coverage but weakened abstention. The reading patch and preference-training checkpoints failed their registered release conditions. Some later preference-training prompts exposed held-out HotpotQA evidence; main and candF1 were trained earlier. The checker blocks some unsupported outputs but also removes correct answers. English factual questions, annotation coverage and small subsets limit generalization.
 
+### What failed and what we learned
+
+{round6_text}{article_diagnostic}
+
 ## 7. What more credits would enable
 
-We would train quote-first answer targets, balance supported answers and refusals, state the semicolon format for two-part answers, and expand the parent-question pool. A separately preregistered experiment would train an answer checker and test guarded second looks on a fresh holdout; it has not yet produced a result.
+We would train quote-first answer targets, balance supported answers and refusals, state the semicolon format for two-part answers, and expand the parent-question pool. {credits_text}
 
 ## 8. Team
 

@@ -54,9 +54,13 @@ The hosted prompts in the saved runs omitted the search limit and exact answer f
 
 Training without refusal examples increased coverage but weakened abstention. The reading patch and preference-training checkpoints failed their registered release conditions. Some later preference-training prompts exposed held-out HotpotQA evidence; main and candF1 were trained earlier. The checker blocks some unsupported outputs but also removes correct answers. English factual questions, annotation coverage and small subsets limit generalization.
 
+### What failed and what we learned
+
+We trained V2m and V2b as answer checkers and evaluated their decisions on pooled development answers that passed deterministic checks. After seeing training-validation results, we expanded the checker threshold grid from 0.50 down to 0.20 before any Round 6 development-model output, while keeping both gate conditions unchanged. At 0.95, both passed 8/40 hidden-evidence answers; V2m kept 113/173 correct answers and V2b kept 105/173. Because no tested threshold met the hidden-evidence limit, neither checker was selected, the second look remains off, and no model has been evaluated on the Round 6 sealed test. The development selection report lists yes/no diagnostics separately for each checker; those diagnostics did not affect the gates.
+
 ## 7. What more credits would enable
 
-We would train quote-first answer targets, balance supported answers and refusals, state the semicolon format for two-part answers, and expand the parent-question pool. A separately preregistered experiment would train an answer checker and test guarded second looks on a fresh holdout; it has not yet produced a result.
+We would train quote-first answer targets, balance supported answers and refusals, state the semicolon format for two-part answers, and expand the parent-question pool. Further work would build more grounded yes/no and difficult hidden-evidence examples, retrain the checker on independent data, and evaluate it under a new preregistered selection protocol.
 
 ## 8. Team
 

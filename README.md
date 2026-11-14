@@ -56,9 +56,15 @@ The [Kaggle instructions](kaggle/README.md) describe training, evaluation and en
 - Reweighting reduced some refusals while increasing unsupported answers.
 - A reading-focused patch improved one type of question but failed its safety guard.
 - Preference-training checkpoints did not meet the release gate; later training prompts also exposed some held-out evidence. The earlier main and candF1 adapters predate those runs.
-- The checker reduces unsupported answers but also withholds some correct answers. A fresh, preregistered checker experiment is being prepared; no result is claimed yet.
+- The existing checker reduces unsupported answers but also withholds some correct answers.
+
+We trained V2m and V2b as answer checkers and evaluated their decisions on pooled development answers that passed deterministic checks. After seeing training-validation results, we expanded the checker threshold grid from 0.50 down to 0.20 before any Round 6 development-model output, while keeping both gate conditions unchanged. At 0.95, both passed 8/40 hidden-evidence answers; V2m kept 113/173 correct answers and V2b kept 105/173. Because no tested threshold met the hidden-evidence limit, neither checker was selected, the second look remains off, and no model has been evaluated on the Round 6 sealed test. The [development selection report](reports/round6_selection.md) includes yes/no diagnostics.
 
 The detailed [experimental history](docs/HISTORY.md) preserves earlier results and corrections.
+
+## What more credits would enable
+
+Further work would build more grounded yes/no and difficult hidden-evidence examples, retrain the checker on independent data, and evaluate it under a new preregistered selection protocol.
 
 ## Artifacts and limits
 
@@ -77,5 +83,7 @@ The evaluation covers English short factual questions. The test has already been
 | Nimbus Home suite | CC BY 4.0 (written by us, fictional) |
 | Benchmark traces | per benchmark, as the source: 2WikiMultihopQA Apache-2.0, MuSiQue CC BY 4.0, SQuAD 2.0 CC BY-SA 4.0, RGB CC BY-NC-SA 4.0 |
 | AgentTune (LSAL v1.1), AuditKIT (LSAL v1.2) | source-available, used as dependencies, not redistributed |
+
+
 
 
