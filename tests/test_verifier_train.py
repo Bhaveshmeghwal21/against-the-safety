@@ -50,6 +50,10 @@ def test_built_set_is_balanced_and_guarded():
     assert not any(guard.matches(as_prompt(r)) for r in rows)
     validation = read(ROOT / "data/processed/verifier/val_v2.jsonl")
     assert not {r["qid"] for r in validation} & {r["qid"] for r in rows}
+    assert not any(guard.matches(as_prompt(r)) for r in validation)
+    assert 0.45 <= sum(r['label'] for r in validation) / len(validation) <= 0.55
+    assert all(not r['deterministic']['cites_unshown'] and not r['deterministic']['answer_part_absent_from_cited']
+               for r in rows + validation)
     labels = {}
     for row in rows + validation:
         key = (row["question"], row["answer"], row["passages"])
