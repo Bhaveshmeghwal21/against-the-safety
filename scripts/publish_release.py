@@ -86,7 +86,7 @@ def publish(user: str, release: Path) -> None:
 def check(user: str) -> bool:
     """Anonymous check: every repository answers 200 without a token, and none is gated."""
     ok = True
-    api = HfApi()  # no token on purpose
+    api = HfApi(token=False)  # do not implicitly load a cached Hugging Face login
     for kind, name, _ in REPOS:
         rid = f"{user}/{name}"
         base = {"model": "", "dataset": "datasets/", "space": "spaces/"}[kind]
@@ -102,12 +102,15 @@ def check(user: str) -> bool:
         ok &= good
         print(f"{'OK ' if good else 'BAD'} {kind:7s} {rid}  http={r.status_code} gated={gated} private={private}")
     for spec in COLLECTIONS.values():
-        found = [c for c in HfApi(token=token()).list_collections(owner=user) if c.title == spec["title"]]
+        found = [c for c in api.list_collections(owner=user) if c.title == spec["title"]]
         for c in found:
+            c = api.get_collection(c.slug)  # listing responses contain only a preview of the items
             r = requests.get(f"https://huggingface.co/collections/{c.slug}", timeout=30)
-            good = r.status_code == 200 and not c.private
+            expected = {(kind, repo_id(user, idx)) for kind, idx in spec["items"]}
+            present = {(item.item_type, item.item_id) for item in c.items}
+            good = r.status_code == 200 and not c.private and expected <= present
             ok &= good
-            print(f"{'OK ' if good else 'BAD'} collection {c.slug} http={r.status_code} private={c.private} items={len(c.items)}")
+            print(f"{'OK ' if good else 'BAD'} collection {c.slug} http={r.status_code} private={c.private} items={len(c.items)} missing={len(expected - present)}")
         if not found:
             ok = False
             print("BAD collection missing:", spec["title"])
