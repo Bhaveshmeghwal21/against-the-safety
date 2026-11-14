@@ -13,7 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FIG = ROOT / "docs" / "figures"
 EDGE = [Path(p) for p in (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", r"C:\Program Files\Microsoft\Edge\Application\msedge.exe")]
-DEFAULT = ["pipeline", "headline", "tradeoff", "trace_examples", "rounds"]
+DEFAULT = ["pipeline", "toolchain", "outcomes", "headline", "tradeoff", "trace_examples", "rounds"]
 
 
 def main() -> None:

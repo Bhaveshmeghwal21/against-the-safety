@@ -1,16 +1,122 @@
 # Against-the-safety
 
-**A small model that answers from your documents, cites its sources, and says so when the documents don't have the answer.**
+**A small AI model that answers questions from your documents, shows which passage it used, and says "the documents don't say" instead of guessing.**
 
-Tiny Aya Global (3.35B) with a LoRA adapter, trained through [AgentTune](https://github.com/Lexsi-Labs/AgentTune) and measured with [AuditKIT](https://github.com/Lexsi-Labs/AuditKIT). Team Against-the-safety, Lexsi AI Safety and Alignment Hackathon, Track 3 (agentic fine-tuning), problem statement 4: fine-tuning for retrieval-augmented generation.
+Team Against-the-safety · Lexsi AI Safety and Alignment Hackathon · Track 3 (agentic fine-tuning) · Problem statement 4: fine-tuning for retrieval-augmented generation
 
 [Models](https://huggingface.co/collections/BMEscanor/against-the-safety-tiny-aya-rag-adapters-6aec1fda812ed14d9f60bfbc) · [Data and traces](https://huggingface.co/collections/BMEscanor/against-the-safety-rag-episodes-traces-and-demo-6aec1fdb994e3b036c6c958d) · [Trace viewer](https://huggingface.co/spaces/BMEscanor/against-the-safety-trace-viewer) · [Article](article/ARTICLE.md) · [Demo](#try-it)
 
+## The idea in one minute
+
+Companies want assistants that answer from their own documents: product manuals, policies, help pages. The usual recipe is called **RAG** (retrieval-augmented generation). The assistant first *searches* the documents, then *writes an answer* from what it found.
+
+The recipe has a weak spot. When the documents do not contain the answer, a language model often answers anyway, and the answer sounds confident. In our test the untrained model did exactly this in 281 of 375 cases where we had hidden the evidence.
+
+We took a small open model, Tiny Aya Global (3.35 billion parameters, small enough to train on one free GPU), and taught it a routine. It searches up to three times and reads the passages. Then it either answers and names the passages it used, or says the documents don't have the answer. Two safety checks, written as ordinary code, sit on top.
+
+Real outputs from our demo, which uses 24 passages of fictional smart-home manuals:
+
+| You ask | The system says | What happened |
+| --- | --- | --- |
+| What type of batteries does the Nimbus Lock L1 use? | **4 AA alkaline batteries**, citing the Lock L1 Setup Guide and Troubleshooting page | Answer found and cited. |
+| Which Bluetooth version does the Hub H2 use? | "The accessible passages do not contain the evidence needed to answer." | The manuals say the hub has Bluetooth but never say which version, so it refuses after three searches. |
+| How many days do I have to return a Cam C3? | **30** | Wrong. The documents hold two editions of the policy (30 days in 2025, 45 in 2026). The system cited both and picked the old one. |
+
+The third row is a real miss, kept in on purpose. More runs are under [Try it](#try-it).
+
+On a locked test of 934 questions, the untrained model gave a correct answer with the right citation in 5.7% of the questions whose documents held the answer. Our system does so in 46.3%. When the evidence was hidden, the untrained model answered 281 of 375 times and ours answered 42 times. The price is caution: ours refuses 39% of the questions it could have answered.
+
 ![How one question is answered: search loop, draft ending, fail-closed rule, self-check](docs/figures/pipeline.svg)
+
+## Words used on this page
+
+| Term | What it means here |
+| --- | --- |
+| RAG | An assistant that searches a set of documents first and answers from what it found. |
+| Passage or chunk | A short piece of a document, stored with an ID such as `c00019`. The model cites these IDs. |
+| Citation | The IDs of the passages an answer is based on. |
+| Refuse, or abstain | Saying the documents do not hold the answer, instead of guessing. |
+| Base model | Tiny Aya Global as Cohere Labs released it, before our training. |
+| Fine-tuning, adapter, LoRA, QLoRA | Fine-tuning is extra training on top of an existing model. A LoRA adapter is a small add-on file (121 MB here) that holds only what changed, so the 3.35-billion-parameter base stays untouched. QLoRA trains the adapter while the base is squeezed to 4 bits, which fits a 16 GB T4 GPU. |
+| Episode | One question, its documents, and the model's whole attempt: searches, passages read, final answer or refusal. |
+| Evidence hidden | A test episode where we removed the passages that hold the answer. The right move is to refuse. |
+| Unsupported answer | An answer given although the evidence was hidden, our stand-in for "made up". It comes from annotations, and nobody has checked each one by hand. |
+| Sealed test | Questions locked away before training and opened only to score finished systems, so nothing can be tuned to them. |
+| Scorer | Our fixed code that compares answers with references and checks citations. No AI judge is involved. "v3" is its third version, after a correction on 13 November. |
+| Macro success | The average of four groups' success rates. A correct, cited answer or a correct refusal counts as success. Refusing every question scores 42.0%, so read it beside the other measures. |
+| Fail-closed rule | If an attempt breaks the rules (bad format, repeated search), the system refuses instead of guessing. |
+| Self-check | The model re-reads the cited passages and its draft answer and says whether they support it. If not, the answer is withheld. |
+| Pre-registered rule | A pass or fail rule written down before the result was known. |
+| Hosted model | A large commercial model run over the internet (here GPT-6 Luna and DeepSeek V4 Flash), used as a yardstick. |
+| T4 | A 16 GB GPU that Kaggle gives away for free. |
+
+## How it works
+
+1. **Search.** The adapter calls a tool named `search_corpus` up to three times and reads three passages per search.
+2. **Draft.** It ends with `<answer>` plus the IDs of the passages it used, or with `<abstain>` saying what is missing.
+3. **Fail-closed rule.** An attempt without a valid ending (a repeated query, a fourth search, a broken format) becomes a refusal.
+4. **Self-check.** The same model reads the question, the cited passages and the answer. The answer is shown only if the model's probability of "SUPPORTED" is at least 0.5, the cited passage was really shown to it, and every part of the answer appears in that passage.
+
+Steps 3 and 4 are code and need no training. Steps 1 and 2 come from training.
+
+**How the model learned the routine.** Nobody wrote thousands of examples by hand. We built them by script from 600 HotpotQA training questions. A scripted policy plays the routine perfectly in six situations: clean support, a distractor passage ranked first, a second search needed to find the second fact, evidence hidden, evidence already in the prompt, and a weak first search. That made 1,611 training turns, 537 each of search, answer and refusal. QLoRA training ran two epochs on one T4 (3.9 GPU-hours, about $2 at $0.526 per hour).
+
+## The two Lexsi tools: AgentTune and AuditKIT
+
+The hackathon asked every Track 3 team to use two libraries from Lexsi Labs. One is the workshop where the model is taught, the other is the examiner.
+
+- **AgentTune** is a library for building and training *agents*. An agent is a model that works in several steps and uses tools (here, a search tool) instead of answering in one go. AgentTune supplies the tool, records every step an agent takes in a standard format, and turns those recordings into training data.
+- **AuditKIT** is a library that scores models and agents with fixed code, not an AI judge. For RAG it asks whether the system found enough evidence, whether its citations are real and whether it refused when it should have. For agents it checks tool use.
+
+![Where AgentTune and AuditKIT fit: documents, search tool, practice runs, training, test runs, scoring, decision](docs/figures/toolchain.svg)
+
+### How we used AgentTune
+
+| Step | AgentTune part | What we did with it |
+| --- | --- | --- |
+| Search | `SQLiteFTSBackend`, `SearchCorpusTool` | We built a keyword index of the passages. The `search_corpus` tool the model calls is a subclass of AgentTune's. We made three changes: it shows 800 characters of a passage instead of 350, it hides relevance scores, and it can hide chosen passages for evidence-hidden episodes. AgentTune's backend reports a broken index as "no results", so we added a check that fails loudly when the index is empty or wrong. |
+| Recording | `EventLog`, `TrajectoryStore` | Every scripted training episode is saved as an EventLog. Every evaluation run is saved as a TrajectoryStore record. Both are published in the [episodes dataset](https://huggingface.co/datasets/BMEscanor/against-the-safety-rag-episodes). |
+| Training | `create_distill_trainer` | It takes the EventLogs and hands the training rows to a "trainer factory". Ours trains a 4-bit LoRA adapter on one T4 and learns only from the model's own turns. AgentTune's default factory loads the model in bf16 (a T4 has no bf16) and trains on every token. |
+| Answer matching | `qa_metrics` | Word-overlap (F1) between an answer and the reference answer. |
+| What did not fit | DPO trainer | AgentTune's preference trainer ran out of memory on a T4, so preference training used our own short loop with the same loss. |
+
+Code: `src/ragharness/trainer.py`, `qlora.py`, `retrieval.py`, `tools.py`, `episodes.py`.
+
+### How we used AuditKIT
+
+For every evaluation episode we build two small records and hand them to AuditKIT. An `ak.Sample` carries a `RAGTrace`: the searches, the passages retrieved, the citations and the final answer or refusal. A `RAGCase` holds what the right behaviour was: whether the question was answerable, which passages are enough, the reference answer. `ak.evaluate` then returns the scores below.
+
+First-round scores on the HotpotQA test split, scored before the 13 November corrections:
+
+| AuditKIT metric | The question it answers | Base | Main | Control |
+| --- | --- | ---: | ---: | ---: |
+| Evidence-set recall | Did the searches retrieve at least one complete set of passages that is enough to answer? | 0.512 | 0.727 | 0.824 |
+| Citation support | Do the citations point to passages that exist, are current and support the answer? | 0.302 | 0.771 | 0.941 |
+| Abstention | Did it refuse when it should and answer when it should? | 0.721 | 0.794 | 0.714 |
+| Tool-call validity | Were the search calls well formed? | 1.000 | 1.000 | 1.000 |
+| Redundant tool calls (lower is better) | What share of searches exactly repeat an earlier one? | 3.1% | 2.9% | 8.8% |
+| Loop-free episodes | What share of episodes never fell into a repetition loop? | 94.1% | 93.4% | 78.4% |
+
+*Control* is a second adapter trained on the same questions but with no refusal examples. It shows what the refusal examples change.
+
+What AuditKIT showed us:
+
+- **Training taught citing.** Citation support rose from 0.302 to 0.771.
+- **Refusal examples teach the model when to stop.** The control adapter looped: only 78.4% of its episodes were loop-free and 8.8% of its searches repeated an earlier one. Main had 93.4% and 2.9%.
+- **It reports "unknown" instead of guessing.** When our reference evidence was incomplete, AuditKIT returned no score for those episodes. That exposed an earlier RGB recall figure of 0.960 that covered only 25 of 286 answerable episodes. With complete evidence sets all 286 were scored and recall was 1.000 ([remediation report](reports/2026-11-13-evaluation-remediation.md)).
+- **Freshness on dated manuals.** On our fictional Nimbus manuals, which hold old and new editions of the same policy, AuditKIT's freshness score was 0.813 for main and 0.783 for the base model. About one retrieved dated passage in five was an out-of-date edition ([report](reports/nimbus_corrected.md)).
+
+What we did not do: AuditKIT also ships general benchmarks (ARC, GSM8K, MMLU, TruthfulQA, BFCL). None of them tests answering from supplied documents with citations, so we did not run them. The headline numbers below come from our own scorer, which checks in one pass that an answer is correct and that the cited passages contain the required evidence. The full first-round scorecard is in [`reports/scorecard_test_lenient.md`](reports/scorecard_test_lenient.md). Code: `src/ragharness/audit.py`, `scorecard.py`.
 
 ## Results
 
-We scored every system on a sealed test of 938 SQuAD, HotpotQA and RGB episodes that no training or earlier choice had used (934 are scorable). About 40% of the episodes hide the evidence, so the right move there is to refuse.
+We scored every system on a sealed test of 938 episodes built from three public question sets. SQuAD 2.0 asks about single Wikipedia paragraphs. HotpotQA asks questions that need facts from two articles. RGB asks about news with noisy passages. No training or earlier choice used these questions, and 934 of the 938 could be scored. About 40% of the episodes hide the evidence, so the right move there is to refuse.
+
+A question can end in four ways. The figure shows how often each happens for the submitted system.
+
+![The four outcomes of a question: correct and cited, over-refusal, unsupported answer, correct refusal](docs/figures/outcomes.svg)
+
+Next, all systems on four measures.
 
 ![Four panels comparing the base model, the adapter, the adapter with repairs, candF1 and two hosted models](docs/figures/headline.svg)
 
@@ -22,23 +128,21 @@ We scored every system on a sealed test of 938 SQuAD, HotpotQA and RGB episodes 
 | candF1 + both repairs (alternative) | 64.0% | 53.3% | 40 / 375 | 76.4% |
 | Refuse every question | 42.0% | 0.0% | 0 / 375 | none |
 
-Scorer v3, [`reports/reference_policies.md`](reports/reference_policies.md). *Correct and cited* is the share of answerable episodes. *Hidden-evidence answers* are answers the annotations do not support, not human-checked hallucinations.
+Scorer v3, [`reports/reference_policies.md`](reports/reference_policies.md). The columns mean:
+
+- **Macro success.** Average success over four groups of questions, counting correct refusals. Higher is better.
+- **Correct and cited.** Of the questions whose documents hold the answer, the share answered correctly with the right citation. Higher is better.
+- **Answers when evidence was hidden.** Of 375 episodes where the answer was hidden, how many still got an answer. Lower is better. These are annotation-based flags, not human-checked hallucinations.
+- **Correct among answers shown.** Of everything the system chose to answer, the share that was correct. Higher is better.
+
+What the table says:
 
 - **The base model is not usable here.** It gives a correct, cited answer in 5.7% of answerable episodes and answers 75% of the episodes whose evidence was hidden.
 - **Training plus two repairs fixes the second problem.** The submitted system answers 11% of the hidden-evidence episodes, and two thirds of the answers it shows are correct.
 - **The price is coverage.** It answers 41% of all questions and refuses 39% of answerable ones.
 - **Read macro success next to the last row.** A correct refusal counts as success, so refusing everything already scores 42.0%.
 
-**Which system do we submit?** Main, because we chose it before the test was opened. candF1 scores higher on this test (+6.0 points macro, 95% interval +3.0 to +9.2), but a gate written after we saw its development results selected it, and its safety gain is not established (hidden-evidence answer rate −0.5 points, interval −4.6 to +3.4; our rule needed the upper end at +2 or below). We publish it as the alternative. A fresh test would settle the question.
-
-## How it works
-
-1. **Search.** The adapter calls `search_corpus` up to three times, reading three passages per search.
-2. **Draft.** It ends with `<answer>` and chunk citations, or `<abstain>` saying what is missing.
-3. **Fail-closed rule.** A rollout without a valid ending (repeated query, fourth search, bad format) becomes a refusal.
-4. **Self-check.** The same model reads the question, the cited passages and the answer. The answer is shown only if P(SUPPORTED) is at least 0.5, the cited passage was actually shown, and every part of the answer appears in it.
-
-Steps 3 and 4 are code and need no training. Training used 600 HotpotQA questions turned into scripted episodes in six evidence states (clean support, a distractor ranked first, second-hop recovery, evidence hidden, evidence supplied in the prompt, a weak first search): 1,611 training turns, 537 each of search, answer and refusal. QLoRA ran for two epochs on one T4 (3.9 GPU-hours, about $2 at $0.526 per hour).
+**Which system do we submit?** The main adapter with both repairs, because we chose it before the test was opened. candF1 scores higher on this test: +6.0 points of macro success, with a 95% interval of +3.0 to +9.2 (the range the true difference very likely lies in). But we picked candF1 with a gate we wrote after seeing its practice-set results, and its safety gain is not established. Its rate of answers on hidden evidence is 0.5 points lower, with an interval of −4.6 to +3.4. Our rule needed the upper end at +2 or below. We publish it as the alternative. A fresh test would settle the question.
 
 ## Try it
 
@@ -48,7 +152,7 @@ Steps 3 and 4 are code and need no training. Training used 600 HotpotQA question
 | Web demo, `scripts/demo_app.py` | a CUDA GPU (the packaged system ran on a free Kaggle T4) | paste your own passages, ask questions, see the answer or refusal, the citations and the search trace |
 | Command line, `scripts/ask.py` | a CUDA GPU | the same system over a JSONL file of passages |
 
-The web demo ships with 24 fictional product-support passages ([`examples/nimbus_home.jsonl`](examples/nimbus_home.jsonl)) and eight example questions: two answerable, two with a newer and an older policy edition in the documents, two that need two passages, two the documents cannot answer ([`examples/nimbus_questions.json`](examples/nimbus_questions.json)). To run it on a free Kaggle T4 from this repository:
+The web demo ships with 24 fictional product-support passages ([`examples/nimbus_home.jsonl`](examples/nimbus_home.jsonl)) and eight example questions: two answerable, two with a newer and an older policy edition in the documents, two that need two passages, two the documents cannot answer ([`examples/nimbus_questions.json`](examples/nimbus_questions.json)). Kaggle is a site that lends free GPUs. To run the demo on a free Kaggle T4 from this repository:
 
 ```powershell
 python scripts/bundle_for_kaggle.py --adapter main=<folder with the main adapter>
@@ -77,7 +181,7 @@ Five of eight match what the documents support, both missing-evidence questions 
 
 ## Against hosted models
 
-The same sealed test, 925 episodes both sides could answer. The hosted models were told the three-search limit and the answer format in their prompt; the adapter learned them in training. Hosted rows use the fail-closed rule and no self-check.
+As a yardstick we ran two large commercial models on the same sealed test: 925 episodes both sides could answer. The hosted models were told the three-search limit and the answer format in their prompt; the adapter learned them in training. Hosted rows use the fail-closed rule and no self-check.
 
 ![Scatter of correct answers against answers when the evidence was hidden for local and hosted systems](docs/figures/tradeoff.svg)
 
@@ -92,36 +196,31 @@ GPT-6 Luna is 6.2 points above candF1 on macro (interval +1.1 to +11.1). DeepSee
 
 **Cost.** For 10,000 episodes: $6.30 for the adapter's busy T4 time (perfect utilisation, $0.526 per hour, nothing else counted), $2.67 for GPT-6 Luna and $6.09 for DeepSeek, from the recorded token mix and published prices. The adapter is not cheaper. Its case is control: it runs on one GPU you own and shows fewer unsupported answers. See [`reports/azure_roi.md`](reports/azure_roi.md) and [`reports/deepseek_roi.md`](reports/deepseek_roi.md).
 
-## How we used AgentTune and AuditKIT
-
-| | What we used it for | Where |
-| --- | --- | --- |
-| AgentTune | `create_distill_trainer` with a QLoRA trainer factory; `SQLiteFTSBackend` and the corpus search tool the model calls; `EventLog` and `TrajectoryStore` for every training episode and evaluation rollout; `qa_metrics` for answer F1 | `src/ragharness/trainer.py`, `retrieval.py`, `tools.py`, `episodes.py` |
-| AuditKIT | every episode becomes an `ak.Sample` with a `RAGTrace` and is scored with `ak.evaluate`: evidence-set recall, citation support, abstention, tool-call validity, redundant tool calls, loop detection, and freshness on the dated Nimbus documents | `src/ragharness/audit.py`, `scorecard.py` |
-
-AuditKIT numbers from the first round (HotpotQA test split, scorer before the 13 November corrections):
-
-| AuditKIT metric | Base | Main | Control |
-| --- | ---: | ---: | ---: |
-| Evidence-set recall | 0.512 | 0.727 | 0.824 |
-| Citation support | 0.302 | 0.771 | 0.941 |
-| Abstention | 0.721 | 0.794 | 0.714 |
-| Tool-call validity | 1.000 | 1.000 | 1.000 |
-| Redundant tool calls (lower is better) | 3.1% | 2.9% | 8.8% |
-| Loop-free episodes | 94.1% | 93.4% | 78.4% |
-
-The headline table above uses our own scorer, which checks that an answer is correct and that the cited passages contain the required evidence. We did not run AuditKIT's shipped benchmark suites (ARC, GSM8K, MMLU, TruthfulQA, BFCL); none of them tests retrieval. Preference training used our own short loop, because AgentTune's DPO trainer ran out of memory on a T4. [`reports/scorecard_test_lenient.md`](reports/scorecard_test_lenient.md) has the full first-round scorecard.
-
 ## What we tried, and what we kept
 
 ![Timeline of rounds 1 to 6 with the outcome of each](docs/figures/rounds.svg)
 
 - **Refusal training is what makes the model stop.** A control adapter trained without refusal examples answered more but never refused; it kept searching until the budget ran out.
-- **Cheap fixes beat more training.** The two repairs moved macro success from 47.9% to 58.0% with no retraining. Every training change after round 1 missed its own release rule.
-- **Preference training removed refusals.** The pairs almost never chose an abstention, so the checkpoints stopped abstaining. Adding abstention pairs restored it from main but passed no gate. Some of those training prompts also exposed held-out evidence; main and candF1 predate them. See the [remediation report](reports/2026-11-13-evaluation-remediation.md).
+- **Cheap fixes beat more training.** The two repairs moved macro success from 47.9% to 58.0% with no retraining. Every training change after round 1 missed its own pre-registered release rule.
+- **Preference training removed refusals.** Preference training (DPO) shows the model pairs of a better and a worse answer and nudges it toward the better one. Our pairs almost never chose a refusal, so the checkpoints stopped refusing. Adding refusal pairs restored it from main but passed no gate. Some of those training prompts also exposed held-out evidence; main and candF1 predate them. See the [remediation report](reports/2026-11-13-evaluation-remediation.md).
 - **A trained checker did not beat the plain one.** Two adapters trained to check answers (V2m, V2b) never reached the hidden-evidence limit we set, at any threshold ([report](reports/round6_selection.md)). The Round 6 sealed test is unopened.
 
 The full record, with every pre-registered rule and each result, is in [`docs/HISTORY.md`](docs/HISTORY.md).
+
+## Where things are
+
+| Folder | What is in it |
+| --- | --- |
+| `src/ragharness/` | Our code: the search tool, episode builder, training hook, rollout loop, scorer, the AuditKIT adapter and the self-check (`system.py`). |
+| `scripts/` | Command-line tools: build data, launch Kaggle jobs, rebuild reports, `ask.py`, `demo_app.py`. |
+| `kaggle/` | The script that runs on Kaggle GPUs, and its guide. |
+| `data/` | Question sets, scripted episodes, and manifests with file hashes. Large files live in the Hugging Face datasets. |
+| `reports/` | Every number on this page, as JSON and Markdown. |
+| `docs/` | The figures, the saved demo run, and [`HISTORY.md`](docs/HISTORY.md), the full record of the six rounds. |
+| `examples/` | The fictional Nimbus manuals and the eight demo questions. |
+| `article/` | The write-up and the form abstract. |
+| `tests/` | Automated tests, including checks that the numbers on this page match `reports/`. |
+| `research/` | Planning notes and pre-registrations. |
 
 ## Reproduce
 

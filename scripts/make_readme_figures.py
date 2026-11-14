@@ -1,6 +1,6 @@
 """Figures for the README and the Article, drawn from the saved report files.
 
-  python scripts/make_readme_figures.py        # -> docs/figures/{headline,tradeoff,pipeline,trace_examples,rounds}.svg
+  python scripts/make_readme_figures.py        # -> docs/figures/{headline,tradeoff,pipeline,toolchain,outcomes,trace_examples,rounds}.svg
 
 Every number comes from reports/reference_policies.json (local systems and the refuse-everything line, 934 episodes of the round-5
 test, scorer v3) or reports/fair_rerun.json (the hosted models in the format-aware rerun, 925 shared episodes). The trace
@@ -320,10 +320,79 @@ def rounds() -> None:
     write("rounds.svg", out)
 
 
+def toolchain() -> None:
+    """Where the two Lexsi libraries sit in the project, in the order the work runs."""
+    w, h = 820, 530
+    out = svg_open(w, h)
+    out.append(f'<defs><marker id="head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="{GREY}"/></marker></defs>')
+    out.append(text(20, 26, "Where AgentTune and AuditKIT fit", 16, weight=600))
+    out.append(text(20, 46, "Blue boxes are AgentTune, green boxes are AuditKIT, grey boxes are code we wrote.", 11.5, MUTED))
+    bw, bh, gap, n = 177, 176, 24, 25
+    xs = [20 + i * (bw + gap) for i in range(4)]
+    y1 = 70
+    y2 = y1 + bh + 48
+    A_FILL, A_EDGE, K_FILL, K_EDGE = "#e8f1fb", MAIN, "#e8f5e9", GREEN
+    box(out, xs[0], y1, bw, bh, "1  Documents", ["Public question sets (HotpotQA, SQuAD, RGB) and our fictional Nimbus manuals, cut into short passages."], "#f6f8fa", RULE, n)
+    box(out, xs[1], y1, bw, bh, "2  Search tool", ["SQLiteFTSBackend is a keyword index. SearchCorpusTool is the search_corpus call the model makes; we subclassed it to hide chosen passages."], A_FILL, A_EDGE, n)
+    box(out, xs[2], y1, bw, bh, "3  Practice runs", ["A scripted policy solves training questions with that tool. Each run is saved as an EventLog."], A_FILL, A_EDGE, n)
+    box(out, xs[3], y1, bw, bh, "4  Training", ["create_distill_trainer turns the EventLogs into training rows. Our QLoRA factory trains the adapter on one T4."], A_FILL, A_EDGE, n)
+    box(out, xs[3], y2, bw, bh, "5  Test runs", ["The trained model answers new questions with the same tool. Each run is saved as a TrajectoryStore record."], A_FILL, A_EDGE, n)
+    box(out, xs[2], y2, bw, bh, "6  Wrap each run", ["Our adapter turns every run into an ak.Sample: a RAGTrace (what it searched, read and cited) and a RAGCase (the right behaviour)."], "#f6f8fa", RULE, n)
+    box(out, xs[1], y2, bw, bh, "7  Score", ["ak.evaluate computes seven scores: evidence-set recall, citation support, abstention, tool-call validity, redundant calls, loop detection, freshness."], K_FILL, K_EDGE, n)
+    box(out, xs[0], y2, bw, bh, "8  Decide", ["Scorecards and our own scorer decide what we keep. The rules were written before the sealed test was opened."], "#f6f8fa", RULE, n)
+    for i in range(3):
+        arrow(out, xs[i] + bw + 1, y1 + bh / 2, xs[i + 1] - 3, y1 + bh / 2)
+    arrow(out, xs[3] + bw / 2, y1 + bh + 1, xs[3] + bw / 2, y2 - 3)
+    for i in (3, 2, 1):
+        arrow(out, xs[i] - 1, y2 + bh / 2, xs[i - 1] + bw + 3, y2 + bh / 2)
+    out.append(text(20, h - 30, "AgentTune covers steps 2 to 5 (build, record, train). AuditKIT covers step 7 (score). Step 6 is the glue between them.", 11, MUTED))
+    out.append(text(20, h - 12, "Preference training (DPO) used our own short loop, because AgentTune's DPO trainer ran out of memory on a T4.", 11, MUTED))
+    write("toolchain.svg", out)
+
+
+def outcomes() -> None:
+    """The four things that can happen to a question, with the submitted system's rates on the sealed test."""
+    ref = load("reference_policies.json")["sealed_r5test"]["main+FB+V"]
+    answerable_other = 1 - ref["supported_correct"] - ref["false_abstain"]
+    hidden_refused = ref["hidden_n"] - ref["unsupported"]
+    w, h, cw, ch, gap = 820, 436, 300, 120, 12
+    out = svg_open(w, h)
+    out.append(text(20, 26, "The four things that can happen to a question", 16, weight=600))
+    out.append(text(20, 46, "Percentages are for the submitted system on the sealed test (934 episodes). The rows show whether the documents hold the answer.", 11.5, MUTED))
+    x0, y0 = 190, 100
+    out.append(text(x0 + cw / 2, y0 - 14, "The system answers", 13, weight=700, anchor="middle"))
+    out.append(text(x0 + cw + gap + cw / 2, y0 - 14, "The system refuses", 13, weight=700, anchor="middle"))
+    out.append(text(20, y0 + ch / 2 - 4, "The documents", 13, weight=700))
+    out.append(text(20, y0 + ch / 2 + 12, "hold the answer", 13, weight=700))
+    out.append(text(20, y0 + ch + gap + ch / 2 - 4, "The documents do", 13, weight=700))
+    out.append(text(20, y0 + ch + gap + ch / 2 + 12, "not hold it", 13, weight=700))
+    cells = [
+        (0, 0, "#e8f5e9", GREEN, "Correct and cited", f"{ref['supported_correct'] * 100:.1f}% of these questions",
+         f"This is the goal. Another {answerable_other * 100:.1f}% are answered, but wrongly or without the right citation."),
+        (1, 0, "#fff4e5", CAND, "Over-refusal", f"{ref['false_abstain'] * 100:.1f}% of these questions", "Safe but unhelpful. This is the price of the two repairs."),
+        (0, 1, "#fdeceb", RED, "Unsupported answer", f"{ref['unsupported']} of {ref['hidden_n']} ({ref['unsupported_rate'] * 100:.1f}%)",
+         "The system answers although the evidence was hidden. The answer may be made up. Lower is better."),
+        (1, 1, "#e8f5e9", GREEN, "Correct refusal", f"{hidden_refused} of {ref['hidden_n']} ({hidden_refused / ref['hidden_n'] * 100:.1f}%)",
+         "It says the documents do not hold the answer. This counts as success."),
+    ]
+    for col, row, fill, edge, title, figure, note in cells:
+        x, y = x0 + col * (cw + gap), y0 + row * (ch + gap)
+        out.append(f'<rect x="{x}" y="{y}" width="{cw}" height="{ch}" rx="8" fill="{fill}" stroke="{edge}" stroke-width="1.4"/>')
+        out.append(text(x + 14, y + 26, title, 14, edge, 700))
+        out.append(text(x + 14, y + 48, figure, 13, INK, 600))
+        for j, line in enumerate(wrap(note, 44)):
+            out.append(text(x + 14, y + 70 + j * 15, line, 11.5, MUTED))
+    out.append(text(20, h - 34, "Macro success rewards the two green cells, averaged over four groups of questions. Refusing every question therefore scores 42.0%.", 11, MUTED))
+    out.append(text(20, h - 16, "That is why we also report the share of correct, cited answers and the share of unsupported answers.", 11, MUTED))
+    write("outcomes.svg", out)
+
+
 def main() -> None:
     headline()
     tradeoff()
     pipeline()
+    toolchain()
+    outcomes()
     trace_examples()
     rounds()
 

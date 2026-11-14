@@ -1,5 +1,7 @@
 # Experimental history
 
+This is the detailed record of the six rounds, written for readers who want every rule and result. New to the project? Start with the [README](../README.md): its "Words used on this page" table explains the terms (adapter, sealed test, macro success, fail-closed, and so on).
+
 Historical scorer v1/v2 results follow unchanged in substance. The [13 November remediation](../reports/2026-11-13-evaluation-remediation.md) corrects evidence eligibility, source offsets and later training-data exposure. The current numbers are in the [README](../README.md).
 
 ## Overview

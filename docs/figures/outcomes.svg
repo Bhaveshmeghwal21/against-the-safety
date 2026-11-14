@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="436" viewBox="0 0 820 436" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="820" height="436" fill="#ffffff"/>
+<text x="20" y="26" font-size="16" font-weight="600" fill="#1f2328" text-anchor="start" >The four things that can happen to a question</text>
+<text x="20" y="46" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >Percentages are for the submitted system on the sealed test (934 episodes). The rows show whether the documents hold the answer.</text>
+<text x="340.0" y="86" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle" >The system answers</text>
+<text x="652.0" y="86" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle" >The system refuses</text>
+<text x="20" y="156.0" font-size="13" font-weight="700" fill="#1f2328" text-anchor="start" >The documents</text>
+<text x="20" y="172.0" font-size="13" font-weight="700" fill="#1f2328" text-anchor="start" >hold the answer</text>
+<text x="20" y="288.0" font-size="13" font-weight="700" fill="#1f2328" text-anchor="start" >The documents do</text>
+<text x="20" y="304.0" font-size="13" font-weight="700" fill="#1f2328" text-anchor="start" >not hold it</text>
+<rect x="190" y="100" width="300" height="120" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.4"/>
+<text x="204" y="126" font-size="14" font-weight="700" fill="#2e7d32" text-anchor="start" >Correct and cited</text>
+<text x="204" y="148" font-size="13" font-weight="600" fill="#1f2328" text-anchor="start" >46.3% of these questions</text>
+<text x="204" y="170" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >This is the goal. Another 15.0% are</text>
+<text x="204" y="185" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >answered, but wrongly or without the right</text>
+<text x="204" y="200" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >citation.</text>
+<rect x="502" y="100" width="300" height="120" rx="8" fill="#fff4e5" stroke="#ef6c00" stroke-width="1.4"/>
+<text x="516" y="126" font-size="14" font-weight="700" fill="#ef6c00" text-anchor="start" >Over-refusal</text>
+<text x="516" y="148" font-size="13" font-weight="600" fill="#1f2328" text-anchor="start" >38.6% of these questions</text>
+<text x="516" y="170" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >Safe but unhelpful. This is the price of the</text>
+<text x="516" y="185" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >two repairs.</text>
+<rect x="190" y="232" width="300" height="120" rx="8" fill="#fdeceb" stroke="#b42318" stroke-width="1.4"/>
+<text x="204" y="258" font-size="14" font-weight="700" fill="#b42318" text-anchor="start" >Unsupported answer</text>
+<text x="204" y="280" font-size="13" font-weight="600" fill="#1f2328" text-anchor="start" >42 of 375 (11.2%)</text>
+<text x="204" y="302" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >The system answers although the evidence was</text>
+<text x="204" y="317" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >hidden. The answer may be made up. Lower is</text>
+<text x="204" y="332" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >better.</text>
+<rect x="502" y="232" width="300" height="120" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.4"/>
+<text x="516" y="258" font-size="14" font-weight="700" fill="#2e7d32" text-anchor="start" >Correct refusal</text>
+<text x="516" y="280" font-size="13" font-weight="600" fill="#1f2328" text-anchor="start" >333 of 375 (88.8%)</text>
+<text x="516" y="302" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >It says the documents do not hold the</text>
+<text x="516" y="317" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >answer. This counts as success.</text>
+<text x="20" y="402" font-size="11" font-weight="400" fill="#57606a" text-anchor="start" >Macro success rewards the two green cells, averaged over four groups of questions. Refusing every question therefore scores 42.0%.</text>
+<text x="20" y="420" font-size="11" font-weight="400" fill="#57606a" text-anchor="start" >That is why we also report the share of correct, cited answers and the share of unsupported answers.</text>
+</svg>

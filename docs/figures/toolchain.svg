@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="530" viewBox="0 0 820 530" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="820" height="530" fill="#ffffff"/>
+<defs><marker id="head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#6e7781"/></marker></defs>
+<text x="20" y="26" font-size="16" font-weight="600" fill="#1f2328" text-anchor="start" >Where AgentTune and AuditKIT fit</text>
+<text x="20" y="46" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >Blue boxes are AgentTune, green boxes are AuditKIT, grey boxes are code we wrote.</text>
+<rect x="20" y="70" width="177" height="176" rx="8" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1.4"/>
+<text x="108.5" y="92" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle" >1  Documents</text>
+<text x="108.5" y="112" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >Public question sets</text>
+<text x="108.5" y="127" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >(HotpotQA, SQuAD, RGB)</text>
+<text x="108.5" y="142" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >and our fictional Nimbus</text>
+<text x="108.5" y="157" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >manuals, cut into short</text>
+<text x="108.5" y="172" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >passages.</text>
+<rect x="221" y="70" width="177" height="176" rx="8" fill="#e8f1fb" stroke="#1565c0" stroke-width="1.4"/>
+<text x="309.5" y="92" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle" >2  Search tool</text>
+<text x="309.5" y="112" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >SQLiteFTSBackend is a</text>
+<text x="309.5" y="127" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >keyword index.</text>
+<text x="309.5" y="142" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >SearchCorpusTool is the</text>
+<text x="309.5" y="157" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >search_corpus call the</text>
+<text x="309.5" y="172" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >model makes; we</text>
+<text x="309.5" y="187" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >subclassed it to hide</text>
+<text x="309.5" y="202" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >chosen passages.</text>
+<rect x="422" y="70" width="177" height="176" rx="8" fill="#e8f1fb" stroke="#1565c0" stroke-width="1.4"/>
+<text x="510.5" y="92" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle" >3  Practice runs</text>
+<text x="510.5" y="112" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >A scripted policy solves</text>
+<text x="510.5" y="127" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >training questions with</text>
+<text x="510.5" y="142" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >that tool. Each run is</text>
+<text x="510.5" y="157" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >saved as an EventLog.</text>
+<rect x="623" y="70" width="177" height="176" rx="8" fill="#e8f1fb" stroke="#1565c0" stroke-width="1.4"/>
+<text x="711.5" y="92" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle" >4  Training</text>
+<text x="711.5" y="112" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >create_distill_trainer</text>
+<text x="711.5" y="127" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >turns the EventLogs into</text>
+<text x="711.5" y="142" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >training rows. Our QLoRA</text>
+<text x="711.5" y="157" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >factory trains the</text>
+<text x="711.5" y="172" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >adapter on one T4.</text>
+<rect x="623" y="294" width="177" height="176" rx="8" fill="#e8f1fb" stroke="#1565c0" stroke-width="1.4"/>
+<text x="711.5" y="316" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle" >5  Test runs</text>
+<text x="711.5" y="336" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >The trained model answers</text>
+<text x="711.5" y="351" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >new questions with the</text>
+<text x="711.5" y="366" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >same tool. Each run is</text>
+<text x="711.5" y="381" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >saved as a</text>
+<text x="711.5" y="396" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >TrajectoryStore record.</text>
+<rect x="422" y="294" width="177" height="176" rx="8" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1.4"/>
+<text x="510.5" y="316" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle" >6  Wrap each run</text>
+<text x="510.5" y="336" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >Our adapter turns every</text>
+<text x="510.5" y="351" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >run into an ak.Sample: a</text>
+<text x="510.5" y="366" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >RAGTrace (what it</text>
+<text x="510.5" y="381" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >searched, read and cited)</text>
+<text x="510.5" y="396" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >and a RAGCase (the right</text>
+<text x="510.5" y="411" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >behaviour).</text>
+<rect x="221" y="294" width="177" height="176" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.4"/>
+<text x="309.5" y="316" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle" >7  Score</text>
+<text x="309.5" y="336" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >ak.evaluate computes</text>
+<text x="309.5" y="351" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >seven scores: evidence-</text>
+<text x="309.5" y="366" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >set recall, citation</text>
+<text x="309.5" y="381" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >support, abstention,</text>
+<text x="309.5" y="396" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >tool-call validity,</text>
+<text x="309.5" y="411" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >redundant calls, loop</text>
+<text x="309.5" y="426" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >detection, freshness.</text>
+<rect x="20" y="294" width="177" height="176" rx="8" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1.4"/>
+<text x="108.5" y="316" font-size="13" font-weight="700" fill="#1f2328" text-anchor="middle" >8  Decide</text>
+<text x="108.5" y="336" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >Scorecards and our own</text>
+<text x="108.5" y="351" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >scorer decide what we</text>
+<text x="108.5" y="366" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >keep. The rules were</text>
+<text x="108.5" y="381" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >written before the sealed</text>
+<text x="108.5" y="396" font-size="11" font-weight="400" fill="#57606a" text-anchor="middle" >test was opened.</text>
+<line x1="198" y1="158.0" x2="218" y2="158.0" stroke="#6e7781" stroke-width="1.6" marker-end="url(#head)"/>
+<line x1="399" y1="158.0" x2="419" y2="158.0" stroke="#6e7781" stroke-width="1.6" marker-end="url(#head)"/>
+<line x1="600" y1="158.0" x2="620" y2="158.0" stroke="#6e7781" stroke-width="1.6" marker-end="url(#head)"/>
+<line x1="711.5" y1="247" x2="711.5" y2="291" stroke="#6e7781" stroke-width="1.6" marker-end="url(#head)"/>
+<line x1="622" y1="382.0" x2="602" y2="382.0" stroke="#6e7781" stroke-width="1.6" marker-end="url(#head)"/>
+<line x1="421" y1="382.0" x2="401" y2="382.0" stroke="#6e7781" stroke-width="1.6" marker-end="url(#head)"/>
+<line x1="220" y1="382.0" x2="200" y2="382.0" stroke="#6e7781" stroke-width="1.6" marker-end="url(#head)"/>
+<text x="20" y="500" font-size="11" font-weight="400" fill="#57606a" text-anchor="start" >AgentTune covers steps 2 to 5 (build, record, train). AuditKIT covers step 7 (score). Step 6 is the glue between them.</text>
+<text x="20" y="518" font-size="11" font-weight="400" fill="#57606a" text-anchor="start" >Preference training (DPO) used our own short loop, because AgentTune's DPO trainer ran out of memory on a T4.</text>
+</svg>

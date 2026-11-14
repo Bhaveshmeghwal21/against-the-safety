@@ -64,3 +64,26 @@ def test_the_demo_run_in_the_readme_matches_the_saved_output():
             right += 1
     assert (right, wrong, over_refusal) == (5, 2, 1)
     assert "Five of eight match" in text and "five right, two wrong, one over-refusal" in text
+
+
+@pytest.mark.parametrize("document", ["README.md", "article/ARTICLE.md"])
+def test_the_auditkit_table_matches_the_first_round_scorecard(document):
+    import re
+
+    scorecard = (ROOT / "reports" / "scorecard_test_lenient.md").read_text(encoding="utf-8")
+    text = (ROOT / document).read_text(encoding="utf-8")
+    rows = {
+        "auditkit_evidence_set_recall": ("| Evidence-set recall |", False),
+        "auditkit_citation_support": ("| Citation support |", False),
+        "auditkit_abstention": ("| Abstention |", False),
+        "tool_call_validity": ("| Tool-call validity |", False),
+        "redundant_tool_calls (lower is better)": ("| Redundant tool calls (lower is better) |", True),
+        "agent_loop_detection (1.0 = loop-free)": ("| Loop-free episodes |", True),
+    }
+    for key, (label, percent) in rows.items():
+        match = re.search(rf"^\| {re.escape(key)} \| ([\d.]+) \| ([\d.]+) \| ([\d.]+) \|", scorecard, re.M)
+        assert match, key
+        values = [f"{float(v) * 100:.1f}%" if percent else f"{float(v):.3f}" for v in match.groups()]
+        line = next((l for l in text.splitlines() if l.startswith(label)), None)
+        assert line is not None, f"{document} has no row {label}"
+        assert line.endswith("| " + " | ".join(values) + " |"), f"{document}: {line} does not match {values}"

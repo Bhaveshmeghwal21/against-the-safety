@@ -6,15 +6,35 @@ Code: https://github.com/Bhaveshmeghwal21/against-the-safety · Models and data:
 
 ## Abstract
 
-A document assistant is only useful if it answers from its documents and says so when they don't hold the answer. We fine-tuned Tiny Aya Global (3.35B) with QLoRA through AgentTune so that it searches a document set up to three times, then answers with citations or refuses. Two repairs sit on top of the model and need no training: a fail-closed rule that turns any invalid ending into a refusal, and a self-check in which the same model reads the cited passages and withholds an answer they do not support.
+A document assistant is only useful if it answers from its documents and says so when they don't hold the answer. This setup is called retrieval-augmented generation (RAG): the assistant searches the documents, then writes an answer from what it found. We fine-tuned Tiny Aya Global (3.35B), a small open model, with QLoRA, which trains a small add-on file (an adapter) instead of the whole model. Training ran through AgentTune, Lexsi's library for training agents. The model searches a document set up to three times, then answers with citations or refuses. Two repairs written as ordinary code sit on top and need no training: a fail-closed rule that turns any invalid ending into a refusal, and a self-check in which the same model reads the cited passages and withholds an answer they do not support. AuditKIT, Lexsi's scoring library, scored our first-round runs and checked evidence coverage; the headline numbers below come from our own scorer.
 
-We scored every system with deterministic code on a sealed test of 938 SQuAD, HotpotQA and RGB episodes, about 40% of which hide the evidence. Against the base model, the submitted system raises correct, cited answers on answerable episodes from 5.7% to 46.3% and cuts answers given when the evidence was hidden from 281 of 375 to 42 of 375. Of the answers it shows, 67.3% are correct. Macro success, which counts a correct refusal as success, is 58.0%. A policy that refuses every question scores 42.0%, so we report four measures and not macro success alone. In a format-aware comparison on 925 shared episodes, GPT-6 Luna and DeepSeek V4 Flash score 70.7% and 68.8% macro success, but show a wrong or unsupported answer in 23.9% and 20.8% of cases, against 13.3% for our system and 9.8% for its alternative checkpoint candF1 (64.5% macro success).
+We scored every system with fixed code, not an AI judge, on a sealed test (questions locked away before training) of 938 SQuAD, HotpotQA and RGB episodes, about 40% of which hide the evidence. Against the base model, the submitted system raises correct, cited answers on answerable episodes from 5.7% to 46.3% and cuts answers given when the evidence was hidden from 281 of 375 to 42 of 375. Of the answers it shows, 67.3% are correct. Macro success, which counts a correct refusal as success, is 58.0%. A policy that refuses every question scores 42.0%, so we report four measures and not macro success alone. In a format-aware comparison on 925 shared episodes, GPT-6 Luna and DeepSeek V4 Flash score 70.7% and 68.8% macro success, but show a wrong or unsupported answer in 23.9% and 20.8% of cases, against 13.3% for our system and 9.8% for its alternative checkpoint candF1 (64.5% macro success).
 
 Every later training change failed its own pre-registered release rule: a patch for single-passage questions, a matched-evidence curriculum, preference training (its checkpoints stopped abstaining) and trained answer checkers. The test covers English short factual questions. The sealed test was opened before our scoring corrections, so further model selection needs a fresh test, and hidden-evidence answers are annotation-based flags, not human-checked hallucinations.
 
 ## 1. Problem and approach
 
-A document assistant has to do four things: decide when to search, find the right passages, answer only from what it found, and refuse when the passages do not hold the answer. A small model usually does the first two passably and fails the last two. The base Tiny Aya Global answered 75% of our test episodes whose evidence we had hidden.
+### The idea in plain terms
+
+Companies want assistants that answer from their own documents: manuals, policies, help pages. The assistant first searches the documents, then writes an answer from what it found. The weak spot is the case where the documents do not hold the answer. A language model then often answers anyway, and the answer sounds confident. The untrained Tiny Aya Global did this in 75% of our test episodes whose evidence we had hidden.
+
+A document assistant has to do four things: decide when to search, find the right passages, answer only from what it found, and refuse when the passages do not hold the answer. A small model usually does the first two passably and fails the last two.
+
+### Terms used in this article
+
+| Term | What it means here |
+| --- | --- |
+| Passage or chunk | A short piece of a document with an ID such as `c00019`. The model cites these IDs. |
+| Refuse, or abstain | Saying the documents do not hold the answer, instead of guessing. |
+| Adapter, LoRA, QLoRA | An adapter is a small add-on file (121 MB here) that holds only what training changed. LoRA is the method. QLoRA does it while the base model is squeezed to 4 bits, so it fits a 16 GB T4 GPU. |
+| Episode | One question, its documents, and the model's whole attempt. |
+| Evidence hidden | A test episode where we removed the passages that hold the answer. The right move is to refuse. |
+| Unsupported answer | An answer given although the evidence was hidden. It stands in for "made up" and comes from annotations, not hand checks. |
+| Sealed test | Questions locked away before training and opened only to score finished systems. |
+| Macro success | The average of four groups' success rates. A correct, cited answer or a correct refusal counts. Refusing every question scores 42.0%. |
+| Pre-registered rule | A pass or fail rule written down before the result was known. |
+
+### What we built
 
 We trained Tiny Aya Global (3.35B) with QLoRA to run a small protocol: call `search_corpus` up to three times (three passages per search, 800 characters each), then end with `<answer>` and chunk citations, or `<abstain>` saying what is missing. The training data are scripted episodes built from 600 HotpotQA training questions in six evidence states: clean support, a distractor ranked first, second-hop recovery, evidence hidden (the right move is to refuse), evidence supplied in the prompt, and a weak first search. That gave 1,611 training turns, 537 each of search, answer and refusal. A control adapter, trained on the answering episodes only, shows what the refusal examples change.
 
@@ -24,23 +44,43 @@ Two repairs run on the model's output and need no training. The **fail-closed ru
 
 ## 2. Lexsi repositories used
 
-| | Used for | Where in the repository |
+The hackathon asked every Track 3 team to use two Lexsi Labs libraries. One is the workshop where the model is taught, the other is the examiner.
+
+**AgentTune** is a library for building and training agents. An agent is a model that works in several steps and uses tools, here a search tool, instead of answering in one go. AgentTune supplies the tool, records every step an agent takes in a standard format, and turns those recordings into training data. **AuditKIT** scores models and agents with fixed code. For RAG it asks whether the system found enough evidence, whether its citations are real and whether it refused when it should have. For agents it checks tool use.
+
+![Where AgentTune and AuditKIT fit](../docs/figures/png/toolchain.png)
+
+### How we used AgentTune
+
+| Step | AgentTune part | What we did with it |
 | --- | --- | --- |
-| [AgentTune](https://github.com/Lexsi-Labs/AgentTune) | `create_distill_trainer` with a QLoRA trainer factory; `SQLiteFTSBackend` and the corpus search tool the model calls; `EventLog` and `TrajectoryStore` for every training episode and evaluation rollout; `qa_metrics` | `src/ragharness/trainer.py`, `retrieval.py`, `tools.py`, `episodes.py` |
-| [AuditKIT](https://github.com/Lexsi-Labs/AuditKIT) | each episode as an `ak.Sample` with a `RAGTrace`, scored with `ak.evaluate`: evidence-set recall, citation support, abstention, tool-call validity, redundant tool calls, loop detection, and freshness on dated documents | `src/ragharness/audit.py`, `scorecard.py` |
+| Search | `SQLiteFTSBackend`, `SearchCorpusTool` | A keyword index of the passages. The `search_corpus` tool the model calls is a subclass of AgentTune's. Three changes: it shows 800 characters of a passage instead of 350, hides relevance scores, and can hide chosen passages for evidence-hidden episodes. AgentTune's backend reports a broken index as "no results", so we added a check that fails loudly when the index is empty or wrong. |
+| Recording | `EventLog`, `TrajectoryStore` | Every scripted training episode is saved as an EventLog and every evaluation run as a TrajectoryStore record. Both are published in the episodes dataset. |
+| Training | `create_distill_trainer` | It takes the EventLogs and hands training rows to a trainer factory. Ours trains a 4-bit LoRA adapter on one T4 and learns only from the model's own turns. AgentTune's default factory loads the model in bf16 (a T4 has no bf16) and trains on every token. |
+| Answer matching | `qa_metrics` | Word-overlap (F1) between an answer and the reference. |
+| What did not fit | DPO trainer | It ran out of memory on a T4, so preference training used our own short loop with the same loss. |
 
-AuditKIT results from the first round (HotpotQA test split, scorer before the 13 November corrections):
+### How we used AuditKIT
 
-| AuditKIT metric | Base | Main | Control |
-| --- | ---: | ---: | ---: |
-| Evidence-set recall | 0.512 | 0.727 | 0.824 |
-| Citation support | 0.302 | 0.771 | 0.941 |
-| Abstention | 0.721 | 0.794 | 0.714 |
-| Tool-call validity | 1.000 | 1.000 | 1.000 |
-| Redundant tool calls (lower is better) | 3.1% | 2.9% | 8.8% |
-| Loop-free episodes | 94.1% | 93.4% | 78.4% |
+For every evaluation episode we build two records and hand them to AuditKIT. An `ak.Sample` carries a `RAGTrace`: the searches, the passages retrieved, the citations and the final answer or refusal. A `RAGCase` holds the right behaviour: whether the question was answerable, which passages are enough, the reference answer. `ak.evaluate` returns the scores. First-round results on the HotpotQA test split, scored before the 13 November corrections:
 
-The headline numbers below come from our own scorer, because it checks that an answer is correct and that the cited passages contain the required evidence. We did not run AuditKIT's shipped benchmark suites (ARC, GSM8K, MMLU, TruthfulQA, BFCL); none of them tests retrieval. AgentTune's DPO trainer ran out of memory on a T4, so preference training used our own short loop with the same loss.
+| AuditKIT metric | The question it answers | Base | Main | Control |
+| --- | --- | ---: | ---: | ---: |
+| Evidence-set recall | Did the searches retrieve at least one complete set of passages that is enough to answer? | 0.512 | 0.727 | 0.824 |
+| Citation support | Do the citations point to passages that exist, are current and support the answer? | 0.302 | 0.771 | 0.941 |
+| Abstention | Did it refuse when it should and answer when it should? | 0.721 | 0.794 | 0.714 |
+| Tool-call validity | Were the search calls well formed? | 1.000 | 1.000 | 1.000 |
+| Redundant tool calls (lower is better) | What share of searches exactly repeat an earlier one? | 3.1% | 2.9% | 8.8% |
+| Loop-free episodes | What share of episodes never fell into a repetition loop? | 94.1% | 93.4% | 78.4% |
+
+What it showed us:
+
+- **Training taught citing.** Citation support rose from 0.302 to 0.771.
+- **Refusal examples teach the model when to stop.** The control adapter, trained without them, had only 78.4% loop-free episodes and 8.8% repeated searches. Main had 93.4% and 2.9%.
+- **It reports "unknown" instead of guessing.** When our reference evidence was incomplete, AuditKIT gave no score for those episodes. That exposed an earlier RGB recall figure of 0.960 that covered only 25 of 286 answerable episodes. With complete evidence sets all 286 were scored and recall was 1.000.
+- **Freshness on dated manuals.** On our fictional Nimbus manuals, which hold old and new editions of one policy, AuditKIT's freshness score was 0.813 for main and 0.783 for base. About one retrieved dated passage in five was an out-of-date edition.
+
+We did not run AuditKIT's general benchmarks (ARC, GSM8K, MMLU, TruthfulQA, BFCL): none tests answering from supplied documents with citations. The headline numbers below come from our own scorer, which checks in one pass that an answer is correct and that the cited passages contain the required evidence.
 
 ## 3. Models and licenses
 
@@ -59,7 +99,13 @@ Training and evaluation use HotpotQA and SQuAD 2.0 (CC BY-SA 4.0), RGB (CC BY-NC
 
 ## 6. Experiments and findings
 
-We scored every system with deterministic code on a sealed test of 938 SQuAD, HotpotQA and RGB episodes that nothing earlier had used (934 scorable). About 40% of them hide the evidence. The scorer (v3) counts an answer as correct only if it matches the reference and cites every required piece of evidence.
+We scored every system with deterministic code on a sealed test of 938 SQuAD, HotpotQA and RGB episodes that nothing earlier had used (934 scorable). SQuAD 2.0 asks about single Wikipedia paragraphs, HotpotQA needs facts from two articles, and RGB asks about news with noisy passages. About 40% of the episodes hide the evidence. The scorer (v3) counts an answer as correct only if it matches the reference and cites every required piece of evidence.
+
+A question can end in four ways. The figure shows how often each happens for the submitted system.
+
+![The four outcomes of a question](../docs/figures/png/outcomes.png)
+
+All systems on four measures:
 
 ![Four measures for six systems](../docs/figures/png/headline.png)
 
@@ -71,15 +117,15 @@ We scored every system with deterministic code on a sealed test of 938 SQuAD, Ho
 | candF1 + both repairs (alternative) | 64.0% | 53.3% | 40 / 375 | 76.4% |
 | Refuse every question | 42.0% | 0.0% | 0 / 375 | none |
 
-Macro success averages four components (SQuAD single, SQuAD two-part, HotpotQA, RGB) and counts a correct refusal as success, so refusing everything scores 42.0%. That is why we report the other three measures beside it. *Hidden-evidence answers* are answers the annotations do not support; they are not human-checked hallucinations.
+The columns: *Macro success* averages four groups of questions (SQuAD single, SQuAD two-part, HotpotQA, RGB) and counts a correct refusal as success, so refusing everything scores 42.0%. *Correct and cited* is the share of answerable episodes answered correctly with the right citation. *Answers when evidence was hidden* counts episodes that still got an answer; lower is better, and these are annotation-based flags, not human-checked hallucinations. *Correct among answers shown* is the share of the system's own answers that are correct.
 
 **What the repairs do.** On the adapter alone, 115 of 375 hidden-evidence episodes get an answer. The two repairs cut that to 42 and lift macro success from 47.9% to 58.0%, at the cost of coverage: the system refuses 39% of answerable questions. The accuracy gain over the base model comes from training (5.7% to 48.8% correct and cited); the repairs leave it at 46.3%.
 
-**Main or candF1?** Main is the registered system: we chose it before the test was opened. candF1 scores 6.0 points higher on macro success (95% interval +3.0 to +9.2), but a gate written after we saw its development results selected it, and its hidden-evidence answer rate is not clearly lower (−0.5 points, interval −4.6 to +3.4; our rule needed the upper end at +2 or below). We publish it as the alternative.
+**Main or candF1?** Main is the registered system: we chose it before the test was opened. candF1 scores 6.0 points higher on macro success (95% interval +3.0 to +9.2, the range the true difference very likely lies in), but a gate written after we saw its development results selected it, and its hidden-evidence answer rate is not clearly lower (−0.5 points, interval −4.6 to +3.4; our rule needed the upper end at +2 or below). We publish it as the alternative.
 
 ### Against hosted models
 
-On the 925 episodes both sides could answer, with the hosted models told the three-search limit and the answer format (the adapter learned them in training):
+As a yardstick we ran two large commercial models. On the 925 episodes both sides could answer, with the hosted models told the three-search limit and the answer format (the adapter learned them in training):
 
 ![Correct answers against answers when the evidence was hidden](../docs/figures/png/tradeoff.png)
 
@@ -104,7 +150,7 @@ GPT-6 Luna is 6.2 points above candF1 on macro success (interval +1.1 to +11.1);
 
 - **Refusal examples are what make the model stop.** The control adapter answered more but never refused; it kept searching until its budget ran out.
 - **Cheap fixes beat more training.** The two repairs added 10 points of macro success with no retraining. Every training change after round 1 missed its own pre-registered release rule.
-- **Preference training removed refusals.** Its pairs almost never chose an abstention, so the checkpoints stopped abstaining. A second run with abstention pairs restored it from main but passed no gate. Some of these training prompts also exposed held-out evidence; main and candF1 predate them, and the cleaned pair files are in the remediation report.
+- **Preference training removed refusals.** Preference training (DPO) shows the model pairs of a better and a worse answer and nudges it toward the better one. Our pairs almost never chose a refusal, so the checkpoints stopped refusing. A second run with refusal pairs restored it from main but passed no gate. Some of these training prompts also exposed held-out evidence; main and candF1 predate them, and the cleaned pair files are in the remediation report.
 - **A trained checker did not beat the plain one.** Two adapters trained to check answers never reached our hidden-evidence limit at any threshold. The Round 6 sealed test is unopened.
 
 ## 7. Compute and cost
