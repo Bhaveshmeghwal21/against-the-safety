@@ -256,4 +256,11 @@ We would train quote-first answer targets, balance supported answers and refusal
 [BMEscanor](https://huggingface.co/BMEscanor) and [abd420](https://huggingface.co/abd420). A friend provided Kaggle compute with permission; the friend is not listed as a teammate.
 '''
 (ROOT / 'article/ARTICLE.md').write_text(article, encoding='utf-8')
+form_path = ROOT / 'article/FORM_DRAFT.md'
+if form_path.exists():
+    form = form_path.read_text(encoding='utf-8')
+    marker = '## Abstract for the form\n\n'
+    if form.count(marker) != 1:
+        raise SystemExit('Cannot locate the form abstract section')
+    form_path.write_text(form.split(marker, 1)[0] + marker + abstract + '\n', encoding='utf-8')
 print(f"README words: {len(re.findall(r'\S+', read('README.md')))}; article words: {len(re.findall(r'\S+', article))}")
