@@ -263,7 +263,7 @@ def main() -> None:
             forced = OUT / f'forced/forced_{name}.jsonl'
             if forced.exists():
                 out = cases / f'forced_{name}.jsonl'
-                sh(f'{py} scripts/build_recover_cases.py --contexts {ctx} --forced {forced} --out {out}')
+                sh(f'{py} scripts/build_recover_cases.py --contexts {ctx} --forced {forced} --out {out} --system {name}')
                 combined.extend(out.read_text(encoding='utf-8').splitlines())
         (cases / 'forced_all.jsonl').write_text(''.join(line + '\n' for line in combined), encoding='utf-8')
         checks_chains = {0: [], 1: []}

@@ -4,6 +4,21 @@
   "eligible_checker_cases": 348,
   "deterministic_flags_and_passages_match": true,
   "checker_thresholds_and_binary_diagnostics_match": true,
+  "forced_coverage": {
+    "main": {
+      "actor_contexts": 310,
+      "forced_responses": 310,
+      "actual_missing": 0,
+      "original_summary_missing_field": 287
+    },
+    "candF1": {
+      "actor_contexts": 287,
+      "forced_responses": 287,
+      "actual_missing": 0,
+      "original_summary_missing_field": 310
+    }
+  },
+  "forced_summary_note": "The original per-actor summary used the combined actor context count; its missing_forced field includes the other actor and is misleading. Selection checked the raw actor-specific IDs and was unaffected.",
   "checkers": {
     "V": {
       "eligible_checker_cases": 348,

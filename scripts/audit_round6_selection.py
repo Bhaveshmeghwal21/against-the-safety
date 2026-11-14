@@ -64,6 +64,19 @@ def main():
     cases = rows_by_key(RS.read(root / 'cases/answers.jsonl'))
     if set(cases) != set(transcripts):
         raise ValueError('Answered development cases do not match transcripts')
+    contexts = RS.read(root / 'cases/recover_contexts.jsonl')
+    if len({c['id'] for c in contexts}) != len(contexts):
+        raise ValueError('Duplicate recovery contexts')
+    forced_coverage = {}
+    for actor in ('main', 'candF1'):
+        expected = {c['id'] for c in contexts if c['system'] == actor}
+        forced = RS.read(root / f'forced/forced_{actor}.jsonl')
+        ids = [row['id'] for row in forced]
+        if len(ids) != len(set(ids)) or set(ids) != expected:
+            raise ValueError(f'{actor} forced responses are duplicated, missing or unexpected')
+        summary = json.loads((root / f'cases/forced_{actor}.summary.json').read_text(encoding='utf-8'))
+        forced_coverage[actor] = {'actor_contexts': len(expected), 'forced_responses': len(ids),
+                                  'actual_missing': 0, 'original_summary_missing_field': summary['missing_forced']}
     eligible = {}
     for k, case in cases.items():
         t, score, flags = transcripts[k]
@@ -100,6 +113,10 @@ def main():
     result = {'scope': 'r4dev and HotpotQA dev only; no Round 6 test data or outputs',
               'answered_transcripts': len(transcripts), 'eligible_checker_cases': len(eligible),
               'deterministic_flags_and_passages_match': True, 'checker_thresholds_and_binary_diagnostics_match': True,
+              'forced_coverage': forced_coverage,
+              'forced_summary_note': 'The original per-actor summary used the combined actor context count; '
+                                     'its missing_forced field includes the other actor and is misleading. '
+                                     'Selection checked the raw actor-specific IDs and was unaffected.',
               'checkers': checked}
     path = ROOT / 'reports/round6_selection_audit.json'
     path.write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')

@@ -9,16 +9,40 @@ from ragharness import checker, protocol
 from ragharness.retrieval import Hit
 
 
+def forced_coverage(contexts, forced, system=None):
+    """Count missing responses only among the actor contexts in this forced file."""
+    ids = [row['id'] for row in forced]
+    if len(ids) != len(set(ids)):
+        raise ValueError('Duplicate forced-answer IDs')
+    if not set(ids) <= set(contexts):
+        raise ValueError('Forced answer does not have a matching context')
+    actors = {contexts[ident]['system'] for ident in ids}
+    if system:
+        if actors - {system}:
+            raise ValueError('Forced answers do not match the requested system')
+        actors = {system}
+    if not actors:
+        actors = {context['system'] for context in contexts.values()}
+        if len(actors) > 1:
+            raise ValueError('Supply --system when the forced file is empty and contexts contain multiple actors')
+    expected = {ident for ident, context in contexts.items() if context['system'] in actors}
+    return {'input_contexts': len(contexts), 'contexts': len(expected), 'forced': len(ids),
+            'missing_forced': len(expected - set(ids)), 'systems': sorted(actors)}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--contexts', required=True)
     ap.add_argument('--forced', required=True)
     ap.add_argument('--out', required=True)
+    ap.add_argument('--system', default=None, help='actor scope, required for an empty forced file with mixed contexts')
     args = ap.parse_args()
-    contexts = {r['id']: r for r in RS.read(args.contexts)}
+    context_rows = RS.read(args.contexts)
+    contexts = {r['id']: r for r in context_rows}
+    if len(contexts) != len(context_rows):
+        raise ValueError('Duplicate recovery-context IDs')
     forced = RS.read(args.forced)
-    if len({r['id'] for r in forced}) != len(forced):
-        raise ValueError('Duplicate forced-answer IDs')
+    coverage = forced_coverage(contexts, forced, args.system)
     cases, counts = [], Counter()
     for item in forced:
         if item['id'] not in contexts:
@@ -46,8 +70,7 @@ def main():
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(''.join(json.dumps(r, ensure_ascii=False) + '\n' for r in cases), encoding='utf-8')
-    summary = {'contexts': len(contexts), 'forced': len(forced), 'cases': len(cases),
-               'missing_forced': len(contexts) - len(forced), 'rejected': dict(counts)}
+    summary = {**coverage, 'cases': len(cases), 'rejected': dict(counts)}
     out.with_suffix('.summary.json').write_text(json.dumps(summary, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(summary))
 
