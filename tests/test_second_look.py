@@ -20,7 +20,7 @@ def test_second_look_turns_a_refusal_into_a_checked_answer(backend):
     rag, force = make(backend, Script(SEARCH, ABSTAIN), GOOD, p=0.93)
     d = rag.ask(QUESTION)
     assert (d.decision, d.answer, d.citations, d.repaired_by, d.model_final) == ('answer', '30 days', ['c00001'], 'second_look', 'abstain')
-    assert len(force.calls) == 1
+    assert len(force.calls) == 1 and d.model_calls == 3
 
 
 def test_second_look_also_follows_a_repeated_query(backend):

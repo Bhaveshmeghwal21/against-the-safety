@@ -116,6 +116,8 @@ class RagSystem:
         base = dict(model_final=final.kind, model_text=last_text, queries=queries, shown_chunk_ids=list(shown), model_calls=calls)
         abstain_text = protocol.format_abstain(episodes.ABSTAIN_TEXT.format(question=question))
         if final.kind != 'answer' and self.recover_threshold is not None and shown:
+            # The forced continuation is another actor generation, even if rejected.
+            base['model_calls'] += 1
             raw_forced = self.force_generate(messages)
             forced, forced_text = protocol.parse_turn_lenient(raw_forced)
             failure, probability = '', None
