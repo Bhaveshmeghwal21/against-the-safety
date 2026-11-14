@@ -37,7 +37,7 @@ def test_threshold_is_inclusive_and_blocks_below(backend):
 @pytest.mark.parametrize('p', [float('nan'), float('inf'), -0.1, 1.1])
 def test_invalid_second_look_probability_fails_closed(backend, p):
     d = make(backend, Script(SEARCH, ABSTAIN), GOOD, p=p)[0].ask(QUESTION)
-    assert d.decision == 'abstain' and d.reason
+    assert d.decision == 'abstain' and d.reason and d.p_supported is None
 
 
 def test_no_passage_on_screen_means_no_second_look(backend):

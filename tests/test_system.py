@@ -76,6 +76,7 @@ def test_invalid_self_check_probability_fails_closed(backend, p):
     result = rag.ask(QUESTION)
     assert result.decision == 'abstain' and result.repaired_by == 'self_check'
     assert result.reason == 'self-check: invalid support probability'
+    assert result.p_supported is None
 
 
 def test_citation_of_an_unshown_chunk_is_blocked_without_a_model_call(backend):
