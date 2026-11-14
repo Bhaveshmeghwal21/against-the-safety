@@ -387,6 +387,54 @@ def outcomes() -> None:
     write("outcomes.svg", out)
 
 
+# ---------------------------------------------------------------- multilingual check
+
+
+def xquad(report: Path | None = None, name: str = "xquad_results.svg") -> None:
+    """Hindi, English and Spanish side by side, from reports/xquad_results.json (written by scripts/report_xquad.py). Skipped if it does not exist yet."""
+    path = report or ROOT / "reports" / "xquad_results.json"
+    if not path.exists():
+        print("skipped", name, "(no report yet)")
+        return
+    rep = json.loads(path.read_text(encoding="utf-8"))
+    langs = [l for l in ("hi", "en", "es") if l in rep["systems"]]
+    names = {"hi": "Hindi", "en": "English", "es": "Spanish"}
+    rows = [("base", "Tiny Aya base", BASE), ("main", "main adapter alone", ADAPTER), ("main+FB+V", "main + both repairs (submitted)", MAIN)]
+    panels = [("Correct and cited answers", "share of episodes where the documents hold the answer, higher is better", "correct_and_cited"),
+              ("Answers although the evidence was hidden", "share of hidden-evidence episodes, lower is better", "hidden_answer_rate")]
+    w, pw, bar, top, chart_w, gap = 820, 380, 17, 86, 250, 24
+    group_h = 3 * bar + gap
+    h = top + len(langs) * group_h + 70
+    out = svg_open(w, h)
+    n = {l: rep["systems"][l]["main"] for l in langs}
+    out.append(text(20, 26, "The same questions in Hindi, English and Spanish: does the system keep its behaviour?", 16, weight=600))
+    out.append(text(20, 46, "XQuAD, " + ", ".join(f"{names[l]} {n[l]['n']} episodes" for l in langs) + ". The adapter was trained on English only. Scorer v3 with XQuAD normalization.", 11.5, MUTED))
+    for i, (title, sub, key) in enumerate(panels):
+        x0 = 20 + i * (pw + 20)
+        out.append(text(x0, top - 24, title, 13, weight=600))
+        out.append(text(x0, top - 9, sub, 11, MUTED))
+        y = top
+        for lang in langs:
+            out.append(text(x0, y + 11, names[lang], 11.5, INK, 600))
+            y += 15
+            for system, _, colour in rows[:3]:
+                m = rep["systems"][lang][system]
+                value = m[key] or 0
+                width = chart_w * value
+                out.append(f'<rect x="{x0 + 62}" y="{y - 11}" width="{width:.1f}" height="{bar - 3}" fill="{colour}"/>')
+                label = f"{value * 100:.1f}%" + (f"  ({m['hidden_answers']}/{m['n_hidden']})" if key == "hidden_answer_rate" else "")
+                out.append(text(x0 + 62 + width + 5, y, label, 10.5))
+                y += bar
+            y += gap - 15
+    x, y = 20, top + len(langs) * group_h + 22
+    for _, label, colour in rows:
+        out.append(f'<rect x="{x}" y="{y - 10}" width="12" height="12" fill="{colour}"/>')
+        out.append(text(x + 17, y, label, 11.5))
+        x += 18 + 6.4 * len(label) + 20
+    out.append(text(20, y + 24, "Bars follow the legend order in every group. Hidden-evidence answers are support flags from annotations, not human-checked hallucinations.", 10.5, MUTED))
+    write(name, out)
+
+
 def main() -> None:
     headline()
     tradeoff()
@@ -395,6 +443,7 @@ def main() -> None:
     outcomes()
     trace_examples()
     rounds()
+    xquad()
 
 
 if __name__ == "__main__":
