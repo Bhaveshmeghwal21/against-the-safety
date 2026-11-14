@@ -68,6 +68,22 @@ def test_new_v3_transcripts_roundtrip_without_being_compared_to_legacy_scores(tm
     assert not mismatches and rows[0]["strong_v3"] and not rows[0]["strong_v1"]
 
 
+def test_hosted_v3_score_replays_alternative_evidence(monkeypatch):
+    monkeypatch.syspath_prepend(str(ROOT / 'scripts'))
+    from ragharness import episodes
+    from scripts.azure_rag_eval import score_hosted_episode
+    from scripts.remediate_audit import validate_stored
+
+    q, corp, _, alternative = rgb_world()
+    text = protocol.format_answer(q.answer, [alternative])
+    ep = Episode(q.qid, q.question, 'open', frozenset(), prefill=[Hit(alternative, 'two', corp.chunk(alternative)['text'], 1)],
+                 steps=[Step(text, protocol.parse_turn(text))], max_chars=800)
+    stored = score_hosted_episode(ep, q, corp, True)
+    replayed = rescore.score(episodes.to_transcript(ep, q, stored), q, corp)
+    assert stored['scorer'] == 'v3' and replayed['strong_v3'] and not replayed['strong_v1']
+    validate_stored(replayed, stored, 'synthetic', q.qid, 'open')
+
+
 def test_compound_alternatives_require_every_component():
     q = Question("rgbint-case", "Who won both?", "Alice; Bob", "integration", "test",
                  [Paragraph("a", ["Alice won."]), Paragraph("b", ["Bob won."]), Paragraph("a2", ["Alice prevailed."])],
