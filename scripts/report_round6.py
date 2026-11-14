@@ -4,6 +4,7 @@ This script does not start a model or change the registered test. It refuses to
 read test outputs until Amendment 3 (development selection) and the exact selection report are committed.
 """
 import argparse
+import hashlib
 import json
 import math
 import re
@@ -32,9 +33,14 @@ def committed_selection(path):
         if result.returncode:
             raise ValueError(f'Not committed at HEAD: {name}')
         return result.stdout.decode('utf-8').replace('\r\n', '\n')
-    if not re.search(r'(?mi)^## Amendment 3:\s*development selection\s*$', committed(prereg)):
+    committed_prereg = committed(prereg)
+    heading = re.search(r'(?mi)^## Amendment 3:[ \t]*development selection[ \t]*$', committed_prereg)
+    if not heading:
         raise ValueError('Commit the preregistration Amendment 3: development selection before reading test outputs')
     saved = committed(rel)
+    match = re.search(r'(?m)^Selection report SHA256: `([0-9a-f]{64})`[ \t]*$', committed_prereg[heading.end():])
+    if not match or match.group(1) != hashlib.sha256(saved.encode('utf-8')).hexdigest():
+        raise ValueError('Committed Amendment 3 does not match the committed selection report')
     if saved != path.read_text(encoding='utf-8').replace('\r\n', '\n'):
         raise ValueError('The local development selection differs from the committed selection')
     selection = json.loads(saved)

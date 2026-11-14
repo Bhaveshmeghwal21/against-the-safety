@@ -38,3 +38,27 @@ def test_grid_amendment_does_not_unlock_sealed_test(monkeypatch):
         returncode=0, stdout=b'## Amendment 2: threshold-grid revision\n'))
     with pytest.raises(ValueError, match='Amendment 3'):
         committed_selection(report_round6.ROOT / 'reports/round6_selection.json')
+
+
+def test_selection_amendment_must_match_the_committed_report(tmp_path, monkeypatch):
+    import hashlib
+    import json
+    from types import SimpleNamespace
+    from scripts import report_round6
+
+    report = {'chosen_checker': 'V2m', 'checker_gates': {'V2m': {'passes': True}}}
+    saved = json.dumps(report) + '\n'
+    selection = tmp_path / 'reports/round6_selection.json'
+    selection.parent.mkdir()
+    selection.write_text(saved, encoding='utf-8')
+    fingerprint = hashlib.sha256(saved.encode('utf-8')).hexdigest()
+    prereg = f'## Amendment 3: development selection\n\nSelection report SHA256: `{fingerprint}`\n'
+    def git_show(cmd, **kwargs):
+        value = prereg if 'preregistration.md' in cmd[-1] else saved
+        return SimpleNamespace(returncode=0, stdout=value.encode('utf-8'))
+    monkeypatch.setattr(report_round6, 'ROOT', tmp_path)
+    monkeypatch.setattr(report_round6.subprocess, 'run', git_show)
+    assert committed_selection(selection) == report
+    prereg = prereg.replace(fingerprint, '0' * 64)
+    with pytest.raises(ValueError, match='does not match'):
+        committed_selection(selection)
