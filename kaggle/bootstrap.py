@@ -512,10 +512,14 @@ def main() -> None:
         if "main/adapter" not in adapters or "candF1/adapter" not in adapters:
             raise SystemExit("general needs the main and candF1 adapters")
         both = f"--adapter main={adapters['main/adapter']} --adapter candF1={adapters['candF1/adapter']}"
-        rc = run_parallel([
-            (f"{py} scripts/general_capability.py {both} --benches mmlu --out {OUT}/general", g0, "general_gpu0.log"),
-            (f"{py} scripts/general_capability.py {both} --benches arc_c,arc_e,truthfulqa,gmmlu_en,gmmlu_hi,gmmlu_es --out {OUT}/general", g1, "general_gpu1.log"),
-        ])
+        only = re.search(r"--benches\s+(\S+)", extra)
+        if only:  # re-run of selected benchmarks on GPU 0 (the first run failed on MMLU only)
+            rc = run_parallel([(f"{py} scripts/general_capability.py {both} --benches {only.group(1)} --out {OUT}/general", g0, "general_rerun.log")])
+        else:
+            rc = run_parallel([
+                (f"{py} scripts/general_capability.py {both} --benches mmlu --out {OUT}/general", g0, "general_gpu0.log"),
+                (f"{py} scripts/general_capability.py {both} --benches arc_c,arc_e,truthfulqa,gmmlu_en,gmmlu_hi,gmmlu_es --out {OUT}/general", g1, "general_gpu1.log"),
+            ])
     elif stage == "demo":  # web demo of the submitted system: a smoke run on the example questions, then a public gradio link for --minutes (default 50)
         if "main/adapter" not in adapters:
             raise SystemExit("demo needs the main adapter")

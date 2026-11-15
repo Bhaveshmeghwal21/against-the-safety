@@ -117,7 +117,7 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     summary = {"model_source": source, "gpu": torch.cuda.get_device_name(0) if torch.cuda.is_available() else "none", "torch": torch.__version__, "results": []}
     for bench in args.benches.split(","):
-        rows = [json.loads(l) for l in (ROOT / args.data / f"{bench}.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+        rows = [json.loads(l) for l in (ROOT / args.data / f"{bench}.jsonl").read_text(encoding="utf-8").split("\n") if l.strip()]  # not splitlines(): some MMLU questions contain U+2028 and similar
         if args.limit:
             rows = rows[: args.limit]
         with (out / f"{bench}.jsonl").open("w", encoding="utf-8", newline="\n") as f:

@@ -203,6 +203,28 @@ def judge_agreement_sentence():
             f"(Cohen's kappa {ag['cohen_kappa']:.2f})")
 
 
+def general_table():
+    """General-capability retention check (reports/general_capability.json, scripts/report_general.py): accuracy and the paired difference from the base model."""
+    rep = load('general_capability.json')['benchmarks']
+    pct1 = lambda x: f"{x * 100:.1f}"
+    lines = ['| Benchmark | Questions | Base | Main (submitted) | candF1 (alternative) | Main minus base (points) | candF1 minus base (points) |', '| --- | ---: | ---: | ---: | ---: | ---: | ---: |']
+    for b in rep.values():
+        a, d = b['accuracy'], b['difference_from_base']
+        diff = lambda s: f"{d[s]['difference'] * 100:+.1f} [{d[s]['ci95'][0] * 100:+.1f}, {d[s]['ci95'][1] * 100:+.1f}]"
+        lines.append(f"| {b['title']} | {b['questions']:,} | {pct1(a['base'])}% | {pct1(a['main'])}% | {pct1(a['candF1'])}% | {diff('main')} | {diff('candF1')} |")
+    return '\n'.join(lines)
+
+
+def general_rules_table():
+    rep = load('general_capability.json')
+    titles = {'mmlu': 'MMLU', 'arc_c': 'ARC-Challenge', 'arc_e': 'ARC-Easy'}
+    lines = ['| Registered rule: lower end of the paired interval at least -3.0 points | Main | candF1 |', '| --- | --- | --- |']
+    for b, title in titles.items():
+        cells = [f"{rep['rules'][a][b]['lower_end'] * 100:+.1f}: {'retained' if rep['rules'][a][b]['retained'] else 'not retained'}" for a in ('main', 'candF1')]
+        lines.append(f"| {title} | " + ' | '.join(cells) + ' |')
+    return '\n'.join(lines)
+
+
 if __name__ == '__main__':
     print(results_table())
     print()

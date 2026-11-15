@@ -89,6 +89,15 @@ def test_the_built_sets_have_the_registered_sizes_and_valid_gold():
     sizes = {k: v["questions"] for k, v in json.loads(manifest.read_text(encoding="utf-8")).items()}
     assert sizes == {"mmlu": 14042, "arc_c": 1172, "arc_e": 2376, "truthfulqa": 817, "gmmlu_en": 400, "gmmlu_hi": 400, "gmmlu_es": 400}
     for name in sizes:
-        for line in (ROOT / "data/general" / f"{name}.jsonl").read_text(encoding="utf-8").splitlines()[:200]:
+        for line in [l for l in (ROOT / "data/general" / f"{name}.jsonl").read_text(encoding="utf-8").split("\n") if l.strip()]:
             r = json.loads(line)
             assert 0 <= r["gold"] < len(r["choices"]) and r["question"].strip() and all(c.strip() for c in r["choices"])
+
+def test_every_line_of_every_built_set_parses_when_split_on_newlines_only():
+    """MMLU contains characters that str.splitlines() treats as line breaks; the loader must not."""
+    if not (ROOT / "data/general/mmlu.jsonl").exists():
+        pytest.skip("data/general not built")
+    text = (ROOT / "data/general/mmlu.jsonl").read_text(encoding="utf-8")
+    rows = [json.loads(l) for l in text.split("\n") if l.strip()]
+    assert len(rows) == 14042
+    assert len(text.splitlines()) >= len(rows)  # equal when no such character is present; larger when one is
