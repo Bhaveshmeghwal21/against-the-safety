@@ -91,7 +91,9 @@ def main():
         compare_conditions(raw_main, raw_base, sm, sb)
         if sm['index_hash'] != manifest['index_hash']:
             raise ValueError(f'Current index does not match the saved {lang} run')
-        built = {'base': raw_base, 'main': raw_main, 'main+FB+V': repaired(raw_main, 'main', lang, cases_b, pred_b),
+        built = {'base': raw_base, 'base+FB': old_select.fail_closed(raw_base),
+                 'main': raw_main, 'main+FB': old_select.fail_closed(raw_main),
+                 'main+FB+V': repaired(raw_main, 'main', lang, cases_b, pred_b),
                  'candF1': raw_cand, 'candF1+FB': old_select.fail_closed(raw_cand),
                  'candF1+FB+V': repaired(raw_cand, 'candF1', lang, cases_c, pred_c),
                  'always refuse': always_refuse(raw_main)}
@@ -111,11 +113,11 @@ def main():
     lines = ['# CandF1 multilingual XQuAD comparison', '', report['scope'], report['checker'], report['bootstrap'], '']
     pct = lambda x: '—' if x is None else f'{100*x:.1f}%'
     for lang in xq.LANGS:
-        lines += [f'## {xq.NAMES[lang]}', '', '| System | Success | Correct and cited | Hidden answers | Answer coverage | Correct among answered | Invalid |',
-                  '| --- | ---: | ---: | ---: | ---: | ---: | ---: |']
+        lines += [f'## {xq.NAMES[lang]}', '', '| System | Success | Correct and cited | Hidden answers | False refusals | Answer coverage | Correct among answered | Invalid |',
+                  '| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |']
         for name, row in systems[lang].items():
             lines.append(f"| {name} | {pct(row['success'])} | {pct(row['correct_and_cited'])} | {row['hidden_answers']}/{row['n_hidden']} | "
-                         f"{pct(row['answered_share'])} | {pct(row['correct_among_answered'])} | {pct(row['invalid'])} |")
+                         f"{pct(row['false_refusal'])} | {pct(row['answered_share'])} | {pct(row['correct_among_answered'])} | {pct(row['invalid'])} |")
         c = comparisons[lang]
         lines += ['', f"CandF1+FB+V minus main+FB+V, on {c['questions']} paired questions:"]
         for metric in ('correct_and_cited', 'hidden_answer_rate', 'success'):
