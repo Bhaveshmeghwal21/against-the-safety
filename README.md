@@ -59,6 +59,12 @@ On a locked test of 934 questions, the untrained model gave a correct answer wit
 
 Steps 3 and 4 are code and need no training. Steps 1 and 2 come from training.
 
+**Why Tiny Aya Global.** The hackathon requires one of Cohere Labs' open-weights models (Tiny Aya Base, Global, Fire, Water or Earth, or Aya Expanse 8B or 32B). Within that list, Tiny Aya Global fits the project for four reasons.
+- Its model card calls it the best balance across languages and regions; Fire, Earth and Water are the regional variants. We did not compare the regional variants, so one of them could do better in a single language.
+- At 3.35 billion parameters it trains with QLoRA on one free Kaggle T4, and every run in this project used Kaggle T4s.
+- It covers 70+ languages, Hindi and Spanish included, and that let us run the [language check](#other-languages-hindi-and-spanish) without changing the model.
+- Its 8K context fits three searches of three passages each. Hindi needs about 3.4 times the tokens of English, which is why the Hindi runs raised the input limit to 8,000 tokens.
+
 **How the model learned the routine.** Nobody wrote thousands of examples by hand. We built them by script from 600 HotpotQA training questions. A scripted policy plays the routine perfectly in six situations: clean support, a distractor passage ranked first, a second search needed to find the second fact, evidence hidden, evidence already in the prompt, and a weak first search. That made 1,611 training turns, 537 each of search, answer and refusal. QLoRA training ran two epochs on one T4 (3.9 GPU-hours, about $2 at $0.526 per hour).
 
 ## The two Lexsi tools: AgentTune and AuditKIT
