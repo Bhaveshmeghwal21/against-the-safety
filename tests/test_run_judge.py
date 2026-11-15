@@ -109,3 +109,21 @@ def test_key_never_reaches_the_stored_files(tmp_path):
     judge = run_judge.AzureJudge("SECRET-KEY-VALUE", tmp_path / "calls.jsonl", 5.0, post=fake_post_factory([]))
     run_judge.score_case(case(), judge)
     assert "SECRET-KEY-VALUE" not in (tmp_path / "calls.jsonl").read_text(encoding="utf-8")
+
+def test_identical_prompts_asked_together_are_sent_once(tmp_path):
+    import threading
+    import time
+
+    log = []
+    inner = fake_post_factory(log)
+
+    def slow(prompt):
+        time.sleep(0.05)
+        return inner(prompt)
+
+    judge = run_judge.AzureJudge("k", tmp_path / "calls.jsonl", 5.0, post=slow)
+    replies = []
+    threads = [threading.Thread(target=lambda: replies.append(judge.complete("hello"))) for _ in range(6)]
+    [t.start() for t in threads]
+    [t.join() for t in threads]
+    assert len(log) == 1 and len(set(replies)) == 1 and judge.new_calls == 1

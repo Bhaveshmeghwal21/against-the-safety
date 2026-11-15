@@ -36,6 +36,16 @@ def build(cases: list[dict], scores: list[dict]) -> dict:
     case_of = {(c["system"], c["part"], c["qid"], c["variant"]): c for c in cases}
     values = {s: collections.defaultdict(dict) for s in SYSTEM_ORDER}
     status = collections.defaultdict(collections.Counter)
+    # AuditKIT defines hallucination as 1 - faithfulness, from the same claims and verdicts. Two threads that asked the identical prompt at the same moment
+    # could each get their own judge reply, so the two rows of one episode can differ. Use the faithfulness verdicts for both and count the episodes.
+    faithful = {(r["system"], r["part"], r["qid"], r["variant"]): r["value"] for r in scores if r["metric"] == "faithfulness" and r["status"] == "scored"}
+    mismatched = 0
+    scores = [dict(r) for r in scores]
+    for r in scores:
+        key = (r["system"], r["part"], r["qid"], r["variant"])
+        if r["metric"] == "hallucination" and r["status"] == "scored" and key in faithful:
+            mismatched += abs(r["value"] - (1.0 - faithful[key])) > 1e-9
+            r["value"] = 1.0 - faithful[key]
     for r in scores:
         key = (r["part"], r["qid"], r["variant"])
         status[(r["system"], r["metric"])][r["status"]] += 1
@@ -45,7 +55,7 @@ def build(cases: list[dict], scores: list[dict]) -> dict:
         for derived, raw in DERIVED.items():
             if r["system"] == raw and r["metric"] in ANSWER_METRICS and case_of[(raw, *key)]["survives_fb_v"]:
                 values[derived][r["metric"]][key] = r["value"]
-    return {"values": values, "status": status, "case_of": case_of}
+    return {"values": values, "status": status, "case_of": case_of, "hallucination_rows_replaced": int(mismatched)}
 
 
 def mean(values) -> float | None:
@@ -104,7 +114,7 @@ def main() -> None:
         raw = DERIVED.get(system, system)
         return [k for k in keys if subsets[name](case_of[(raw, *k)])]
 
-    result = {"sample_episodes": len(keys), "systems": {}, "status_counts": {f"{s}|{m}": dict(v) for (s, m), v in sorted(status.items())}}
+    result = {"sample_episodes": len(keys), "hallucination_rows_that_differed_from_1_minus_faithfulness": built["hallucination_rows_replaced"], "systems": {}, "status_counts": {f"{s}|{m}": dict(v) for (s, m), v in sorted(status.items())}}
     answers_given = {}
     for system in SYSTEM_ORDER:
         raw = DERIVED.get(system, system)

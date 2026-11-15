@@ -1,5 +1,6 @@
 {
  "sample_episodes": 300,
+ "hallucination_rows_that_differed_from_1_minus_faithfulness": 1,
  "systems": {
   "base": {
    "answers_given": 231,
@@ -216,18 +217,18 @@
     "hallucination": {
      "all": {
       "n": 162,
-      "mean": 0.2839506172839506,
+      "mean": 0.2777777777777778,
       "ci95": [
-       0.215625,
-       0.35294117647058826
+       0.21019108280254778,
+       0.3465909090909091
       ]
      },
      "answerable": {
       "n": 129,
-      "mean": 0.15503875968992248,
+      "mean": 0.14728682170542637,
       "ci95": [
-       0.096,
-       0.21755725190839695
+       0.08984375,
+       0.208955223880597
       ]
      },
      "hidden evidence": {
@@ -854,8 +855,8 @@
     "judged": 88,
     "mean_faithfulness": 0.9659090909090909,
     "share_fully_faithful": 0.9659090909090909,
-    "mean_hallucination": 0.045454545454545456,
-    "share_any_hallucination": 0.045454545454545456
+    "mean_hallucination": 0.03409090909090909,
+    "share_any_hallucination": 0.03409090909090909
    },
    "wrong_answer": {
     "answers": 43,
@@ -990,10 +991,10 @@
    ]
   },
   "hallucination: main minus base": {
-   "difference": -0.09081843806546186,
+   "difference": -0.09699127757163467,
    "ci95": [
-    -0.1694845781199445,
-    -0.014772336850258971
+    -0.174136640947231,
+    -0.021244684519020784
    ]
   },
   "hallucination: main+FB+V minus base": {
@@ -1004,10 +1005,10 @@
    ]
   },
   "hallucination: main+FB+V minus main": {
-   "difference": -0.0919506172839506,
+   "difference": -0.08577777777777779,
    "ci95": [
-    -0.1408372093023256,
-    -0.04537815126050418
+    -0.13440600697237864,
+    -0.04113594488504366
    ]
   },
   "hallucination: candF1+FB+V minus base": {

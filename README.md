@@ -72,7 +72,7 @@ Steps 3 and 4 are code and need no training. Steps 1 and 2 come from training.
 The hackathon asked every Track 3 team to use two libraries from Lexsi Labs. One is the workshop where the model is taught, the other is the examiner.
 
 - **AgentTune** is a library for building and training *agents*. An agent is a model that works in several steps and uses tools (here, a search tool) instead of answering in one go. AgentTune supplies the tool, records every step an agent takes in a standard format, and turns those recordings into training data.
-- **AuditKIT** is a library that scores models and agents with fixed code, not an AI judge. For RAG it asks whether the system found enough evidence, whether its citations are real and whether it refused when it should have. For agents it checks tool use.
+- **AuditKIT** is a library that scores models and agents, mostly with fixed code and optionally with an AI judge. For RAG it asks whether the system found enough evidence, whether its citations are real and whether it refused when it should have. For agents it checks tool use. Our scorecards use the fixed-code checks. We ran the judge-based ones on a sample ([More AuditKIT metrics](#more-auditkit-metrics-faithfulness-retrieval-quality-numbers-and-speed)).
 
 ![Where AgentTune and AuditKIT fit: documents, search tool, practice runs, training, test runs, scoring, decision](docs/figures/toolchain.svg)
 
@@ -111,6 +111,7 @@ What AuditKIT showed us:
 - **Refusal examples teach the model when to stop.** The control adapter looped: only 78.4% of its episodes were loop-free and 8.8% of its searches repeated an earlier one. Main had 93.4% and 2.9%.
 - **It reports "unknown" instead of guessing.** When our reference evidence was incomplete, AuditKIT returned no score for those episodes. That exposed an earlier RGB recall figure of 0.960 that covered only 25 of 286 answerable episodes. With complete evidence sets all 286 were scored and recall was 1.000 ([remediation report](reports/2026-11-13-evaluation-remediation.md)).
 - **Freshness on dated manuals.** On our fictional Nimbus manuals, which hold old and new editions of the same policy, AuditKIT's freshness score was 0.813 for main and 0.783 for the base model. About one retrieved dated passage in five was an out-of-date edition ([report](reports/nimbus_corrected.md)).
+- **Judge-based metrics, later.** Faithfulness, hallucination, context precision and recall, answer relevancy, numeric accuracy and latency came last, on a 300-episode sample and a Kaggle T4. The submitted system's answers are more faithful than the base model's ([results](#more-auditkit-metrics-faithfulness-retrieval-quality-numbers-and-speed)).
 
 What we did not do: AuditKIT also ships general benchmarks (ARC, GSM8K, MMLU, TruthfulQA, BFCL). None of them tests answering from supplied documents with citations, so we did not run them. The headline numbers below come from our own scorer, which checks in one pass that an answer is correct and that the cited passages contain the required evidence. The full first-round scorecard is in [`reports/scorecard_test_lenient.md`](reports/scorecard_test_lenient.md). Code: `src/ragharness/audit.py`, `scorecard.py`.
 
@@ -163,6 +164,56 @@ Second, it measured the submitted system again. Success by group of questions (t
 | Refuse every question, fresh test | 41.1% | 44.3% | 50.0% | 39.7% | 43.8% | 0 / 291 |
 
 The refusing carried over: 10.0% of hidden-evidence episodes were answered, and macro success is 10.3 points above refusing everything (interval +7.5 to +13.1). The answering did not carry over for single-passage SQuAD questions: 43.3% is close to refusing everything (41.1%), on 75 questions from 25 articles, and we have not looked for the cause. On this test 34.7% of the answers shown are correct. The first test's pooled 67.3% is not directly comparable, because that test held many more RGB episodes (471 of 934, against 141 of 679). We did not run the base model or the hosted models here.
+
+### More AuditKIT metrics: faithfulness, retrieval quality, numbers and speed
+
+Our scorecards so far use the AuditKIT checks that need no judge model. On 16 November we added the metrics that do need one, plus numeric accuracy and single-request speed, so that the AuditKIT list for RAG is covered. The plan was written before any of it ran ([pre-registration](research/2026-11-16-judge-latency-preregistration.md)). Nothing here changed the submitted system.
+
+**How.** AuditKIT's own judge classes (`faithfulness`, `hallucination`, `response_groundedness`, `answer_relevancy`, `context_relevance`, `context_precision`, `context_recall`; prompts unmodified) ran on 300 episodes of the first sealed test. The sample was drawn with a fixed seed, in proportion to the question groups and to answerable and hidden-evidence episodes. The judge was Azure's `gpt-6-luna`. Our hosted comparison used the same model as a competitor, but it judged none of its own answers here. The whole judge run cost $0.56, metered from the token counts the API returned. When we asked the judge a second time about a third of the sample, it gave the same value for 96% of faithfulness scores (mean absolute difference 0.014). Full tables: [`reports/judge_results.md`](reports/judge_results.md).
+
+**Faithfulness** is the share of an answer's claims that the passages the system was shown support. Hallucination is its complement. Both are averaged over the answers a system gave, so a system that answers less is not automatically better; the answer count is in the second column.
+
+| System | Answers given (of 300 episodes) | Faithfulness (higher is better) | Hallucination (lower is better) | Response groundedness | Answer relevancy |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Tiny Aya base | 231 | 0.625 (0.566 to 0.685) | 0.375 (0.315 to 0.435) | 0.641 | 0.912 |
+| Main adapter alone | 166 | 0.722 (0.653 to 0.790) | 0.278 (0.210 to 0.347) | 0.982 | 0.976 |
+| Main + both repairs (submitted) | 125 | 0.808 (0.736 to 0.872) | 0.192 (0.124 to 0.261) | 0.984 | 1.000 |
+| candF1 + both repairs (alternative) | 128 | 0.885 (0.830 to 0.935) | 0.115 (0.066 to 0.171) | 0.977 | 0.989 |
+
+- Faithfulness rises at each step: 0.625 for the base model, 0.722 for the adapter, 0.808 for the submitted system. The self-check adds 0.086 (95% interval 0.043 to 0.136) over the adapter's own answers. Part of that is selection, because the self-check removes answers.
+- Almost every sentence the adapter writes is in the passages (groundedness 0.98 against 0.64 for the base model).
+- Answer relevancy is close to 1 for every system, because the answers are short phrases. It tells us little here.
+
+**Does the judge agree with our labels?** Our scorer labels each answer from annotations. The judge reads the passages and the answer without seeing those labels.
+
+| Our label of the submitted system's answer | Answers | Mean faithfulness | Share fully faithful | Share with an unsupported or contradicted claim |
+| --- | ---: | ---: | ---: | ---: |
+| Correct and cited (our scorer) | 85 | 0.965 | 0.965 | 0.035 |
+| Wrong answer on answerable question (our scorer) | 28 | 0.607 | 0.571 | 0.429 |
+| Answered although the evidence was hidden (our flag) | 12 | 0.167 | 0.167 | 0.833 |
+
+The judge agrees with our scorer on the clear cases: 96.5% of the answers we call correct and cited are fully faithful. Of the 12 answers on hidden evidence, 10 contain a claim the shown passages do not support and 2 do not. So the flag "answered although the evidence was hidden" is mostly, not always, a real hallucination. The judge is a model, not a person. The flags are still not hand-checked. A blank 50-row sheet for that, with the labels withheld, is in [`reports/hand_label_sheet.csv`](reports/hand_label_sheet.csv).
+
+**Retrieval quality.** Every system uses the same search tool and writes its own queries.
+
+| System | Context relevance (share of shown passages that are relevant) | Context precision (relevant passages ranked first) | Context recall (reference answer found in the passages) |
+| --- | ---: | ---: | ---: |
+| Tiny Aya base | 0.358 (0.326 to 0.392) | 0.696 (0.648 to 0.743) | 0.892 (0.847 to 0.937) |
+| Main adapter | 0.356 (0.321 to 0.393) | 0.692 (0.643 to 0.740) | 0.950 (0.916 to 0.978) |
+| candF1 | 0.359 (0.322 to 0.395) | 0.700 (0.652 to 0.747) | 0.955 (0.922 to 0.983) |
+
+Relevance is low for all three because the tool returns the top three passages and usually only one or two are relevant. The adapter's queries find the reference answer in the passages a little more often than the base model's (0.950 against 0.892, with overlapping intervals).
+
+**Numeric accuracy.** AuditKIT has no numeric metric and our question sets carry no numeric type. We took the answerable episodes whose gold answer is a single number (16 questions) and counted an answer as correct when the numbers in it include the gold value. The sample is small.
+
+| System | Numeric-answer episodes (questions) | Answered | Numerically correct | Numeric accuracy | Correct among answered |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| base | 43 (16) | 34 | 24 | 55.8% | 70.6% |
+| main | 43 (16) | 30 | 27 | 62.8% | 90.0% |
+| main+FB+V (submitted) | 43 (16) | 28 | 26 | 60.5% | 92.9% |
+| candF1+FB+V (alternative) | 43 (16) | 29 | 26 | 60.5% | 89.7% |
+
+**Limits of these numbers.** One judge, one sample of 300 episodes, claim extraction by a model, and the hidden-evidence flags are not hand-checked.
 
 ## Try it
 
@@ -338,7 +389,8 @@ Training and evaluation ran on Kaggle T4s: see [`kaggle/README.md`](kaggle/READM
 
 - English, short factual questions. Tiny Aya is a multilingual model, but we trained the adapter in English only. A first Hindi and Spanish check (see [Other languages](#other-languages-hindi-and-spanish)) shows the refusing carries over and the answering does not: 2% to 5% of questions got a correct, cited answer, and Hindi searches loop far more often. Training on Hindi afterwards raised Hindi answers to about 35% but made both adapters answer on hidden evidence more often, so neither passed our safety rule and the submitted system stays English. Two-part answers and single-passage questions are weak spots; with two documents and dated editions the adapter sometimes cites the older one.
 - The first sealed test was opened before the scoring corrections, and candF1 was tested on it after its gate was written. The fresh Round 6 test was then opened once, for the second look, so further model selection needs yet another fresh test. On that test the submitted system answered single-passage SQuAD questions about as well as refusing everything would score (43.3% against 41.1%).
-- Hidden-evidence answers are annotation-based flags. An unannotated alternative source could make a flagged answer correct, and no one has hand-checked them.
+- Hidden-evidence answers are annotation-based flags. An unannotated alternative source could make a flagged answer correct, and no person has checked them. An AI judge found an unsupported claim in 10 of the 12 flagged answers of the submitted system in a 300-episode sample, so most flags look real. A blank 50-row sheet for a human check is in [`reports/hand_label_sheet.csv`](reports/hand_label_sheet.csv).
+- The judge-based metrics rest on one judge model and one sample of 300 episodes of the first sealed test. They were not run on the fresh test, on Hindi, or on the hosted models.
 - The self-check withholds some correct answers. The submitted system refuses 39% of answerable questions.
 - On benchmarks the adapters never trained on, the adapter is level with GPT-6 Luna and behind DeepSeek V4 Flash, and on SQuAD 2.0 it scores the same as refusing every question. Large hosted models are more accurate when the documents hold the answer. See [Against hosted models](#against-hosted-models).
 - There is no hosted live endpoint: the web demo needs a GPU you start yourself. Its GPU run answered the eight example questions as shown above (five right, two wrong, one over-refusal); eight questions say little about accuracy, which the sealed test measures.
@@ -350,7 +402,7 @@ Hugging Face Articles need a Pro account, so this README is the write-up, as the
 - **Track and problem statement:** Track 3 (agentic fine-tuning), problem statement 4: fine-tuning for retrieval-augmented generation.
 - **Work done outside the hackathon:** none. The repository history starts on 4 November 2026. The base model, AgentTune, AuditKIT and the public datasets are third-party.
 - **LLM usage:** AI coding assistants drafted a large share of the code, tests and prose under the team's direction. Every number comes from a script run on saved transcripts and is in a file under `reports/`.
-- **With more credits:** quote-first answer targets, balanced answer and refusal data in both directions, far more than 488 parent questions, and a second Hindi attempt with more English replay, judged on fresh sealed tests under a new pre-registration. Two measurements we did not make: a hand-labelled check of the hidden-evidence flags with a judge-based faithfulness score calibrated on it, and single-request latency.
+- **With more credits:** quote-first answer targets, balanced answer and refusal data in both directions, far more than 488 parent questions, and a second Hindi attempt with more English replay, judged on fresh sealed tests under a new pre-registration. Measurements we did not make: a human check of the hidden-evidence flags (the judge-based faithfulness score is not calibrated against people), a second judge model, a second training seed, and the hosted models on the second sealed test.
 
 ## Artifacts and licenses
 

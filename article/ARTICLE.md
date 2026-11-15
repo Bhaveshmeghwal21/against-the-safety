@@ -139,6 +139,54 @@ Second, it measured the submitted system again. Success by group of questions (t
 
 The refusing carried over: 10.0% of hidden-evidence episodes were answered, and macro success is 10.3 points above refusing everything (interval +7.5 to +13.1). The answering did not carry over for single-passage SQuAD questions: 43.3% is close to refusing everything (41.1%), on 75 questions from 25 articles, and we have not looked for the cause. On this test 34.7% of the answers shown are correct. The first test's pooled 67.3% is not directly comparable, because that test held many more RGB episodes (471 of 934, against 141 of 679). We did not run the base model or the hosted models on the fresh test. Record: `research/2026-11-15-round6-second-look-preregistration.md` and `research/2026-11-15-round6-second-look-results.md` in the code repository.
 
+### More AuditKIT metrics: faithfulness, retrieval quality, numbers and speed
+
+The scorecards above use the AuditKIT checks that need no judge model. On 16 November we added the metrics that do need one, plus numeric accuracy and single-request speed, so that AuditKIT's RAG list is covered. The plan was written before any of it ran (`research/2026-11-16-judge-latency-preregistration.md`). Nothing here changed the submitted system.
+
+AuditKIT's own judge classes (`faithfulness`, `hallucination`, `response_groundedness`, `answer_relevancy`, `context_relevance`, `context_precision`, `context_recall`; prompts unmodified) ran on 300 episodes of the first sealed test, drawn with a fixed seed in proportion to the question groups and to answerable and hidden-evidence episodes. The judge was Azure's `gpt-6-luna`. Our hosted comparison used the same model as a competitor, but it judged none of its own answers here. The judge run cost $0.56, metered from the token counts the API returned. When the judge was asked a second time about a third of the sample, it gave the same value for 96% of faithfulness scores (mean absolute difference 0.014). Full tables: `reports/judge_results.md`.
+
+Faithfulness is the share of an answer's claims that the passages the system was shown support. Hallucination is its complement. Both are averaged over the answers a system gave, so a system that answers less is not automatically better; the answer count is in the second column.
+
+| System | Answers given (of 300 episodes) | Faithfulness (higher is better) | Hallucination (lower is better) | Response groundedness | Answer relevancy |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Tiny Aya base | 231 | 0.625 (0.566 to 0.685) | 0.375 (0.315 to 0.435) | 0.641 | 0.912 |
+| Main adapter alone | 166 | 0.722 (0.653 to 0.790) | 0.278 (0.210 to 0.347) | 0.982 | 0.976 |
+| Main + both repairs (submitted) | 125 | 0.808 (0.736 to 0.872) | 0.192 (0.124 to 0.261) | 0.984 | 1.000 |
+| candF1 + both repairs (alternative) | 128 | 0.885 (0.830 to 0.935) | 0.115 (0.066 to 0.171) | 0.977 | 0.989 |
+
+Faithfulness rises at each step: 0.625 for the base model, 0.722 for the adapter, 0.808 for the submitted system. The self-check adds 0.086 (95% interval 0.043 to 0.136) over the adapter's own answers. Part of that is selection, because the self-check removes answers. Almost every sentence the adapter writes is in the passages (groundedness 0.98 against 0.64 for the base model). Answer relevancy is close to 1 for every system because the answers are short phrases, so it tells us little here.
+
+Our scorer labels each answer from annotations. The judge reads the passages and the answer without seeing those labels.
+
+| Our label of the submitted system's answer | Answers | Mean faithfulness | Share fully faithful | Share with an unsupported or contradicted claim |
+| --- | ---: | ---: | ---: | ---: |
+| Correct and cited (our scorer) | 85 | 0.965 | 0.965 | 0.035 |
+| Wrong answer on answerable question (our scorer) | 28 | 0.607 | 0.571 | 0.429 |
+| Answered although the evidence was hidden (our flag) | 12 | 0.167 | 0.167 | 0.833 |
+
+The judge agrees with our scorer on the clear cases: 96.5% of the answers we call correct and cited are fully faithful. Of the 12 answers on hidden evidence, 10 contain a claim the shown passages do not support and 2 do not, so the flag "answered although the evidence was hidden" is mostly, not always, a real hallucination. The judge is a model, not a person. The flags are still not hand-checked. A blank 50-row sheet for that, with the labels withheld, is in `reports/hand_label_sheet.csv`.
+
+Retrieval quality. Every system uses the same search tool and writes its own queries.
+
+| System | Context relevance (share of shown passages that are relevant) | Context precision (relevant passages ranked first) | Context recall (reference answer found in the passages) |
+| --- | ---: | ---: | ---: |
+| Tiny Aya base | 0.358 (0.326 to 0.392) | 0.696 (0.648 to 0.743) | 0.892 (0.847 to 0.937) |
+| Main adapter | 0.356 (0.321 to 0.393) | 0.692 (0.643 to 0.740) | 0.950 (0.916 to 0.978) |
+| candF1 | 0.359 (0.322 to 0.395) | 0.700 (0.652 to 0.747) | 0.955 (0.922 to 0.983) |
+
+Relevance is low for all three because the tool returns the top three passages and usually only one or two are relevant. The adapter's queries find the reference answer in the passages a little more often than the base model's (0.950 against 0.892, with overlapping intervals).
+
+Numeric accuracy. AuditKIT has no numeric metric and our question sets carry no numeric type. We took the answerable episodes whose gold answer is a single number (16 questions) and counted an answer as correct when the numbers in it include the gold value. The sample is small.
+
+| System | Numeric-answer episodes (questions) | Answered | Numerically correct | Numeric accuracy | Correct among answered |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| base | 43 (16) | 34 | 24 | 55.8% | 70.6% |
+| main | 43 (16) | 30 | 27 | 62.8% | 90.0% |
+| main+FB+V (submitted) | 43 (16) | 28 | 26 | 60.5% | 92.9% |
+| candF1+FB+V (alternative) | 43 (16) | 29 | 26 | 60.5% | 89.7% |
+
+Limits of these numbers: one judge, one sample of 300 episodes, claim extraction by a model, and hidden-evidence flags that are not hand-checked.
+
 ### Against hosted models
 
 As a yardstick we ran two large commercial models. On the 925 episodes both sides could answer, with the hosted models told the three-search limit and the answer format (the adapter learned them in training):
@@ -228,13 +276,14 @@ The submitted adapter trained for 3.9 T4 GPU-hours on Kaggle's free quota (about
 
 - English, short factual questions. Tiny Aya is a multilingual model, but we trained the adapter in English only. A first Hindi and Spanish check (section 6) shows the refusing carries over and the answering does not: 2% to 5% of questions got a correct, cited answer, and Hindi searches loop far more often. Training on Hindi afterwards raised Hindi answers to about 35% but made both adapters answer on hidden evidence more often, so neither passed our safety rule and the submitted system stays English. Two-part answers and single-passage questions are weak spots, and with two editions of a policy the adapter sometimes cites the older one.
 - The first sealed test was opened before the scoring corrections, and candF1 was tested on it after its gate was written. The fresh Round 6 test was then opened once, for the second look, so further model selection needs yet another fresh test. On that test the submitted system answered single-passage SQuAD questions about as well as refusing everything would score (43.3% against 41.1%).
-- Hidden-evidence answers are annotation-based flags. An unannotated alternative source could make a flagged answer correct, and nobody has hand-checked them.
+- Hidden-evidence answers are annotation-based flags. An unannotated alternative source could make a flagged answer correct, and no person has checked them. An AI judge found an unsupported claim in 10 of the 12 flagged answers of the submitted system in a 300-episode sample, so most flags look real. A blank 50-row sheet for a human check is in `reports/hand_label_sheet.csv`.
+- The judge-based metrics rest on one judge model and one sample of 300 episodes of the first sealed test. They were not run on the fresh test, on Hindi, or on the hosted models.
 - The self-check withholds some correct answers.
 - On benchmarks the adapters never trained on, the adapter is level with GPT-6 Luna and behind DeepSeek V4 Flash, and on SQuAD 2.0 it scores the same as refusing every question. Large hosted models are more accurate when the documents hold the answer. The web demo needs a GPU you start yourself.
 
 ## 9. What more credits would enable
 
-Quote-first answer targets, so the model copies the supporting span before answering. Balanced answer and refusal data in both directions. The semicolon format for two-part answers stated in the prompt, and far more than 488 parent questions. Retraining the checker on independent labelled data, judged on a fresh sealed test under a new pre-registration. A second Hindi attempt with more English replay, on fresh tests. A hand-labelled check of the hidden-evidence flags with a judge-based faithfulness score calibrated on it, and single-request latency, neither of which we measured.
+Quote-first answer targets, so the model copies the supporting span before answering. Balanced answer and refusal data in both directions. The semicolon format for two-part answers stated in the prompt, and far more than 488 parent questions. Retraining the checker on independent labelled data, judged on a fresh sealed test under a new pre-registration. A second Hindi attempt with more English replay, on fresh tests. A human check of the hidden-evidence flags, so that the judge-based faithfulness score can be calibrated against people. A second judge model, a second training seed, and the hosted models on the second sealed test, none of which we ran.
 
 ## 10. Reproduction and artifacts
 

@@ -479,6 +479,10 @@ Paired intervals and the per-part numbers are in `reports/reference_policies.md`
 
 Traces of the Hindi experiment: `xq2_hi` and `xq2_en` (300 fresh XQuAD questions in Hindi and English), `hi_dev` (development), and `r6t_*` for the adapters `hiMain` and `hiF` and their parents `main` and `candF1`. `hindi_training/` holds the self-check's cases and verdicts (the parents' verdicts are a batch-1 rerun on the saved cases, see the amendment in the pre-registration). The registered report is `reports/hindi_results.md`: both adapters gained in Hindi and failed the registered safety rules, so they are experiments and the submitted system is unchanged.
 
+## Judge-based metrics, numeric accuracy and latency (research/2026-11-16-judge-latency-preregistration.md)
+
+`judge/` holds the 300-episode sample of the first sealed test (`sample_r5t.json`), the cases (`cases_r5t.jsonl`: the question, the gold answer, the answer of base, main or candF1, and the passages the system was shown), the AuditKIT judge scores (`run1__scores.jsonl`, one line per episode and metric, with the claims and verdicts), every judge call with its token usage (`judge_calls.jsonl`) and the repeatability pass (`run1_retest__scores.jsonl`, `judge_calls_retest.jsonl`). `latency/` holds the per-request timings of the Kaggle T4 run. Results are in `reports/judge_results.md`, `reports/numeric_accuracy.md` and `reports/latency.md`. `reports/hand_label_sheet.csv` is a blank 50-row sheet for a human check of the answers; its key is `judge/hand_label_key.json`.
+
 ## Contents
 
 - `traces/<benchmark>/<system>__<lenient|strict>__{{transcripts,scores,trajectories}}.jsonl` and `__summary.json`: `transcripts` are readable conversations, `scores` hold the deterministic

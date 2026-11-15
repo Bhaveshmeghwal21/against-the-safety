@@ -159,8 +159,18 @@ def main() -> None:
         copy(ROOT / "data" / "bench" / b / "manifest.json", bt / "manifests" / f"{b}.json")
     for f in sorted((ROOT / "reports").glob("benchmarks_*")) + sorted((ROOT / "reports").glob("round3_test*")) + sorted((ROOT / "reports").glob("round4_test*")) \
             + sorted((ROOT / "reports").glob("round5_final*")) + sorted((ROOT / "reports").glob("round5b_final*")) + sorted((ROOT / "reports").glob("round5_system_check*")) + sorted((ROOT / "reports").glob("xquad_*")) \
-            + sorted((ROOT / "reports").glob("round6_second_look*")) + sorted((ROOT / "reports").glob("hindi_*")):
+            + sorted((ROOT / "reports").glob("round6_second_look*")) + sorted((ROOT / "reports").glob("hindi_*")) \
+            + sorted((ROOT / "reports").glob("judge_results*")) + sorted((ROOT / "reports").glob("numeric_accuracy*")) + sorted((ROOT / "reports").glob("latency*")) + sorted((ROOT / "reports").glob("hand_label_sheet*")):
         copy(f, bt / "reports" / f.name)
+    for rel in ("sample_r5t.json", "cases_r5t.jsonl", "hand_label_key.json", "judge_calls.jsonl", "judge_calls_retest.jsonl"):  # judge-based metrics (research/2026-11-16-judge-latency-preregistration.md)
+        copy(ROOT / "data" / "judge" / rel, bt / "judge" / rel)
+    for folder in ("run1", "run1_retest"):
+        for rel in ("scores.jsonl", "run_summary.json"):
+            copy(ROOT / "data" / "judge" / folder / rel, bt / "judge" / f"{folder}__{rel}")
+    latency = RUNS / "ats-latency-t4" / "out" / "latency"
+    for rel in ("latency_summary.json", "requests_base.jsonl", "requests_submitted.jsonl"):
+        if (latency / rel).exists():
+            copy(latency / rel, bt / "latency" / rel)
     for tag, folder in (("base", RUNS / "ats-r6-system-hi-base" / "out"), ("new", RUNS / "ats-r6-system-hi-new" / "out")):  # Hindi training: the self-check's cases and verdicts
         for rel in ("cases/answers.jsonl", "verify/V/verdicts_A.jsonl"):
             if (folder / rel).exists():

@@ -207,3 +207,37 @@ def test_the_main_card_reports_the_second_test_with_the_saved_numbers():
     assert "not adopted" in note
     assert str(sl["shared_eligible"]) in note
     assert release_cards._second_look_headline() in release_cards.bench_card("BMEscanor")
+
+@needs_reports
+@pytest.mark.parametrize("document", ["README.md", "article/ARTICLE.md"])
+def test_the_judge_context_and_numeric_tables_match_the_reports(document):
+    import make_readme_table as tables
+
+    text = (ROOT / document).read_text(encoding="utf-8")
+    for table in (tables.judge_table(), tables.judge_agreement_table(), tables.context_table(), tables.numeric_table()):
+        for line in table.splitlines():
+            assert line in text, f"{document} is missing or has changed: {line}"
+
+
+@needs_reports
+def test_the_judge_report_follows_its_pre_registered_readings():
+    import json
+
+    rep = json.loads((ROOT / "reports" / "judge_results.json").read_text(encoding="utf-8"))
+    assert rep["sample_episodes"] == 300 and rep["judge"]["run_summary"]["stopped_by"] is None
+    readings = rep["pre_stated_readings"]
+    assert readings["1_annotation_flag_corroborated"]["corroborated"] == (readings["1_annotation_flag_corroborated"]["mean_hallucination_of_main_answers_on_hidden_evidence"] > 0.5)
+    low = readings["2_self_check_improves_faithfulness"]["ci95"][0]
+    assert readings["2_self_check_improves_faithfulness"]["improves"] == (low > 0)
+    manifest = json.loads((ROOT / "data" / "judge" / "sample_r5t.json").read_text(encoding="utf-8"))
+    assert manifest["sample_sha256"] == "91aa3283ead72dbfe120ef947714cb0aa531bb59ff77cb8161ebad650216a984"  # the hash written in the pre-registration
+
+@needs_reports
+def test_the_abstract_quotes_the_judge_faithfulness_numbers():
+    import json
+
+    rep = json.loads((ROOT / "reports" / "judge_results.json").read_text(encoding="utf-8"))["systems"]
+    abstract = (ROOT / "article" / "ABSTRACT.md").read_text(encoding="utf-8")
+    assert f"{rep['main+FB+V']['metrics']['faithfulness']['all']['mean'] * 100:.1f}% of the claims" in abstract
+    assert f"against {rep['base']['metrics']['faithfulness']['all']['mean'] * 100:.1f}% for the base model" in abstract
+    assert len(abstract.split()) < 500

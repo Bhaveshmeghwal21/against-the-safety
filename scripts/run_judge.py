@@ -69,7 +69,7 @@ class AzureJudge:
         self.key, self.budget, self.max_completion_tokens, self.salt = key, budget, max_completion_tokens, salt
         self.calls_path = calls_path
         self.lock = threading.Lock()
-        self.cache, self.spent, self.new_calls, self.cache_hits = {}, 0.0, 0, 0
+        self.cache, self.spent, self.new_calls, self.cache_hits, self.inflight = {}, 0.0, 0, 0, {}
         self._post = post or self._http
         if calls_path.exists():
             for line in calls_path.read_text(encoding="utf-8").splitlines():
@@ -109,8 +109,17 @@ class AzureJudge:
             if h in self.cache:
                 self.cache_hits += 1
                 return self.cache[h]
-            if self.spent >= self.budget:
-                raise BudgetExceeded(f"metered cost ${self.spent:.3f} reached the ${self.budget:.2f} limit")
+            gate = self.inflight.setdefault(h, threading.Lock())
+        with gate:  # one call per prompt: threads that ask the identical prompt together wait for the first reply instead of each getting their own
+            with self.lock:
+                if h in self.cache:
+                    self.cache_hits += 1
+                    return self.cache[h]
+                if self.spent >= self.budget:
+                    raise BudgetExceeded(f"metered cost ${self.spent:.3f} reached the ${self.budget:.2f} limit")
+            return self._ask_once(h, prompt)
+
+    def _ask_once(self, h: str, prompt: str) -> str:
         obj = self._post(prompt)
         if obj.get("model") != VERSION:
             raise RuntimeError(f"Unexpected judge model version: {obj.get('model')!r}")

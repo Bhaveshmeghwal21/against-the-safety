@@ -7,7 +7,7 @@ Judge: Azure `gpt-6-luna-2026-09-22`, AuditKIT prompts (version v2), one judge, 
 | System | Answers given (of those episodes) | Faithfulness (higher is better) | Hallucination (lower is better) | Response groundedness | Answer relevancy |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | base | 231 of 300 | 0.625 (0.566 to 0.685), n=224 | 0.375 (0.315 to 0.435), n=224 | 0.641 (0.580 to 0.700), n=228 | 0.912 (0.882 to 0.938), n=229 |
-| main | 166 of 300 | 0.722 (0.653 to 0.790), n=162 | 0.284 (0.216 to 0.353), n=162 | 0.982 (0.959 to 1.000), n=166 | 0.976 (0.950 to 0.994), n=165 |
+| main | 166 of 300 | 0.722 (0.653 to 0.790), n=162 | 0.278 (0.210 to 0.347), n=162 | 0.982 (0.959 to 1.000), n=166 | 0.976 (0.950 to 0.994), n=165 |
 | main+FB+V | 125 of 300 | 0.808 (0.736 to 0.872), n=125 | 0.192 (0.124 to 0.261), n=125 | 0.984 (0.958 to 1.000), n=125 | 1.000 (1.000 to 1.000), n=125 |
 | candF1 | 182 of 300 | 0.750 (0.688 to 0.808), n=181 | 0.250 (0.191 to 0.310), n=181 | 0.940 (0.904 to 0.972), n=182 | 0.992 (0.980 to 1.000), n=182 |
 | candF1+FB+V | 128 of 300 | 0.885 (0.830 to 0.935), n=128 | 0.115 (0.066 to 0.171), n=128 | 0.977 (0.947 to 1.000), n=128 | 0.989 (0.972 to 1.000), n=128 |
@@ -17,7 +17,7 @@ Judge: Azure `gpt-6-luna-2026-09-22`, AuditKIT prompts (version v2), one judge, 
 | System | Answers given (of those episodes) | Faithfulness (higher is better) | Hallucination (lower is better) | Response groundedness | Answer relevancy |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | base | 140 of 179 | 0.843 (0.785 to 0.898), n=138 | 0.157 (0.104 to 0.216), n=138 | 0.806 (0.743 to 0.863), n=138 | 0.944 (0.919 to 0.966), n=139 |
-| main | 131 of 179 | 0.853 (0.788 to 0.909), n=129 | 0.155 (0.096 to 0.218), n=129 | 0.977 (0.949 to 1.000), n=131 | 0.992 (0.975 to 1.000), n=130 |
+| main | 131 of 179 | 0.853 (0.788 to 0.909), n=129 | 0.147 (0.090 to 0.209), n=129 | 0.977 (0.949 to 1.000), n=131 | 0.992 (0.975 to 1.000), n=130 |
 | main+FB+V | 113 of 179 | 0.876 (0.814 to 0.934), n=113 | 0.124 (0.067 to 0.186), n=113 | 0.982 (0.954 to 1.000), n=113 | 1.000 (1.000 to 1.000), n=113 |
 | candF1 | 150 of 179 | 0.875 (0.824 to 0.923), n=150 | 0.125 (0.078 to 0.175), n=150 | 0.953 (0.917 to 0.981), n=150 | 0.991 (0.976 to 1.000), n=150 |
 | candF1+FB+V | 120 of 179 | 0.927 (0.880 to 0.968), n=120 | 0.073 (0.033 to 0.120), n=120 | 0.975 (0.943 to 1.000), n=120 | 0.989 (0.970 to 1.000), n=120 |
@@ -46,7 +46,7 @@ Each answered episode carries our scorer-v3 outcome. Here is what the judge says
 
 | System | Annotation group | Answers | Judged | Mean faithfulness | Share fully faithful | Mean hallucination | Share with any hallucination |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| main | supported_correct | 88 | 88 | 0.966 | 0.966 | 0.045 | 0.045 |
+| main | supported_correct | 88 | 88 | 0.966 | 0.966 | 0.034 | 0.034 |
 | main | wrong_answer | 43 | 41 | 0.610 | 0.585 | 0.390 | 0.415 |
 | main | answered on hidden evidence | 35 | 33 | 0.212 | 0.212 | 0.788 | 0.788 |
 | main+FB+V | supported_correct | 85 | 85 | 0.965 | 0.965 | 0.035 | 0.035 |
@@ -68,9 +68,9 @@ Each answered episode carries our scorer-v3 outcome. Here is what the judge says
 | faithfulness: main+FB+V minus main | 0.086 | 0.043 to 0.136 |
 | faithfulness: candF1+FB+V minus base | 0.260 | 0.185 to 0.334 |
 | faithfulness: candF1+FB+V minus main+FB+V | 0.077 | 0.008 to 0.152 |
-| hallucination: main minus base | -0.091 | -0.169 to -0.015 |
+| hallucination: main minus base | -0.097 | -0.174 to -0.021 |
 | hallucination: main+FB+V minus base | -0.183 | -0.261 to -0.101 |
-| hallucination: main+FB+V minus main | -0.092 | -0.141 to -0.045 |
+| hallucination: main+FB+V minus main | -0.086 | -0.134 to -0.041 |
 | hallucination: candF1+FB+V minus base | -0.260 | -0.335 to -0.184 |
 | hallucination: candF1+FB+V minus main+FB+V | -0.077 | -0.147 to -0.009 |
 | answer_relevancy: main minus base | 0.064 | 0.031 to 0.096 |
