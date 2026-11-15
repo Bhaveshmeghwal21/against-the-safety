@@ -214,7 +214,7 @@ def test_the_judge_context_and_numeric_tables_match_the_reports(document):
     import make_readme_table as tables
 
     text = (ROOT / document).read_text(encoding="utf-8")
-    for table in (tables.judge_table(), tables.judge_agreement_table(), tables.context_table(), tables.numeric_table()):
+    for table in (tables.judge_table(), tables.judge_agreement_table(), tables.context_table(), tables.numeric_table(), tables.latency_table()):
         for line in table.splitlines():
             assert line in text, f"{document} is missing or has changed: {line}"
 
@@ -241,3 +241,13 @@ def test_the_abstract_quotes_the_judge_faithfulness_numbers():
     assert f"{rep['main+FB+V']['metrics']['faithfulness']['all']['mean'] * 100:.1f}% of the claims" in abstract
     assert f"against {rep['base']['metrics']['faithfulness']['all']['mean'] * 100:.1f}% for the base model" in abstract
     assert len(abstract.split()) < 500
+
+@needs_reports
+def test_the_abstract_and_limits_quote_the_measured_latency():
+    import json
+
+    lat = json.loads((ROOT / "reports" / "latency.json").read_text(encoding="utf-8"))["arms"]["submitted"]["latency_ms"]
+    abstract = (ROOT / "article" / "ABSTRACT.md").read_text(encoding="utf-8")
+    assert f"a median of {lat['p50'] / 1000:.1f} s (95th percentile {lat['p95'] / 1000:.1f} s)" in abstract
+    for document in ("README.md", "article/ARTICLE.md"):
+        assert f"a median of {lat['p50'] / 1000:.1f} s per question" in (ROOT / document).read_text(encoding="utf-8")

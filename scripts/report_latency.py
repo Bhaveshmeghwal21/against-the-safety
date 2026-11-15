@@ -31,10 +31,10 @@ def main() -> None:
              f"One request at a time (batch size 1), greedy decoding, at most {env['max_new_tokens']} new tokens per turn, {env['gpu']}, model in 4-bit, "
              f"Hugging Face `generate` with no serving-engine tuning. {env['episodes_per_part'] * 3} requests from the three r5t suites (seed {env['seed']}), "
              f"{env['warmup']} untimed warm-up requests per arm. Percentiles and requests per second use AuditKIT's `LatencyStats` and `Throughput`. "
-             "The pre-registration is [here](../research/2026-11-16-judge-latency-preregistration.md).", "",
-             "| System | Requests | p50 (s) | p95 (s) | p99 (s) | Mean (s) | Max (s) | Requests per second | Mean output tokens | Answers given | Peak GPU memory (GB) |",
+             "The base arm also applies the fail-closed rule and the code checks of the self-check (cited passage was shown, answer text is in it), which cost no model call; it skips only the model self-check. The pre-registration is [here](../research/2026-11-16-judge-latency-preregistration.md).", "",
+             "| System | Requests | p50 (s) | p95 (s) | p99 (s) | Mean (s) | Max (s) | Requests per second | Mean output tokens | Answers shown after the repairs | Peak GPU memory (GB) |",
              "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"]
-    names = {"base": "Tiny Aya base, same loop, no self-check", "submitted": "Submitted: main adapter, fail-closed rule, self-check"}
+    names = {"base": "Tiny Aya base, same loop, fail-closed rule and code checks, no model self-check", "submitted": "Submitted: main adapter, fail-closed rule, self-check"}
     for arm, s in summary["arms"].items():
         lat = s["latency_ms"]
         cost = lat["mean"] / 1000 / 3600 * T4_DOLLARS_PER_HOUR

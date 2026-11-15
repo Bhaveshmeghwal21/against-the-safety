@@ -175,7 +175,7 @@ def numeric_table():
 
 def latency_table():
     rep = load('latency.json')['arms']
-    names = {'base': 'Tiny Aya base, same loop, no self-check', 'submitted': 'Submitted system (main adapter, fail-closed rule, self-check)'}
+    names = {'base': 'Tiny Aya base, same loop, no model self-check', 'submitted': 'Submitted system (main adapter, fail-closed rule, self-check)'}
     lines = ['| System | Requests | p50 (s) | p95 (s) | p99 (s) | Requests per second | Cost per 1,000 requests, busy T4 |', '| --- | ---: | ---: | ---: | ---: | ---: | ---: |']
     for arm, s in rep.items():
         lat = s['latency_ms']

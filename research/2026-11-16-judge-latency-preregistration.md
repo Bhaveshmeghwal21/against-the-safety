@@ -76,3 +76,8 @@ AuditKIT has no numeric metric and our datasets carry no numeric type. We define
 ## 10. Amendment 2 (16 November 2026, after the first-pass results were read)
 
 - **One inconsistent pair.** AuditKIT defines hallucination as 1 minus faithfulness, from the same claims and verdicts, and our runner reuses the cached judge replies for it. Two threads that sent an identical prompt at the same moment could each get their own reply. That happened for one episode (main, HotpotQA, `5ade45c75542992fa25da720`): faithfulness 1.0 and hallucination 1.0. The report now takes hallucination as 1 minus the faithfulness of the same episode and records the count (`hallucination_rows_that_differed_from_1_minus_faithfulness` in `reports/judge_results.json`). The runner now sends an identical prompt once. The first pass was not rerun. The effect is one episode in 162 for main's mean hallucination (0.284 became 0.278). No reading in section 4 changes.
+
+## 11. Amendment 3 (16 November 2026, after the latency run)
+
+- **What the base arm applies.** Section 6 says the base arm has "no self-check". It runs inside `RagSystem`, which always applies the fail-closed rule and the code checks that sit in front of the model self-check (the cited passage was shown, the answer text occurs in it). Only the model self-check is skipped (its support function returns 1.0). The base arm therefore shows 7 answers in 150 requests. Its latency is unaffected, because those checks need no model call. The report labels the arm accordingly.
+- **Run.** Kaggle kernel `ats-latency-t4` (T4, account 1), about 1.1 hours including setup. Outputs are in `runs/kaggle/ats-latency-t4/out/latency/` and, once published, in the benchmark-traces dataset (`latency/`).

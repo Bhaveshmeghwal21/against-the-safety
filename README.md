@@ -213,6 +213,15 @@ Relevance is low for all three because the tool returns the top three passages a
 | main+FB+V (submitted) | 43 (16) | 28 | 26 | 60.5% | 92.9% |
 | candF1+FB+V (alternative) | 43 (16) | 29 | 26 | 60.5% | 89.7% |
 
+**Speed.** One Kaggle T4, one request at a time, 150 requests from the three suites of the first sealed test, 3 untimed warm-up requests, greedy decoding, the model in 4-bit, Hugging Face `generate` with no serving-engine tuning. Percentiles and requests per second are AuditKIT's `LatencyStats` and `Throughput`. Full report: [`reports/latency.md`](reports/latency.md).
+
+| System | Requests | p50 (s) | p95 (s) | p99 (s) | Requests per second | Cost per 1,000 requests, busy T4 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Tiny Aya base, same loop, no model self-check | 150 | 8.77 | 19.44 | 23.44 | 0.097 | $1.51 |
+| Submitted system (main adapter, fail-closed rule, self-check) | 150 | 16.27 | 23.84 | 26.17 | 0.064 | $2.27 |
+
+The submitted system takes a median of 16.3 s per question and a 95th percentile of 23.8 s. That is 1.9 times the base model's median, because it searches more and uses the model once more to check the answer (the check itself costs 0.28 s per request on average; nearly all the time is generation). Peak GPU memory is 3.98 GB. Our batched evaluation runs needed 4.3 GPU-seconds per episode ([`reports/azure_roi.md`](reports/azure_roi.md)), because many episodes share a batch. One at a time, the same system needs 15.5 s on average, so the cost per question in that report is a best case, not what a single user would see. A serving engine would be faster; we did not tune one. The base arm applies the fail-closed rule and the code checks of the self-check, so it shows only 7 answers in 150, but it skips the model self-check. The Kaggle host is shared, so some noise is possible.
+
 **Limits of these numbers.** One judge, one sample of 300 episodes, claim extraction by a model, and the hidden-evidence flags are not hand-checked.
 
 ## Try it
@@ -390,6 +399,7 @@ Training and evaluation ran on Kaggle T4s: see [`kaggle/README.md`](kaggle/READM
 - English, short factual questions. Tiny Aya is a multilingual model, but we trained the adapter in English only. A first Hindi and Spanish check (see [Other languages](#other-languages-hindi-and-spanish)) shows the refusing carries over and the answering does not: 2% to 5% of questions got a correct, cited answer, and Hindi searches loop far more often. Training on Hindi afterwards raised Hindi answers to about 35% but made both adapters answer on hidden evidence more often, so neither passed our safety rule and the submitted system stays English. Two-part answers and single-passage questions are weak spots; with two documents and dated editions the adapter sometimes cites the older one.
 - The first sealed test was opened before the scoring corrections, and candF1 was tested on it after its gate was written. The fresh Round 6 test was then opened once, for the second look, so further model selection needs yet another fresh test. On that test the submitted system answered single-passage SQuAD questions about as well as refusing everything would score (43.3% against 41.1%).
 - Hidden-evidence answers are annotation-based flags. An unannotated alternative source could make a flagged answer correct, and no person has checked them. An AI judge found an unsupported claim in 10 of the 12 flagged answers of the submitted system in a 300-episode sample, so most flags look real. A blank 50-row sheet for a human check is in [`reports/hand_label_sheet.csv`](reports/hand_label_sheet.csv).
+- Single-request latency is slow: a median of 16.3 s per question at batch size one on a T4 with an untuned research stack, so the system as run here is not real-time. A serving engine would help; we did not try one.
 - The judge-based metrics rest on one judge model and one sample of 300 episodes of the first sealed test. They were not run on the fresh test, on Hindi, or on the hosted models.
 - The self-check withholds some correct answers. The submitted system refuses 39% of answerable questions.
 - On benchmarks the adapters never trained on, the adapter is level with GPT-6 Luna and behind DeepSeek V4 Flash, and on SQuAD 2.0 it scores the same as refusing every question. Large hosted models are more accurate when the documents hold the answer. See [Against hosted models](#against-hosted-models).
@@ -401,7 +411,7 @@ Hugging Face Articles need a Pro account, so this README is the write-up, as the
 
 - **Track and problem statement:** Track 3 (agentic fine-tuning), problem statement 4: fine-tuning for retrieval-augmented generation.
 - **Work done outside the hackathon:** none. The repository history starts on 4 November 2026. The base model, AgentTune, AuditKIT and the public datasets are third-party.
-- **LLM usage:** AI coding assistants drafted a large share of the code, tests and prose under the team's direction. Every number comes from a script run on saved transcripts and is in a file under `reports/`.
+- **LLM usage:** AI coding assistants drafted a large share of the code, tests and prose under the team's direction. Azure's `gpt-6-luna` served as the judge for the faithfulness, groundedness, relevancy and context metrics, and as a competitor in the hosted-model comparison. Every number comes from a script run on saved transcripts and is in a file under `reports/`.
 - **With more credits:** quote-first answer targets, balanced answer and refusal data in both directions, far more than 488 parent questions, and a second Hindi attempt with more English replay, judged on fresh sealed tests under a new pre-registration. Measurements we did not make: a human check of the hidden-evidence flags (the judge-based faithfulness score is not calibrated against people), a second judge model, a second training seed, and the hosted models on the second sealed test.
 
 ## Artifacts and licenses
