@@ -154,6 +154,22 @@ The adapter is within two points of GPT-6 Luna on three of the five suites and a
 
 **Cost for 10,000 episodes.** $6.30 for the adapter's busy T4 time (perfect utilisation, $0.526 per hour, nothing else counted), $2.67 for GPT-6 Luna and $6.09 for DeepSeek V4 Flash, from the recorded token mix and published prices. The adapter is not cheaper. Its case is control: one GPU you own, and fewer unsupported answers shown.
 
+### Other languages: Hindi and Spanish
+
+Tiny Aya reads 70 languages, but we trained the adapter on English only. On 15 November 2026 we ran the submitted system once on the same questions in Hindi, English and Spanish (XQuAD, Wikipedia questions translated by professionals), after committing the plan and before building the data. Nothing was retrained or tuned for the check.
+
+![Hindi, English and Spanish side by side](../docs/figures/png/xquad_results.png)
+
+| XQuAD, same questions in three languages | Hindi (285 questions) | English (295 questions) | Spanish (285 questions) |
+| --- | ---: | ---: | ---: |
+| Correct and cited, when the documents hold the answer | 2.1% | 2.7% | 4.6% |
+| Answers although the evidence was hidden | 3 / 285 | 0 / 295 | 1 / 285 |
+| Same, Tiny Aya base model | 188 / 285 | 205 / 295 | 237 / 285 |
+| Success (refusing every question scores 50.0%) | 50.5% | 51.4% | 52.1% |
+| Adapter alone: turns that ended invalid | 73.0% | 23.6% | 6.5% |
+
+The refusing carries over: with the evidence hidden, the system answers 3 of 285 Hindi, 0 of 295 English and 1 of 285 Spanish questions, against more than two thirds for the base model. The answering does not carry over in any language. With the evidence in reach, only 2% to 5% of questions got a correct, cited answer, so the success rate sits at what refusing every question would score (50.0%). English is just as low as Hindi, because these are single-passage questions, a weak spot we already knew, so the check cannot separate a language problem from that one. It does show that Hindi and Spanish are not measurably worse than English. Before the repairs, 73% of the adapter's Hindi turns ended invalid, against 24% in English and 6.5% in Spanish; nearly all repeat the previous search word for word, and we did not test why. This is one sample of 300 translated questions per language; hosted models were not run on Hindi. The [plan](../research/2026-11-15-multilingual-plan.md) and [results](../research/2026-11-15-multilingual-results.md) are in the repository.
+
 ### Sample inputs and outputs
 
 ![Four recorded episodes](../docs/figures/png/trace_examples.png)
@@ -173,7 +189,7 @@ The submitted adapter trained for 3.9 T4 GPU-hours on Kaggle's free quota (about
 
 ## 8. Limitations
 
-- English, short factual questions. Tiny Aya is a multilingual model, but we trained and tested only in English, so we do not know how the adapter behaves in other languages. Two-part answers and single-passage questions are weak spots, and with two editions of a policy the adapter sometimes cites the older one.
+- English, short factual questions. Tiny Aya is a multilingual model, but we trained the adapter in English only. A first Hindi and Spanish check (section 6) shows the refusing carries over and the answering does not: 2% to 5% of questions got a correct, cited answer, and Hindi searches loop far more often. Two-part answers and single-passage questions are weak spots, and with two editions of a policy the adapter sometimes cites the older one.
 - The sealed test was opened before the scoring corrections, and candF1 was tested on it after its gate was written. Further model selection needs a fresh test.
 - Hidden-evidence answers are annotation-based flags. An unannotated alternative source could make a flagged answer correct, and nobody has hand-checked them.
 - The self-check withholds some correct answers.

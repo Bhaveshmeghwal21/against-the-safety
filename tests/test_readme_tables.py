@@ -108,7 +108,23 @@ def test_the_external_suite_table_and_hosted_claims_match_the_reports(document):
     assert tables.pct(fair["gpt_old+FB"]["macro"]) in text
 
 
-def test_the_documents_state_that_only_english_was_tested():
+def test_the_documents_say_the_adapter_was_trained_in_english_only_and_show_the_language_check():
+    import make_readme_table as tables
+
     for document in ("README.md", "article/ARTICLE.md"):
         text = (ROOT / document).read_text(encoding="utf-8")
-        assert "trained and tested only in English" in text, document
+        assert "trained the adapter in English only" in text or "trained the adapter on English only" in text, document
+        for line in tables.multilingual_table().splitlines():
+            assert line in text, f"{document} is missing or has changed: {line}"
+        assert "trained and tested only in English" not in text, document
+
+
+def test_the_main_card_reports_the_language_check_with_the_saved_numbers():
+    import make_readme_table as tables
+    from ragharness import release_cards
+
+    rep = tables.load("xquad_results.json")["systems"]
+    note = release_cards.multilingual_note()
+    for lang in ("hi", "en", "es"):
+        assert f"{rep[lang]['main+FB+V']['correct_and_cited']:.1%}" in note
+    assert "not a claim" in note

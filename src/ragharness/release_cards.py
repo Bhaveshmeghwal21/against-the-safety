@@ -178,6 +178,17 @@ The results above are for the adapter alone. The submitted system adds two repai
 On a sealed test of {m['n']} fresh episodes (SQuAD, HotpotQA and RGB; scorer v3; opened for the reference systems and once more for one round-5b candidate), macro success is {b['macro']:.1%} for the base model, {m['macro']:.1%} for the adapter and {s['macro']:.1%} for the adapter with both repairs. Answers given although the evidence was hidden fall from {hid(b)} episodes (base) to {hid(m)} (adapter) and {hid(s)} (with repairs). The repairs cost caution: refusals of answerable episodes rise from {m['false_abstain']:.0%} to {s['false_abstain']:.0%}, and correct, cited answers do not increase ({m['supported_correct']:.1%} to {s['supported_correct']:.1%}). Among the answers that remain, {s['correct_among_answered']:.1%} are correct and cited (adapter alone: {m['correct_among_answered']:.1%}). The scorer is stricter than the one in the first-round table and the questions are harder, so these numbers do not compare with it. Code and tables: `reports/reference_policies.md` and `scripts/verify_round5.py` in the repository. To run the whole system on your own documents (needs a CUDA GPU and access to the gated base model), use `scripts/ask.py` (`src/ragharness/system.py`) or the web demo `scripts/demo_app.py`. A second round of preference training (round 5b) produced one eligible checkpoint, [candF1](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-cand-f1). With the same repairs it scored {f['macro']:.1%} macro against {s['macro']:.1%} on the same test, but its unsupported-answer difference from this system ({cor['unsupported_rate']['difference']:+.3f}, interval {cor['unsupported_rate']['ci95'][0]:+.3f} to {cor['unsupported_rate']['ci95'][1]:+.3f}) did not meet the registered safety bound (upper end at most +0.02), so this adapter stays the submitted model."""
 
 
+def multilingual_note() -> str:
+    """Hindi and Spanish paragraph of the main card, from reports/xquad_results.json (scripts/report_xquad.py)."""
+    rep = json.loads((ROOT / "reports" / "xquad_results.json").read_text(encoding="utf-8"))["systems"]
+    s = lambda lang: rep[lang]["main+FB+V"]
+    base = lambda lang: rep[lang]["base"]
+    hid = lambda x: f"{x['hidden_answers']} of {x['n_hidden']}"
+    return f"""## Other languages (a first check, not a claim)
+
+The adapter was trained on English only. On 300 XQuAD questions in each of Hindi, English and Spanish (one run, evaluation only, nothing retrained), the system with both repairs answered although the evidence was hidden in {hid(s('hi'))} Hindi, {hid(s('en'))} English and {hid(s('es'))} Spanish episodes (base model: {hid(base('hi'))}, {hid(base('en'))}, {hid(base('es'))}). It gave a correct, cited answer when the evidence was available in only {s('hi')['correct_and_cited']:.1%} (Hindi), {s('en')['correct_and_cited']:.1%} (English) and {s('es')['correct_and_cited']:.1%} (Spanish) of questions, so its success rate ({s('hi')['success']:.1%}, {s('en')['success']:.1%}, {s('es')['success']:.1%}) is about what refusing every question scores (50.0%). English is as low as the other two because these single-passage questions are a known weak spot. In Hindi {rep['hi']['main']['invalid']:.0%} of the adapter's raw turns ended invalid, mostly by repeating the previous search (English {rep['en']['main']['invalid']:.0%}, Spanish {rep['es']['main']['invalid']:.1%}). See `research/2026-11-15-multilingual-results.md`."""
+
+
 @_audited_card
 def model_card(name: str, user: str) -> str:
     is_main = name == "main"
@@ -219,6 +230,8 @@ paired intervals are in the repository (`reports/`) and in the dataset repositor
 {"A decoding-time sweep on the development split (`reports/bias_sweep.md`) added a bias to the logit of `abstain` after `<`: from 0 to -3 the results barely change; at -6 false abstains on answerable questions halve (20 to 10 of 86) but unsupported answers on unanswerable ones rise from 2 to 26 of 73; from -9 it never abstains, as with the control. No setting removed the false abstains without losing the correct ones." if is_main else ""}
 
 {_round5_note() if is_main else ""}
+
+{multilingual_note() if is_main else ""}
 
 ## Five external benchmarks (never trained on or used for any choice)
 
@@ -357,6 +370,9 @@ BENCH_SOURCES = {  # folder -> (benchmark, license, citation)
     "r5t_squad": ("SQuAD 2.0 training-split articles, sealed round-5 test", "CC BY-SA 4.0", "Rajpurkar et al., 2018 (as above)"),
     "r5t_hotpot": ("HotpotQA validation, sealed round-5 test", "CC BY-SA 4.0", "Yang et al., 2018, HotpotQA"),
     "r5t_rgb": ("RGB, English refined set, sealed round-5 test (noise 0, 0.8, 1)", "CC BY-NC-SA 4.0", "Chen et al., 2024 (as above)"),
+    "xq_hi": ("XQuAD, Hindi (multilingual check, 300 questions; main and base only)", "CC BY-SA 4.0", "Artetxe et al., 2020, On the Cross-lingual Transferability of Monolingual Representations"),
+    "xq_en": ("XQuAD, English (multilingual check, same questions)", "CC BY-SA 4.0", "Artetxe et al., 2020 (as above)"),
+    "xq_es": ("XQuAD, Spanish (multilingual check, same questions)", "CC BY-SA 4.0", "Artetxe et al., 2020 (as above)"),
 }
 
 

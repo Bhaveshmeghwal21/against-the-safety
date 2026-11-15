@@ -56,9 +56,28 @@ def external_table():
     return '\n'.join(lines)
 
 
+def multilingual_table():
+    """The Hindi / English / Spanish check on XQuAD (reports/xquad_results.json, scripts/report_xquad.py). The submitted system unless a row says otherwise."""
+    rep = load('xquad_results.json')['systems']
+    langs = ('hi', 'en', 'es')
+    row = lambda title, f: f"| {title} | " + ' | '.join(f(rep[l]) for l in langs) + ' |'
+    hidden = lambda s: f"{s['hidden_answers']} / {s['n_hidden']}"
+    return '\n'.join([
+        '| XQuAD, same questions in three languages | ' + ' | '.join(f"{n} ({rep[l]['main+FB+V']['n_answerable']} questions)" for n, l in zip(('Hindi', 'English', 'Spanish'), langs)) + ' |',
+        '| --- | ---: | ---: | ---: |',
+        row('Correct and cited, when the documents hold the answer', lambda r: pct(r['main+FB+V']['correct_and_cited'])),
+        row('Answers although the evidence was hidden', lambda r: hidden(r['main+FB+V'])),
+        row('Same, Tiny Aya base model', lambda r: hidden(r['base'])),
+        row('Success (refusing every question scores 50.0%)', lambda r: pct(r['main+FB+V']['success'])),
+        row('Adapter alone: turns that ended invalid', lambda r: pct(r['main']['invalid'])),
+    ])
+
+
 if __name__ == '__main__':
     print(results_table())
     print()
     print(hosted_table())
     print()
     print(external_table())
+    print()
+    print(multilingual_table())

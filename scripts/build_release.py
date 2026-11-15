@@ -50,9 +50,10 @@ BENCH_EVALS = [RUNS / "ats-eval-bench-a" / "out" / "eval", RUNS / "ats-eval-benc
                RUNS / "ats-eval-jobs-r3test" / "out" / "eval", RUNS / "ats-eval-jobs-r3testA" / "out" / "eval",  # plan section 26: fresh test
                A2R4 / "ats-eval-jobs-r4dev" / "out" / "eval", A2R4 / "ats-eval-jobs-r4test" / "out" / "eval",  # round 4: development and final holdout
                A2R5 / "ats-train-dpo-r5c" / "out" / "eval", A2R5 / "ats-train-dpo2-r5b" / "out" / "eval",  # rounds 5 and 5b: development evaluation
-               A2R5 / "ats-eval-jobs-r5test-ref" / "out" / "eval", A2R5 / "ats-eval-jobs-r5test-final" / "out" / "eval"]  # round 5: sealed test
+               A2R5 / "ats-eval-jobs-r5test-ref" / "out" / "eval", A2R5 / "ats-eval-jobs-r5test-final" / "out" / "eval",  # round 5: sealed test
+               RUNS / "ats-r6-system-xq" / "out" / "eval"]  # multilingual check (research/2026-11-15-multilingual-plan.md)
 BENCHES = ["2wiki", "musique", "squad2", "rgb", "rgb_int", "r3t_hotpot", "r3t_2wiki", "r3t_musique", "r3t_squad2", "r3t_rgb", "r3t_rgb_int",
-           "r4dev", "r4test", "r5t_squad", "r5t_hotpot", "r5t_rgb"]
+           "r4dev", "r4test", "r5t_squad", "r5t_hotpot", "r5t_rgb", "xq_hi", "xq_en", "xq_es"]
 
 
 def copy(src: Path, dst: Path) -> None:
@@ -150,7 +151,7 @@ def main() -> None:
         counts[f"bench_{b}"] = sum(copy_traces(b, f"bench_{b}", root, bt) for root in BENCH_EVALS)
         copy(ROOT / "data" / "bench" / b / "manifest.json", bt / "manifests" / f"{b}.json")
     for f in sorted((ROOT / "reports").glob("benchmarks_*")) + sorted((ROOT / "reports").glob("round3_test*")) + sorted((ROOT / "reports").glob("round4_test*")) \
-            + sorted((ROOT / "reports").glob("round5_final*")) + sorted((ROOT / "reports").glob("round5b_final*")) + sorted((ROOT / "reports").glob("round5_system_check*")):
+            + sorted((ROOT / "reports").glob("round5_final*")) + sorted((ROOT / "reports").glob("round5b_final*")) + sorted((ROOT / "reports").glob("round5_system_check*")) + sorted((ROOT / "reports").glob("xquad_*")):
         copy(f, bt / "reports" / f.name)
     (bt / "README.md").write_text(cards.bench_card(args.user), encoding="utf-8", newline="\n")
 

@@ -210,6 +210,28 @@ The adapter is within two points of GPT-6 Luna on three of the five suites and a
 
 **Cost.** For 10,000 episodes: $6.30 for the adapter's busy T4 time (perfect utilisation, $0.526 per hour, nothing else counted), $2.67 for GPT-6 Luna and $6.09 for DeepSeek, from the recorded token mix and published prices. The adapter is not cheaper. Its case is control: it runs on one GPU you own and shows fewer unsupported answers. See [`reports/azure_roi.md`](reports/azure_roi.md) and [`reports/deepseek_roi.md`](reports/deepseek_roi.md).
 
+## Other languages: Hindi and Spanish
+
+Tiny Aya reads 70 languages, but we trained the adapter on English only. On 15 November 2026 we ran the submitted system once on the same questions in Hindi, English and Spanish (XQuAD, Wikipedia questions translated by professionals). Nothing was retrained or tuned for this check, and the plan was committed before any data was built ([plan](research/2026-11-15-multilingual-plan.md), [results](research/2026-11-15-multilingual-results.md)).
+
+![Hindi, English and Spanish side by side](docs/figures/xquad_results.svg)
+
+| XQuAD, same questions in three languages | Hindi (285 questions) | English (295 questions) | Spanish (285 questions) |
+| --- | ---: | ---: | ---: |
+| Correct and cited, when the documents hold the answer | 2.1% | 2.7% | 4.6% |
+| Answers although the evidence was hidden | 3 / 285 | 0 / 295 | 1 / 285 |
+| Same, Tiny Aya base model | 188 / 285 | 205 / 295 | 237 / 285 |
+| Success (refusing every question scores 50.0%) | 50.5% | 51.4% | 52.1% |
+| Adapter alone: turns that ended invalid | 73.0% | 23.6% | 6.5% |
+
+In plain words:
+
+- **The refusing carries over.** When the evidence is hidden, the system answers 3 of 285 Hindi, 0 of 295 English and 1 of 285 Spanish questions. The base model answers two thirds or more of them.
+- **The answering does not, in any of the three languages.** With the evidence in reach, the system gives a correct, cited answer to only 2% to 5% of questions, so its success rate sits at what refusing every question would score (50.0%). English is just as low as Hindi, because these are single-passage questions, a weak spot we already knew. This check therefore cannot tell a language problem apart from that one. It shows that Hindi and Spanish are not measurably worse than English.
+- **Hindi breaks the search more often.** Before the repairs, 73% of the adapter's Hindi turns ended invalid, against 24% in English and 6.5% in Spanish. Nearly all of them repeat the previous search word for word. The repairs turn these into refusals. We did not test why.
+
+One sample of 300 translated questions per language, so treat it as a first look. Hosted models were not run on Hindi.
+
 ## What we tried, and what we kept
 
 ![Timeline of rounds 1 to 6 with the outcome of each](docs/figures/rounds.svg)
@@ -253,7 +275,7 @@ Training and evaluation ran on Kaggle T4s: see [`kaggle/README.md`](kaggle/READM
 
 ## Limits
 
-- English, short factual questions. Tiny Aya is a multilingual model, but we trained and tested only in English, so we do not know how the adapter behaves in other languages. Two-part answers and single-passage questions are weak spots; with two documents and dated editions the adapter sometimes cites the older one.
+- English, short factual questions. Tiny Aya is a multilingual model, but we trained the adapter in English only. A first Hindi and Spanish check (see [Other languages](#other-languages-hindi-and-spanish)) shows the refusing carries over and the answering does not: 2% to 5% of questions got a correct, cited answer, and Hindi searches loop far more often. Two-part answers and single-passage questions are weak spots; with two documents and dated editions the adapter sometimes cites the older one.
 - The sealed test was opened before the scoring corrections, and candF1 was tested on it after its gate was written, so further model selection needs a fresh test.
 - Hidden-evidence answers are annotation-based flags. An unannotated alternative source could make a flagged answer correct, and no one has hand-checked them.
 - The self-check withholds some correct answers. The submitted system refuses 39% of answerable questions.

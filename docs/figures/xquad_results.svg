@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="381" viewBox="0 0 820 381" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="820" height="381" fill="#ffffff"/>
+<text x="20" y="26" font-size="16" font-weight="600" fill="#1f2328" text-anchor="start" >The same questions in Hindi, English and Spanish: does the system keep its behaviour?</text>
+<text x="20" y="46" font-size="11.5" font-weight="400" fill="#57606a" text-anchor="start" >XQuAD, Hindi 570 episodes, English 590 episodes, Spanish 570 episodes. The adapter was trained on English only. Scorer v3 with XQuAD normalization.</text>
+<text x="20" y="62" font-size="13" font-weight="600" fill="#1f2328" text-anchor="start" >Correct and cited answers</text>
+<text x="20" y="77" font-size="11" font-weight="400" fill="#57606a" text-anchor="start" >share of episodes where the documents hold the answer, higher is better</text>
+<text x="20" y="97" font-size="11.5" font-weight="600" fill="#1f2328" text-anchor="start" >Hindi</text>
+<rect x="82" y="90" width="0.0" height="14" fill="#9e9e9e"/>
+<text x="87" y="101" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >0.0%</text>
+<rect x="82" y="107" width="6.1" height="14" fill="#81c784"/>
+<text x="93.14035087719299" y="118" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >2.5%</text>
+<rect x="82" y="124" width="5.3" height="14" fill="#1565c0"/>
+<text x="92.26315789473684" y="135" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >2.1%</text>
+<text x="20" y="172" font-size="11.5" font-weight="600" fill="#1f2328" text-anchor="start" >English</text>
+<rect x="82" y="165" width="0.0" height="14" fill="#9e9e9e"/>
+<text x="87" y="176" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >0.0%</text>
+<rect x="82" y="182" width="6.8" height="14" fill="#81c784"/>
+<text x="93.77966101694915" y="193" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >2.7%</text>
+<rect x="82" y="199" width="6.8" height="14" fill="#1565c0"/>
+<text x="93.77966101694915" y="210" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >2.7%</text>
+<text x="20" y="247" font-size="11.5" font-weight="600" fill="#1f2328" text-anchor="start" >Spanish</text>
+<rect x="82" y="240" width="0.0" height="14" fill="#9e9e9e"/>
+<text x="87" y="251" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >0.0%</text>
+<rect x="82" y="257" width="12.3" height="14" fill="#81c784"/>
+<text x="99.28070175438597" y="268" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >4.9%</text>
+<rect x="82" y="274" width="11.4" height="14" fill="#1565c0"/>
+<text x="98.40350877192982" y="285" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >4.6%</text>
+<text x="420" y="62" font-size="13" font-weight="600" fill="#1f2328" text-anchor="start" >Answers although the evidence was hidden</text>
+<text x="420" y="77" font-size="11" font-weight="400" fill="#57606a" text-anchor="start" >share of hidden-evidence episodes, lower is better</text>
+<text x="420" y="97" font-size="11.5" font-weight="600" fill="#1f2328" text-anchor="start" >Hindi</text>
+<rect x="482" y="90" width="164.9" height="14" fill="#9e9e9e"/>
+<text x="651.9122807017544" y="101" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >66.0%  (188/285)</text>
+<rect x="482" y="107" width="5.3" height="14" fill="#81c784"/>
+<text x="492.2631578947368" y="118" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >2.1%  (6/285)</text>
+<rect x="482" y="124" width="2.6" height="14" fill="#1565c0"/>
+<text x="489.63157894736844" y="135" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >1.1%  (3/285)</text>
+<text x="420" y="172" font-size="11.5" font-weight="600" fill="#1f2328" text-anchor="start" >English</text>
+<rect x="482" y="165" width="173.7" height="14" fill="#9e9e9e"/>
+<text x="660.728813559322" y="176" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >69.5%  (205/295)</text>
+<rect x="482" y="182" width="0.0" height="14" fill="#81c784"/>
+<text x="487" y="193" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >0.0%  (0/295)</text>
+<rect x="482" y="199" width="0.0" height="14" fill="#1565c0"/>
+<text x="487" y="210" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >0.0%  (0/295)</text>
+<text x="420" y="247" font-size="11.5" font-weight="600" fill="#1f2328" text-anchor="start" >Spanish</text>
+<rect x="482" y="240" width="207.9" height="14" fill="#9e9e9e"/>
+<text x="694.8947368421052" y="251" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >83.2%  (237/285)</text>
+<rect x="482" y="257" width="1.8" height="14" fill="#81c784"/>
+<text x="488.7543859649123" y="268" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >0.7%  (2/285)</text>
+<rect x="482" y="274" width="0.9" height="14" fill="#1565c0"/>
+<text x="487.87719298245617" y="285" font-size="10.5" font-weight="400" fill="#1f2328" text-anchor="start" >0.4%  (1/285)</text>
+<rect x="20" y="323" width="12" height="12" fill="#9e9e9e"/>
+<text x="37" y="333" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >Tiny Aya base</text>
+<rect x="141.2" y="323" width="12" height="12" fill="#81c784"/>
+<text x="158.2" y="333" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >main adapter alone</text>
+<rect x="294.4" y="323" width="12" height="12" fill="#1565c0"/>
+<text x="311.4" y="333" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" >main + both repairs (submitted)</text>
+<text x="20" y="357" font-size="10.5" font-weight="400" fill="#57606a" text-anchor="start" >Bars follow the legend order in every group. Hidden-evidence answers are support flags from annotations, not human-checked hallucinations.</text>
+</svg>
