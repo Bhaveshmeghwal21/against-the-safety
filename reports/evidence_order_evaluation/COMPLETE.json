@@ -1,0 +1,10 @@
+{
+  "episodes": 938,
+  "systems": [
+    "dora"
+  ],
+  "checker": "main, wording A, threshold 0.5",
+  "scorer": "v2",
+  "test_used_for_training": false,
+  "note": "Previously published test set; a reproduction benchmark, not a new sealed holdout."
+}

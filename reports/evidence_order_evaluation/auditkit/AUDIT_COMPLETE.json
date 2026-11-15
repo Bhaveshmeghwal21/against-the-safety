@@ -1,0 +1,13 @@
+{
+  "adapter_sha256": {
+    "adapter_config.json": "012204738f8c8f3dab6937bc8cfa01cbbb34b1df520a0ccb2f45e8eb4a44ef29",
+    "adapter_model.safetensors": "89552acaf005b840318d75feb98b9a4522110e84ad62a2415f98815db2b6b436"
+  },
+  "adapter_contract": "recorded-v2",
+  "auditkit_version": "1.1.3",
+  "sources_sha256": {
+    "scripts/audit_slice.py": "8f8aa23b4daf837a4dac719796feb92dd3383d4257d4fbc71e92318ec865fe2f",
+    "src/ragharness/audit.py": "c595cc92d1d335ee94d8dec3f9a16542e526dda753cec67f294da55c2d92d67c",
+    "reports/round5_test_manifest.json": "a0ee2656f5f5ba0e187339269b726cec19198d19730b1f32480f0b66088c5d07"
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "validated": true,
+  "total_episodes": 938,
+  "frozen_manifest_sha256": "996367911485ec80f0664a555c6f4e8fa6a8881c30e1345c3e4bc175f9db875a",
+  "oracle_checked": false,
+  "sets": {
+    "r5t_squad": {
+      "questions": 65,
+      "episodes": 385,
+      "hidden_episodes": 158,
+      "index_hash": "d21f3b23b95409787ef8fd610a26ad5f2b53c68f9b8229c8b183caa50a684f07",
+      "chunks": 984,
+      "sqlite_verified": true,
+      "files": {
+        "corpus.json": {
+          "sha256": "678da92d476f015e90874cab80fc76b46b75d8d171b00ea873a4e2f855e38033",
+          "frozen_sha256": "678da92d476f015e90874cab80fc76b46b75d8d171b00ea873a4e2f855e38033",
+          "match": "exact",
+          "line_ending_equivalent": false,
+          "bytes": 882736
+        },
+        "manifest.json": {
+          "sha256": "9e501ca3497ed1478d0eb57eb9bb8fe8fe41922e3c7fc4f4f630a966712c0158",
+          "frozen_sha256": "dca7563aa2b21aac4dab1dc4816e4137f6716e85b47d021a38714184beade585",
+          "match": "crlf_equivalent",
+          "line_ending_equivalent": true,
+          "bytes": 3898
+        },
+        "prompt_variants.json": {
+          "sha256": "a6b88b6f27cb34e15cc33ae592b1fc5a2cde0124fbead20eee9dc155af3f488b",
+          "frozen_sha256": "e81feffad02b88bc7687ea57008435300ba90735feba3986cdfd3297d7b34d9f",
+          "match": "crlf_equivalent",
+          "line_ending_equivalent": true,
+          "bytes": 53365
+        },
+        "questions.jsonl": {
+          "sha256": "163a2c6e97509e3873787c6f73a442d2440530f25e88b11a2453fd860086a35e",
+          "frozen_sha256": "163a2c6e97509e3873787c6f73a442d2440530f25e88b11a2453fd860086a35e",
+          "match": "exact",
+          "line_ending_equivalent": false,
+          "bytes": 93775
+        }
+      }
+    },
+    "r5t_hotpot": {
+      "questions": 60,
+      "episodes": 82,
+      "hidden_episodes": 38,
+      "index_hash": "25e7b04c22283f356036fa13db4d42c785a7526a7e9f3e07375dabfc0f2c465f",
+      "chunks": 9959,
+      "sqlite_verified": true,
+      "files": {
+        "corpus.json": {
+          "sha256": "00108da9032a6cc720cf5d1818cbfb7773c77040391cd02355d33507a52237c2",
+          "frozen_sha256": "00108da9032a6cc720cf5d1818cbfb7773c77040391cd02355d33507a52237c2",
+          "match": "exact",
+          "line_ending_equivalent": false,
+          "bytes": 6898697
+        },
+        "manifest.json": {
+          "sha256": "dce92517e214bd7f139413102ebacd4cb57e3ac30e18f6aed31b451e8812dda9",
+          "frozen_sha256": "dce92517e214bd7f139413102ebacd4cb57e3ac30e18f6aed31b451e8812dda9",
+          "match": "exact",
+          "line_ending_equivalent": false,
+          "bytes": 2184
+        },
+        "questions.jsonl": {
+          "sha256": "fa6a10cc638ea39d5a0f43d205590cd0961185d9f5ff312d98a5baf71e2ad4e1",
+          "frozen_sha256": "fa6a10cc638ea39d5a0f43d205590cd0961185d9f5ff312d98a5baf71e2ad4e1",
+          "match": "exact",
+          "line_ending_equivalent": false,
+          "bytes": 383447
+        }
+      }
+    },
+    "r5t_rgb": {
+      "questions": 100,
+      "episodes": 471,
+      "hidden_episodes": 179,
+      "index_hash": "17f055d9ccb446cff2f7902e4988d18ca3c15a6cb793c3ec2055defaa7478094",
+      "chunks": 7461,
+      "sqlite_verified": true,
+      "files": {
+        "corpus.json": {
+          "sha256": "301a3bb2220bcdd09140b483553f7ddae9c0ddb6b67e6d53e552aedff54751b5",
+          "frozen_sha256": "301a3bb2220bcdd09140b483553f7ddae9c0ddb6b67e6d53e552aedff54751b5",
+          "match": "exact",
+          "line_ending_equivalent": false,
+          "bytes": 8261029
+        },
+        "manifest.json": {
+          "sha256": "89b16898092d6fb0e7a808f2460f3d500941170d04db205f95b4641fc51c6d1b",
+          "frozen_sha256": "89b16898092d6fb0e7a808f2460f3d500941170d04db205f95b4641fc51c6d1b",
+          "match": "exact",
+          "line_ending_equivalent": false,
+          "bytes": 1876
+        },
+        "prompt_variants.json": {
+          "sha256": "38535609f80854467b2a8785ebefbca9f2ac815ae1f065fb86038d53b764f523",
+          "frozen_sha256": "38535609f80854467b2a8785ebefbca9f2ac815ae1f065fb86038d53b764f523",
+          "match": "exact",
+          "line_ending_equivalent": false,
+          "bytes": 58754
+        },
+        "questions.jsonl": {
+          "sha256": "3a5e5a2008c8f06d3cfd4944ca3ec578ef6c5fe491460d1ae4be5dcccbb4408d",
+          "frozen_sha256": "3a5e5a2008c8f06d3cfd4944ca3ec578ef6c5fe491460d1ae4be5dcccbb4408d",
+          "match": "exact",
+          "line_ending_equivalent": false,
+          "bytes": 2544240
+        }
+      }
+    }
+  }
+}

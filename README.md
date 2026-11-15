@@ -230,6 +230,24 @@ The adapter is within two points of GPT-6 Luna on three of the five suites and a
 
 **Cost.** For 10,000 episodes: $6.30 for the adapter's busy T4 time (perfect utilisation, $0.526 per hour, nothing else counted), $2.67 for GPT-6 Luna and $6.09 for DeepSeek, from the recorded token mix and published prices. The adapter is not cheaper. Its case is control: it runs on one GPU you own and shows fewer unsupported answers. See [`reports/azure_roi.md`](reports/azure_roi.md) and [`reports/deepseek_roi.md`](reports/deepseek_roi.md).
 
+## DoRA experiments on the opened Round 5 suite
+
+Three DoRA checkpoints were evaluated on the same 938 Round 5 input episodes. These are historical **scorer-v2** results; the scorer-v3 results above use corrected rules. The individual checkpoints also have different exclusions, so this table is descriptive and should not be read as a paired, like-for-like ranking against the newer results.
+
+| DoRA checkpoint | Raw macro success | With fail-closed and main verifier | Hidden-evidence answers with both repairs |
+| --- | ---: | ---: | ---: |
+| Original Modal DoRA | 44.71% | 50.09% | 64/364 |
+| Kaggle DoRA, learning rate 5e-5 | 34.00% | 47.34% | 91/371 |
+| Evidence-order continuation | 27.82% | 45.41% | 126/374 |
+
+The evidence-order continuation failed its development screen and was not adopted. These are results on an already opened test, not a new blind holdout. The PR reports use the main adapter as verifier; its checkpoint-specific exclusions and older scoring limit direct comparisons.
+
+![Historical DoRA and LoRA cost and effectiveness comparison](docs/figures/dora_lora_cost_efficiency.svg)
+
+![Historical DoRA training time and GPU-hour comparison](docs/figures/dora_training_efficiency.svg)
+
+The figures use historical GPU-price scenarios and different hardware; they are not invoices or a controlled price-performance ranking. See the [DoRA comparison](reports/evidence_order_all_previous_comparison.md), [cost and resource report](reports/dora_lora_cost_efficiency.md), and [checkpoint evaluation](reports/evidence_order_evaluation/EVALUATION_SUMMARY.md).
+
 ## Other languages: Hindi and Spanish
 
 Tiny Aya reads 70 languages, but we trained the adapter on English only. On 15 November 2026 we ran the submitted system once on the same questions in Hindi, English and Spanish (XQuAD, Wikipedia questions translated by professionals). Nothing was retrained or tuned for this check, and the plan was committed before any data was built ([plan](research/2026-11-15-multilingual-plan.md), [results](research/2026-11-15-multilingual-results.md)).

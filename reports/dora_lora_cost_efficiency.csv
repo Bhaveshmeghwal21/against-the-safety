@@ -1,0 +1,8 @@
+phase,model,gpu_count,wall_seconds,allocated_gpu_hours,processed_tokens_all_epochs,processed_tokens_per_wall_second,processed_tokens_per_gpu_second,rows,steps,historical_l4_gpu_only_usd_scenario,configuration,timing_contract,episodes,gpu_seconds,gpu_seconds_per_episode,gpu_hours_per_10000,historical_l4_gpu_only_usd_per_10000,output_tokens_per_actor_second
+training,Original Modal DoRA,1,13144.9,3.651361111111111,4268470.0,324.7244178350539,324.7244178350539,1611,202,2.9181678,,,,,,,,
+training,Kaggle DoRA lr5e-5,4,3763.7,4.1818888888888885,4268470.0,1134.1153651991392,283.5288412997848,1611,202,3.3421656,,,,,,,,
+training,Evidence-order DoRA continuation,4,646.8,0.7186666666666666,757435.0,1171.0497835497836,292.7624458874459,541,34,0.5743583999999999,,,,,,,,
+inference,Original Modal DoRA,,,,,,,,,,raw,recorded generation busy-time proxy,938,15418.646,16.437788912579958,45.66052475716655,36.49189138592751,4.479576222192272
+inference,Original Modal DoRA,,,,,,,,,,FB+V,recorded generation busy-time proxy,938,15542.346000000001,16.56966524520256,46.02684790334045,36.78465684434969,4.479576222192272
+inference,Latest evidence-order DoRA,,,,,,,,,,raw,recorded generation busy-time proxy,938,9492.283,10.119704690831556,28.110290807865432,22.465744413646053,4.524306744752553
+inference,Latest evidence-order DoRA,,,,,,,,,,FB+V,recorded generation busy-time proxy,938,9685.082999999999,10.325248400852876,28.681245557924655,22.922051449893385,4.524306744752553
