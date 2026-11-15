@@ -1,4 +1,4 @@
-"""Stage or launch the previously authorized candF1 verifier-only retry.
+"""Stage or launch the prepared candF1 verifier-only retry.
 
 Running without --launch only writes the private kernel files locally. Upload the
 prepared retry dataset and obtain the user's explicit approval before --launch.
