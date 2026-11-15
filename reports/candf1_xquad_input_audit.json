@@ -1,0 +1,25 @@
+{
+  "baseline_bundle_id": "1b91757b568a9921319d",
+  "candidate_bundle_id": "d306a67f543870712632",
+  "matched_input_sha256": {
+    "initial_adapters/main/adapter/adapter_model.safetensors": "5834043354893027625a7198341616ca904393f6dc29d993912da8a1d7a8916a",
+    "initial_adapters/main/adapter/adapter_config.json": "90344006753f0334c19687753aa86846ce3684e8a827525d68888c022db0a017",
+    "data/bench/xq_hi/questions.jsonl": "27341d96f3953e1f82997f8375ffacc4f0b61f238ffdec26141861cc35a07412",
+    "data/bench/xq_hi/corpus.json": "75fed84cf74864a884ecd91e48c03740f994d83635265070e525b3a9b86244d1",
+    "data/bench/xq_hi/corpus.sqlite": "1136f3f4ab3566d576c25392e194fbbf7cfc709a6f4c1f0f1c01e1626856d865",
+    "data/bench/xq_hi/manifest.json": "d6f1909b5794a43b6583cc91c4e338784b9bd318770bc867f0714376489e08db",
+    "data/bench/xq_en/questions.jsonl": "815961e7c50a8efc5de608cad27d268cc702f93a205c994aa96869979b7b6d16",
+    "data/bench/xq_en/corpus.json": "b402132db63484d4509a90970b7c354f59b7fa1e7e13e056018d19f468fbf26f",
+    "data/bench/xq_en/corpus.sqlite": "cb9aa180b1b6492712cdaab4e9e694d19027c1d50bd965af8dcf3f591385eadb",
+    "data/bench/xq_en/manifest.json": "ce72ee14b34bc3a81cecec2105f2b1024b4b5ec01040a01bc690e43604f2c9bb",
+    "data/bench/xq_es/questions.jsonl": "d3d3176ec287e870f1a37ba303a1f0ed3af17e2c54ed45925d1e8c9927ad67a9",
+    "data/bench/xq_es/corpus.json": "5bf4956e6c252aa49b0cb6354eb56e829b66224fb0b6d0420641e8e3b8979439",
+    "data/bench/xq_es/corpus.sqlite": "5dc7fabd5afd7ac6e5077e363eea5e8599c27d84ffdb41b267cfaa94913019fb",
+    "data/bench/xq_es/manifest.json": "0ea3d343134804eff34fda2e4eb7e946a069dcb044fab21b13244cd755e924c0"
+  },
+  "compared_code_files": 40,
+  "differing_code_files": [
+    "src/ragharness/release_cards.py"
+  ],
+  "note": "release_cards.py produces publication text and is not used by the model evaluation; matching saved inputs does not prove identical GPU/runtime behavior."
+}
