@@ -57,3 +57,21 @@ If A1, A2 and A3 all hold, N is published as a Hindi-capable variant. If both ne
 ## Caveats stated in advance
 
 The training data is machine translated and unchecked; a Hindi gain on XQuAD is evidence of transfer from translated data to human-translated text, and Hindi gains on `hi_dev` alone would not be. The test questions share articles and passages with the first 300 XQuAD questions, which I have seen results for. `r6t` is not a fresh test any more. Hidden-evidence answers are annotation-based flags.
+
+## Amendment 1 (2026-11-15, 15:40 IST): the self-check ran out of memory on the baseline run; training finished
+
+Written before any score on `xq2_hi`, `xq2_en` or `r6t` was read for the Hindi experiment. No rule above changes.
+
+**What happened.**
+- The baseline kernel (account 2, `ats-r6-system-hi-base`, bundle `90f8930c3fc315230df4`) completed all nine generation jobs, then V stopped with a CUDA out-of-memory error (a 4.76 GiB allocation: next-token logits for the whole sequence, batch 6, on long Hindi cases). The kernel ended in ERROR, and the nine evaluation folders and the answer cases were saved.
+- Training (`ats-hi-train-a`, account 1) finished. `hiMain`: 956 rows, 120 optimizer steps, loss 0.036, peak 9.98 GB. `hiF`: 899 rows, 114 steps, loss 0.042, peak 9.98 GB. No row truncated, no non-finite loss.
+
+**What I looked at before this amendment.** The tail of the kernel log; the number of saved answer cases per run (a count of answers given, not their correctness: main 20 and candF1 48 on `xq2_hi`); the training reports; and the `hi_dev` scores of all four adapters, which are in the report script's sanity table and on which no rule depends. On `hi_dev` (120 translated questions, raw): correct and cited main 5.0%, candF1 7.9%, `hiMain` 31.7%, `hiF` 32.7%; invalid raw turns 66% (`main`) and 68% (`candF1`) against 1% and 1.5% for the new adapters; answers on hidden evidence 17/101 for both parents and 48/101 (`hiMain`) and 47/101 (`hiF`). I did not read any outcome on `xq2_*` or `r6t`.
+
+**Change (infrastructure only).** V is run with `--batch-size 1 --last-logits-only`. This changes memory use and not the method: V reads the logits of the last position only, as before, and the same adapter (`main`), wording (A) and threshold (0.50) apply. It applies to every V verdict computed for this experiment:
+- the verdicts of `main` and `candF1` on `xq2_hi`, `xq2_en`, `hi_dev` and `candF1` on `r6t_*` are recomputed from the 561 saved answer cases (new stage `verify-cases` in `kaggle/bootstrap.py`; no generation is repeated; `hi_dev` is not scored with V);
+- the new adapters' run (`ats-r6-system-hi-new`, account 1, bundle `1afbd00e8790a1611d5e`) uses the same flags in the same `r6-system` stage.
+`main` on `r6t` is reused from the Round 6 test run (`runs/kaggle/ats-r6-system-sl`), whose verdicts came from batch 6 with full logits and whose generator input limit was 4,096 tokens; the report states each run's limit and the number of truncated prompts. Batch size can move a fp16 probability in the last digits, so a case within that margin of 0.50 could flip; I count that as noise and do not rerun it.
+The bundle `1afbd00e8790a1611d5e` differs from the training bundle only by the saved cases, `kaggle/bootstrap.py` (the V flags and the `verify-cases` stage), `scripts/report_hindi.py` and two reports from another work stream; generation code is unchanged.
+
+**Evaluation kernel.** `hiMain` and `hiF` on `xq2_hi`, `xq2_en`, `r6t_squad`, `r6t_hotpot`, `r6t_rgb`, greedy, three searches, top-3 passages, 800 characters, 8,000 input tokens, V, no second look: one run each, rerun only after an infrastructure failure with the same arguments.

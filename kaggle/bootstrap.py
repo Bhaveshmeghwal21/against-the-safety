@@ -45,6 +45,7 @@ TMP = Path("/kaggle/temp") if Path("/kaggle/temp").exists() else Path("/tmp")
 REPO = TMP / "repo"
 OUT = Path("/kaggle/working/out")
 EXTRA_PIP: list[str] = []  # nothing beyond the lock file
+VERIFY_SAFE = "--batch-size 1 --last-logits-only"  # long Hindi cases ran out of memory at batch 6 with full-sequence logits (Hindi baseline run, 2026-11-15)
 
 
 def sh(cmd: str, check: bool = True, env: dict | None = None) -> str:
@@ -277,7 +278,7 @@ def main() -> None:
         checks_chains = {0: [], 1: []}
         for i, check in enumerate(checks):
             adapter = adapters[('main' if check == 'V' else check) + '/adapter']
-            checks_chains[i % 2].append(f'{py} scripts/verify_round5.py --cases {cases}/answers.jsonl --tag {check} --adapter {adapter} --out {OUT}/verify/{check} --wordings A')
+            checks_chains[i % 2].append(f'{py} scripts/verify_round5.py --cases {cases}/answers.jsonl --tag {check} --adapter {adapter} --out {OUT}/verify/{check} --wordings A {VERIFY_SAFE}')
         rc = run_parallel([(' && '.join(cmds), {'CUDA_VISIBLE_DEVICES': str(g)}, f'r6_verify_gpu{g}.log') for g, cmds in checks_chains.items() if cmds])
         if rc:
             raise SystemExit(rc)
@@ -304,8 +305,21 @@ def main() -> None:
         checks_chains = {0: [], 1: []}
         for i, check in enumerate(checks):
             adapter = adapters[('main' if check == 'V' else check) + '/adapter']
-            checks_chains[i % 2].append(f'{py} scripts/verify_round5.py --cases {cases}/forced_all.jsonl --tag {check} --adapter {adapter} --out {OUT}/verify_forced/{check} --wordings A')
+            checks_chains[i % 2].append(f'{py} scripts/verify_round5.py --cases {cases}/forced_all.jsonl --tag {check} --adapter {adapter} --out {OUT}/verify_forced/{check} --wordings A {VERIFY_SAFE}')
         rc = run_parallel([(' && '.join(cmds), {'CUDA_VISIBLE_DEVICES': str(g)}, f'r6_verify_forced_gpu{g}.log') for g, cmds in checks_chains.items() if cmds])
+    elif stage == "verify-cases":  # self-check V on saved answer cases only (no generation): --cases <path inside the bundle>
+        m = re.search(r"--cases\s+(\S+)", extra)
+        if not m or "main/adapter" not in adapters:
+            raise SystemExit("verify-cases needs --cases and the main adapter")
+        cases_file = REPO / m.group(1)
+        rows = [json.loads(line) for line in cases_file.read_text(encoding="utf-8").splitlines() if line.strip()]
+        rc = run_parallel([(f"{py} scripts/verify_round5.py --cases {cases_file} --tag V --adapter {adapters['main/adapter']} --out {OUT}/verify/V --wordings A {VERIFY_SAFE}", g0, "verify_cases.log")])
+        verdicts = OUT / "verify/V/verdicts_A.jsonl"
+        if rc == 0:
+            got = {(r["run"], r["qid"], r["variant"]) for r in map(json.loads, verdicts.read_text(encoding="utf-8").splitlines()) if r}
+            if got != {(r["run"], r["qid"], r["variant"]) for r in rows} or len(got) != len(rows):
+                raise SystemExit("verdicts do not match the cases")
+            print("verdicts complete:", len(got), flush=True)
     elif stage == "hi-train":  # Hindi training (research/2026-11-15-hindi-training-preregistration.md): hiMain from main on GPU 0, hiF from candF1 on GPU 1
         m = re.search(r"--jobs\s+(\S+)", extra)
         jobs_spec, rest = (m.group(1), extra.replace(m.group(0), "")) if m else ("", extra)
