@@ -1096,6 +1096,17 @@
    ]
   }
  },
+ "judge_agreement_with_annotation_labels": {
+  "post_hoc": true,
+  "answers": 357,
+  "agreement": 0.9019607843137255,
+  "cohen_kappa": 0.7956028856063209,
+  "both_supported": 198,
+  "both_not_supported": 124,
+  "judge_supported_label_not": 26,
+  "label_supported_judge_not": 9,
+  "definition": "label: scorer v3 correct-and-cited vs answered on hidden evidence (wrong answers left out); judge: faithfulness 1.0 or not; raw base, main and candF1 answers"
+ },
  "repeatability": {
   "faithfulness": {
    "pairs": 181,

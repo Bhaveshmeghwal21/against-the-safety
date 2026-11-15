@@ -81,3 +81,10 @@ AuditKIT has no numeric metric and our datasets carry no numeric type. We define
 
 - **What the base arm applies.** Section 6 says the base arm has "no self-check". It runs inside `RagSystem`, which always applies the fail-closed rule and the code checks that sit in front of the model self-check (the cited passage was shown, the answer text occurs in it). Only the model self-check is skipped (its support function returns 1.0). The base arm therefore shows 7 answers in 150 requests. Its latency is unaffected, because those checks need no model call. The report labels the arm accordingly.
 - **Run.** Kaggle kernel `ats-latency-t4` (T4, account 1), about 1.1 hours including setup. Outputs are in `runs/kaggle/ats-latency-t4/out/latency/` and, once published, in the benchmark-traces dataset (`latency/`).
+
+## 12. Amendment 4 (16 November 2026, post-hoc, after all results above were read)
+
+Two descriptive additions, made after a check of the write-up against the hackathon's required items. Neither has a rule, and neither changes a result or the submitted system.
+
+- **Judge agreement with annotation-derived labels.** The write-up list asks how often an automatic judge agrees with labels. No human labelled our answers, so we compare the judge with our scorer's labels, which come from the datasets' human answer and evidence annotations. Clear cases only: an answer we call correct and cited counts as supported, an answer on hidden evidence as not supported. Wrong answers on answerable questions are left out. Judge "supported" means faithfulness 1.0. Raw answers of base, main and candF1 in the 300-episode sample: 357 answers, 90.2% agreement, Cohen's kappa 0.80 (`reports/judge_results.md`).
+- **Tool use per suite on the first sealed test** (`scripts/report_tool_use.py`, `reports/tool_use_r5t.md`), from the AuditKIT metrics each evaluation run saved and from the saved transcripts. No model was run.

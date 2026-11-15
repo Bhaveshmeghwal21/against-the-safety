@@ -157,6 +157,26 @@ def main() -> None:
             diffs[f"{metric}: {a} minus {b}"] = {"difference": None if ma is None or mb is None else ma - mb, "ci95": bootstrap_diff(da, db, keys, rng)}
     result["differences"] = diffs
 
+    # Post-hoc (amendment 4): agreement of the judge with our annotation-derived labels on the clear cases. Our label "supported" = scorer v3 says
+    # correct and cited; "not supported" = answered although the evidence was hidden. Wrong answers on answerable questions are left out, because the
+    # passages may or may not support a wrong answer. Judge "supported" = every claim SUPPORTED (faithfulness 1.0). Raw answers of base, main, candF1.
+    pairs = []
+    for system in ("base", "main", "candF1"):
+        for k in sorted(answers_given[system]):
+            outcome = case_of[(system, *k)]["outcome_v3"]
+            if k not in values[system]["faithfulness"] or outcome not in ("supported_correct",) + HIDDEN_ANSWERED:
+                continue
+            pairs.append((outcome == "supported_correct", values[system]["faithfulness"][k] == 1.0))
+    n = len(pairs)
+    tp = sum(a and b for a, b in pairs); tn = sum(not a and not b for a, b in pairs)
+    fp = sum(not a and b for a, b in pairs); fn = sum(a and not b for a, b in pairs)
+    po = (tp + tn) / n if n else None
+    pe = (((tp + fn) * (tp + fp)) + ((tn + fp) * (tn + fn))) / (n * n) if n else None
+    kappa = (po - pe) / (1 - pe) if n and pe != 1 else None
+    result["judge_agreement_with_annotation_labels"] = {
+        "post_hoc": True, "answers": n, "agreement": po, "cohen_kappa": kappa,
+        "both_supported": tp, "both_not_supported": tn, "judge_supported_label_not": fp, "label_supported_judge_not": fn,
+        "definition": "label: scorer v3 correct-and-cited vs answered on hidden evidence (wrong answers left out); judge: faithfulness 1.0 or not; raw base, main and candF1 answers"}
     retest_path = ROOT / (args.run + "_retest") / "scores.jsonl"
     repeat = None
     if retest_path.exists():
@@ -229,6 +249,13 @@ def main() -> None:
               f"The rule needed more than 0.5 to say the judge corroborates the annotation-based flag: **{'corroborated' if r1['corroborated'] else 'not corroborated'}**.",
               f"2. Self-check effect on faithfulness (`main+FB+V` minus main): {fmt(r2['difference'])}, interval {r2_text}. "
               f"The rule needed the interval above 0: **{'improves' if r2['improves'] else 'not shown to improve'}**."]
+    ag = result["judge_agreement_with_annotation_labels"]
+    lines += ["", "## Judge agreement with our annotation-derived labels (post-hoc)", "",
+              "No human labelled these answers. Our scorer's labels come from the datasets' human answer and evidence annotations. On the clear cases "
+              "(correct and cited, or answered although the evidence was hidden; wrong answers on answerable questions left out), raw answers of base, main and candF1:", "",
+              "| Answers | Agreement | Cohen's kappa | Both say supported | Both say not supported | Judge supported, our label not | Our label supported, judge not |",
+              "| ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+              f"| {ag['answers']} | {fmt(ag['agreement'])} | {fmt(ag['cohen_kappa'])} | {ag['both_supported']} | {ag['both_not_supported']} | {ag['judge_supported_label_not']} | {ag['label_supported_judge_not']} |"]
     if repeat:
         lines += ["", "## Judge repeatability", "",
                   "Every third episode of the sample (all systems) was judged a second time with a different cache salt, so the judge answered again. "

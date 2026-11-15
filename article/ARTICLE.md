@@ -8,7 +8,7 @@ Code: https://github.com/Bhaveshmeghwal21/against-the-safety · Models and data:
 
 A document assistant is only useful if it answers from its documents and says so when they don't hold the answer. This setup is called retrieval-augmented generation (RAG): the assistant searches the documents, then writes an answer from what it found. We fine-tuned Tiny Aya Global (3.35B), a small open model, with QLoRA, which trains a small add-on file (an adapter) instead of the whole model. Training ran through AgentTune, Lexsi's library for training agents. The model searches a document set up to three times, then answers with citations or refuses. Two repairs written as ordinary code sit on top and need no training: a fail-closed rule that turns any invalid ending into a refusal, and a self-check in which the same model reads the cited passages and withholds an answer they do not support. AuditKIT, Lexsi's scoring library, scored our first-round runs and checked evidence coverage; the headline numbers below come from our own scorer.
 
-We scored every system with fixed code, not an AI judge, on a sealed test (questions locked away before training) of 938 SQuAD, HotpotQA and RGB episodes, about 40% of which hide the evidence. Against the base model, the submitted system raises correct, cited answers on answerable episodes from 5.7% to 46.3% and cuts answers given when the evidence was hidden from 281 of 375 to 42 of 375. Of the answers it shows, 67.3% are correct. Macro success, which counts a correct refusal as success, is 58.0%. A policy that refuses every question scores 42.0%, so we report four measures and not macro success alone. In a format-aware comparison on 925 shared episodes, GPT-6 Luna and DeepSeek V4 Flash score 70.7% and 68.8% macro success, but show a wrong or unsupported answer in 23.9% and 20.8% of cases, against 13.3% for our system and 9.8% for its alternative checkpoint candF1 (64.5% macro success).
+We scored every system with fixed code on a sealed test (questions locked away before training) of 938 SQuAD, HotpotQA and RGB episodes, about 40% of which hide the evidence. Against the base model, the submitted system raises correct, cited answers on answerable episodes from 5.7% to 46.3% and cuts answers given when the evidence was hidden from 281 of 375 to 42 of 375. Of the answers it shows, 67.3% are correct. Macro success, which counts a correct refusal as success, is 58.0%. A policy that refuses every question scores 42.0%, so we report four measures and not macro success alone. In a format-aware comparison on 925 shared episodes, GPT-6 Luna and DeepSeek V4 Flash score 70.7% and 68.8% macro success, but show a wrong or unsupported answer in 23.9% and 20.8% of cases, against 13.3% for our system and 9.8% for its alternative checkpoint candF1 (64.5% macro success). On a 300-episode sample, an AI judge (AuditKIT faithfulness, Azure gpt-6-luna) found 80.8% of the claims in the submitted system's answers supported by the passages it was shown, against 62.5% for the base model. At batch size one on a Kaggle T4, the submitted system answers in a median of 16.3 s (95th percentile 23.8 s).
 
 Every later training change failed its own pre-registered release rule: a patch for single-passage questions, a matched-evidence curriculum, preference training (its checkpoints stopped abstaining) and trained answer checkers. A second look at refusals, checked by the plain self-check, also failed its pre-registered rule on a fresh 679-episode test that we opened once (macro success +0.9 points, interval −0.3 to +2.1). The same test measured the submitted system again: 54.1% macro success against 43.8% for refusing everything, 10.0% of hidden-evidence episodes answered, and single-passage SQuAD questions close to the refuse-everything score. The tests cover English short factual questions. Further model selection needs another fresh test, and hidden-evidence answers are annotation-based flags, not human-checked hallucinations.
 
@@ -41,6 +41,21 @@ We trained Tiny Aya Global (3.35B) with QLoRA to run a small protocol: call `sea
 Two repairs run on the model's output and need no training. The **fail-closed rule** turns a rollout without a valid ending (repeated query, fourth search, bad format) into a refusal. The **self-check** has the same model read the question, the cited passages and the answer; the answer is shown only if P(SUPPORTED) is at least 0.5, the cited passage was actually shown, and every part of the answer appears in it.
 
 ![How one question is answered](../docs/figures/png/pipeline.png)
+
+**Training settings.**
+
+| Setting | main (submitted) | candF1 (alternative) |
+| --- | --- | --- |
+| Base model | Tiny Aya Global, revision `af89d219`, loaded in 4-bit NF4 with double quantisation and fp16 compute (QLoRA) | same |
+| Starts from | the base model | candA, a second-round adapter trained like main on the same questions (1,668 rows, more of them answers) |
+| Training rows | 1,611 (537 search, 537 answer, 537 refusal) from 600 HotpotQA training questions | 721 from SQuAD training-split articles: 304 rows from 152 pairs of the same question with the needed fact present and missing, plus 417 replay rows |
+| LoRA | rank 16, alpha 32, dropout 0.05, all seven attention and MLP projections | same |
+| Optimiser | paged AdamW 8-bit, learning rate 2e-4, cosine schedule, 3% warm-up, no weight decay, gradient clipping at 1.0 | same, learning rate 3e-5 |
+| Batch and length | batch 1 with 16-step gradient accumulation, at most 2,560 tokens per row, loss on the model's own turns only | same |
+| Length of training | 2 epochs, 202 optimiser steps | the checkpoint after epoch 1 of 2 (92 steps for both epochs) |
+| Seed, time, memory | seed 13, 3.9 h on one T4, peak 5.8 GB | seed 47 (candA: seed 13), 2.0 h on one T4, peak 6.0 GB |
+
+**Library settings.** AgentTune 1.1.3 and AuditKIT 1.1.3, pinned in `requirements-gpu.lock.txt` with PyTorch 2.11, Transformers 5.22.1, TRL 1.7.1, PEFT 0.21.2 and bitsandbytes 0.50.2. From AgentTune we set `SQLiteFTSBackend(match_all=False)`, our `search_corpus` subclass (three passages per search, 800 characters each) and `create_distill_trainer` with our QLoRA trainer factory. AuditKIT's metrics were called by name through `ak.evaluate` with their default settings. The judge metrics used AuditKIT's own prompts (version v2) and the judge deployment's default sampling. Other options stayed at the libraries' defaults. The Hindi adapters' settings are in section 6.
 
 ## 2. Lexsi repositories used
 
@@ -89,6 +104,8 @@ The base is [Cohere Tiny Aya Global](https://huggingface.co/CohereLabs/tiny-aya-
 ## 4. Datasets and licenses
 
 Training and evaluation use HotpotQA and SQuAD 2.0 (CC BY-SA 4.0), RGB (CC BY-NC-SA 4.0, noncommercial), 2WikiMultihopQA (Apache-2.0), MuSiQue (CC BY 4.0), and a fictional product-support suite, Nimbus Home, that we wrote (CC BY 4.0). The mixed episodes bundle contains RGB-derived rows, so do not treat it as commercially usable.
+
+**Splits and leak checks.** main trained on HotpotQA training-split questions and candF1 on SQuAD training-split articles. The first sealed test has 938 episodes from 225 questions (SQuAD 65, HotpotQA 60, RGB 100). The second has 679 episodes from 164 questions (75, 60, 29). The build scripts checked by exact match, before any model ran, that no SQuAD article sits in more than one group (training, development, test), that no HotpotQA test question was used before and none of its supporting passages is in an earlier corpus (by title, and for the second test also by normalised text), and that no RGB question repeats an earlier RGB set. For the first-round development and test sets, none of the supporting passages appears in any training row and no question text repeats (`reports/leakage_report.json`). We ran no embedding-based or MinHash near-duplicate check. The test files were hashed before they were opened (`reports/round5_test_manifest.json`).
 
 ## 5. Collections and demo
 
@@ -139,6 +156,24 @@ Second, it measured the submitted system again. Success by group of questions (t
 
 The refusing carried over: 10.0% of hidden-evidence episodes were answered, and macro success is 10.3 points above refusing everything (interval +7.5 to +13.1). The answering did not carry over for single-passage SQuAD questions: 43.3% is close to refusing everything (41.1%), on 75 questions from 25 articles, and we have not looked for the cause. On this test 34.7% of the answers shown are correct. The first test's pooled 67.3% is not directly comparable, because that test held many more RGB episodes (471 of 934, against 141 of 679). We did not run the base model or the hosted models on the fresh test. Record: `research/2026-11-15-round6-second-look-preregistration.md` and `research/2026-11-15-round6-second-look-results.md` in the code repository.
 
+### Tool use on the sealed test
+
+AuditKIT's tool-call checks, as each evaluation run saved them, for the raw agents before the fail-closed rule, over all 938 episodes of the first sealed test (`reports/tool_use_r5t.md`).
+
+| System | Suite | Well-formed tool calls | Repeated searches (lower is better) | Loop-free episodes | Searches per episode | Invalid endings (lower is better) |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Tiny Aya base | SQuAD | 100.0% | 0.0% | 100.0% | 0.98 | 28.3% |
+| Tiny Aya base | HotpotQA | 100.0% | 0.0% | 100.0% | 0.98 | 9.8% |
+| Tiny Aya base | RGB | 100.0% | 0.5% | 98.9% | 0.83 | 16.3% |
+| Main adapter | SQuAD | 100.0% | 5.7% | 87.5% | 1.62 | 12.2% |
+| Main adapter | HotpotQA | 100.0% | 2.0% | 93.9% | 2.18 | 7.3% |
+| Main adapter | RGB | 100.0% | 3.1% | 94.1% | 1.11 | 5.7% |
+| candF1 | SQuAD | 100.0% | 7.6% | 84.2% | 1.45 | 15.6% |
+| candF1 | HotpotQA | 100.0% | 3.0% | 90.2% | 2.09 | 7.3% |
+| candF1 | RGB | 100.0% | 2.2% | 96.2% | 1.06 | 4.0% |
+
+Every search call was well formed for all three systems. The trained adapters search more (1.1 to 2.2 searches per episode, against about one for the base model) and repeat a query more often: 2% to 8% of their searches repeat an earlier one, and 84% to 96% of their episodes are loop-free. The fail-closed rule turns such an episode into a refusal. The base model looks loop-free because it rarely searches twice. It ends 10% to 28% of episodes with an invalid turn instead, against 4% to 16% for the adapters. Latency per suite is in `reports/latency.md`.
+
 ### More AuditKIT metrics: faithfulness, retrieval quality, numbers and speed
 
 The scorecards above use the AuditKIT checks that need no judge model. On 16 November we added the metrics that do need one, plus numeric accuracy and single-request speed, so that AuditKIT's RAG list is covered. The plan was written before any of it ran (`research/2026-11-16-judge-latency-preregistration.md`). Nothing here changed the submitted system.
@@ -164,7 +199,7 @@ Our scorer labels each answer from annotations. The judge reads the passages and
 | Wrong answer on answerable question (our scorer) | 28 | 0.607 | 0.571 | 0.429 |
 | Answered although the evidence was hidden (our flag) | 12 | 0.167 | 0.167 | 0.833 |
 
-The judge agrees with our scorer on the clear cases: 96.5% of the answers we call correct and cited are fully faithful. Of the 12 answers on hidden evidence, 10 contain a claim the shown passages do not support and 2 do not, so the flag "answered although the evidence was hidden" is mostly, not always, a real hallucination. The judge is a model, not a person. The flags are still not hand-checked. A blank 50-row sheet for that, with the labels withheld, is in `reports/hand_label_sheet.csv`.
+The judge agrees with our scorer on the clear cases: 96.5% of the answers we call correct and cited are fully faithful. Of the 12 answers on hidden evidence, 10 contain a claim the shown passages do not support and 2 do not, so the flag "answered although the evidence was hidden" is mostly, not always, a real hallucination. Across the clear cases of all three raw systems (answers we call correct and cited, or answers on hidden evidence), the judge's fully-faithful verdict agrees with our label on 90.2% of 357 answers (Cohen's kappa 0.80). We added this count after seeing the results. The judge is a model, not a person. The flags are still not hand-checked. A blank 50-row sheet for that, with the labels withheld, is in `reports/hand_label_sheet.csv`.
 
 Retrieval quality. Every system uses the same search tool and writes its own queries.
 
@@ -288,12 +323,15 @@ The submitted adapter trained for 3.9 T4 GPU-hours on Kaggle's free quota (about
 - Hidden-evidence answers are annotation-based flags. An unannotated alternative source could make a flagged answer correct, and no person has checked them. An AI judge found an unsupported claim in 10 of the 12 flagged answers of the submitted system in a 300-episode sample, so most flags look real. A blank 50-row sheet for a human check is in `reports/hand_label_sheet.csv`.
 - Single-request latency is slow: a median of 16.3 s per question at batch size one on a T4 with an untuned research stack, so the system as run here is not real-time. A serving engine would help; we did not try one.
 - The judge-based metrics rest on one judge model and one sample of 300 episodes of the first sealed test. They were not run on the fresh test, on Hindi, or on the hosted models.
+- Each adapter is one training run with one seed (main: seed 13), so we do not know how much a rerun would vary.
 - The self-check withholds some correct answers.
 - On benchmarks the adapters never trained on, the adapter is level with GPT-6 Luna and behind DeepSeek V4 Flash, and on SQuAD 2.0 it scores the same as refusing every question. Large hosted models are more accurate when the documents hold the answer. The web demo needs a GPU you start yourself.
 
 ## 9. What more credits would enable
 
 Quote-first answer targets, so the model copies the supporting span before answering. Balanced answer and refusal data in both directions. The semicolon format for two-part answers stated in the prompt, and far more than 488 parent questions. Retraining the checker on independent labelled data, judged on a fresh sealed test under a new pre-registration. A second Hindi attempt with more English replay, on fresh tests. A human check of the hidden-evidence flags, so that the judge-based faithfulness score can be calibrated against people. A second judge model, a second training seed, and the hosted models on the second sealed test, none of which we ran.
+
+Expected before and after, as forecasts we have not tested: (1) quote-first answer targets with balanced answer and refusal data should lift single-passage SQuAD on the fresh test from 43.3%, about the refuse-everything level, toward the 59.1% the system scored on the first test, and macro success toward candF1's 64.0%, with answers on hidden evidence kept near 10%. (2) A second Hindi attempt with more English replay should keep most of the Hindi gain (35% correct and cited in the first attempt) while holding English answers on hidden evidence within 2 points of the parent adapter, the rule the first attempt missed. (3) A human check of 50 flagged answers should confirm most flags, because the judge found an unsupported claim in 10 of 12. (4) A serving engine with batching should cut the cost per answer and the 16.3 s median latency; we have not measured by how much.
 
 ## 10. Reproduction and artifacts
 

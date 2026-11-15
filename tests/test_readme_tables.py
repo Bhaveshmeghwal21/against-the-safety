@@ -251,3 +251,34 @@ def test_the_abstract_and_limits_quote_the_measured_latency():
     assert f"a median of {lat['p50'] / 1000:.1f} s (95th percentile {lat['p95'] / 1000:.1f} s)" in abstract
     for document in ("README.md", "article/ARTICLE.md"):
         assert f"a median of {lat['p50'] / 1000:.1f} s per question" in (ROOT / document).read_text(encoding="utf-8")
+
+@needs_reports
+@pytest.mark.parametrize("document", ["README.md", "article/ARTICLE.md"])
+def test_the_tool_use_table_and_judge_agreement_match_the_reports(document):
+    import make_readme_table as tables
+
+    text = (ROOT / document).read_text(encoding="utf-8")
+    for line in tables.tool_use_table().splitlines():
+        assert line in text, f"{document} is missing or has changed: {line}"
+    assert tables.judge_agreement_sentence() in text
+
+
+@needs_reports
+@pytest.mark.parametrize("document", ["README.md", "article/ARTICLE.md"])
+def test_the_write_up_states_hyperparameters_leak_checks_seed_and_forecasts(document):
+    import json
+
+    text = (ROOT / document).read_text(encoding="utf-8")
+    report = json.loads((ROOT / "runs/kaggle/ats-train-both/out/main/train_report.json").read_text(encoding="utf-8")) \
+        if (ROOT / "runs/kaggle/ats-train-both/out/main/train_report.json").exists() else None
+    if report:
+        assert f"{report['optimizer_steps']} optimiser steps" in text and f"seed {report['args']['seed']}" in text
+        assert f"{report['rows_trained']:,} (537 search" in text
+    for phrase in ("**Splits and leak checks.**", "no embedding-based or MinHash", "one training run with one seed", "forecasts we have not tested",
+                   "**Training settings.**", "**Library settings.**"):
+        assert phrase.lower() in text.lower(), f"{document} lacks: {phrase}"
+
+
+def test_the_article_abstract_is_the_abstract_file():
+    abstract = (ROOT / "article" / "ABSTRACT.md").read_text(encoding="utf-8").strip()
+    assert abstract in (ROOT / "article" / "ARTICLE.md").read_text(encoding="utf-8")

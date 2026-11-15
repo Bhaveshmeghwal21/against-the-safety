@@ -1,0 +1,113 @@
+{
+ "source": "summary.json (AuditKIT) and transcripts.jsonl of the first sealed test runs; raw agents, before the repairs",
+ "trajectories": {
+  "base": {
+   "r5t_squad": {
+    "episodes": 385,
+    "tool_call_validity": 1.0,
+    "redundant_tool_calls": 0.0,
+    "loop_free_episodes": 1.0,
+    "mean_searches": 0.9844155844155844,
+    "invalid_endings": 0.2831168831168831
+   },
+   "r5t_hotpot": {
+    "episodes": 82,
+    "tool_call_validity": 1.0,
+    "redundant_tool_calls": 0.0,
+    "loop_free_episodes": 1.0,
+    "mean_searches": 0.975609756097561,
+    "invalid_endings": 0.0975609756097561
+   },
+   "r5t_rgb": {
+    "episodes": 471,
+    "tool_call_validity": 1.0,
+    "redundant_tool_calls": 0.005,
+    "loop_free_episodes": 0.989,
+    "mean_searches": 0.8301486199575372,
+    "invalid_endings": 0.16348195329087048
+   }
+  },
+  "main": {
+   "r5t_squad": {
+    "episodes": 385,
+    "tool_call_validity": 1.0,
+    "redundant_tool_calls": 0.057,
+    "loop_free_episodes": 0.875,
+    "mean_searches": 1.6207792207792209,
+    "invalid_endings": 0.12207792207792208
+   },
+   "r5t_hotpot": {
+    "episodes": 82,
+    "tool_call_validity": 1.0,
+    "redundant_tool_calls": 0.02,
+    "loop_free_episodes": 0.939,
+    "mean_searches": 2.182926829268293,
+    "invalid_endings": 0.07317073170731707
+   },
+   "r5t_rgb": {
+    "episodes": 471,
+    "tool_call_validity": 1.0,
+    "redundant_tool_calls": 0.031,
+    "loop_free_episodes": 0.941,
+    "mean_searches": 1.1125265392781316,
+    "invalid_endings": 0.05732484076433121
+   }
+  },
+  "candF1": {
+   "r5t_squad": {
+    "episodes": 385,
+    "tool_call_validity": 1.0,
+    "redundant_tool_calls": 0.076,
+    "loop_free_episodes": 0.842,
+    "mean_searches": 1.4493506493506494,
+    "invalid_endings": 0.15584415584415584
+   },
+   "r5t_hotpot": {
+    "episodes": 82,
+    "tool_call_validity": 1.0,
+    "redundant_tool_calls": 0.03,
+    "loop_free_episodes": 0.902,
+    "mean_searches": 2.0853658536585367,
+    "invalid_endings": 0.07317073170731707
+   },
+   "r5t_rgb": {
+    "episodes": 471,
+    "tool_call_validity": 1.0,
+    "redundant_tool_calls": 0.022,
+    "loop_free_episodes": 0.962,
+    "mean_searches": 1.059447983014862,
+    "invalid_endings": 0.040339702760084924
+   }
+  }
+ },
+ "task_success": {
+  "base": {
+   "single": 0.01818181818181818,
+   "compound": 0.037267080745341616,
+   "hotpot": 0.0,
+   "rgb": 0.07006369426751592,
+   "macro": 0.03137814829866893
+  },
+  "main+FB+V": {
+   "single": 0.5909090909090909,
+   "compound": 0.40372670807453415,
+   "hotpot": 0.5853658536585366,
+   "rgb": 0.7409766454352441,
+   "macro": 0.5802445745193514
+  },
+  "candF1+FB+V": {
+   "single": 0.6136363636363636,
+   "compound": 0.5403726708074534,
+   "hotpot": 0.6463414634146342,
+   "rgb": 0.7600849256900213,
+   "macro": 0.6401088558871182
+  },
+  "always_refuse": {
+   "single": 0.4,
+   "compound": 0.43478260869565216,
+   "hotpot": 0.4634146341463415,
+   "rgb": 0.38004246284501064,
+   "macro": 0.4195599264217511
+  }
+ }
+}

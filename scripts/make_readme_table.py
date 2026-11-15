@@ -183,6 +183,26 @@ def latency_table():
     return '\n'.join(lines)
 
 
+def tool_use_table():
+    """AuditKIT tool-call metrics of the raw agents per suite of the first sealed test (reports/tool_use_r5t.json, scripts/report_tool_use.py)."""
+    rep = load('tool_use_r5t.json')['trajectories']
+    suites = {'r5t_squad': 'SQuAD', 'r5t_hotpot': 'HotpotQA', 'r5t_rgb': 'RGB'}
+    lines = ['| System | Suite | Well-formed tool calls | Repeated searches (lower is better) | Loop-free episodes | Searches per episode | Invalid endings (lower is better) |',
+             '| --- | --- | ---: | ---: | ---: | ---: | ---: |']
+    for name, title in (('base', 'Tiny Aya base'), ('main', 'Main adapter'), ('candF1', 'candF1')):
+        for part, suite in suites.items():
+            m = rep[name][part]
+            lines.append(f"| {title} | {suite} | {m['tool_call_validity'] * 100:.1f}% | {m['redundant_tool_calls'] * 100:.1f}% | {m['loop_free_episodes'] * 100:.1f}% | "
+                         f"{m['mean_searches']:.2f} | {m['invalid_endings'] * 100:.1f}% |")
+    return '\n'.join(lines)
+
+
+def judge_agreement_sentence():
+    ag = load('judge_results.json')['judge_agreement_with_annotation_labels']
+    return (f"the judge's fully-faithful verdict agrees with our label on {ag['agreement'] * 100:.1f}% of {ag['answers']} answers "
+            f"(Cohen's kappa {ag['cohen_kappa']:.2f})")
+
+
 if __name__ == '__main__':
     print(results_table())
     print()
@@ -205,3 +225,5 @@ if __name__ == '__main__':
     print(context_table())
     print()
     print(numeric_table())
+    print()
+    print(tool_use_table())

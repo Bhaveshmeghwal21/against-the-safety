@@ -89,6 +89,14 @@ Each answered episode carries our scorer-v3 outcome. Here is what the judge says
 1. Mean judge hallucination of main's answers on hidden-evidence episodes: 0.788 over 33 answers. The rule needed more than 0.5 to say the judge corroborates the annotation-based flag: **corroborated**.
 2. Self-check effect on faithfulness (`main+FB+V` minus main): 0.086, interval 0.043 to 0.136. The rule needed the interval above 0: **improves**.
 
+## Judge agreement with our annotation-derived labels (post-hoc)
+
+No human labelled these answers. Our scorer's labels come from the datasets' human answer and evidence annotations. On the clear cases (correct and cited, or answered although the evidence was hidden; wrong answers on answerable questions left out), raw answers of base, main and candF1:
+
+| Answers | Agreement | Cohen's kappa | Both say supported | Both say not supported | Judge supported, our label not | Our label supported, judge not |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 357 | 0.902 | 0.796 | 198 | 124 | 26 | 9 |
+
 ## Judge repeatability
 
 Every third episode of the sample (all systems) was judged a second time with a different cache salt, so the judge answered again. The main results above are the first pass.

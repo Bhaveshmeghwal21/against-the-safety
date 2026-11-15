@@ -67,6 +67,23 @@ Steps 3 and 4 are code and need no training. Steps 1 and 2 come from training.
 
 **How the model learned the routine.** Nobody wrote thousands of examples by hand. We built them by script from 600 HotpotQA training questions. A scripted policy plays the routine perfectly in six situations: clean support, a distractor passage ranked first, a second search needed to find the second fact, evidence hidden, evidence already in the prompt, and a weak first search. That made 1,611 training turns, 537 each of search, answer and refusal. QLoRA training ran two epochs on one T4 (3.9 GPU-hours, about $2 at $0.526 per hour).
 
+**Training settings.**
+
+| Setting | main (submitted) | candF1 (alternative) |
+| --- | --- | --- |
+| Base model | Tiny Aya Global, revision `af89d219`, loaded in 4-bit NF4 with double quantisation and fp16 compute (QLoRA) | same |
+| Starts from | the base model | candA, a second-round adapter trained like main on the same questions (1,668 rows, more of them answers) |
+| Training rows | 1,611 (537 search, 537 answer, 537 refusal) from 600 HotpotQA training questions | 721 from SQuAD training-split articles: 304 rows from 152 pairs of the same question with the needed fact present and missing, plus 417 replay rows |
+| LoRA | rank 16, alpha 32, dropout 0.05, all seven attention and MLP projections | same |
+| Optimiser | paged AdamW 8-bit, learning rate 2e-4, cosine schedule, 3% warm-up, no weight decay, gradient clipping at 1.0 | same, learning rate 3e-5 |
+| Batch and length | batch 1 with 16-step gradient accumulation, at most 2,560 tokens per row, loss on the model's own turns only | same |
+| Length of training | 2 epochs, 202 optimiser steps | the checkpoint after epoch 1 of 2 (92 steps for both epochs) |
+| Seed, time, memory | seed 13, 3.9 h on one T4, peak 5.8 GB | seed 47 (candA: seed 13), 2.0 h on one T4, peak 6.0 GB |
+
+**Library settings.** AgentTune 1.1.3 and AuditKIT 1.1.3, pinned in `requirements-gpu.lock.txt` with PyTorch 2.11, Transformers 5.22.1, TRL 1.7.1, PEFT 0.21.2 and bitsandbytes 0.50.2. From AgentTune we set `SQLiteFTSBackend(match_all=False)`, our `search_corpus` subclass (three passages per search, 800 characters each) and `create_distill_trainer` with our QLoRA trainer factory. AuditKIT's metrics were called by name through `ak.evaluate` with their default settings. The judge metrics used AuditKIT's own prompts (version v2) and the judge deployment's default sampling. Other options stayed at the libraries' defaults. The Hindi adapters' settings are in [Other languages](#other-languages-hindi-and-spanish).
+
+**Splits and leak checks.** main trained on HotpotQA training-split questions and candF1 on SQuAD training-split articles. The first sealed test has 938 episodes from 225 questions (SQuAD 65, HotpotQA 60, RGB 100). The second has 679 episodes from 164 questions (75, 60, 29). The build scripts checked by exact match, before any model ran, that no SQuAD article sits in more than one group (training, development, test), that no HotpotQA test question was used before and none of its supporting passages is in an earlier corpus (by title, and for the second test also by normalised text), and that no RGB question repeats an earlier RGB set. For the first-round development and test sets, none of the supporting passages appears in any training row and no question text repeats ([`reports/leakage_report.json`](reports/leakage_report.json)). We ran no embedding-based or MinHash near-duplicate check. The test files were hashed before they were opened ([`reports/round5_test_manifest.json`](reports/round5_test_manifest.json)).
+
 ## The two Lexsi tools: AgentTune and AuditKIT
 
 The hackathon asked every Track 3 team to use two libraries from Lexsi Labs. One is the workshop where the model is taught, the other is the examiner.
@@ -165,6 +182,22 @@ Second, it measured the submitted system again. Success by group of questions (t
 
 The refusing carried over: 10.0% of hidden-evidence episodes were answered, and macro success is 10.3 points above refusing everything (interval +7.5 to +13.1). The answering did not carry over for single-passage SQuAD questions: 43.3% is close to refusing everything (41.1%), on 75 questions from 25 articles, and we have not looked for the cause. On this test 34.7% of the answers shown are correct. The first test's pooled 67.3% is not directly comparable, because that test held many more RGB episodes (471 of 934, against 141 of 679). We did not run the base model or the hosted models here.
 
+**Tool use on the sealed test.** AuditKIT's tool-call checks, as each evaluation run saved them, for the raw agents before the fail-closed rule, over all 938 episodes of the first sealed test ([`reports/tool_use_r5t.md`](reports/tool_use_r5t.md)).
+
+| System | Suite | Well-formed tool calls | Repeated searches (lower is better) | Loop-free episodes | Searches per episode | Invalid endings (lower is better) |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Tiny Aya base | SQuAD | 100.0% | 0.0% | 100.0% | 0.98 | 28.3% |
+| Tiny Aya base | HotpotQA | 100.0% | 0.0% | 100.0% | 0.98 | 9.8% |
+| Tiny Aya base | RGB | 100.0% | 0.5% | 98.9% | 0.83 | 16.3% |
+| Main adapter | SQuAD | 100.0% | 5.7% | 87.5% | 1.62 | 12.2% |
+| Main adapter | HotpotQA | 100.0% | 2.0% | 93.9% | 2.18 | 7.3% |
+| Main adapter | RGB | 100.0% | 3.1% | 94.1% | 1.11 | 5.7% |
+| candF1 | SQuAD | 100.0% | 7.6% | 84.2% | 1.45 | 15.6% |
+| candF1 | HotpotQA | 100.0% | 3.0% | 90.2% | 2.09 | 7.3% |
+| candF1 | RGB | 100.0% | 2.2% | 96.2% | 1.06 | 4.0% |
+
+Every search call was well formed for all three systems. The trained adapters search more (1.1 to 2.2 searches per episode, against about one for the base model) and repeat a query more often: 2% to 8% of their searches repeat an earlier one, and 84% to 96% of their episodes are loop-free. The fail-closed rule turns such an episode into a refusal. The base model looks loop-free because it rarely searches twice. It ends 10% to 28% of episodes with an invalid turn instead, against 4% to 16% for the adapters. Latency per suite is in [`reports/latency.md`](reports/latency.md).
+
 ### More AuditKIT metrics: faithfulness, retrieval quality, numbers and speed
 
 Our scorecards so far use the AuditKIT checks that need no judge model. On 16 November we added the metrics that do need one, plus numeric accuracy and single-request speed, so that the AuditKIT list for RAG is covered. The plan was written before any of it ran ([pre-registration](research/2026-11-16-judge-latency-preregistration.md)). Nothing here changed the submitted system.
@@ -192,7 +225,7 @@ Our scorecards so far use the AuditKIT checks that need no judge model. On 16 No
 | Wrong answer on answerable question (our scorer) | 28 | 0.607 | 0.571 | 0.429 |
 | Answered although the evidence was hidden (our flag) | 12 | 0.167 | 0.167 | 0.833 |
 
-The judge agrees with our scorer on the clear cases: 96.5% of the answers we call correct and cited are fully faithful. Of the 12 answers on hidden evidence, 10 contain a claim the shown passages do not support and 2 do not. So the flag "answered although the evidence was hidden" is mostly, not always, a real hallucination. The judge is a model, not a person. The flags are still not hand-checked. A blank 50-row sheet for that, with the labels withheld, is in [`reports/hand_label_sheet.csv`](reports/hand_label_sheet.csv).
+The judge agrees with our scorer on the clear cases: 96.5% of the answers we call correct and cited are fully faithful. Of the 12 answers on hidden evidence, 10 contain a claim the shown passages do not support and 2 do not. So the flag "answered although the evidence was hidden" is mostly, not always, a real hallucination. Across the clear cases of all three raw systems (answers we call correct and cited, or answers on hidden evidence), the judge's fully-faithful verdict agrees with our label on 90.2% of 357 answers (Cohen's kappa 0.80). We added this count after seeing the results. The judge is a model, not a person. The flags are still not hand-checked. A blank 50-row sheet for that, with the labels withheld, is in [`reports/hand_label_sheet.csv`](reports/hand_label_sheet.csv).
 
 **Retrieval quality.** Every system uses the same search tool and writes its own queries.
 
@@ -401,6 +434,7 @@ Training and evaluation ran on Kaggle T4s: see [`kaggle/README.md`](kaggle/READM
 - Hidden-evidence answers are annotation-based flags. An unannotated alternative source could make a flagged answer correct, and no person has checked them. An AI judge found an unsupported claim in 10 of the 12 flagged answers of the submitted system in a 300-episode sample, so most flags look real. A blank 50-row sheet for a human check is in [`reports/hand_label_sheet.csv`](reports/hand_label_sheet.csv).
 - Single-request latency is slow: a median of 16.3 s per question at batch size one on a T4 with an untuned research stack, so the system as run here is not real-time. A serving engine would help; we did not try one.
 - The judge-based metrics rest on one judge model and one sample of 300 episodes of the first sealed test. They were not run on the fresh test, on Hindi, or on the hosted models.
+- Each adapter is one training run with one seed (main: seed 13), so we do not know how much a rerun would vary.
 - The self-check withholds some correct answers. The submitted system refuses 39% of answerable questions.
 - On benchmarks the adapters never trained on, the adapter is level with GPT-6 Luna and behind DeepSeek V4 Flash, and on SQuAD 2.0 it scores the same as refusing every question. Large hosted models are more accurate when the documents hold the answer. See [Against hosted models](#against-hosted-models).
 - There is no hosted live endpoint: the web demo needs a GPU you start yourself. Its GPU run answered the eight example questions as shown above (five right, two wrong, one over-refusal); eight questions say little about accuracy, which the sealed test measures.
@@ -411,8 +445,10 @@ Hugging Face Articles need a Pro account, so this README is the write-up, as the
 
 - **Track and problem statement:** Track 3 (agentic fine-tuning), problem statement 4: fine-tuning for retrieval-augmented generation.
 - **Work done outside the hackathon:** none. The repository history starts on 4 November 2026. The base model, AgentTune, AuditKIT and the public datasets are third-party.
+- **Compute used:** The submitted adapter trained for 3.9 T4 GPU-hours on Kaggle's free quota (about $2 at $0.526 per hour). Later rounds ran on a friend's Kaggle account with permission, plus local CPU for scoring. The hosted-model comparison cost about $0.84 at published prices. The Hindi experiment (training both adapters, then testing four) used about 20 more T4 GPU-hours on the same free quota (about $10 at the same rate). The judge-based metrics used $0.56 of Azure credit, metered from returned token counts, and the single-request latency run used about 1.1 T4 GPU-hours.
 - **LLM usage:** AI coding assistants drafted a large share of the code, tests and prose under the team's direction. Azure's `gpt-6-luna` served as the judge for the faithfulness, groundedness, relevancy and context metrics, and as a competitor in the hosted-model comparison. Every number comes from a script run on saved transcripts and is in a file under `reports/`.
 - **With more credits:** quote-first answer targets, balanced answer and refusal data in both directions, far more than 488 parent questions, and a second Hindi attempt with more English replay, judged on fresh sealed tests under a new pre-registration. Measurements we did not make: a human check of the hidden-evidence flags (the judge-based faithfulness score is not calibrated against people), a second judge model, a second training seed, and the hosted models on the second sealed test.
+- **Expected before and after (forecasts we have not tested):** (1) quote-first answer targets with balanced answer and refusal data should lift single-passage SQuAD on the fresh test from 43.3%, about the refuse-everything level, toward the 59.1% the system scored on the first test, and macro success toward candF1's 64.0%, with answers on hidden evidence kept near 10%. (2) A second Hindi attempt with more English replay should keep most of the Hindi gain (35% correct and cited in the first attempt) while holding English answers on hidden evidence within 2 points of the parent adapter, the rule the first attempt missed. (3) A human check of 50 flagged answers should confirm most flags, because the judge found an unsupported claim in 10 of 12. (4) A serving engine with batching should cut the cost per answer and the 16.3 s median latency; we have not measured by how much.
 
 ## Artifacts and licenses
 
