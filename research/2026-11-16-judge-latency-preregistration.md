@@ -65,4 +65,4 @@ AuditKIT has no numeric metric and our datasets carry no numeric type. We define
 
 ## 8. Files
 
-`scripts/build_judge_cases.py`, `scripts/run_judge.py`, `scripts/report_judge.py`, `scripts/report_numeric.py`, `scripts/latency_run.py`, `scripts/report_latency.py`; `data/processed/judge/` (sample, cases, cached judge calls); results in `reports/judge_results.{json,md}`, `reports/numeric_accuracy.{json,md}` and `reports/latency.{json,md}`. Deviations from this document are labelled as deviations where they occur.
+`scripts/build_judge_cases.py`, `scripts/run_judge.py`, `scripts/report_judge.py`, `scripts/report_numeric.py`, `scripts/latency_run.py`, `scripts/report_latency.py`; `data/judge/` (sample, cases, cached judge calls); results in `reports/judge_results.{json,md}`, `reports/numeric_accuracy.{json,md}` and `reports/latency.{json,md}`. Deviations from this document are labelled as deviations where they occur.

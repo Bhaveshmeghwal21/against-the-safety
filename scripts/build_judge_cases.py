@@ -1,6 +1,6 @@
 """The episodes the judge-based RAG metrics are run on (research/2026-11-16-judge-latency-preregistration.md).
 
-  python scripts/build_judge_cases.py --n 300 --seed 61 --out data/processed/judge
+  python scripts/build_judge_cases.py --n 300 --seed 61 --out data/judge
 
 Takes the first sealed test (r5t) as scored with scorer v3, keeps the episodes that are eligible for all three raw systems (base, main, candF1), draws
 `--n` of them stratified by question group and answerable/hidden-evidence with a fixed seed, and writes one case per system and episode:
@@ -48,7 +48,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=300)
     ap.add_argument("--seed", type=int, default=61)
-    ap.add_argument("--out", default="data/processed/judge")
+    ap.add_argument("--out", default="data/judge")
     args = ap.parse_args()
 
     import remediate_audit as audit

@@ -1,6 +1,6 @@
 """Run AuditKIT's judge-based RAG metrics on the cases from scripts/build_judge_cases.py with the Azure gpt-6-luna deployment as the judge.
 
-  python scripts/run_judge.py --cases data/processed/judge/cases_r5t.jsonl --out data/processed/judge/run1 [--limit 12] [--budget 2.5]
+  python scripts/run_judge.py --cases data/judge/cases_r5t.jsonl --out data/judge/run1 [--limit 12] [--budget 2.5]
 
 Metrics (AuditKIT classes, unmodified prompts, prompt version v2):
   every answered episode          faithfulness, hallucination, response_groundedness, answer_relevancy
