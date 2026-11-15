@@ -334,6 +334,7 @@ RGB (Chen et al., 2024) and this project as applicable. RGB material is not lice
 - `manifests/`: split manifest (question ids), index manifest (hash of the shared 7,820-passage index), leakage and shortcut reports. `reports/`: scorecards, trade-off tables, ROI.
 - Second round (plan sections 20 and 21 in the code repository): `training/candA.jsonl` and `training/candB.jsonl` (two re-weighted selections of the same train decisions), `traces/dev_round2/` (both candidates on dev, used for selection), `traces/test2/` (base, closed book, main, control and candA on the fresh split), `manifests/test2_manifest.json` (question ids, sampling rule, and the hash of the extended 8,777-passage index).
 - Third round (plan sections 24 to 26): `training/candC.jsonl` and `training/candD.jsonl` (the two patch sets: new rows from SQuAD 2.0 training-split passages and HotpotQA train questions, plus rehearsal rows), `episodes/eventlogs_train3.jsonl` (the new episodes), `traces/dev_round3*` (both patches, and the weight blends of the main and candD adapters, on the development set, which holds held-out SQuAD training-split articles), `manifests/r3dev.json` (what was drawn for the development set). Fresh-test traces and manifests for the third round are in the benchmark-traces dataset.
+- Hindi training (`research/2026-11-15-hindi-training-preregistration.md`): `training/hiMain.jsonl` and `training/hiF.jsonl` (540 Hindi rows built from 220 IndicSQuAD Hindi questions, plus English replay), `episodes/eventlogs_trainhi.jsonl` (the Hindi episodes). IndicSQuAD (`l3cube-pune/indic-squad`) is listed CC BY 4.0 and translates SQuAD 2.0 (CC BY-SA 4.0), so treat these files as CC BY-SA 4.0. Hindi traces are in the benchmark-traces dataset.
 - Fourth and fifth rounds (plan sections 27 and 28, `research/` notes in the code repository): `training/candE.jsonl` and `training/candF.jsonl` (matched evidence decisions), `training/dpo_r5.jsonl` (335 preference pairs from sampled rollouts), `training/dpo_r5b.jsonl` and `training/force_contexts_r5.jsonl` (the same pairs plus abstention-chosen pairs, and the decision points they come from), `sampling/` (the 1,920 sampled rollouts and the forced answers), `verifier/` (the cases the self-check was run on and its verdicts), `traces/dev_round4`, `traces/dev_round5` and `traces/dev_round5b` (checkpoints on HotpotQA dev). The round-4 and round-5 SQuAD-style development and test traces, and the sealed round-5 test, are in the benchmark-traces dataset.
 
 ## How it was built
@@ -401,6 +402,9 @@ BENCH_SOURCES = {  # folder -> (benchmark, license, citation)
     "xq_hi": ("XQuAD, Hindi (multilingual check, 300 questions; main and base only)", "CC BY-SA 4.0", "Artetxe et al., 2020, On the Cross-lingual Transferability of Monolingual Representations"),
     "xq_en": ("XQuAD, English (multilingual check, same questions)", "CC BY-SA 4.0", "Artetxe et al., 2020 (as above)"),
     "xq_es": ("XQuAD, Spanish (multilingual check, same questions)", "CC BY-SA 4.0", "Artetxe et al., 2020 (as above)"),
+    "xq2_hi": ("XQuAD, Hindi (Hindi training test, 300 fresh questions)", "CC BY-SA 4.0", "Artetxe et al., 2020 (as above)"),
+    "xq2_en": ("XQuAD, English (Hindi training test, same questions)", "CC BY-SA 4.0", "Artetxe et al., 2020 (as above)"),
+    "hi_dev": ("IndicSQuAD Hindi (Hindi training development set, 120 machine-translated questions)", "CC BY 4.0 as listed; translates SQuAD 2.0 (CC BY-SA 4.0), so treat as CC BY-SA 4.0", "L3Cube-IndicSQuAD (l3cube-pune/indic-squad); Rajpurkar et al., 2016, 2018"),
 }
 
 
@@ -470,6 +474,10 @@ Paired intervals and the per-part numbers are in `reports/reference_policies.md`
 ## Round 6: the second sealed test (`r6t_*` folders; main only)
 
 `r6t_squad`, `r6t_hotpot` and `r6t_rgb` are 679 episodes (75, 60 and 29 questions) built and hashed before any model ran, and opened once for the main adapter. The run produced the raw traces, the self-check's verdicts on every answer (`round6_second_look/verify__V__verdicts_A.jsonl`), the forced second-look answers (`forced__forced_main.jsonl`) and the self-check's verdicts on them (`verify_forced__V__verdicts_A.jsonl`), all in `round6_second_look/`. The registered report is `reports/round6_second_look.md` (and `.json`); post hoc numbers are in `reports/round6_second_look_extra.md`. Under the registered rule the second look was not adopted (macro success {_second_look_headline()}). The base model and hosted models were not run on this test.
+
+## Hindi training (research/2026-11-15-hindi-training-preregistration.md)
+
+Traces of the Hindi experiment: `xq2_hi` and `xq2_en` (300 fresh XQuAD questions in Hindi and English), `hi_dev` (development), and `r6t_*` for the adapters `hiMain` and `hiF` and their parents `main` and `candF1`. `hindi_training/` holds the self-check's cases and verdicts (the parents' verdicts are a batch-1 rerun on the saved cases, see the amendment in the pre-registration). The registered report is `reports/hindi_results.md`: both adapters gained in Hindi and failed the registered safety rules, so they are experiments and the submitted system is unchanged.
 
 ## Contents
 
@@ -645,4 +653,69 @@ Refusals of answerable episodes are still high ({sysm["candF1+FB+V"]["false_abst
 ## License
 
 CC BY-NC 4.0, inherited from the base model. Cohere Labs' terms for Tiny Aya apply.
+"""
+
+
+# ---------------------------------------------------------------- Hindi training (research/2026-11-15-hindi-training-preregistration.md)
+
+HINDI_ADAPTERS = {"hiMain": ("hi-main", "main", "main"), "hiF": ("hi-f", "candF1", "cand-f1")}  # name -> (repository suffix, parent adapter, parent repository suffix)
+
+
+def hindi_card(name: str, user: str) -> str:
+    """Card of an experimental Hindi adapter; every number comes from reports/hindi_results.json (scripts/report_hindi.py)."""
+    rep = json.loads((ROOT / "reports" / "hindi_results.json").read_text(encoding="utf-8"))
+    slug, parent, parent_slug = HINDI_ADAPTERS[name]
+    hi, en = rep["xq2_hi"]["systems"], rep["r6t"]["systems"]
+    c_hi = rep["xq2_hi"]["comparisons"][f"{name}+FB+V minus {parent}+FB+V"]
+    c_en = rep["r6t"]["comparisons"][f"{name}+FB+V/{parent}+FB+V"]
+    train = rep["training"][name]
+    ci = lambda c: f"{c['difference'] * 100:+.1f} [{c['ci95'][0] * 100:+.1f}, {c['ci95'][1] * 100:+.1f}]"
+    met = lambda ok: "met" if ok else "not met"
+    rules = [("A1. Hindi, correct and cited (lower end above 0)", ci(c_hi["correct_and_cited"]), c_hi["correct_and_cited"]["ci95"][0] > 0),
+             ("A2. Hindi, answers on hidden evidence (upper end at most +2.0)", ci(c_hi["hidden_answer_rate"]), c_hi["hidden_answer_rate"]["ci95"][1] <= 0.02),
+             ("A3a. English, macro success (lower end at least -3.0)", ci(c_en["macro"]), c_en["macro"]["ci95"][0] >= -0.03),
+             ("A3b. English, answers on hidden evidence (upper end at most +2.0)", ci(c_en["unsupported_rate"]), c_en["unsupported_rate"]["ci95"][1] <= 0.02)]
+    names = [title.split(".")[0] for title, _, ok in rules if not ok]
+    failed = " and ".join(names) if len(names) < 3 else ", ".join(names[:-1]) + " and " + names[-1]
+    failed = failed or "none"
+    rule_table = "\n".join(["| Registered rule (difference in points, 95% interval) | " + f"{name} minus {parent} |", "| --- | ---: |"] + [f"| {t} | {d}: {met(ok)} |" for t, d, ok in rules])
+    pct = lambda x: f"{x:.1%}"
+    rows = [(f"{name} + both repairs", f"{name}+FB+V"), (f"{parent} + both repairs (parent)", f"{parent}+FB+V"), ("Refuse every question", "always refuse")]
+    table = "\n".join(["| System | Hindi: correct and cited | Hindi: answers when evidence was hidden | English: macro success (second sealed test) | English: answers when evidence was hidden |", "| --- | ---: | ---: | ---: | ---: |"]
+                      + [f"| {title} | {pct(hi[k]['correct_and_cited'])} | {hi[k]['hidden_answers']} / {hi[k]['n_hidden']} | {pct(en[k]['macro'])} | {en[k]['unsupported']} / {en[k]['hidden_n']} |" for title, k in rows])
+    return f"""---
+license: cc-by-nc-4.0
+base_model: {BASE}
+library_name: peft
+pipeline_tag: text-generation
+language: [hi, en]
+tags: [lora, qlora, peft, rag, retrieval, abstention, citations, agent, hindi, experimental, tiny-aya, lexsi-hackathon, agenttune, auditkit]
+datasets: [{user}/against-the-safety-rag-episodes, {user}/against-the-safety-benchmark-traces]
+---
+
+# against-the-safety-tiny-aya-rag-{slug}
+
+**Status: experimental. It failed the registered rules {failed} and is not the submitted system.** The submitted system is [the main adapter](https://huggingface.co/{user}/against-the-safety-tiny-aya-rag-main) with a fail-closed rule and a self-check, in English.
+
+A LoRA adapter for [Tiny Aya Global](https://huggingface.co/{BASE}) (revision `{REVISION[:8]}`). It continues the [{parent} adapter](https://huggingface.co/{user}/against-the-safety-tiny-aya-rag-{parent_slug}) on Hindi: 220 machine-translated questions (IndicSQuAD Hindi, from SQuAD 2.0) built into 540 Hindi search-answer-abstain rows, plus English replay at half the Hindi token count. Two epochs, learning rate 1e-4, seed 53, one run on two Kaggle T4s ({train['rows_trained']} rows, {train['optimizer_steps']} optimizer steps, final training loss {train['train_loss']:.3f}). Built for the Lexsi AI Safety and Alignment Hackathon, Track 3, problem statement 4. Team **Against-the-safety**. Code, pre-registration and results: [{REPO_URL}]({REPO_URL}) (`research/2026-11-15-hindi-training-preregistration.md`, `research/2026-11-15-hindi-training-results.md`).
+
+## Results (300 fresh XQuAD questions in Hindi, human translated; the second English sealed test; scorer v3; both repairs; one run)
+
+{table}
+
+{rule_table}
+
+Read it as a trade-off. The adapter answers Hindi questions it could not answer before (the parent's raw Hindi turns were invalid {pct(hi[parent]['invalid'])} of the time, against {pct(hi[name]['invalid'])} for this adapter), and it answers on hidden evidence more often. Part of the Hindi gain is general single-passage answering: the same questions in English also improved. The registered rule for calling an adapter a Hindi-capable variant needed all of A1, A2 and A3, so this adapter is published as an experiment and not as one.
+
+## Use
+
+The result needs both repairs, and the self-check in those runs was done by the **main** adapter (wording A, threshold 0.5), not by this adapter. Hindi text costs about 3.4 times the tokens of English, so the runs used an input limit of 8,000 tokens. The tokenizer files are not copied (they belong to the gated base repository). Loading and the tool loop are the same as for the main adapter (see its card); replace the adapter id with `{user}/against-the-safety-tiny-aya-rag-{slug}`.
+
+## Limits
+
+One training run and one seed. The training questions are machine translated and were not checked by a speaker; the test questions are human translated. The test questions share articles with the first 300 XQuAD questions, whose results we had seen, and the hidden-evidence answers are annotation-based flags. Refusals of answerable Hindi questions are still {pct(hi[f'{name}+FB+V']['false_refusal'])} with the repairs. Not for safety-critical or legal use.
+
+## License
+
+CC BY-NC 4.0, inherited from the base model. Cohere Labs' terms for Tiny Aya apply. Training data: IndicSQuAD Hindi (`l3cube-pune/indic-squad`, listed CC BY 4.0; it translates SQuAD 2.0, CC BY-SA 4.0) and the project's English episodes (HotpotQA-derived, CC BY-SA 4.0).
 """

@@ -246,6 +246,29 @@ In plain words:
 
 One sample of 300 translated questions per language, so treat it as a first look. Hosted models were not run on Hindi.
 
+### We then trained on Hindi, and the gain came with a safety cost
+
+Because the English-only adapter answers almost nothing in Hindi, we continued training both `main` and `candF1` on Hindi: 220 machine-translated questions (IndicSQuAD) built into 540 Hindi rows, plus English replay, two epochs, one run each on Kaggle T4s. We tested both on 300 fresh human-translated XQuAD questions, and on the second English sealed test to see what Hindi training did to English. The rules were committed before any result ([pre-registration](research/2026-11-15-hindi-training-preregistration.md), [results](research/2026-11-15-hindi-training-results.md)). `hiMain` continues `main`, `hiF` continues `candF1`; every row below has both repairs.
+
+| System | Hindi: correct and cited (291 questions) | Hindi: answers when evidence was hidden | English: macro success (second sealed test) | English: answers when evidence was hidden |
+| --- | ---: | ---: | ---: | ---: |
+| Main + both repairs (submitted) | 2.1% | 4 / 291 | 54.1% | 29 / 291 |
+| hiMain + both repairs | 35.4% | 18 / 291 | 55.1% | 53 / 291 |
+| candF1 + both repairs | 3.8% | 3 / 291 | 62.6% | 28 / 291 |
+| hiF + both repairs | 35.1% | 13 / 291 | 63.9% | 33 / 291 |
+| Refuse every question | 0.0% | 0 / 291 | 43.8% | 0 / 291 |
+
+| Registered rule (difference in points, 95% interval) | hiMain minus main | hiF minus candF1 |
+| --- | ---: | ---: |
+| A1. Hindi, correct and cited (lower end above 0) | +33.3 [+27.9, +38.9]: met | +31.3 [+25.5, +37.3]: met |
+| A2. Hindi, answers on hidden evidence (upper end at most +2.0) | +4.8 [+2.1, +7.8]: not met | +3.4 [+0.7, +6.6]: not met |
+| A3a. English, macro success (lower end at least -3.0) | +1.0 [-2.0, +4.1]: met | +1.2 [-1.5, +4.0]: met |
+| A3b. English, answers on hidden evidence (upper end at most +2.0) | +8.2 [+4.1, +12.2]: not met | +1.7 [-0.7, +4.6]: not met |
+
+- **The Hindi gain is large.** Correct, cited answers rose from 2% and 4% to 35%, and the repeated-search failure went from 76% and 72% of raw turns to under 1%. Hindi success rose about 14 points above the 50% that refusing everything scores. Part of the gain is general single-passage answering: the same questions in English also improved (1.4% to 12.7% for `hiMain`, 10.3% to 24.1% for `hiF`).
+- **It cost caution.** Both adapters answer on hidden evidence more often, in Hindi and, for `hiMain`, clearly in English (29 to 53 of 291). Under the registered rule neither adapter qualifies as a Hindi-capable variant, so **the submitted English system is unchanged**. `hiF` misses the English bound by a smaller margin.
+- One training run per adapter, machine-translated training data, and test sets that are now used up: a second attempt would need a new registration and fresh tests. We did not test why the caution dropped.
+
 ## What we tried, and what we kept
 
 ![Timeline of rounds 1 to 6 with the outcome of each](docs/figures/rounds.svg)
@@ -289,7 +312,7 @@ Training and evaluation ran on Kaggle T4s: see [`kaggle/README.md`](kaggle/READM
 
 ## Limits
 
-- English, short factual questions. Tiny Aya is a multilingual model, but we trained the adapter in English only. A first Hindi and Spanish check (see [Other languages](#other-languages-hindi-and-spanish)) shows the refusing carries over and the answering does not: 2% to 5% of questions got a correct, cited answer, and Hindi searches loop far more often. Two-part answers and single-passage questions are weak spots; with two documents and dated editions the adapter sometimes cites the older one.
+- English, short factual questions. Tiny Aya is a multilingual model, but we trained the adapter in English only. A first Hindi and Spanish check (see [Other languages](#other-languages-hindi-and-spanish)) shows the refusing carries over and the answering does not: 2% to 5% of questions got a correct, cited answer, and Hindi searches loop far more often. Training on Hindi afterwards raised Hindi answers to about 35% but made both adapters answer on hidden evidence more often, so neither passed our safety rule and the submitted system stays English. Two-part answers and single-passage questions are weak spots; with two documents and dated editions the adapter sometimes cites the older one.
 - The first sealed test was opened before the scoring corrections, and candF1 was tested on it after its gate was written. The fresh Round 6 test was then opened once, for the second look, so further model selection needs yet another fresh test. On that test the submitted system answered single-passage SQuAD questions about as well as refusing everything would score (43.3% against 41.1%).
 - Hidden-evidence answers are annotation-based flags. An unannotated alternative source could make a flagged answer correct, and no one has hand-checked them.
 - The self-check withholds some correct answers. The submitted system refuses 39% of answerable questions.

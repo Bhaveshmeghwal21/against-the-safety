@@ -5,6 +5,7 @@
 release/
   model_main/        LoRA adapter, 2 epochs, main mixture        (README.md = model card)
   model_control/     LoRA adapter, 2 epochs, supported-only control
+  model_hi_main/, model_hi_f/  experimental Hindi adapters (hiMain from main, hiF from candF1); they failed their registered safety rules
   dataset_episodes/  training rows, AgentTune EventLogs, evaluation traces, manifests, scorecards (HotpotQA-derived: CC BY-SA 4.0)
   dataset_nimbus/    the fictional Nimbus Home support suite and its evaluation traces (CC BY 4.0)
   dataset_benchmarks/ traces on five external benchmarks (each folder keeps its source license; RGB is CC BY-NC-SA 4.0)
@@ -52,9 +53,10 @@ BENCH_EVALS = [RUNS / "ats-eval-bench-a" / "out" / "eval", RUNS / "ats-eval-benc
                A2R5 / "ats-train-dpo-r5c" / "out" / "eval", A2R5 / "ats-train-dpo2-r5b" / "out" / "eval",  # rounds 5 and 5b: development evaluation
                A2R5 / "ats-eval-jobs-r5test-ref" / "out" / "eval", A2R5 / "ats-eval-jobs-r5test-final" / "out" / "eval",  # round 5: sealed test
                RUNS / "ats-r6-system-xq" / "out" / "eval",  # multilingual check (research/2026-11-15-multilingual-plan.md)
-               RUNS / "ats-r6-system-sl" / "out" / "eval"]  # round 6 sealed test, second look (research/2026-11-15-round6-second-look-preregistration.md)
+               RUNS / "ats-r6-system-sl" / "out" / "eval",  # round 6 sealed test, second look (research/2026-11-15-round6-second-look-preregistration.md)
+               RUNS / "ats-r6-system-hi-base" / "out" / "eval", RUNS / "ats-r6-system-hi-new" / "out" / "eval", RUNS / "ats-hi-train-a" / "out" / "eval"]  # Hindi training (research/2026-11-15-hindi-training-preregistration.md)
 BENCHES = ["2wiki", "musique", "squad2", "rgb", "rgb_int", "r3t_hotpot", "r3t_2wiki", "r3t_musique", "r3t_squad2", "r3t_rgb", "r3t_rgb_int",
-           "r4dev", "r4test", "r5t_squad", "r5t_hotpot", "r5t_rgb", "r6t_squad", "r6t_hotpot", "r6t_rgb", "xq_hi", "xq_en", "xq_es"]
+           "r4dev", "r4test", "r5t_squad", "r5t_hotpot", "r5t_rgb", "r6t_squad", "r6t_hotpot", "r6t_rgb", "xq_hi", "xq_en", "xq_es", "xq2_hi", "xq2_en", "hi_dev"]
 
 
 def copy(src: Path, dst: Path) -> None:
@@ -107,10 +109,12 @@ def main() -> None:
     build_model("candA", out, cards.cand_a_card(args.user), train=TRAIN_ROUND2, dst_name="cand_a")
     build_model("candD", out, cards.patch_card(args.user), train=TRAIN_ROUND3, dst_name="patch")
     build_model("candF", out, cards.cand_f1_card(args.user), train=A2R4 / "ats-train-evidence-r4" / "out", dst_name="cand_f1", folder="adapter_ep1")  # round 4 checkpoint, the round-5b alternative
+    for name, (slug, _, _) in cards.HINDI_ADAPTERS.items():  # experimental Hindi adapters, final (epoch 2) weights; they failed their registered safety rules
+        build_model(name, out, cards.hindi_card(name, args.user), train=RUNS / "ats-hi-train-a" / "out", dst_name=slug.replace("-", "_"))
 
     ds = out / "dataset_episodes"
     shutil.rmtree(ds, ignore_errors=True)
-    for name in ("main", "control", "dev", "candA", "candB", "candC", "candD", "candE", "candF"):
+    for name in ("main", "control", "dev", "candA", "candB", "candC", "candD", "candE", "candF", "hiMain", "hiF"):
         copy(ROOT / "data" / "processed" / "training" / f"{name}.jsonl", ds / "training" / f"{name}.jsonl")
     for name in ("dpo_r5", "dpo_r5b", "dpo_r5_clean", "dpo_r5b_clean", "force_contexts_r5"):  # historical artifacts and separately validated clean pairs
         if (ROOT / "data" / "processed" / "training" / f"{name}.jsonl").exists():
@@ -127,6 +131,7 @@ def main() -> None:
             copy(f, ds / "sampling" / folder / f.relative_to(A2R5 / folder / "out").as_posix().replace("/", "__"))
     copy(ROOT / "data" / "processed" / "episodes" / "eventlogs_train.jsonl", ds / "episodes" / "eventlogs_train.jsonl")
     copy(ROOT / "data" / "processed" / "episodes" / "eventlogs_train3.jsonl", ds / "episodes" / "eventlogs_train3.jsonl")
+    copy(ROOT / "data" / "processed" / "episodes" / "eventlogs_trainhi.jsonl", ds / "episodes" / "eventlogs_trainhi.jsonl")
     copy(ROOT / "data" / "bench" / "r3dev" / "manifest.json", ds / "manifests" / "r3dev.json")
     for f in (ROOT / "data" / "manifests").glob("*.json"):
         copy(f, ds / "manifests" / f.name)
@@ -153,8 +158,12 @@ def main() -> None:
         copy(ROOT / "data" / "bench" / b / "manifest.json", bt / "manifests" / f"{b}.json")
     for f in sorted((ROOT / "reports").glob("benchmarks_*")) + sorted((ROOT / "reports").glob("round3_test*")) + sorted((ROOT / "reports").glob("round4_test*")) \
             + sorted((ROOT / "reports").glob("round5_final*")) + sorted((ROOT / "reports").glob("round5b_final*")) + sorted((ROOT / "reports").glob("round5_system_check*")) + sorted((ROOT / "reports").glob("xquad_*")) \
-            + sorted((ROOT / "reports").glob("round6_second_look*")):
+            + sorted((ROOT / "reports").glob("round6_second_look*")) + sorted((ROOT / "reports").glob("hindi_*")):
         copy(f, bt / "reports" / f.name)
+    for tag, folder in (("base", RUNS / "ats-r6-system-hi-base" / "out"), ("new", RUNS / "ats-r6-system-hi-new" / "out")):  # Hindi training: the self-check's cases and verdicts
+        for rel in ("cases/answers.jsonl", "verify/V/verdicts_A.jsonl"):
+            if (folder / rel).exists():
+                copy(folder / rel, bt / "hindi_training" / f"{tag}__{rel.replace('/', '__')}")  # the baseline verdicts are the batch-1 rerun on the saved cases (kernel ats-verify-cases-hi-base)
     sl = RUNS / "ats-r6-system-sl" / "out"  # the self-check's verdicts, the forced second-look answers and the checks of those answers
     for rel in ("cases/answers.jsonl", "cases/forced_all.jsonl", "cases/recover_contexts.jsonl", "forced/forced_main.jsonl",
                 "verify/V/verdicts_A.jsonl", "verify_forced/V/verdicts_A.jsonl"):

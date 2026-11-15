@@ -152,6 +152,37 @@ def test_the_fresh_test_table_and_the_second_look_claims_match_the_reports(docum
 
 
 @needs_reports
+@pytest.mark.parametrize("document", ["README.md", "article/ARTICLE.md"])
+def test_the_hindi_training_tables_and_verdict_match_the_report(document):
+    import make_readme_table as tables
+
+    text = (ROOT / document).read_text(encoding="utf-8")
+    for table in (tables.hindi_training_table(), tables.hindi_rules_table()):
+        for line in table.splitlines():
+            assert line in text, f"{document} is missing or has changed: {line}"
+    decisions = tables.load("hindi_results.json")["decisions"]
+    assert not any(d["published_as_hindi_variant"] for d in decisions.values())  # the documents say neither adapter qualified
+    assert "the submitted English system is unchanged" in text
+
+
+@needs_reports
+def test_the_hindi_cards_state_the_failed_rules_with_the_saved_numbers():
+    import make_readme_table as tables
+    from ragharness import release_cards
+
+    rep = tables.load("hindi_results.json")
+    for name, (slug, parent, _) in release_cards.HINDI_ADAPTERS.items():
+        card = release_cards.hindi_card(name, "BMEscanor")
+        assert "experimental" in card and "not the submitted system" in card
+        assert f"against-the-safety-tiny-aya-rag-{slug}" in card
+        assert not rep["decisions"][name]["published_as_hindi_variant"]
+        hi = rep["xq2_hi"]["systems"]
+        assert f"{hi[f'{name}+FB+V']['correct_and_cited']:.1%}" in card and f"{hi[f'{parent}+FB+V']['correct_and_cited']:.1%}" in card
+        for rule, ok in (("A2", rep["decisions"][name]["A2_hindi_safety"]), ("A1", rep["decisions"][name]["A1_hindi_gain"])):
+            assert f"| {'met' if ok else 'not met'} |" in card or f": {'met' if ok else 'not met'} |" in card, rule
+
+
+@needs_reports
 def test_the_abstract_reports_the_second_test():
     import make_readme_table as tables
 

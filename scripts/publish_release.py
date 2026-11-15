@@ -28,13 +28,15 @@ REPOS = [  # (kind, name, local folder)
     ("dataset", "against-the-safety-benchmark-traces", "dataset_benchmarks"),  # external benchmarks (plan sections 22 and 23) and the round-3 fresh test
     ("model", "against-the-safety-tiny-aya-rag-patch", "model_patch"),  # round 3, not the selected model (plan sections 24 to 26)
     ("model", "against-the-safety-tiny-aya-rag-cand-f1", "model_cand_f1"),  # round 4 checkpoint, the documented alternative of round 5b (plan section 29)
+    ("model", "against-the-safety-tiny-aya-rag-hi-main", "model_hi_main"),  # experimental Hindi adapter (hiMain); failed its registered safety rules
+    ("model", "against-the-safety-tiny-aya-rag-hi-f", "model_hi_f"),  # experimental Hindi adapter (hiF); failed its registered safety rules
 ]
 
 COLLECTIONS = {
     "models": {
         "title": "Against-the-safety: Tiny Aya RAG adapters",
         "description": "LoRA adapters for Tiny Aya Global trained with AgentTune on search-cite-abstain episodes (PS 4).",
-        "items": [("model", 0), ("model", 1), ("model", 5), ("model", 7), ("model", 8)],
+        "items": [("model", 0), ("model", 1), ("model", 5), ("model", 7), ("model", 8), ("model", 9), ("model", 10)],
     },
     "data": {
         "title": "Against-the-safety: RAG episodes, traces and demo",
