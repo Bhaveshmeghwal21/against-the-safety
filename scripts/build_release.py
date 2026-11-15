@@ -51,9 +51,10 @@ BENCH_EVALS = [RUNS / "ats-eval-bench-a" / "out" / "eval", RUNS / "ats-eval-benc
                A2R4 / "ats-eval-jobs-r4dev" / "out" / "eval", A2R4 / "ats-eval-jobs-r4test" / "out" / "eval",  # round 4: development and final holdout
                A2R5 / "ats-train-dpo-r5c" / "out" / "eval", A2R5 / "ats-train-dpo2-r5b" / "out" / "eval",  # rounds 5 and 5b: development evaluation
                A2R5 / "ats-eval-jobs-r5test-ref" / "out" / "eval", A2R5 / "ats-eval-jobs-r5test-final" / "out" / "eval",  # round 5: sealed test
-               RUNS / "ats-r6-system-xq" / "out" / "eval"]  # multilingual check (research/2026-11-15-multilingual-plan.md)
+               RUNS / "ats-r6-system-xq" / "out" / "eval",  # multilingual check (research/2026-11-15-multilingual-plan.md)
+               RUNS / "ats-r6-system-sl" / "out" / "eval"]  # round 6 sealed test, second look (research/2026-11-15-round6-second-look-preregistration.md)
 BENCHES = ["2wiki", "musique", "squad2", "rgb", "rgb_int", "r3t_hotpot", "r3t_2wiki", "r3t_musique", "r3t_squad2", "r3t_rgb", "r3t_rgb_int",
-           "r4dev", "r4test", "r5t_squad", "r5t_hotpot", "r5t_rgb", "xq_hi", "xq_en", "xq_es"]
+           "r4dev", "r4test", "r5t_squad", "r5t_hotpot", "r5t_rgb", "r6t_squad", "r6t_hotpot", "r6t_rgb", "xq_hi", "xq_en", "xq_es"]
 
 
 def copy(src: Path, dst: Path) -> None:
@@ -151,8 +152,14 @@ def main() -> None:
         counts[f"bench_{b}"] = sum(copy_traces(b, f"bench_{b}", root, bt) for root in BENCH_EVALS)
         copy(ROOT / "data" / "bench" / b / "manifest.json", bt / "manifests" / f"{b}.json")
     for f in sorted((ROOT / "reports").glob("benchmarks_*")) + sorted((ROOT / "reports").glob("round3_test*")) + sorted((ROOT / "reports").glob("round4_test*")) \
-            + sorted((ROOT / "reports").glob("round5_final*")) + sorted((ROOT / "reports").glob("round5b_final*")) + sorted((ROOT / "reports").glob("round5_system_check*")) + sorted((ROOT / "reports").glob("xquad_*")):
+            + sorted((ROOT / "reports").glob("round5_final*")) + sorted((ROOT / "reports").glob("round5b_final*")) + sorted((ROOT / "reports").glob("round5_system_check*")) + sorted((ROOT / "reports").glob("xquad_*")) \
+            + sorted((ROOT / "reports").glob("round6_second_look*")):
         copy(f, bt / "reports" / f.name)
+    sl = RUNS / "ats-r6-system-sl" / "out"  # the self-check's verdicts, the forced second-look answers and the checks of those answers
+    for rel in ("cases/answers.jsonl", "cases/forced_all.jsonl", "cases/recover_contexts.jsonl", "forced/forced_main.jsonl",
+                "verify/V/verdicts_A.jsonl", "verify_forced/V/verdicts_A.jsonl"):
+        if (sl / rel).exists():
+            copy(sl / rel, bt / "round6_second_look" / rel.replace("/", "__"))
     (bt / "README.md").write_text(cards.bench_card(args.user), encoding="utf-8", newline="\n")
 
     sp = out / "space"

@@ -73,6 +73,26 @@ def multilingual_table():
     ])
 
 
+def fresh_test_table():
+    """The second sealed test (reports/round6_second_look.json and round6_second_look_extra.json, scripts/report_round6_second_look*.py) next to the first one."""
+    sl, extra = load('round6_second_look.json'), load('round6_second_look_extra.json')
+    r5 = load('reference_policies.json')['sealed_r5test']
+    groups = ('single', 'compound', 'hotpot', 'rgb')
+
+    def row(title, components, macro, system):
+        hidden = f"{system['unsupported']} / {system['hidden_n']}" + (f" ({pct(system['unsupported_rate'])})" if system['unsupported'] else '')
+        return f"| {title} | " + ' | '.join(pct(components[g]) for g in groups) + f" | {pct(macro)} | {hidden} |"
+    fresh, refuse = sl['systems']['main+FB+V'], sl['systems']['always refuse']
+    first = r5['main+FB+V']
+    return '\n'.join([
+        '| | SQuAD single | SQuAD two-part | HotpotQA | RGB | Macro success | Answers on hidden evidence |',
+        '| --- | ---: | ---: | ---: | ---: | ---: | ---: |',
+        row('Submitted system, fresh test', extra['round6_components']['main+FB+V'], fresh['macro'], fresh),
+        row('Submitted system, first test', extra['round5_components']['main+FB+V'], first['macro'], first),
+        row('Refuse every question, fresh test', extra['round6_components']['always refuse'], refuse['macro'], refuse),
+    ])
+
+
 if __name__ == '__main__':
     print(results_table())
     print()
@@ -81,3 +101,5 @@ if __name__ == '__main__':
     print(external_table())
     print()
     print(multilingual_table())
+    print()
+    print(fresh_test_table())

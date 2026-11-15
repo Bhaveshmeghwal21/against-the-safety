@@ -144,6 +144,20 @@ What the table says:
 
 **Which system do we submit?** The main adapter with both repairs, because we chose it before the test was opened. candF1 scores higher on this test: +6.0 points of macro success, with a 95% interval of +3.0 to +9.2 (the range the true difference very likely lies in). But we picked candF1 with a gate we wrote after seeing its practice-set results, and its safety gain is not established. Its rate of answers on hidden evidence is 0.5 points lower, with an interval of −4.6 to +3.4. Our rule needed the upper end at +2 or below. We publish it as the alternative. A fresh test would settle the question.
 
+**A second, fresh test.** After the first test was used up, we built another from questions nothing had used (679 episodes: 75 SQuAD, 60 HotpotQA and 29 RGB questions), hashed it before any model ran, and opened it once. It did two jobs.
+
+First, it tested one more idea, a *second look*. When the system refuses after it has seen passages, it is asked once to answer anyway, and that answer is shown only if the self-check is at least 90% sure. We wrote the rule first: macro success must rise with an interval above zero, and the rate of answers on hidden evidence may rise by at most 2 points. The second look failed the first half. Macro success rose 0.9 points (interval −0.3 to +2.1), so nothing changed and the submitted system stays as it is. It did add correct, cited answers (+2.3 points, interval +0.7 to +4.1), but it also showed seven wrong answers and two on hidden evidence. Record: [pre-registration](research/2026-11-15-round6-second-look-preregistration.md), [results](research/2026-11-15-round6-second-look-results.md).
+
+Second, it measured the submitted system again. Success by group of questions (the pooled columns above are not comparable across the two tests, because the mix of question types differs):
+
+| | SQuAD single | SQuAD two-part | HotpotQA | RGB | Macro success | Answers on hidden evidence |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Submitted system, fresh test | 43.3% | 36.2% | 58.9% | 78.0% | 54.1% | 29 / 291 (10.0%) |
+| Submitted system, first test | 59.1% | 40.4% | 58.5% | 74.1% | 58.0% | 42 / 375 (11.2%) |
+| Refuse every question, fresh test | 41.1% | 44.3% | 50.0% | 39.7% | 43.8% | 0 / 291 |
+
+The refusing carried over: 10.0% of hidden-evidence episodes were answered, and macro success is 10.3 points above refusing everything (interval +7.5 to +13.1). The answering did not carry over for single-passage SQuAD questions: 43.3% is close to refusing everything (41.1%), on 75 questions from 25 articles, and we have not looked for the cause. On this test 34.7% of the answers shown are correct. The first test's pooled 67.3% is not directly comparable, because that test held many more RGB episodes (471 of 934, against 141 of 679). We did not run the base model or the hosted models here.
+
 ## Try it
 
 | Option | Needs | What you get |
@@ -239,7 +253,7 @@ One sample of 300 translated questions per language, so treat it as a first look
 - **Refusal training is what makes the model stop.** A control adapter trained without refusal examples answered more but never refused; it kept searching until the budget ran out.
 - **Cheap fixes beat more training.** The two repairs moved macro success from 47.9% to 58.0% with no retraining. Every training change after round 1 missed its own pre-registered release rule.
 - **Preference training removed refusals.** Preference training (DPO) shows the model pairs of a better and a worse answer and nudges it toward the better one. Our pairs almost never chose a refusal, so the checkpoints stopped refusing. Adding refusal pairs restored it from main but passed no gate. Some of those training prompts also exposed held-out evidence; main and candF1 predate them. See the [remediation report](reports/2026-11-13-evaluation-remediation.md).
-- **A trained checker did not beat the plain one.** Two adapters trained to check answers (V2m, V2b) never reached the hidden-evidence limit we set, at any threshold ([report](reports/round6_selection.md)). The Round 6 sealed test is unopened.
+- **A trained checker did not beat the plain one.** Two adapters trained to check answers (V2m, V2b) never reached the hidden-evidence limit we set, at any threshold ([report](reports/round6_selection.md)). A second look at refusals, checked by the plain self-check, also failed its rule on the fresh Round 6 test, which we opened once ([results](research/2026-11-15-round6-second-look-results.md)).
 
 The full record, with every pre-registered rule and each result, is in [`docs/HISTORY.md`](docs/HISTORY.md).
 
@@ -276,7 +290,7 @@ Training and evaluation ran on Kaggle T4s: see [`kaggle/README.md`](kaggle/READM
 ## Limits
 
 - English, short factual questions. Tiny Aya is a multilingual model, but we trained the adapter in English only. A first Hindi and Spanish check (see [Other languages](#other-languages-hindi-and-spanish)) shows the refusing carries over and the answering does not: 2% to 5% of questions got a correct, cited answer, and Hindi searches loop far more often. Two-part answers and single-passage questions are weak spots; with two documents and dated editions the adapter sometimes cites the older one.
-- The sealed test was opened before the scoring corrections, and candF1 was tested on it after its gate was written, so further model selection needs a fresh test.
+- The first sealed test was opened before the scoring corrections, and candF1 was tested on it after its gate was written. The fresh Round 6 test was then opened once, for the second look, so further model selection needs yet another fresh test. On that test the submitted system answered single-passage SQuAD questions about as well as refusing everything would score (43.3% against 41.1%).
 - Hidden-evidence answers are annotation-based flags. An unannotated alternative source could make a flagged answer correct, and no one has hand-checked them.
 - The self-check withholds some correct answers. The submitted system refuses 39% of answerable questions.
 - On benchmarks the adapters never trained on, the adapter is level with GPT-6 Luna and behind DeepSeek V4 Flash, and on SQuAD 2.0 it scores the same as refusing every question. Large hosted models are more accurate when the documents hold the answer. See [Against hosted models](#against-hosted-models).

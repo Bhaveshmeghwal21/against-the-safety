@@ -128,3 +128,51 @@ def test_the_main_card_reports_the_language_check_with_the_saved_numbers():
     for lang in ("hi", "en", "es"):
         assert f"{rep[lang]['main+FB+V']['correct_and_cited']:.1%}" in note
     assert "not a claim" in note
+
+
+@needs_reports
+@pytest.mark.parametrize("document", ["README.md", "article/ARTICLE.md"])
+def test_the_fresh_test_table_and_the_second_look_claims_match_the_reports(document):
+    import make_readme_table as tables
+
+    text = (ROOT / document).read_text(encoding="utf-8")
+    for line in tables.fresh_test_table().splitlines():
+        assert line in text, f"{document} is missing or has changed: {line}"
+    sl = tables.load("round6_second_look.json")
+    extra = tables.load("round6_second_look_extra.json")
+    assert sl["decision"]["adopt"] is False  # the documents say the second look was not adopted
+    macro = sl["comparisons"]["main+FB+V+second look/main+FB+V"]["macro"]
+    interval = f"{macro['difference'] * 100:.1f} points (interval {macro['ci95'][0] * 100:+.1f} to {macro['ci95'][1] * 100:+.1f})".replace("-", "\u2212")
+    assert f"rose {interval}" in text
+    cited = sl["comparisons"]["main+FB+V+second look/main+FB+V"]["supported_correct"]
+    assert f"(+{cited['difference'] * 100:.1f} points, interval +{cited['ci95'][0] * 100:.1f} to +{cited['ci95'][1] * 100:.1f})" in text
+    margin = extra["comparisons"]["main+FB+V/always refuse"]["macro"]
+    assert f"{margin['difference'] * 100:.1f} points above refusing everything (interval +{margin['ci95'][0] * 100:.1f} to +{margin['ci95'][1] * 100:.1f})" in text
+    assert f"{sl['systems']['main+FB+V']['correct_among_answered'] * 100:.1f}% of the answers shown are correct" in text
+
+
+@needs_reports
+def test_the_abstract_reports_the_second_test():
+    import make_readme_table as tables
+
+    sl = tables.load("round6_second_look.json")
+    abstract = (ROOT / "article" / "ABSTRACT.md").read_text(encoding="utf-8")
+    main, refuse = sl["systems"]["main+FB+V"], sl["systems"]["always refuse"]
+    macro = sl["comparisons"]["main+FB+V+second look/main+FB+V"]["macro"]
+    assert f"{main['macro'] * 100:.1f}% macro success against {refuse['macro'] * 100:.1f}% for refusing everything" in abstract
+    assert f"{main['unsupported_rate'] * 100:.1f}% of hidden-evidence episodes answered" in abstract
+    assert f"macro success +{macro['difference'] * 100:.1f} points, interval {macro['ci95'][0] * 100:.1f} to +{macro['ci95'][1] * 100:.1f}".replace("-", "\u2212") in abstract
+    assert f"{sl['shared_eligible']}-episode" in abstract
+
+
+@needs_reports
+def test_the_main_card_reports_the_second_test_with_the_saved_numbers():
+    import make_readme_table as tables
+    from ragharness import release_cards
+
+    sl = tables.load("round6_second_look.json")
+    note = release_cards.fresh_test_note()
+    assert f"{sl['systems']['main+FB+V']['macro']:.1%} macro success against {sl['systems']['always refuse']['macro']:.1%}" in note
+    assert "not adopted" in note
+    assert str(sl["shared_eligible"]) in note
+    assert release_cards._second_look_headline() in release_cards.bench_card("BMEscanor")

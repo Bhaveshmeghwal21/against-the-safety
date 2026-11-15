@@ -189,6 +189,29 @@ def multilingual_note() -> str:
 The adapter was trained on English only. On 300 XQuAD questions in each of Hindi, English and Spanish (one run, evaluation only, nothing retrained), the system with both repairs answered although the evidence was hidden in {hid(s('hi'))} Hindi, {hid(s('en'))} English and {hid(s('es'))} Spanish episodes (base model: {hid(base('hi'))}, {hid(base('en'))}, {hid(base('es'))}). It gave a correct, cited answer when the evidence was available in only {s('hi')['correct_and_cited']:.1%} (Hindi), {s('en')['correct_and_cited']:.1%} (English) and {s('es')['correct_and_cited']:.1%} (Spanish) of questions, so its success rate ({s('hi')['success']:.1%}, {s('en')['success']:.1%}, {s('es')['success']:.1%}) is about what refusing every question scores (50.0%). English is as low as the other two because these single-passage questions are a known weak spot. In Hindi {rep['hi']['main']['invalid']:.0%} of the adapter's raw turns ended invalid, mostly by repeating the previous search (English {rep['en']['main']['invalid']:.0%}, Spanish {rep['es']['main']['invalid']:.1%}). See `research/2026-11-15-multilingual-results.md`."""
 
 
+def _second_look_headline() -> str:
+    """The registered decision numbers of the round-6 second-look test, from reports/round6_second_look.json."""
+    rep = json.loads((ROOT / "reports" / "round6_second_look.json").read_text(encoding="utf-8"))
+    macro = rep["comparisons"]["main+FB+V+second look/main+FB+V"]["macro"]
+    return f"{macro['difference'] * 100:+.1f} points, interval {macro['ci95'][0] * 100:+.1f} to {macro['ci95'][1] * 100:+.1f}"
+
+
+def fresh_test_note() -> str:
+    """Round-6 paragraph of the main card, from reports/round6_second_look.json (scripts/report_round6_second_look.py) and reports/round6_second_look_extra.json."""
+    rep = json.loads((ROOT / "reports" / "round6_second_look.json").read_text(encoding="utf-8"))
+    extra = json.loads((ROOT / "reports" / "round6_second_look_extra.json").read_text(encoding="utf-8"))
+    ref = json.loads((ROOT / "reports" / "reference_policies.json").read_text(encoding="utf-8"))["sealed_r5test"]["main+FB+V"]
+    s, r = rep["systems"]["main+FB+V"], rep["systems"]["always refuse"]
+    cmp = rep["comparisons"]["main+FB+V+second look/main+FB+V"]
+    vs_refuse = extra["comparisons"]["main+FB+V/always refuse"]["macro"]
+    c6, c5 = extra["round6_components"]["main+FB+V"], extra["round5_components"]["main+FB+V"]
+    return f"""## A second fresh test, and a second look that did not pass (round 6)
+
+After the round-5 test was used up, we built a second sealed test of {rep['shared_eligible']} episodes (SQuAD, HotpotQA and RGB; hashed before any model ran; scorer v3) and opened it once. With both repairs this adapter scored {s['macro']:.1%} macro success against {r['macro']:.1%} for refusing every question ({vs_refuse['difference'] * 100:+.1f} points, interval {vs_refuse['ci95'][0] * 100:+.1f} to {vs_refuse['ci95'][1] * 100:+.1f}), and answered {s['unsupported']} of {s['hidden_n']} hidden-evidence episodes (round-5 test: {ref['unsupported']} of {ref['hidden_n']}). Refusing carried over. Answering single-passage SQuAD questions did not: success was {c6['single']:.1%} against {c5['single']:.1%} on the round-5 test and {r['components']['single']:.1%} for refusing every question. The pooled share of correct answers among those shown was {s['correct_among_answered']:.1%} here; the round-5 figure ({ref['correct_among_answered']:.1%}) is not comparable because the mix of SQuAD, HotpotQA and RGB episodes differs. The base model and the hosted models were not run on this test.
+
+The same run tested a *second look*: when the system refuses after seeing passages, it is asked once to answer anyway, and the answer is shown only if the self-check is at least 90% sure. The registered rule needed the macro-success gain to have an interval above zero. It was {cmp['macro']['difference'] * 100:+.1f} points (interval {cmp['macro']['ci95'][0] * 100:+.1f} to {cmp['macro']['ci95'][1] * 100:+.1f}), so the second look was not adopted and the submitted system is unchanged. See `research/2026-11-15-round6-second-look-results.md` in the repository."""
+
+
 @_audited_card
 def model_card(name: str, user: str) -> str:
     is_main = name == "main"
@@ -232,6 +255,8 @@ paired intervals are in the repository (`reports/`) and in the dataset repositor
 {_round5_note() if is_main else ""}
 
 {multilingual_note() if is_main else ""}
+
+{fresh_test_note() if is_main else ""}
 
 ## Five external benchmarks (never trained on or used for any choice)
 
@@ -370,6 +395,9 @@ BENCH_SOURCES = {  # folder -> (benchmark, license, citation)
     "r5t_squad": ("SQuAD 2.0 training-split articles, sealed round-5 test", "CC BY-SA 4.0", "Rajpurkar et al., 2018 (as above)"),
     "r5t_hotpot": ("HotpotQA validation, sealed round-5 test", "CC BY-SA 4.0", "Yang et al., 2018, HotpotQA"),
     "r5t_rgb": ("RGB, English refined set, sealed round-5 test (noise 0, 0.8, 1)", "CC BY-NC-SA 4.0", "Chen et al., 2024 (as above)"),
+    "r6t_squad": ("SQuAD 2.0 training-split articles, sealed round-6 test (main only)", "CC BY-SA 4.0", "Rajpurkar et al., 2018 (as above)"),
+    "r6t_hotpot": ("HotpotQA validation, sealed round-6 test (main only)", "CC BY-SA 4.0", "Yang et al., 2018, HotpotQA"),
+    "r6t_rgb": ("RGB, English refined set, sealed round-6 test (main only)", "CC BY-NC-SA 4.0", "Chen et al., 2024 (as above)"),
     "xq_hi": ("XQuAD, Hindi (multilingual check, 300 questions; main and base only)", "CC BY-SA 4.0", "Artetxe et al., 2020, On the Cross-lingual Transferability of Monolingual Representations"),
     "xq_en": ("XQuAD, English (multilingual check, same questions)", "CC BY-SA 4.0", "Artetxe et al., 2020 (as above)"),
     "xq_es": ("XQuAD, Spanish (multilingual check, same questions)", "CC BY-SA 4.0", "Artetxe et al., 2020 (as above)"),
@@ -438,6 +466,10 @@ answer or abstention becomes an abstention (fail-closed, FB), and an answer the 
 
 Macro success is the mean of four component rates (SQuAD single, SQuAD two-part, HotpotQA, RGB); the scorer is stricter than the one used for the first-round tables, so the numbers do not compare with them.
 Paired intervals and the per-part numbers are in `reports/reference_policies.md` and `reports/round5_corrected.md`. `r4dev` and `r4test` are the round-4 development set and final holdout.
+
+## Round 6: the second sealed test (`r6t_*` folders; main only)
+
+`r6t_squad`, `r6t_hotpot` and `r6t_rgb` are 679 episodes (75, 60 and 29 questions) built and hashed before any model ran, and opened once for the main adapter. The run produced the raw traces, the self-check's verdicts on every answer (`round6_second_look/verify__V__verdicts_A.jsonl`), the forced second-look answers (`forced__forced_main.jsonl`) and the self-check's verdicts on them (`verify_forced__V__verdicts_A.jsonl`), all in `round6_second_look/`. The registered report is `reports/round6_second_look.md` (and `.json`); post hoc numbers are in `reports/round6_second_look_extra.md`. Under the registered rule the second look was not adopted (macro success {_second_look_headline()}). The base model and hosted models were not run on this test.
 
 ## Contents
 
