@@ -232,7 +232,7 @@ The adapter is within two points of GPT-6 Luna on three of the five suites and a
 
 ## DoRA experiments on the opened Round 5 suite
 
-Three DoRA checkpoints were evaluated on the same 938 Round 5 input episodes. These are historical **scorer-v2** results; the scorer-v3 results above use corrected rules. The individual checkpoints also have different exclusions, so this table is descriptive and should not be read as a paired, like-for-like ranking against the newer results.
+Contributed by Ansh ([@Ansh13579](https://github.com/Ansh13579), pull request 1) and reviewed in [`research/2026-11-15-pr1-review.md`](research/2026-11-15-pr1-review.md): the frozen test inputs match our manifest hashes, but the raw run files are not in the repository, so these tables are reports and cannot be rescored from here. Three DoRA checkpoints were evaluated on the same 938 Round 5 input episodes. These are historical **scorer-v2** results; the scorer-v3 results above use corrected rules. The individual checkpoints also have different exclusions, so this table is descriptive and should not be read as a paired, like-for-like ranking against the newer results.
 
 | DoRA checkpoint | Raw macro success | With fail-closed and main verifier | Hidden-evidence answers with both repairs |
 | --- | ---: | ---: | ---: |
