@@ -84,7 +84,7 @@ We did not run AuditKIT's general benchmarks (ARC, GSM8K, MMLU, TruthfulQA, BFCL
 
 ## 3. Models and licenses
 
-The base is [Cohere Tiny Aya Global](https://huggingface.co/CohereLabs/tiny-aya-global), gated, CC BY-NC 4.0. Our adapters inherit that license. The submitted adapter is `main`; `candF1` is the alternative. Repository code is MIT. AgentTune (LSAL v1.1) and AuditKIT (LSAL v1.2) are source-available dependencies.
+The base is [Cohere Tiny Aya Global](https://huggingface.co/CohereLabs/tiny-aya-global), gated, CC BY-NC 4.0. Our adapters inherit that license. The submitted adapter is `main`; `candF1` is the alternative. Two further adapters, [`hiMain`](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-hi-main) and [`hiF`](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-hi-f), were trained on Hindi; they failed their registered safety rules and are published as experiments. Repository code is MIT. AgentTune (LSAL v1.1) and AuditKIT (LSAL v1.2) are source-available dependencies.
 
 ## 4. Datasets and licenses
 

@@ -347,7 +347,7 @@ Training and evaluation ran on Kaggle T4s: see [`kaggle/README.md`](kaggle/READM
 
 | | |
 | --- | --- |
-| Adapters | [main](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-main) (submitted), [candF1](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-cand-f1) (alternative), [control](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-control), [candA](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-cand-a), [patch](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-patch) |
+| Adapters | [main](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-main) (submitted), [candF1](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-cand-f1) (alternative), [control](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-control), [candA](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-cand-a), [patch](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-patch), and the experimental Hindi adapters [hiMain](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-hi-main) and [hiF](https://huggingface.co/BMEscanor/against-the-safety-tiny-aya-rag-hi-f) (they failed their safety rules; see [Other languages](#other-languages-hindi-and-spanish)) |
 | Data | [episodes and training rows](https://huggingface.co/datasets/BMEscanor/against-the-safety-rag-episodes), [benchmark traces](https://huggingface.co/datasets/BMEscanor/against-the-safety-benchmark-traces), [Nimbus Home suite](https://huggingface.co/datasets/BMEscanor/nimbus-home-support-suite) |
 | Code | MIT |
 | Adapters | CC BY-NC 4.0, inherited from Tiny Aya (gated; accept its terms) |

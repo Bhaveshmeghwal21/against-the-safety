@@ -23,6 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BASE = "CohereLabs/tiny-aya-global"
 REVISION = "af89d219b53ed9b13b8a4645f9c8028973510324"
+HELD_BACK_REPORTS = ("dora_", "evidence_order_", "readme_lora_vs_all_dora")  # contributed DoRA reports (pull request 1): GitHub only
 
 RUNS = ROOT / "runs" / "kaggle"
 TRAIN = RUNS / "ats-train-both" / "out"
@@ -136,7 +137,7 @@ def main() -> None:
     for f in (ROOT / "data" / "manifests").glob("*.json"):
         copy(f, ds / "manifests" / f.name)
     for f in sorted((ROOT / "reports").glob("*")):
-        if f.is_file():
+        if f.is_file() and not f.name.startswith(HELD_BACK_REPORTS):  # the dataset card does not describe the contributed DoRA reports (pull request 1), so they stay in the GitHub repository only
             copy(f, ds / "reports" / f.name)
     counts = {label: copy_traces(label, split, root, ds) for label, (split, root) in EVALS.items() if not label.startswith("product")}
     (ds / "README.md").write_text(cards.episodes_card(args.user), encoding="utf-8", newline="\n")
