@@ -112,10 +112,21 @@ def main():
               'systems': systems, 'candF1_minus_main': comparisons, 'generation': generation,
               'stored_score_mismatches': mismatches, 'auditkit_raw_systems': audit,
               'bootstrap': '3,000 paired article-cluster draws, seed 47.'}
+    retry_path = candidate / 'retry_integrity.json'
+    if retry_path.exists():
+        retry = json.loads(retry_path.read_text(encoding='utf-8'))
+        if retry['cases'] != retry['verdicts'] or retry['batch_size'] != 1 or not retry['last_logits_only']:
+            raise ValueError('Verifier retry integrity record is inconsistent')
+        report['verifier_retry'] = retry
+        report['verifier_retry_note'] = ('The original candidate checker ran out of GPU memory after actor evaluation. '
+            'The retry scored the same saved cases with batch size one and final-position logits only; '
+            'CPU equivalence was checked, but GPU batching can cause small numerical differences.')
     output.parent.mkdir(parents=True, exist_ok=True)
     output.with_suffix('.json').write_text(json.dumps(report, indent=2, ensure_ascii=False, allow_nan=False) + '\n', encoding='utf-8')
     lines = [('# CandF1 multilingual XQuAD comparison — verifier incomplete' if args.raw_only else
               '# CandF1 multilingual XQuAD comparison'), '', report['scope'], report['checker'], report['bootstrap'], '']
+    if 'verifier_retry_note' in report:
+        lines += [report['verifier_retry_note'], '']
     pct = lambda x: '—' if x is None else f'{100*x:.1f}%'
     for lang in xq.LANGS:
         lines += [f'## {xq.NAMES[lang]}', '', '| System | Success | Correct and cited | Hidden answers | False refusals | Answer coverage | Correct among answered | Invalid |',
