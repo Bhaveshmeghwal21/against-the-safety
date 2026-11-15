@@ -93,6 +93,36 @@ def fresh_test_table():
     ])
 
 
+def hindi_training_table():
+    """Hindi training of main and candF1 (reports/hindi_results.json, scripts/report_hindi.py): every system with both repairs."""
+    rep = load('hindi_results.json')
+    hi, en = rep['xq2_hi']['systems'], rep['r6t']['systems']
+    rows = [('Main + both repairs (submitted)', 'main+FB+V'), ('hiMain + both repairs', 'hiMain+FB+V'), ('candF1 + both repairs', 'candF1+FB+V'),
+            ('hiF + both repairs', 'hiF+FB+V'), ('Refuse every question', 'always refuse')]
+    lines = [f"| System | Hindi: correct and cited ({hi['main+FB+V']['n_answerable']} questions) | Hindi: answers when evidence was hidden | English: macro success (second sealed test) | English: answers when evidence was hidden |",
+             '| --- | ---: | ---: | ---: | ---: |']
+    for title, key in rows:
+        h, e = hi[key], en[key]
+        lines.append(f"| {title} | {pct(h['correct_and_cited'])} | {h['hidden_answers']} / {h['n_hidden']} | {pct(e['macro'])} | {e['unsupported']} / {e['hidden_n']} |")
+    return '\n'.join(lines)
+
+
+def hindi_rules_table():
+    """The three registered rules for the Hindi adapters, each with its interval and whether it was met (limits as registered)."""
+    rep = load('hindi_results.json')
+    pairs = (('hiMain', 'main'), ('hiF', 'candF1'))
+    hi, en = rep['xq2_hi']['comparisons'], rep['r6t']['comparisons']
+    cell = lambda c, ok: f"{c['difference'] * 100:+.1f} [{c['ci95'][0] * 100:+.1f}, {c['ci95'][1] * 100:+.1f}]: {'met' if ok else 'not met'}"
+    rules = (('A1. Hindi, correct and cited (lower end above 0)', lambda n, p: cell(hi[f'{n}+FB+V minus {p}+FB+V']['correct_and_cited'], hi[f'{n}+FB+V minus {p}+FB+V']['correct_and_cited']['ci95'][0] > 0)),
+             ('A2. Hindi, answers on hidden evidence (upper end at most +2.0)', lambda n, p: cell(hi[f'{n}+FB+V minus {p}+FB+V']['hidden_answer_rate'], hi[f'{n}+FB+V minus {p}+FB+V']['hidden_answer_rate']['ci95'][1] <= 0.02)),
+             ('A3a. English, macro success (lower end at least -3.0)', lambda n, p: cell(en[f'{n}+FB+V/{p}+FB+V']['macro'], en[f'{n}+FB+V/{p}+FB+V']['macro']['ci95'][0] >= -0.03)),
+             ('A3b. English, answers on hidden evidence (upper end at most +2.0)', lambda n, p: cell(en[f'{n}+FB+V/{p}+FB+V']['unsupported_rate'], en[f'{n}+FB+V/{p}+FB+V']['unsupported_rate']['ci95'][1] <= 0.02)))
+    lines = ['| Registered rule (difference in points, 95% interval) | hiMain minus main | hiF minus candF1 |', '| --- | ---: | ---: |']
+    for title, f in rules:
+        lines.append(f"| {title} | " + ' | '.join(f(n, p) for n, p in pairs) + ' |')
+    return '\n'.join(lines)
+
+
 if __name__ == '__main__':
     print(results_table())
     print()
@@ -103,3 +133,7 @@ if __name__ == '__main__':
     print(multilingual_table())
     print()
     print(fresh_test_table())
+    print()
+    print(hindi_training_table())
+    print()
+    print(hindi_rules_table())
