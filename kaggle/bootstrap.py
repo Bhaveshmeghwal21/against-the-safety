@@ -260,7 +260,7 @@ def main() -> None:
         no_second_look = '--no-second-look' in extra
         limit_match = re.search(r'--max-input-tokens\s+(\d+)', extra)
         eval_args = '--parse lenient --extra-questions 0' + (f' --max-input-tokens {limit_match.group(1)}' if limit_match else '')
-        if any(item.split(':')[1] == 'bench_xq_hi' for item in spec.split(',')):
+        if any(item.split(':')[1] in ('bench_xq_hi', 'bench_xq2_hi', 'bench_hi_dev') for item in spec.split(',')):
             sh(f'{py} scripts/probe_hindi_index.py')  # the FTS5 tokenizer option must work here, or every Hindi search would come back empty
         rc = eval_jobs(py, spec, eval_args, adapters)
         if rc:
@@ -306,6 +306,32 @@ def main() -> None:
             adapter = adapters[('main' if check == 'V' else check) + '/adapter']
             checks_chains[i % 2].append(f'{py} scripts/verify_round5.py --cases {cases}/forced_all.jsonl --tag {check} --adapter {adapter} --out {OUT}/verify_forced/{check} --wordings A')
         rc = run_parallel([(' && '.join(cmds), {'CUDA_VISIBLE_DEVICES': str(g)}, f'r6_verify_forced_gpu{g}.log') for g, cmds in checks_chains.items() if cmds])
+    elif stage == "hi-train":  # Hindi training (research/2026-11-15-hindi-training-preregistration.md): hiMain from main on GPU 0, hiF from candF1 on GPU 1
+        m = re.search(r"--jobs\s+(\S+)", extra)
+        jobs_spec, rest = (m.group(1), extra.replace(m.group(0), "")) if m else ("", extra)
+        smoke = "--smoke" in rest
+        rest = rest.replace("--smoke", "")
+        names = (("hiMain", "main", g0), ("hiF", "candF1", g1))
+        for _, initial, _ in names:
+            if f"{initial}/adapter" not in adapters:
+                raise SystemExit(f"initial adapter missing: {initial}")
+        options = "--epochs 1 --max-steps 2 --limit-rows 32" if smoke else "--epochs 2"
+        rc = run_parallel([
+            (f"{py} scripts/train.py --set {name} --out {OUT}/{name} --init-adapter {adapters[f'{initial}/adapter']} "
+             f"--lr 1e-4 --seed 53 --max-length 5120 {options} {rest}", gpu, f"train_{name}.log")
+            for name, initial, gpu in names
+        ])
+        if rc:
+            raise SystemExit(rc)
+        for name, _, _ in names:
+            report = json.loads((OUT / name / "train_report.json").read_text())
+            if not __import__('math').isfinite(report["train_loss"]):
+                raise SystemExit(f"non-finite training loss: {name}")
+            adapters[f"{name}/adapter"] = str(OUT / name / "adapter")
+            print(name, "trained", {k: report[k] for k in ("rows_trained", "episodes", "processed_tokens", "wall_seconds", "peak_gpu_memory_gb", "train_loss")}, flush=True)
+        if jobs_spec:
+            sh(f'{py} scripts/probe_hindi_index.py')  # the FTS5 tokenizer option must work here, or every Hindi search would come back empty
+            rc = eval_jobs(py, jobs_spec, "--parse lenient --extra-questions 0 --max-input-tokens 8000", adapters)
     elif stage == "train-both":
         rc = run_parallel([
             (f"{py} scripts/train.py --set main --out {OUT}/main {extra}", g0, "train_main.log"),

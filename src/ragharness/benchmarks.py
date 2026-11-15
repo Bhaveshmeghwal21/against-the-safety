@@ -233,9 +233,16 @@ def load_xquad(parquet: Path, lang: str) -> tuple[list[Question], list[Question]
     """
     import pyarrow.parquet as pq
 
+    return load_squad_rows(pq.read_table(parquet).to_pylist(), lang)
+
+
+def load_squad_rows(rows: list[dict], lang: str) -> tuple[list[Question], list[Question], Counter]:
+    """The body of `load_xquad` for any SQuAD-format rows (`id`, `context`, `question`, `answers` with `text` and `answer_start`).
+
+    The Hindi training and development sets (scripts/prepare_hindi.py, IndicSQuAD) are read through the same passage splitting, titles and
+    display checks as the XQuAD test sets, so what a model is trained on looks like what it is tested on."""
     from .retrieval import visible_text
 
-    rows = pq.read_table(parquet).to_pylist()
     rej: Counter = Counter()
     by_context: dict[str, list[tuple[Paragraph, int, int]]] = {}  # context -> [(passage, first sentence index, start offset)] in order
     sentence_passage: dict[str, list[tuple[int, int]]] = {}  # context -> per sentence (passage index, local sentence index)
