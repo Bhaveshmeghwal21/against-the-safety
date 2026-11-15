@@ -46,3 +46,8 @@ The English adapters were trained on English only. The Hindi and Spanish sets th
 ## 6. Files
 
 `scripts/prepare_general.py`, `scripts/general_capability.py`, `scripts/report_general.py`; `data/general/manifest.json`; results in `reports/general_capability.{json,md}`. Deviations are labelled where they occur.
+
+## 7. Amendment 1 (16 November 2026, written while the MMLU re-run was in progress)
+
+- **What happened.** The first Kaggle launch (`ats-general-t4x2`, two T4s) ran the six smaller benchmarks on one GPU and MMLU on the other. The MMLU process stopped before scoring anything: reading the benchmark file with Python's `splitlines()` broke a JSON line, because two MMLU questions contain a Unicode line-separator character. The loader now splits on newlines only. MMLU was re-run alone in a second kernel (`ats-general-mmlu`), with the same code otherwise, the same adapters and the same prompts. The report reads each benchmark from the one kernel that holds it and refuses to run if a benchmark is missing or duplicated.
+- **What was seen before MMLU finished.** The run summaries of the six smaller benchmarks (accuracy only, no intervals) were read while MMLU was still to run. No definition, margin or rule changed after that. The registered rules cover MMLU, ARC-Challenge and ARC-Easy as written in section 4.

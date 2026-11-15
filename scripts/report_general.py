@@ -22,12 +22,17 @@ SYSTEMS = ("base", "main", "candF1")
 MARGIN = -0.03
 
 
-def load(run: Path, bench: str, expected: int) -> dict:
+def load(runs: list[Path], bench: str, expected: int) -> dict:
+    """The benchmark's result file from whichever run folder holds it (a failed kernel is re-run for the missing benchmarks only)."""
+    holders = [r for r in runs if (r / f"{bench}.jsonl").exists()]
+    if len(holders) != 1:
+        raise SystemExit(f"{bench}: found in {len(holders)} run folders, expected exactly one")
     by_system = {s: {} for s in SYSTEMS}
-    for line in (run / f"{bench}.jsonl").read_text(encoding="utf-8").splitlines():
-        if line.strip():
-            r = json.loads(line)
-            by_system[r["system"]][r["id"]] = r["correct"]
+    for line in (holders[0] / f"{bench}.jsonl").read_text(encoding="utf-8").split("\n"):
+        if not line.strip():
+            continue
+        r = json.loads(line)
+        by_system[r["system"]][r["id"]] = r["correct"]
     ids = sorted(by_system["base"])
     for s, d in by_system.items():
         if len(d) != expected or sorted(d) != ids:
@@ -52,13 +57,14 @@ def bootstrap(arrays: dict, draws: int = 3000, seed: int = 47, chunk: int = 250)
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--run", default="runs/kaggle/ats-general-t4x2/out/general")
+    ap.add_argument("--run", action="append", default=None, help="run folder; repeat when benchmarks come from more than one kernel")
     ap.add_argument("--out", default="reports/general_capability")
     args = ap.parse_args()
+    runs = [ROOT / r for r in (args.run or ["runs/kaggle/ats-general-t4x2/out/general", "runs/kaggle/ats-general-mmlu/out/general"])]
     manifest = json.loads((ROOT / "data/general/manifest.json").read_text(encoding="utf-8"))
     result = {"protocol": "zero-shot letter scoring, plain text, no chat template, 4-bit; base = adapters switched off", "margin_points": MARGIN * 100, "benchmarks": {}, "rules": {}}
     for bench in BENCHES:
-        arrays = load(ROOT / args.run, bench, manifest[bench]["questions"])
+        arrays = load(runs, bench, manifest[bench]["questions"])
         own, paired = bootstrap(arrays)
         acc = {s: float(arrays[s].mean()) for s in SYSTEMS}
         result["benchmarks"][bench] = {"title": BENCHES[bench], "questions": len(arrays["base"]), "license": manifest[bench]["license"],
@@ -67,7 +73,7 @@ def main() -> None:
     for adapter in ("main", "candF1"):
         result["rules"][adapter] = {b: {"lower_end": result["benchmarks"][b]["difference_from_base"][adapter]["ci95"][0],
                                         "retained": result["benchmarks"][b]["difference_from_base"][adapter]["ci95"][0] >= MARGIN} for b in RULE_BENCHES}
-    summaries = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((ROOT / args.run).glob("summary_*.json"))]
+    summaries = [json.loads(p.read_text(encoding="utf-8")) for r in runs for p in sorted(r.glob("summary_*.json"))]
     result["environment"] = {"gpu": summaries[0]["gpu"], "torch": summaries[0]["torch"], "model_source": summaries[0]["model_source"],
                              "seconds": {f"{r['bench']}/{r['system']}": r["seconds"] for s in summaries for r in s["results"]}} if summaries else None
     (ROOT / args.out).with_suffix(".json").write_text(json.dumps(result, indent=1) + "\n", encoding="utf-8")
