@@ -65,8 +65,8 @@ def cost_of(usage: dict) -> float:
 class AzureJudge:
     """A text-in, text-out judge in the shape AuditKIT's metrics expect (`generate` and `identity`)."""
 
-    def __init__(self, key: str, calls_path: Path, budget: float, max_completion_tokens: int = 3000, post=None):
-        self.key, self.budget, self.max_completion_tokens = key, budget, max_completion_tokens
+    def __init__(self, key: str, calls_path: Path, budget: float, max_completion_tokens: int = 3000, post=None, salt: str = ""):
+        self.key, self.budget, self.max_completion_tokens, self.salt = key, budget, max_completion_tokens, salt
         self.calls_path = calls_path
         self.lock = threading.Lock()
         self.cache, self.spent, self.new_calls, self.cache_hits = {}, 0.0, 0, 0
@@ -104,7 +104,7 @@ class AzureJudge:
         raise RuntimeError("Azure retry limit exhausted")
 
     def complete(self, prompt: str) -> str:
-        h = hashlib.sha256((VERSION + "\0" + prompt).encode("utf-8")).hexdigest()
+        h = hashlib.sha256((VERSION + "\0" + (self.salt + "\0" if self.salt else "") + prompt).encode("utf-8")).hexdigest()
         with self.lock:
             if h in self.cache:
                 self.cache_hits += 1
@@ -185,14 +185,19 @@ def main() -> None:
     ap.add_argument("--cases", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--limit", type=int, default=0, help="first N episodes only (pilot)")
+    ap.add_argument("--stride", type=int, default=1, help="every k-th episode only (repeatability check on a third of the sample)")
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--budget", type=float, default=2.5, help="stop when the metered cost reaches this many dollars")
+    ap.add_argument("--salt", default="", help="a different salt makes the judge ask again instead of reading the cache (repeatability check); its calls go to their own file")
     args = ap.parse_args()
     out = (ROOT / args.out).resolve()
     if not out.is_relative_to(ROOT.resolve()):
         raise SystemExit("output must stay inside the workspace")
     out.mkdir(parents=True, exist_ok=True)
     cases = [json.loads(l) for l in (ROOT / args.cases).read_text(encoding="utf-8").splitlines() if l.strip()]
+    if args.stride > 1:
+        every = list(dict.fromkeys((c["part"], c["qid"], c["variant"]) for c in cases))[:: args.stride]
+        cases = [c for c in cases if (c["part"], c["qid"], c["variant"]) in set(every)]
     if args.limit:
         first = list(dict.fromkeys((c["part"], c["qid"], c["variant"]) for c in cases))[: args.limit]
         cases = [c for c in cases if (c["part"], c["qid"], c["variant"]) in set(first)]
@@ -203,7 +208,7 @@ def main() -> None:
             r = json.loads(line)
             done.add((r["system"], r["part"], r["qid"], r["variant"]))
     todo = [c for c in cases if (c["system"], c["part"], c["qid"], c["variant"]) not in done]
-    judge = AzureJudge(api_key(), out.parent / "judge_calls.jsonl", args.budget)
+    judge = AzureJudge(api_key(), out.parent / (f"judge_calls_{args.salt}.jsonl" if args.salt else "judge_calls.jsonl"), args.budget, salt=args.salt)
     print(f"{len(cases)} cases, {len(todo)} to do, metered spend so far ${judge.spent:.3f}", flush=True)
     write_lock, finished, started = threading.Lock(), [0], time.time()
 

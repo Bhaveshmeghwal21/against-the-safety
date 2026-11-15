@@ -66,3 +66,9 @@ AuditKIT has no numeric metric and our datasets carry no numeric type. We define
 ## 8. Files
 
 `scripts/build_judge_cases.py`, `scripts/run_judge.py`, `scripts/report_judge.py`, `scripts/report_numeric.py`, `scripts/latency_run.py`, `scripts/report_latency.py`; `data/judge/` (sample, cases, cached judge calls); results in `reports/judge_results.{json,md}`, `reports/numeric_accuracy.{json,md}` and `reports/latency.{json,md}`. Deviations from this document are labelled as deviations where they occur.
+
+## 9. Amendment 1 (16 November 2026, written during the judge run, before the full judge results were read)
+
+- **Repeatability check.** The judge is not deterministic (its sampling is fixed by the deployment, and claim extraction varies). After the main pass we ask the judge again, with a cache salt, for every third episode of the sample (100 episodes, 300 cases, about $0.15). We report how often the two passes agree per metric (identical value, mean absolute difference) and the group means of the second pass. The main results stay those of the first pass. No rule depends on the second pass.
+- **Disclosure.** While the judge was running, the report script was dry-run on the partial scores (about 130 episodes) to debug it. Those partial numbers were seen. They did not change any definition, rule or sample.
+- **Hand-label sheet.** Built by `scripts/build_hand_label_sheet.py` (`reports/hand_label_sheet.csv`, key withheld in `data/judge/hand_label_key.json`).

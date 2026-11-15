@@ -1,0 +1,73 @@
+{
+ "definition": "eligible answerable episodes whose gold answer is a single number; correct = the answer's numbers include the gold value",
+ "systems": {
+  "base": {
+   "episodes": 43,
+   "questions": 16,
+   "answered": 34,
+   "numerically_correct": 24,
+   "numeric_accuracy": 0.5581395348837209,
+   "numeric_accuracy_ci95": [
+    0.4110735806551171,
+    0.6956691437607867
+   ],
+   "answered_share": 0.7906976744186046,
+   "correct_among_answered": 0.7058823529411765,
+   "correct_among_answered_ci95": [
+    0.5383077411853625,
+    0.8316554739006805
+   ]
+  },
+  "main": {
+   "episodes": 43,
+   "questions": 16,
+   "answered": 30,
+   "numerically_correct": 27,
+   "numeric_accuracy": 0.627906976744186,
+   "numeric_accuracy_ci95": [
+    0.47859538265273166,
+    0.7562386110622568
+   ],
+   "answered_share": 0.6976744186046512,
+   "correct_among_answered": 0.9,
+   "correct_among_answered_ci95": [
+    0.7437855868473339,
+    0.9654007400402839
+   ]
+  },
+  "main+FB+V (submitted)": {
+   "episodes": 43,
+   "questions": 16,
+   "answered": 28,
+   "numerically_correct": 26,
+   "numeric_accuracy": 0.6046511627906976,
+   "numeric_accuracy_ci95": [
+    0.4557879659331908,
+    0.7363489380154359
+   ],
+   "answered_share": 0.6511627906976745,
+   "correct_among_answered": 0.9285714285714286,
+   "correct_among_answered_ci95": [
+    0.7735426157408214,
+    0.9801883525522292
+   ]
+  },
+  "candF1+FB+V (alternative)": {
+   "episodes": 43,
+   "questions": 16,
+   "answered": 29,
+   "numerically_correct": 26,
+   "numeric_accuracy": 0.6046511627906976,
+   "numeric_accuracy_ci95": [
+    0.4557879659331908,
+    0.7363489380154359
+   ],
+   "answered_share": 0.6744186046511628,
+   "correct_among_answered": 0.896551724137931,
+   "correct_among_answered_ci95": [
+    0.7361455275293085,
+    0.9641857596186989
+   ]
+  }
+ }
+}

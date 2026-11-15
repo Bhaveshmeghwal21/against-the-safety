@@ -123,6 +123,66 @@ def hindi_rules_table():
     return '\n'.join(lines)
 
 
+def _ci(entry, digits=3):
+    low, high = entry['ci95']
+    return f"{entry['mean']:.{digits}f} ({low:.{digits}f} to {high:.{digits}f})"
+
+
+def judge_table():
+    """Judge-based answer metrics on the 300-episode sample of the first sealed test (reports/judge_results.json, scripts/report_judge.py)."""
+    rep = load('judge_results.json')['systems']
+    rows = [('Tiny Aya base', 'base'), ('Main adapter alone', 'main'), ('Main + both repairs (submitted)', 'main+FB+V'),
+            ('candF1 + both repairs (alternative)', 'candF1+FB+V')]
+    lines = ['| System | Answers given (of 300 episodes) | Faithfulness (higher is better) | Hallucination (lower is better) | Response groundedness | Answer relevancy |',
+             '| --- | ---: | ---: | ---: | ---: | ---: |']
+    for title, key in rows:
+        m = rep[key]['metrics']
+        lines.append(f"| {title} | {rep[key]['answers_given']} | {_ci(m['faithfulness']['all'])} | {_ci(m['hallucination']['all'])} | "
+                     f"{m['response_groundedness']['all']['mean']:.3f} | {m['answer_relevancy']['all']['mean']:.3f} |")
+    return '\n'.join(lines)
+
+
+def judge_agreement_table():
+    """What the judge says about the submitted system's answers, grouped by our own annotation-based outcome."""
+    rep = load('judge_results.json')['judge_vs_annotation']['main+FB+V']
+    names = {'supported_correct': 'Correct and cited (our scorer)', 'wrong_answer': 'Wrong answer on answerable question (our scorer)',
+             'answered on hidden evidence': 'Answered although the evidence was hidden (our flag)'}
+    lines = ['| Our label of the submitted system\'s answer | Answers | Mean faithfulness | Share fully faithful | Share with an unsupported or contradicted claim |', '| --- | ---: | ---: | ---: | ---: |']
+    for key, title in names.items():
+        g = rep[key]
+        lines.append(f"| {title} | {g['judged']} | {g['mean_faithfulness']:.3f} | {g['share_fully_faithful']:.3f} | {g['share_any_hallucination']:.3f} |")
+    return '\n'.join(lines)
+
+
+def context_table():
+    """Judge-based retrieval metrics of the three raw systems (same search tool, each system writes its own queries)."""
+    rep = load('judge_results.json')['systems']
+    lines = ['| System | Context relevance (share of shown passages that are relevant) | Context precision (relevant passages ranked first) | Context recall (reference answer found in the passages) |',
+             '| --- | ---: | ---: | ---: |']
+    for title, key in (('Tiny Aya base', 'base'), ('Main adapter', 'main'), ('candF1', 'candF1')):
+        m = rep[key]['metrics']
+        lines.append(f"| {title} | {_ci(m['context_relevance']['all'])} | {_ci(m['context_precision']['answerable'])} | {_ci(m['context_recall']['answerable'])} |")
+    return '\n'.join(lines)
+
+
+def numeric_table():
+    rep = load('numeric_accuracy.json')['systems']
+    lines = ['| System | Numeric-answer episodes (questions) | Answered | Numerically correct | Numeric accuracy | Correct among answered |', '| --- | ---: | ---: | ---: | ---: | ---: |']
+    for title, s in rep.items():
+        lines.append(f"| {title} | {s['episodes']} ({s['questions']}) | {s['answered']} | {s['numerically_correct']} | {pct(s['numeric_accuracy'])} | {pct(s['correct_among_answered'])} |")
+    return '\n'.join(lines)
+
+
+def latency_table():
+    rep = load('latency.json')['arms']
+    names = {'base': 'Tiny Aya base, same loop, no self-check', 'submitted': 'Submitted system (main adapter, fail-closed rule, self-check)'}
+    lines = ['| System | Requests | p50 (s) | p95 (s) | p99 (s) | Requests per second | Cost per 1,000 requests, busy T4 |', '| --- | ---: | ---: | ---: | ---: | ---: | ---: |']
+    for arm, s in rep.items():
+        lat = s['latency_ms']
+        lines.append(f"| {names[arm]} | {s['requests']} | {lat['p50'] / 1000:.2f} | {lat['p95'] / 1000:.2f} | {lat['p99'] / 1000:.2f} | {s['throughput']['rps']:.3f} | ${s['cost_per_1000_requests_usd_busy_t4']:.2f} |")
+    return '\n'.join(lines)
+
+
 if __name__ == '__main__':
     print(results_table())
     print()
@@ -137,3 +197,11 @@ if __name__ == '__main__':
     print(hindi_training_table())
     print()
     print(hindi_rules_table())
+    print()
+    print(judge_table())
+    print()
+    print(judge_agreement_table())
+    print()
+    print(context_table())
+    print()
+    print(numeric_table())
