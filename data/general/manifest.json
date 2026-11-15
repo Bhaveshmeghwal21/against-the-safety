@@ -1,0 +1,44 @@
+{
+ "mmlu": {
+  "source": "cais/mmlu (all, test)",
+  "license": "MIT",
+  "questions": 14042,
+  "file_sha256": "3472864a41aede9786cd8c4787a1786fc81f349c1f159b4cf9c76878e9e1765d"
+ },
+ "arc_c": {
+  "source": "allenai/ai2_arc (ARC-Challenge, test)",
+  "license": "CC BY-SA 4.0",
+  "questions": 1172,
+  "file_sha256": "6d3f1767dc7e8bada17036179467c2c30b35c77cb01b644726e8a6fe09f9f87e"
+ },
+ "arc_e": {
+  "source": "allenai/ai2_arc (ARC-Easy, test)",
+  "license": "CC BY-SA 4.0",
+  "questions": 2376,
+  "file_sha256": "103a4f902defeaba4c72445b0c3d66a3e3fb598df1d8427d51d1d37978c79665"
+ },
+ "truthfulqa": {
+  "source": "truthfulqa/truthful_qa (multiple_choice, validation, MC1)",
+  "license": "Apache-2.0",
+  "questions": 817,
+  "file_sha256": "a017d14935d41c9d07780a51c865b8d50a8d2c2baee73d67ae9baf4a8b87c762"
+ },
+ "gmmlu_en": {
+  "source": "CohereLabs/Global-MMLU-Lite (en, test)",
+  "license": "Apache-2.0",
+  "questions": 400,
+  "file_sha256": "1997b4b6dbb6e9e25a14d6f570021bf57e7f2ffa9531323ccf9339d6dca28125"
+ },
+ "gmmlu_hi": {
+  "source": "CohereLabs/Global-MMLU-Lite (hi, test)",
+  "license": "Apache-2.0",
+  "questions": 400,
+  "file_sha256": "e3a306e25783cdf44d52d4d70f8cdb01a3e39b4d852c9c4e7e2d1a5707bdfa7e"
+ },
+ "gmmlu_es": {
+  "source": "CohereLabs/Global-MMLU-Lite (es, test)",
+  "license": "Apache-2.0",
+  "questions": 400,
+  "file_sha256": "462d6921bd7525eb5f80a91841f6774d069211f836b85cc9e9ea2bc1e1140104"
+ }
+}

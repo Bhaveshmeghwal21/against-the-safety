@@ -508,6 +508,14 @@ def main() -> None:
             raise SystemExit("latency needs the main adapter")
         m = re.search(r"--per-part\s+(\d+)", extra)
         rc = run_parallel([(f"{py} scripts/latency_run.py --adapter {adapters['main/adapter']} --out {OUT}/latency --per-part {m.group(1) if m else 50} --seed 61 --warmup 3", g0, "latency.log")])
+    elif stage == "general":  # research/2026-11-16-general-capability-preregistration.md: base, main and candF1 on MMLU, ARC, TruthfulQA and Global-MMLU-Lite; MMLU on GPU 0, the rest on GPU 1
+        if "main/adapter" not in adapters or "candF1/adapter" not in adapters:
+            raise SystemExit("general needs the main and candF1 adapters")
+        both = f"--adapter main={adapters['main/adapter']} --adapter candF1={adapters['candF1/adapter']}"
+        rc = run_parallel([
+            (f"{py} scripts/general_capability.py {both} --benches mmlu --out {OUT}/general", g0, "general_gpu0.log"),
+            (f"{py} scripts/general_capability.py {both} --benches arc_c,arc_e,truthfulqa,gmmlu_en,gmmlu_hi,gmmlu_es --out {OUT}/general", g1, "general_gpu1.log"),
+        ])
     elif stage == "demo":  # web demo of the submitted system: a smoke run on the example questions, then a public gradio link for --minutes (default 50)
         if "main/adapter" not in adapters:
             raise SystemExit("demo needs the main adapter")

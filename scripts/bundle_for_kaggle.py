@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "runs" / "kaggle_bundle"
-INCLUDE_DIRS = ["src", "scripts", "tests", "kaggle", "data/manifests", "data/processed", "data/index", "data/product", "data/bench", "reports", "examples"]
+INCLUDE_DIRS = ["src", "scripts", "tests", "kaggle", "data/manifests", "data/processed", "data/index", "data/product", "data/bench", "data/general", "reports", "examples"]
 INCLUDE_FILES = ["pyproject.toml", "requirements-gpu.lock.txt", "requirements-cpu.lock.txt", "README.md"]
 SKIP = ("__pycache__", ".pyc", "tests/fixtures", "trajectories.sqlite")
 SEALED_REPORTS = {"reports/round6_test_manifest.json", "reports/round6_allocation.json"}

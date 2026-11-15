@@ -30,6 +30,7 @@ wandb/
 data/raw/
 data/processed/
 data/brightpro/
+data/general/*.jsonl
 data/index/
 data/bench/*/corpus.json
 data/bench/*/questions.jsonl
