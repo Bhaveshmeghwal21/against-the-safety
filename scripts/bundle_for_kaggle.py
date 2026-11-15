@@ -35,8 +35,12 @@ def main() -> None:
     ap.add_argument("--out", default=str(OUT))
     ap.add_argument("--adapter", action="append", default=[], help="NAME=local adapter directory; credentials are never included")
     ap.add_argument("--brightpro", action="store_true", help="include the optional evaluation-only full robotics corpus")
-    ap.add_argument('--development-only', action='store_true', help='exclude Round 6 sealed-test inputs and restrict permitted jobs')
+    restricted = ap.add_mutually_exclusive_group()
+    restricted.add_argument('--development-only', action='store_true', help='exclude Round 6 sealed-test inputs and restrict permitted jobs')
+    restricted.add_argument('--xquad-candf1-only', action='store_true', help='package only XQuAD inputs for the candF1 comparison')
     args = ap.parse_args()
+    if args.xquad_candf1_only and (args.brightpro or {a.split('=', 1)[0] for a in args.adapter} != {'main', 'candF1'} or len(args.adapter) != 2):
+        raise ValueError('The restricted XQuAD bundle requires exactly the main and candF1 adapters, without BrightPro')
     out = (ROOT / args.out).resolve()
     if not out.is_relative_to(ROOT.resolve()):
         raise ValueError('Bundle output must stay within the workspace')
@@ -45,7 +49,15 @@ def main() -> None:
     files = [ROOT / f for f in INCLUDE_FILES]
     if args.development_only:
         files.append(ROOT / 'research/2026-11-14-round6-preregistration.md')
-    for d in INCLUDE_DIRS + (["data/brightpro"] if args.brightpro else []):
+    include_dirs = (['src', 'scripts', 'kaggle'] + [f'data/bench/xq_{lang}' for lang in ('hi', 'en', 'es')]
+                    if args.xquad_candf1_only else INCLUDE_DIRS + (["data/brightpro"] if args.brightpro else []))
+    if args.xquad_candf1_only:
+        files.extend([ROOT / 'data/manifests/index_manifest.json', ROOT / 'data/manifests/split_manifest.json',
+                      *(ROOT / 'data/processed' / f'questions_{split}.jsonl' for split in ('train', 'dev', 'test')),
+                      ROOT / 'reports/xquad_selection.json',
+                      ROOT / 'research/2026-11-15-multilingual-plan.md',
+                      ROOT / 'research/2026-11-15-candf1-xquad-preregistration.md'])
+    for d in include_dirs:
         base = ROOT / d
         if args.development_only and d == 'data/bench':
             # Do not descend into a sealed-test directory at all.
@@ -79,6 +91,10 @@ def main() -> None:
             marker = b'Only the preregistered development jobs are permitted.\n'
             z.writestr('DEVELOPMENT_ONLY', marker)
             content.update(b'DEVELOPMENT_ONLY\0' + hashlib.sha256(marker).digest())
+        if args.xquad_candf1_only:
+            marker = b'Only the preregistered candF1 XQuAD comparison is permitted.\n'
+            z.writestr('XQUAD_CANDF1_ONLY', marker)
+            content.update(b'XQUAD_CANDF1_ONLY\0' + hashlib.sha256(marker).digest())
         # the kernel compares this id with the one it was launched with, so a stale dataset mount fails fast
         z.writestr("BUNDLE_ID", content.hexdigest()[:20])
     digest = hashlib.sha256(zpath.read_bytes()).hexdigest()

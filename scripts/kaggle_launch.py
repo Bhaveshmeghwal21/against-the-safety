@@ -78,7 +78,7 @@ def make_dataset(existing_bundle: bool = False) -> None:
         subprocess.run([sys.executable, str(ROOT / "scripts" / "bundle_for_kaggle.py")], check=True, env={**os.environ, "PYTHONUTF8": "1"})
     elif not (BUNDLE / "against-the-safety.zip").is_file():
         raise SystemExit("the prepared bundle is missing")
-    meta = {"title": "against-the-safety-bundle", "id": f"{username()}/{SLUG}", "licenses": [{"name": "CC-BY-SA-4.0"}]}
+    meta = {"title": SLUG, "id": f"{username()}/{SLUG}", "licenses": [{"name": "CC-BY-SA-4.0"}]}
     (BUNDLE / "dataset-metadata.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
     status = kaggle("datasets", "status", f"{username()}/{SLUG}", check=False).lower()  # `datasets list -s` is a search index and can lag
     exists = any(w in status for w in ("ready", "pending", "processing"))
@@ -168,10 +168,11 @@ def run_stage(stage: str, adapters_from: str | None, extra: str, tag: str = "", 
 
 
 def main() -> None:
-    global BUNDLE
+    global BUNDLE, SLUG
     ap = argparse.ArgumentParser()
     ap.add_argument("--credentials-env", help="process/Windows user variable containing a kaggle.json path or JSON")
     ap.add_argument("--bundle-dir", help="use an already prepared, isolated bundle directory")
+    ap.add_argument("--dataset-slug", help="use a separate private bundle dataset slug")
     sub = ap.add_subparsers(dest="cmd", required=True)
     dataset_parser = sub.add_parser("dataset")
     dataset_parser.add_argument("--existing", action="store_true", help="upload the already prepared bundle, including explicit adapters")
@@ -190,6 +191,11 @@ def main() -> None:
         os.environ["ATS_KAGGLE_CREDENTIALS_ENV"] = a.credentials_env
     if a.bundle_dir:
         BUNDLE = Path(a.bundle_dir).resolve()
+    if a.dataset_slug:
+        import re
+        if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', a.dataset_slug):
+            raise SystemExit('dataset slug must contain lowercase letters, digits and single hyphens')
+        SLUG = a.dataset_slug
     if a.cmd == "dataset":
         make_dataset(a.existing)
     elif a.cmd == "run":

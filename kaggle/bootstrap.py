@@ -149,6 +149,21 @@ def development_jobs_only(spec: str) -> bool:
     return len(jobs) == len(items) == len(allowed) and set(jobs) == allowed
 
 
+def xquad_candf1_jobs_only(spec: str) -> bool:
+    """A restricted bundle can evaluate only candF1 on the three XQuAD suites."""
+    allowed = {('candF1', f'bench_xq_{lang}') for lang in ('hi', 'en', 'es')}
+    items = [item.split(':') for item in spec.split(',')]
+    if any(len(item) not in (2, 3) for item in items):
+        return False
+    try:
+        if any(len(item) == 3 and (not 0 < float(item[2]) < 1000) for item in items):
+            return False
+    except ValueError:
+        return False
+    jobs = [(item[0], item[1]) for item in items]
+    return len(jobs) == len(allowed) and set(jobs) == allowed
+
+
 def eval_jobs(py: str, spec: str, rest: str, adapters: dict[str, str]) -> int:
     """Round 3 (plan section 24): a list of system:split[:weight] jobs spread over the two GPUs.
 
@@ -182,6 +197,8 @@ def main() -> None:
     extra = " ".join(sys.argv[2:])
     OUT.mkdir(parents=True, exist_ok=True)
     unpack()
+    if (REPO / 'XQUAD_CANDF1_ONLY').exists() and stage != 'r6-system':
+        raise SystemExit('The restricted XQuAD bundle permits only the r6-system stage')
     model = find_model()
     py = python_for_env()
     install(py)
@@ -225,6 +242,11 @@ def main() -> None:
         spec = job_match.group(1)
         if (REPO / 'DEVELOPMENT_ONLY').exists() and not development_jobs_only(spec):
             raise SystemExit('The development-only bundle permits only the four registered development jobs')
+        if (REPO / 'XQUAD_CANDF1_ONLY').exists():
+            if (not xquad_candf1_jobs_only(spec) or checker_match.group(1) != 'V'
+                    or '--no-second-look' not in extra
+                    or not re.search(r'--max-input-tokens\s+8000(?:\s|$)', extra)):
+                raise SystemExit('The restricted bundle permits only the three candF1 XQuAD jobs with V, no second look and the 8000-token limit')
         names = list(dict.fromkeys(item.split(':')[0] for item in spec.split(',')))
         checks = list(dict.fromkeys(checker_match.group(1).split(',')))
         if not set(checks) <= {'V', 'V2m', 'V2b'} or not checks:
