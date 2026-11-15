@@ -300,3 +300,11 @@ def test_the_capability_tables_match_the_report_and_the_abstract_quotes_it(docum
     tq = rep["benchmarks"]["truthfulqa"]["difference_from_base"]["main"]["difference"]
     assert f"{abs(tq) * 100:.1f} points lower" in abstract and tq < 0
     assert all(r["retained"] for a in rep["rules"].values() for r in a.values()) and "all three English sets" in text
+
+@needs_reports
+def test_the_adapter_cards_keep_the_correction_notice_and_carry_the_capability_note():
+    from ragharness import release_cards as cards
+
+    for text in (cards.model_card("main", "BMEscanor"), cards.cand_f1_card("BMEscanor")):
+        assert "13 November 2026 correction" in text and "General capability (retention check)" in text
+    assert "13 November 2026 correction" not in cards.general_capability_note("main")

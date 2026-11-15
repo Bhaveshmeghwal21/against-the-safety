@@ -212,7 +212,6 @@ After the round-5 test was used up, we built a second sealed test of {rep['share
 The same run tested a *second look*: when the system refuses after seeing passages, it is asked once to answer anyway, and the answer is shown only if the self-check is at least 90% sure. The registered rule needed the macro-success gain to have an interval above zero. It was {cmp['macro']['difference'] * 100:+.1f} points (interval {cmp['macro']['ci95'][0] * 100:+.1f} to {cmp['macro']['ci95'][1] * 100:+.1f}), so the second look was not adopted and the submitted system is unchanged. See `research/2026-11-15-round6-second-look-results.md` in the repository."""
 
 
-@_audited_card
 def general_capability_note(adapter: str) -> str:
     """General-capability paragraph of an adapter card, from reports/general_capability.json (scripts/report_general.py). `adapter` is "main" or "candF1"."""
     path = ROOT / "reports" / "general_capability.json"
@@ -225,15 +224,20 @@ def general_capability_note(adapter: str) -> str:
         b = rep["benchmarks"][key]
         d = b["difference_from_base"][adapter]
         rows.append(f"{b['title']}: {b['accuracy']['base'] * 100:.1f}% for the base model, {b['accuracy'][adapter] * 100:.1f}% for this adapter ({pts(d['difference'])} points, interval {pts(d['ci95'][0])} to {pts(d['ci95'][1])})")
+    tq = rep["benchmarks"]["truthfulqa"]
+    tqd = tq["difference_from_base"][adapter]
+    gm_excl = [k for k in ("gmmlu_en", "gmmlu_hi", "gmmlu_es") if not (rep["benchmarks"][k]["difference_from_base"][adapter]["ci95"][0] <= 0 <= rep["benchmarks"][k]["difference_from_base"][adapter]["ci95"][1])]
+    gm = "no interval excludes zero" if not gm_excl else "the interval excludes zero for " + ", ".join(gm_excl)
     kept = [k for k, r in rep["rules"][adapter].items() if r["retained"]]
     verdict = "all three met the registered rule (lower end of the interval at least -3.0 points)" if len(kept) == 3 else \
         f"the registered rule (lower end of the interval at least -3.0 points) was met on {len(kept)} of 3 and failed on " + ", ".join(k for k in rep["rules"][adapter] if k not in kept)
     return ("## General capability (retention check)\n\n"
             "Zero-shot multiple choice in plain text, no chat template, 4-bit, one run per system, letter scoring (`scripts/general_capability.py`). " + "; ".join(rows) + f". {verdict[0].upper() + verdict[1:]}. "
-            "Also measured, without a rule: TruthfulQA MC1 and Global-MMLU-Lite in English, Hindi and Spanish. Full table: `reports/general_capability.md` in the code repository. "
+            f"Also measured, without a rule: TruthfulQA MC1 ({tq['accuracy']['base'] * 100:.1f}% for the base model, {tq['accuracy'][adapter] * 100:.1f}% for this adapter, {pts(tqd['difference'])} points, interval {pts(tqd['ci95'][0])} to {pts(tqd['ci95'][1])}{', a clear loss' if tqd['ci95'][1] < 0 else ''}) and Global-MMLU-Lite in English, Hindi and Spanish (400 questions each; {gm}). Full table: `reports/general_capability.md` in the code repository. "
             "Absolute scores are not comparable with published ones, because the prompt and protocol differ.\n")
 
 
+@_audited_card
 def model_card(name: str, user: str) -> str:
     is_main = name == "main"
     what = ("trained on the full matched-state mixture: search, answer and abstain decisions in six evidence states, including episodes where the supporting passage is missing"
