@@ -30,3 +30,19 @@ Use an isolated private XQuAD-only bundle. Do not open, package, or run any Roun
 - `data/bench/xq_es/manifest.json`: `0ea3d343134804eff34fda2e4eb7e946a069dcb044fab21b13244cd755e924c0`
 - `runs/kaggle/ats-train-both/out/main/adapter/adapter_model.safetensors`: `5834043354893027625a7198341616ca904393f6dc29d993912da8a1d7a8916a`
 - `runs/account2_round4/ats-train-evidence-r4/out/candF/adapter_ep1/adapter_model.safetensors`: `cefbd4e824d6c59c5376a2ba3511acaa71a2f5784ebdf345a03efcc1368fb461`
+
+## Amendment 1: verifier-only retry after GPU memory failure
+
+The candF1 actor completed all 1,730 episodes, with no truncated inputs. Its checker then failed from GPU out-of-memory using batch size six; no candidate verifier verdicts were saved. The raw and fail-closed actor outcomes were inspected before this amendment. This retry reuses the exact 104 saved answer cases and the same main-adapter V, wording A and threshold 0.50. It does not regenerate answers, re-evaluate questions, train anything, run a second look, or change the selection protocol. The previous XQuAD results and raw candF1 outcomes are already known, so this remains exploratory.
+
+To reduce peak memory, the checker uses batch size one and requests only last-position logits. The latter gives identical final-position logits on a CPU Cohere2 regression test; GPU numerical differences due to batching are still possible. All 104 cases have passages and must receive exactly one finite verifier probability. We will compare the completed +V results using the previously stated metrics and clustered bootstrap, report outcomes as observed, and preserve the failed run and raw report.
+
+Retry input hashes (recorded before any retry model call):
+
+- `runs/kaggle/ats-r6-system-candf1-xq/out/cases/answers.jsonl`: `b0cb94c1cb12a89c6ac0a4a700237a802430d759b903cd886052e3d6542aac6e`
+- `runs/kaggle/ats-r6-system-candf1-xq/out/eval/candF1_bench_xq_hi/lenient/scores.jsonl`: `c2173bc8a79e652723c2a6583c06a65d5151fabd337f5530c1a5817f4c30c222`
+- `runs/kaggle/ats-r6-system-candf1-xq/out/eval/candF1_bench_xq_hi/lenient/transcripts.jsonl`: `309df1a1cb0de5686eb59347d83fa5d8173e0bf24acfea533eebb67e3ed0c9bb`
+- `runs/kaggle/ats-r6-system-candf1-xq/out/eval/candF1_bench_xq_en/lenient/scores.jsonl`: `363389a0adb936e39ff6c3609738f1f0e35f882fda724770dc1eddc29198925c`
+- `runs/kaggle/ats-r6-system-candf1-xq/out/eval/candF1_bench_xq_en/lenient/transcripts.jsonl`: `eb9e3a68255d3633ef9aefc73613ebfabcf669da24742cc831f4b6819972d884`
+- `runs/kaggle/ats-r6-system-candf1-xq/out/eval/candF1_bench_xq_es/lenient/scores.jsonl`: `97ec1a9a1990b20735a41de4e46907f39fc7d85d97fbcc677d7a7c83d9bf4108`
+- `runs/kaggle/ats-r6-system-candf1-xq/out/eval/candF1_bench_xq_es/lenient/transcripts.jsonl`: `a5673c5140512ed102cf1dc19435573c4975300d0db731ae7703bae77fb140ef`

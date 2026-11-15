@@ -31,6 +31,7 @@ def main() -> None:
     ap.add_argument("--out", required=True)
     ap.add_argument("--wordings", default="A,B")
     ap.add_argument("--batch-size", type=int, default=6)
+    ap.add_argument('--last-logits-only', action='store_true', help='compute only final-position logits to reduce peak GPU memory')
     args = ap.parse_args()
 
     import torch
@@ -44,7 +45,8 @@ def main() -> None:
         tok.pad_token = tok.eos_token
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    summary = {"tag": args.tag, "adapter": args.adapter, "model_source": source, "cases": len(cases), "wordings": {}}
+    summary = {"tag": args.tag, "adapter": args.adapter, "model_source": source, "cases": len(cases),
+               "batch_size": args.batch_size, "last_logits_only": args.last_logits_only, "wordings": {}}
     for w in args.wordings.split(","):
         template, pos, neg = WORDINGS[w]
         ip, ineg = tok.encode(pos, add_special_tokens=False)[0], tok.encode(neg, add_special_tokens=False)[0]
@@ -63,7 +65,8 @@ def main() -> None:
                 ids[r, width - len(prompts[i]):] = torch.tensor(prompts[i])
                 att[r, width - len(prompts[i]):] = 1
             with torch.no_grad():
-                logits = model(input_ids=ids.to(model.device), attention_mask=att.to(model.device), use_cache=False).logits[:, -1, :].float()
+                options = {'logits_to_keep': 1} if args.last_logits_only else {}
+                logits = model(input_ids=ids.to(model.device), attention_mask=att.to(model.device), use_cache=False, **options).logits[:, -1, :].float()
             two = torch.stack([logits[:, ip], logits[:, ineg]], dim=1).softmax(dim=1)[:, 0]
             for r, i in enumerate(idx):
                 top = int(logits[r].argmax())
