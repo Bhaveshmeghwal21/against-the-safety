@@ -1,0 +1,344 @@
+{
+ "protocol": "zero-shot letter scoring, plain text, no chat template, 4-bit; base = adapters switched off",
+ "margin_points": -3.0,
+ "benchmarks": {
+  "mmlu": {
+   "title": "MMLU (English)",
+   "questions": 14042,
+   "license": "MIT",
+   "accuracy": {
+    "base": 0.5445805440820396,
+    "main": 0.5406637231163652,
+    "candF1": 0.542016806722689
+   },
+   "accuracy_ci95": {
+    "base": [
+     0.5360347528842045,
+     0.552914470873095
+    ],
+    "main": [
+     0.532331576698476,
+     0.5486415752741775
+    ],
+    "candF1": [
+     0.5333285856715567,
+     0.5501353083606324
+    ]
+   },
+   "difference_from_base": {
+    "main": {
+     "difference": -0.003916820965674361,
+     "ci95": [
+      -0.008332146417889152,
+      0.0006409343398375872
+     ]
+    },
+    "candF1": {
+     "difference": -0.0025637373593505597,
+     "ci95": [
+      -0.006765418031619452,
+      0.0017091582395669658
+     ]
+    }
+   }
+  },
+  "arc_c": {
+   "title": "ARC-Challenge (English)",
+   "questions": 1172,
+   "license": "CC BY-SA 4.0",
+   "accuracy": {
+    "base": 0.734641638225256,
+    "main": 0.726962457337884,
+    "candF1": 0.7303754266211604
+   },
+   "accuracy_ci95": {
+    "base": [
+     0.7098976109215017,
+     0.7585324232081911
+    ],
+    "main": [
+     0.7022184300341296,
+     0.7508532423208191
+    ],
+    "candF1": [
+     0.7056313993174061,
+     0.7542662116040956
+    ]
+   },
+   "difference_from_base": {
+    "main": {
+     "difference": -0.007679180887371961,
+     "ci95": [
+      -0.019645904436860075,
+      0.004266211604095463
+     ]
+    },
+    "candF1": {
+     "difference": -0.004266211604095571,
+     "ci95": [
+      -0.016211604095563104,
+      0.007679180887371961
+     ]
+    }
+   }
+  },
+  "arc_e": {
+   "title": "ARC-Easy (English)",
+   "questions": 2376,
+   "license": "CC BY-SA 4.0",
+   "accuracy": {
+    "base": 0.8543771043771043,
+    "main": 0.8547979797979798,
+    "candF1": 0.8560606060606061
+   },
+   "accuracy_ci95": {
+    "base": [
+     0.8400673400673401,
+     0.8682659932659933
+    ],
+    "main": [
+     0.8404882154882155,
+     0.8691077441077442
+    ],
+    "candF1": [
+     0.8421717171717171,
+     0.8695391414141415
+    ]
+   },
+   "difference_from_base": {
+    "main": {
+     "difference": 0.00042087542087543284,
+     "ci95": [
+      -0.0063131313131312705,
+      0.006734006734006703
+     ]
+    },
+    "candF1": {
+     "difference": 0.0016835016835017313,
+     "ci95": [
+      -0.004629629629629539,
+      0.007575757575757569
+     ]
+    }
+   }
+  },
+  "truthfulqa": {
+   "title": "TruthfulQA MC1 (English)",
+   "questions": 817,
+   "license": "Apache-2.0",
+   "accuracy": {
+    "base": 0.5177478580171359,
+    "main": 0.48225214198286415,
+    "candF1": 0.5006119951040392
+   },
+   "accuracy_ci95": {
+    "base": [
+     0.4834761321909425,
+     0.5520195838433293
+    ],
+    "main": [
+     0.44917380660954714,
+     0.5165238678090576
+    ],
+    "candF1": [
+     0.4663402692778458,
+     0.5348837209302325
+    ]
+   },
+   "difference_from_base": {
+    "main": {
+     "difference": -0.03549571603427171,
+     "ci95": [
+      -0.056303549571603384,
+      -0.015911872705018315
+     ]
+    },
+    "candF1": {
+     "difference": -0.017135862913096656,
+     "ci95": [
+      -0.03549571603427171,
+      0.0012239902080783405
+     ]
+    }
+   }
+  },
+  "gmmlu_en": {
+   "title": "Global-MMLU-Lite, English",
+   "questions": 400,
+   "license": "Apache-2.0",
+   "accuracy": {
+    "base": 0.605,
+    "main": 0.5875,
+    "candF1": 0.5975
+   },
+   "accuracy_ci95": {
+    "base": [
+     0.555,
+     0.6525
+    ],
+    "main": [
+     0.5375,
+     0.635
+    ],
+    "candF1": [
+     0.55,
+     0.645
+    ]
+   },
+   "difference_from_base": {
+    "main": {
+     "difference": -0.01749999999999996,
+     "ci95": [
+      -0.04500000000000004,
+      0.007500000000000062
+     ]
+    },
+    "candF1": {
+     "difference": -0.007499999999999951,
+     "ci95": [
+      -0.03499999999999992,
+      0.01750000000000007
+     ]
+    }
+   }
+  },
+  "gmmlu_hi": {
+   "title": "Global-MMLU-Lite, Hindi",
+   "questions": 400,
+   "license": "Apache-2.0",
+   "accuracy": {
+    "base": 0.41,
+    "main": 0.42,
+    "candF1": 0.405
+   },
+   "accuracy_ci95": {
+    "base": [
+     0.36,
+     0.4575
+    ],
+    "main": [
+     0.3725,
+     0.4675
+    ],
+    "candF1": [
+     0.3575,
+     0.4525
+    ]
+   },
+   "difference_from_base": {
+    "main": {
+     "difference": 0.010000000000000009,
+     "ci95": [
+      -0.015000000000000013,
+      0.03749999999999998
+     ]
+    },
+    "candF1": {
+     "difference": -0.004999999999999949,
+     "ci95": [
+      -0.034999999999999976,
+      0.025000000000000022
+     ]
+    }
+   }
+  },
+  "gmmlu_es": {
+   "title": "Global-MMLU-Lite, Spanish",
+   "questions": 400,
+   "license": "Apache-2.0",
+   "accuracy": {
+    "base": 0.5725,
+    "main": 0.5625,
+    "candF1": 0.5625
+   },
+   "accuracy_ci95": {
+    "base": [
+     0.525,
+     0.62
+    ],
+    "main": [
+     0.515,
+     0.61
+    ],
+    "candF1": [
+     0.515,
+     0.61
+    ]
+   },
+   "difference_from_base": {
+    "main": {
+     "difference": -0.010000000000000009,
+     "ci95": [
+      -0.030000000000000027,
+      0.010000000000000009
+     ]
+    },
+    "candF1": {
+     "difference": -0.010000000000000009,
+     "ci95": [
+      -0.03500000000000003,
+      0.015000000000000013
+     ]
+    }
+   }
+  }
+ },
+ "rules": {
+  "main": {
+   "mmlu": {
+    "lower_end": -0.008332146417889152,
+    "retained": true
+   },
+   "arc_c": {
+    "lower_end": -0.019645904436860075,
+    "retained": true
+   },
+   "arc_e": {
+    "lower_end": -0.0063131313131312705,
+    "retained": true
+   }
+  },
+  "candF1": {
+   "mmlu": {
+    "lower_end": -0.006765418031619452,
+    "retained": true
+   },
+   "arc_c": {
+    "lower_end": -0.016211604095563104,
+    "retained": true
+   },
+   "arc_e": {
+    "lower_end": -0.004629629629629539,
+    "retained": true
+   }
+  }
+ },
+ "environment": {
+  "gpu": "Tesla T4",
+  "torch": "2.11.0+cu130",
+  "model_source": "local:/kaggle/input/models/cohere-labs/tiny-aya/transformers/global/1",
+  "seconds": {
+   "arc_c/base": 35.5,
+   "arc_c/main": 54.9,
+   "arc_c/candF1": 57.9,
+   "arc_e/base": 76.1,
+   "arc_e/main": 101.4,
+   "arc_e/candF1": 101.9,
+   "truthfulqa/base": 34.3,
+   "truthfulqa/main": 45.4,
+   "truthfulqa/candF1": 46.4,
+   "gmmlu_en/base": 21.1,
+   "gmmlu_en/main": 28.6,
+   "gmmlu_en/candF1": 28.6,
+   "gmmlu_hi/base": 51.1,
+   "gmmlu_hi/main": 70.2,
+   "gmmlu_hi/candF1": 70.0,
+   "gmmlu_es/base": 23.9,
+   "gmmlu_es/main": 32.3,
+   "gmmlu_es/candF1": 32.2,
+   "mmlu/base": 807.5,
+   "mmlu/main": 1157.1,
+   "mmlu/candF1": 1159.7
+  }
+ }
+}

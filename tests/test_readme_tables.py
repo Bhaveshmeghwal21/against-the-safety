@@ -282,3 +282,21 @@ def test_the_write_up_states_hyperparameters_leak_checks_seed_and_forecasts(docu
 def test_the_article_abstract_is_the_abstract_file():
     abstract = (ROOT / "article" / "ABSTRACT.md").read_text(encoding="utf-8").strip()
     assert abstract in (ROOT / "article" / "ARTICLE.md").read_text(encoding="utf-8")
+
+@needs_reports
+@pytest.mark.parametrize("document", ["README.md", "article/ARTICLE.md"])
+def test_the_capability_tables_match_the_report_and_the_abstract_quotes_it(document):
+    import json
+    import make_readme_table as tables
+
+    text = (ROOT / document).read_text(encoding="utf-8")
+    for table in (tables.general_table(), tables.general_rules_table()):
+        for line in table.splitlines():
+            assert line in text, f"{document} is missing or has changed: {line}"
+    rep = json.loads((ROOT / "reports" / "general_capability.json").read_text(encoding="utf-8"))
+    abstract = (ROOT / "article" / "ABSTRACT.md").read_text(encoding="utf-8")
+    drops = [abs(rep["benchmarks"][b]["difference_from_base"][a]["difference"]) for b in ("mmlu", "arc_c", "arc_e") for a in ("main", "candF1")]
+    assert max(drops) < 0.01 and "within 1 point of the base model" in abstract
+    tq = rep["benchmarks"]["truthfulqa"]["difference_from_base"]["main"]["difference"]
+    assert f"{abs(tq) * 100:.1f} points lower" in abstract and tq < 0
+    assert all(r["retained"] for a in rep["rules"].values() for r in a.values()) and "all three English sets" in text

@@ -130,7 +130,7 @@ What AuditKIT showed us:
 - **Freshness on dated manuals.** On our fictional Nimbus manuals, which hold old and new editions of the same policy, AuditKIT's freshness score was 0.813 for main and 0.783 for the base model. About one retrieved dated passage in five was an out-of-date edition ([report](reports/nimbus_corrected.md)).
 - **Judge-based metrics, later.** Faithfulness, hallucination, context precision and recall, answer relevancy, numeric accuracy and latency came last, on a 300-episode sample and a Kaggle T4. The submitted system's answers are more faithful than the base model's ([results](#more-auditkit-metrics-faithfulness-retrieval-quality-numbers-and-speed)).
 
-What we did not do: AuditKIT also ships general benchmarks (ARC, GSM8K, MMLU, TruthfulQA, BFCL). None of them tests answering from supplied documents with citations, so we did not run them. The headline numbers below come from our own scorer, which checks in one pass that an answer is correct and that the cited passages contain the required evidence. The full first-round scorecard is in [`reports/scorecard_test_lenient.md`](reports/scorecard_test_lenient.md). Code: `src/ragharness/audit.py`, `scorecard.py`.
+AuditKIT also ships general benchmarks (ARC, GSM8K, MMLU, TruthfulQA, BFCL). None of them tests answering from supplied documents with citations, so our headline numbers do not use them. We did run ARC, MMLU and TruthfulQA, with our own scorer rather than AuditKIT's lm-eval engine, as a retention check (see below); GSM8K and BFCL were not run. The headline numbers below come from our own scorer, which checks in one pass that an answer is correct and that the cited passages contain the required evidence. The full first-round scorecard is in [`reports/scorecard_test_lenient.md`](reports/scorecard_test_lenient.md). Code: `src/ragharness/audit.py`, `scorecard.py`.
 
 ## Results
 
@@ -256,6 +256,33 @@ Relevance is low for all three because the tool returns the top three passages a
 The submitted system takes a median of 16.3 s per question and a 95th percentile of 23.8 s. That is 1.9 times the base model's median, because it searches more and uses the model once more to check the answer (the check itself costs 0.28 s per request on average; nearly all the time is generation). Peak GPU memory is 3.98 GB. Our batched evaluation runs needed 4.3 GPU-seconds per episode ([`reports/azure_roi.md`](reports/azure_roi.md)), because many episodes share a batch. One at a time, the same system needs 15.5 s on average, so the cost per question in that report is a best case, not what a single user would see. A serving engine would be faster; we did not tune one. The base arm applies the fail-closed rule and the code checks of the self-check, so it shows only 7 answers in 150, but it skips the model self-check. The Kaggle host is shared, so some noise is possible.
 
 **Limits of these numbers.** One judge, one sample of 300 episodes, claim extraction by a model, and the hidden-evidence flags are not hand-checked.
+
+### Did the fine-tuning hurt general ability?
+
+The hackathon asks for a general-capability check that shows the fine-tuning did not break something else. We ran one as a retention check (plan: [pre-registration](research/2026-11-16-general-capability-preregistration.md), written before the run). Both published English adapters and the base model answered the same multiple-choice questions in plain text, zero-shot, with no chat template. The answer is the letter the model finds most likely. The base model is Tiny Aya Global with the adapters switched off. Languages: English for MMLU, ARC and TruthfulQA; English, Hindi and Spanish for Global-MMLU-Lite (the same 400 questions in each). None of these is part of the focus task (retrieval-augmented answering). The English adapters were trained on English only, so the Hindi and Spanish sets show what that training did to those languages.
+
+| Benchmark | Questions | Base | Main (submitted) | candF1 (alternative) | Main minus base (points) | candF1 minus base (points) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| MMLU (English) | 14,042 | 54.5% | 54.1% | 54.2% | -0.4 [-0.8, +0.1] | -0.3 [-0.7, +0.2] |
+| ARC-Challenge (English) | 1,172 | 73.5% | 72.7% | 73.0% | -0.8 [-2.0, +0.4] | -0.4 [-1.6, +0.8] |
+| ARC-Easy (English) | 2,376 | 85.4% | 85.5% | 85.6% | +0.0 [-0.6, +0.7] | +0.2 [-0.5, +0.8] |
+| TruthfulQA MC1 (English) | 817 | 51.8% | 48.2% | 50.1% | -3.5 [-5.6, -1.6] | -1.7 [-3.5, +0.1] |
+| Global-MMLU-Lite, English | 400 | 60.5% | 58.8% | 59.8% | -1.7 [-4.5, +0.8] | -0.7 [-3.5, +1.8] |
+| Global-MMLU-Lite, Hindi | 400 | 41.0% | 42.0% | 40.5% | +1.0 [-1.5, +3.7] | -0.5 [-3.5, +2.5] |
+| Global-MMLU-Lite, Spanish | 400 | 57.2% | 56.2% | 56.2% | -1.0 [-3.0, +1.0] | -1.0 [-3.5, +1.5] |
+
+Registered rule: an adapter is retained on a benchmark if the lower end of its paired interval is at least -3.0 points. The submitted adapter met the registered rule on all three English sets; candF1 met the registered rule on all three English sets.
+
+| Registered rule: lower end of the paired interval at least -3.0 points | Main | candF1 |
+| --- | --- | --- |
+| MMLU | -0.8: retained | -0.7: retained |
+| ARC-Challenge | -2.0: retained | -1.6: retained |
+| ARC-Easy | -0.6: retained | -0.5: retained |
+
+- Main differs from the base model by -0.4 points on MMLU, -0.8 on ARC-Challenge and +0.0 on ARC-Easy (intervals above).
+- TruthfulQA is the one place where we measured a clear loss. Against the base model: main -3.5 points (interval -5.6 to -1.6, which excludes zero); candF1 -1.7 points (interval -3.5 to +0.1). It had no registered rule, because an interval on 817 questions is wider than the 3-point margin we set for the three sets with more questions. We report it as it is and have not tested why.
+- Global-MMLU-Lite has no rule; with 400 questions per language its intervals are wide. Main differs by +1.0 points in Hindi, -1.0 in Spanish and -1.7 in English, and none of those intervals excludes zero.
+- Absolute scores are not comparable with published ones: our prompt is plain zero-shot letter scoring, theirs differ, and AuditKIT's lm-eval engine was not used. Only the differences inside the table carry meaning. The adapters were trained with a chat template and a search protocol, so a prompt in that format could behave differently; we did not test one. Generation tasks (GSM8K, code) were not run. Full report: [`reports/general_capability.md`](reports/general_capability.md).
 
 ## Try it
 
@@ -432,6 +459,7 @@ Training and evaluation ran on Kaggle T4s: see [`kaggle/README.md`](kaggle/READM
 - English, short factual questions. Tiny Aya is a multilingual model, but we trained the adapter in English only. A first Hindi and Spanish check (see [Other languages](#other-languages-hindi-and-spanish)) shows the refusing carries over and the answering does not: 2% to 5% of questions got a correct, cited answer, and Hindi searches loop far more often. Training on Hindi afterwards raised Hindi answers to about 35% but made both adapters answer on hidden evidence more often, so neither passed our safety rule and the submitted system stays English. Two-part answers and single-passage questions are weak spots; with two documents and dated editions the adapter sometimes cites the older one.
 - The first sealed test was opened before the scoring corrections, and candF1 was tested on it after its gate was written. The fresh Round 6 test was then opened once, for the second look, so further model selection needs yet another fresh test. On that test the submitted system answered single-passage SQuAD questions about as well as refusing everything would score (43.3% against 41.1%).
 - Hidden-evidence answers are annotation-based flags. An unannotated alternative source could make a flagged answer correct, and no person has checked them. An AI judge found an unsupported claim in 10 of the 12 flagged answers of the submitted system in a 300-episode sample, so most flags look real. A blank 50-row sheet for a human check is in [`reports/hand_label_sheet.csv`](reports/hand_label_sheet.csv).
+- The general-capability check is one zero-shot prompt format, one run per system, with no generation or safety tasks, and its absolute scores are not comparable with published ones. The submitted adapter met the registered rule on all three English sets; candF1 met the registered rule on all three English sets.
 - Single-request latency is slow: a median of 16.3 s per question at batch size one on a T4 with an untuned research stack, so the system as run here is not real-time. A serving engine would help; we did not try one.
 - The judge-based metrics rest on one judge model and one sample of 300 episodes of the first sealed test. They were not run on the fresh test, on Hindi, or on the hosted models.
 - Each adapter is one training run with one seed (main: seed 13), so we do not know how much a rerun would vary.
@@ -445,9 +473,9 @@ Hugging Face Articles need a Pro account, so this README is the write-up, as the
 
 - **Track and problem statement:** Track 3 (agentic fine-tuning), problem statement 4: fine-tuning for retrieval-augmented generation.
 - **Work done outside the hackathon:** none. The repository history starts on 4 November 2026. The base model, AgentTune, AuditKIT and the public datasets are third-party.
-- **Compute used:** The submitted adapter trained for 3.9 T4 GPU-hours on Kaggle's free quota (about $2 at $0.526 per hour). Later rounds ran on a friend's Kaggle account with permission, plus local CPU for scoring. The hosted-model comparison cost about $0.84 at published prices. The Hindi experiment (training both adapters, then testing four) used about 20 more T4 GPU-hours on the same free quota (about $10 at the same rate). The judge-based metrics used $0.56 of Azure credit, metered from returned token counts, and the single-request latency run used about 1.1 T4 GPU-hours.
+- **Compute used:** The submitted adapter trained for 3.9 T4 GPU-hours on Kaggle's free quota (about $2 at $0.526 per hour). Later rounds ran on a friend's Kaggle account with permission, plus local CPU for scoring. The hosted-model comparison cost about $0.84 at published prices. The Hindi experiment (training both adapters, then testing four) used about 20 more T4 GPU-hours on the same free quota (about $10 at the same rate). The judge-based metrics used $0.56 of Azure credit, metered from returned token counts, the single-request latency run used about 1.1 T4 GPU-hours, and the general-capability check used about 1.5 more (two Kaggle sessions, one of which failed on a file-reading bug and was re-run for MMLU only).
 - **LLM usage:** AI coding assistants drafted a large share of the code, tests and prose under the team's direction. Azure's `gpt-6-luna` served as the judge for the faithfulness, groundedness, relevancy and context metrics, and as a competitor in the hosted-model comparison. Every number comes from a script run on saved transcripts and is in a file under `reports/`.
-- **With more credits:** quote-first answer targets, balanced answer and refusal data in both directions, far more than 488 parent questions, and a second Hindi attempt with more English replay, judged on fresh sealed tests under a new pre-registration. Measurements we did not make: a human check of the hidden-evidence flags (the judge-based faithfulness score is not calibrated against people), a second judge model, a second training seed, and the hosted models on the second sealed test.
+- **With more credits:** quote-first answer targets, balanced answer and refusal data in both directions, far more than 488 parent questions, and a second Hindi attempt with more English replay, judged on fresh sealed tests under a new pre-registration. Measurements we did not make: a chat-format and a generation-based (GSM8K) capability check, a human check of the hidden-evidence flags (the judge-based faithfulness score is not calibrated against people), a second judge model, a second training seed, and the hosted models on the second sealed test.
 - **Expected before and after (forecasts we have not tested):** (1) quote-first answer targets with balanced answer and refusal data should lift single-passage SQuAD on the fresh test from 43.3%, about the refuse-everything level, toward the 59.1% the system scored on the first test, and macro success toward candF1's 64.0%, with answers on hidden evidence kept near 10%. (2) A second Hindi attempt with more English replay should keep most of the Hindi gain (35% correct and cited in the first attempt) while holding English answers on hidden evidence within 2 points of the parent adapter, the rule the first attempt missed. (3) A human check of 50 flagged answers should confirm most flags, because the judge found an unsupported claim in 10 of 12. (4) A serving engine with batching should cut the cost per answer and the 16.3 s median latency; we have not measured by how much.
 
 ## Artifacts and licenses
@@ -462,6 +490,7 @@ Hugging Face Articles need a Pro account, so this README is the write-up, as the
 | RGB-derived data | CC BY-NC-SA 4.0, noncommercial |
 | Nimbus Home suite | CC BY 4.0 (fictional, written by us) |
 | Benchmark traces | as the source: 2WikiMultihopQA Apache-2.0, MuSiQue CC BY 4.0, SQuAD 2.0 CC BY-SA 4.0, RGB CC BY-NC-SA 4.0 |
+| General-capability question sets (not redistributed; per-question predictions only) | MMLU MIT, ARC CC BY-SA 4.0, TruthfulQA Apache-2.0, Global-MMLU-Lite Apache-2.0 |
 | AgentTune (LSAL v1.1), AuditKIT (LSAL v1.2) | source-available, used as dependencies, not redistributed |
 
 Written by [BMEscanor](https://huggingface.co/BMEscanor) and [abd420](https://huggingface.co/abd420). A friend provided Kaggle compute with permission.

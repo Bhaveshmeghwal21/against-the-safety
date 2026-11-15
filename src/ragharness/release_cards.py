@@ -213,6 +213,27 @@ The same run tested a *second look*: when the system refuses after seeing passag
 
 
 @_audited_card
+def general_capability_note(adapter: str) -> str:
+    """General-capability paragraph of an adapter card, from reports/general_capability.json (scripts/report_general.py). `adapter` is "main" or "candF1"."""
+    path = ROOT / "reports" / "general_capability.json"
+    if not path.exists():
+        return ""
+    rep = json.loads(path.read_text(encoding="utf-8"))
+    pts = lambda x: f"{x * 100:+.1f}"
+    rows = []
+    for key in ("mmlu", "arc_c", "arc_e"):
+        b = rep["benchmarks"][key]
+        d = b["difference_from_base"][adapter]
+        rows.append(f"{b['title']}: {b['accuracy']['base'] * 100:.1f}% for the base model, {b['accuracy'][adapter] * 100:.1f}% for this adapter ({pts(d['difference'])} points, interval {pts(d['ci95'][0])} to {pts(d['ci95'][1])})")
+    kept = [k for k, r in rep["rules"][adapter].items() if r["retained"]]
+    verdict = "all three met the registered rule (lower end of the interval at least -3.0 points)" if len(kept) == 3 else \
+        f"the registered rule (lower end of the interval at least -3.0 points) was met on {len(kept)} of 3 and failed on " + ", ".join(k for k in rep["rules"][adapter] if k not in kept)
+    return ("## General capability (retention check)\n\n"
+            "Zero-shot multiple choice in plain text, no chat template, 4-bit, one run per system, letter scoring (`scripts/general_capability.py`). " + "; ".join(rows) + f". {verdict[0].upper() + verdict[1:]}. "
+            "Also measured, without a rule: TruthfulQA MC1 and Global-MMLU-Lite in English, Hindi and Spanish. Full table: `reports/general_capability.md` in the code repository. "
+            "Absolute scores are not comparable with published ones, because the prompt and protocol differ.\n")
+
+
 def model_card(name: str, user: str) -> str:
     is_main = name == "main"
     what = ("trained on the full matched-state mixture: search, answer and abstain decisions in six evidence states, including episodes where the supporting passage is missing"
@@ -257,6 +278,8 @@ paired intervals are in the repository (`reports/`) and in the dataset repositor
 {multilingual_note() if is_main else ""}
 
 {fresh_test_note() if is_main else ""}
+
+{general_capability_note("main") if is_main else ""}
 
 ## Five external benchmarks (never trained on or used for any choice)
 
@@ -483,6 +506,10 @@ Traces of the Hindi experiment: `xq2_hi` and `xq2_en` (300 fresh XQuAD questions
 
 `judge/` holds the 300-episode sample of the first sealed test (`sample_r5t.json`), the cases (`cases_r5t.jsonl`: the question, the gold answer, the answer of base, main or candF1, and the passages the system was shown), the AuditKIT judge scores (`run1__scores.jsonl`, one line per episode and metric, with the claims and verdicts), every judge call with its token usage (`judge_calls.jsonl`) and the repeatability pass (`run1_retest__scores.jsonl`, `judge_calls_retest.jsonl`). `latency/` holds the per-request timings of the Kaggle T4 run. Results are in `reports/judge_results.md`, `reports/numeric_accuracy.md` and `reports/latency.md`. `reports/hand_label_sheet.csv` is a blank 50-row sheet for a human check of the answers; its key is `judge/hand_label_key.json`.
 
+## General capability (research/2026-11-16-general-capability-preregistration.md)
+
+`general/` holds the per-question predictions of the base model, `main` and `candF1` on MMLU, ARC-Challenge, ARC-Easy, TruthfulQA MC1 and Global-MMLU-Lite (English, Hindi, Spanish), one JSONL per benchmark, plus `manifest.json` with the source, licence, size and hash of each question set. The question sets are public datasets and are not redistributed here; `scripts/prepare_general.py` rebuilds them. Results and the registered rule are in `reports/general_capability.md`.
+
 ## Contents
 
 - `traces/<benchmark>/<system>__<lenient|strict>__{{transcripts,scores,trajectories}}.jsonl` and `__summary.json`: `transcripts` are readable conversations, `scores` hold the deterministic
@@ -642,6 +669,8 @@ it was not chosen blind. The registered rule for replacing main needed, besides 
 
 candF1 minus main, both with the repairs, paired 95% intervals from resampling whole questions: macro **{ci("macro")}**; unsupported-answer rate {ci("unsupported_rate")}; supported correct answers {ci("supported_correct")}.
 Read it as: more answers are correct, and the data cannot say whether it is safer or less safe than main. The unsupported counts are small. This is a post-hoc correction on an opened holdout: it does not change which model was submitted, and a new selection claim would need a fresh holdout.
+
+{general_capability_note("candF1")}
 
 ## Use
 

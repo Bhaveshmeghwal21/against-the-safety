@@ -160,13 +160,18 @@ def main() -> None:
     for f in sorted((ROOT / "reports").glob("benchmarks_*")) + sorted((ROOT / "reports").glob("round3_test*")) + sorted((ROOT / "reports").glob("round4_test*")) \
             + sorted((ROOT / "reports").glob("round5_final*")) + sorted((ROOT / "reports").glob("round5b_final*")) + sorted((ROOT / "reports").glob("round5_system_check*")) + sorted((ROOT / "reports").glob("xquad_*")) \
             + sorted((ROOT / "reports").glob("round6_second_look*")) + sorted((ROOT / "reports").glob("hindi_*")) \
-            + sorted((ROOT / "reports").glob("judge_results*")) + sorted((ROOT / "reports").glob("numeric_accuracy*")) + sorted((ROOT / "reports").glob("latency*")) + sorted((ROOT / "reports").glob("hand_label_sheet*")):
+            + sorted((ROOT / "reports").glob("general_capability*")) + sorted((ROOT / "reports").glob("tool_use_r5t*")) + sorted((ROOT / "reports").glob("judge_results*")) + sorted((ROOT / "reports").glob("numeric_accuracy*")) + sorted((ROOT / "reports").glob("latency*")) + sorted((ROOT / "reports").glob("hand_label_sheet*")):
         copy(f, bt / "reports" / f.name)
     for rel in ("sample_r5t.json", "cases_r5t.jsonl", "hand_label_key.json", "judge_calls.jsonl", "judge_calls_retest.jsonl"):  # judge-based metrics (research/2026-11-16-judge-latency-preregistration.md)
         copy(ROOT / "data" / "judge" / rel, bt / "judge" / rel)
     for folder in ("run1", "run1_retest"):
         for rel in ("scores.jsonl", "run_summary.json"):
             copy(ROOT / "data" / "judge" / folder / rel, bt / "judge" / f"{folder}__{rel}")
+    copy(ROOT / "data" / "general" / "manifest.json", bt / "general" / "manifest.json")  # general-capability check: the question sets are public datasets and are not redistributed; the per-question predictions are
+    for kernel in ("ats-general-t4x2", "ats-general-mmlu"):
+        folder = RUNS / kernel / "out" / "general"
+        for f in sorted(folder.glob("*.jsonl")) + sorted(folder.glob("summary_*.json")):
+            copy(f, bt / "general" / f.name)
     latency = RUNS / "ats-latency-t4" / "out" / "latency"
     for rel in ("latency_summary.json", "requests_base.jsonl", "requests_submitted.jsonl"):
         if (latency / rel).exists():
