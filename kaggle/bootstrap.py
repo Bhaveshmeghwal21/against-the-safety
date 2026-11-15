@@ -503,6 +503,11 @@ def main() -> None:
              {"CUDA_VISIBLE_DEVICES": str(i % 2)}, f"check_{b.split(':')[0]}.log")
             for i, b in enumerate(benches)
         ])
+    elif stage == "latency":  # research/2026-11-16-judge-latency-preregistration.md: batch-1 latency of the base model and the submitted system, one T4
+        if "main/adapter" not in adapters:
+            raise SystemExit("latency needs the main adapter")
+        m = re.search(r"--per-part\s+(\d+)", extra)
+        rc = run_parallel([(f"{py} scripts/latency_run.py --adapter {adapters['main/adapter']} --out {OUT}/latency --per-part {m.group(1) if m else 50} --seed 61 --warmup 3", g0, "latency.log")])
     elif stage == "demo":  # web demo of the submitted system: a smoke run on the example questions, then a public gradio link for --minutes (default 50)
         if "main/adapter" not in adapters:
             raise SystemExit("demo needs the main adapter")
