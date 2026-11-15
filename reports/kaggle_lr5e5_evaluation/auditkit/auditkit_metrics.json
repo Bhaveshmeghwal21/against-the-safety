@@ -1,0 +1,1602 @@
+{
+  "auditkit_version": "1.1.3",
+  "model": "Tiny Aya + DoRA",
+  "input_episodes": 938,
+  "adapter_source_sha256": {
+    "scripts/audit_slice.py": "8f8aa23b4daf837a4dac719796feb92dd3383d4257d4fbc71e92318ec865fe2f",
+    "src/ragharness/audit.py": "c595cc92d1d335ee94d8dec3f9a16542e526dda753cec67f294da55c2d92d67c"
+  },
+  "model_identity": {
+    "assets_sha256": "6608df676c91cdd457045167ebeb061c35dc44d3240bb6c372f1710b7300d6fc",
+    "checkpoints": {
+      "base": {
+        "repo": "CohereLabs/tiny-aya-global",
+        "revision": "af89d219b53ed9b13b8a4645f9c8028973510324",
+        "sha256": {
+          "model-00001-of-00002.safetensors": "0590022d0efe06f12e08e1e94302f069dff404341b426f7435c6303725635fb1",
+          "model-00002-of-00002.safetensors": "2ac3809931d113785058809f27775620e0b8aec6fbc7e163c9c09c08b5f90dab",
+          "config.json": "458a9265b6a96e5ad4bbe1857716bd69e434f062f8b32fae48f5f06197d26384",
+          "tokenizer.json": "2227ea9c52e8afb3f98bfed2679008b275f2664de69dfde174b374389eb0225d",
+          "tokenizer_config.json": "fb56a3ef7659346aae196a2ab877355f1e7fd871c36843f709bb2e23c606d972"
+        }
+      },
+      "adapters": {
+        "main": {
+          "repo": "BMEscanor/against-the-safety-tiny-aya-rag-main",
+          "revision": "269ffae880ec53885a7279e9fd6b667219fff31a",
+          "sha256": {
+            "adapter_model.safetensors": "5834043354893027625a7198341616ca904393f6dc29d993912da8a1d7a8916a",
+            "adapter_config.json": "d1bdce4764c296dfee33f3e35f8ab1811a69c010b97c3e44ceae54194530064a"
+          }
+        },
+        "candA": {
+          "repo": "BMEscanor/against-the-safety-tiny-aya-rag-cand-a",
+          "revision": "7b7a5e07ece926fa279b6a9331b914d875d75fff",
+          "sha256": {
+            "adapter_model.safetensors": "8bc3c51a3d32b0b2725a877d4ea08a09b55ab16d01775d2faf61199d28b4003d",
+            "adapter_config.json": "c6343056929b86fc3137ce92be8b3da1ffc7ccd4637fd6738671730b53adc565"
+          }
+        }
+      }
+    },
+    "systems": [
+      "dora"
+    ],
+    "batch_size": 4,
+    "concurrency": 8,
+    "verifier_batch_size": 2,
+    "workers": 4,
+    "checker": "main/A/0.5",
+    "dora_checkpoint": {
+      "path": "/kaggle/input/notebooks/mlsingh1234/training-l4x4/ats-experiments/dora_lr5e5/dora/adapter",
+      "sha256": {
+        "adapter_config.json": "0b28ab8333837e9f84ce62db2ab243ad0451fe804a293f3f45a26b6676636381",
+        "adapter_model.safetensors": "d9800f319dc047ffcde7068218f2f58eb395505bdfa92998585673148bc35a81"
+      }
+    }
+  },
+  "metric_source_sha256": {
+    "rag_stress.py": "8237009231a68fe02203d2e4ef0edf6ab8b74adfe57b5d94d148dce1a8f2ed81",
+    "rag.py": "93d0e09578a26e7adc3ce2e0e63bfe0d1f7b2574ac4fe2898b79b84919c2676c",
+    "agent.py": "15acd322ba019bcc300adf281e7304757d9f7e99ae0fcd171d0293b3b1125f1a",
+    "retrieval.py": "0a1550d95d1dcc4eea68d85925a94b8f1ddd15136639ef6684a3df13ab295338",
+    "code.py": "da49b77701b358c9b6bf036ea66256a7eb0089e0a95efad9c69713df3278da45"
+  },
+  "adapter_contract": "recorded-v2",
+  "generation_rerun": false,
+  "input_sha256": {
+    "out/verifier/cases.jsonl": "451492856241d13a43920e5dd5f5a3a6aeb27c485dad1c0f960db4fb1cadc9b7",
+    "out/evaluation_identity.json": "44439ddc4966c46063a66cc842591b66c2d27e1bb716b7e36eef5ac7101e7ded",
+    "out/verifier/shard0/verdicts_A.jsonl": "a9c6bf1939f016f0d82ceb1b0be76487333baf6d2e06659baf1bfca8719dd2d7",
+    "out/verifier/shard1/verdicts_A.jsonl": "ae56e395dcf19bdb6f2da77db7595d2c62328c3afb1afa5cb8e632f9498223ed",
+    "out/verifier/shard2/verdicts_A.jsonl": "45dd8d17743f5390eefbdd88a52045741245dd5fe2481a8b527a9a9806b82d59",
+    "out/verifier/shard3/verdicts_A.jsonl": "8bf65217cf60abb55ed6a9f69b3f059eab9b2a49f8426b31455d94fb6f560ae7",
+    "out/eval/dora_bench_r5t_squad/lenient/transcripts.jsonl": "7822605aff83b83444ee7248ddca2345e2b37901132031c56c7b8736f64cd42d",
+    "out/eval/dora_bench_r5t_squad/lenient/scores.jsonl": "b3f43b2e2820f2b824ec1b4c7faabe3785fde0f32c003938b63995e54b806f23",
+    "out/eval/dora_bench_r5t_hotpot/lenient/transcripts.jsonl": "2f9bf24cb6bb2f5688ef3f74b26c0f79d29286bbe882d518dba849803bda0f9b",
+    "out/eval/dora_bench_r5t_hotpot/lenient/scores.jsonl": "adb4c34a37e199763321674a462670451052f194142975f9493a924471bf43f0",
+    "out/eval/dora_bench_r5t_rgb/lenient/transcripts.jsonl": "83e208ccf4aeb01df512163a874c0eb5b64f670904d42e9eaa7b9b5f1238b82f",
+    "out/eval/dora_bench_r5t_rgb/lenient/scores.jsonl": "24d37f4f4d6a1ce8276044d0e887ba64de4f39bb35111adfd6cbbc01da0d5024"
+  },
+  "configurations": {
+    "dora": {
+      "input_episodes": 938,
+      "invalid_final_actions": 22,
+      "existing_benchmark_macro": 0.3400055946734278,
+      "cohorts": {
+        "rag_stress": {
+          "input_n": 938,
+          "stats": {
+            "evidence_set_recall": {
+              "name": "evidence_set_recall",
+              "count": 563,
+              "mean": 0.8969804618117229,
+              "stderr": 0.012811414824451521,
+              "std": 0.30398439588201104,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "citation_support": {
+              "name": "citation_support",
+              "count": 563,
+              "mean": 0.8614564831261101,
+              "stderr": 0.014559805666321148,
+              "std": 0.3454695511996739,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "citation_precision": {
+              "name": "citation_precision",
+              "count": 563,
+              "mean": 0.5612788632326821,
+              "stderr": 0.01590029230299214,
+              "std": 0.3772761101176337,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "citation_recall": {
+              "name": "citation_recall",
+              "count": 563,
+              "mean": 0.3806145511263612,
+              "stderr": 0.015598388243700955,
+              "std": 0.37011264500972063,
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "unscored": {
+            "evidence_set_recall": {
+              "unknown": 0,
+              "not_tested": 375
+            },
+            "citation_support": {
+              "unknown": 0,
+              "not_tested": 375
+            }
+          },
+          "fingerprint": "749db0378b8ebe2e"
+        },
+        "agent": {
+          "input_n": 938,
+          "stats": {
+            "tool_call_validity": {
+              "name": "tool_call_validity",
+              "count": 566,
+              "mean": 1.0,
+              "stderr": 0.0,
+              "std": 0.0,
+              "min": 1.0,
+              "max": 1.0
+            },
+            "redundant_tool_calls": {
+              "name": "redundant_tool_calls",
+              "count": 566,
+              "mean": 0.015606595995288576,
+              "stderr": 0.0034091399807542554,
+              "std": 0.08110601236123899,
+              "min": 0.0,
+              "max": 0.5
+            },
+            "agent_loop_detection": {
+              "name": "agent_loop_detection",
+              "count": 938,
+              "mean": 0.976545842217484,
+              "stderr": 0.004941454714596301,
+              "std": 0.15134087440354255,
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "unscored": {},
+          "fingerprint": "eb28844a63448c7c"
+        },
+        "abstention": {
+          "input_n": 916,
+          "stats": {
+            "abstention": {
+              "name": "abstention",
+              "count": 916,
+              "mean": 0.6724890829694323,
+              "stderr": 0.015506285394728028,
+              "std": 0.469305355026303,
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "unscored": {},
+          "fingerprint": "18476d233328add4"
+        },
+        "answerable_answered": {
+          "input_n": 485,
+          "stats": {
+            "lexical_groundedness": {
+              "name": "lexical_groundedness",
+              "count": 485,
+              "mean": 0.9841027939638428,
+              "stderr": 0.0055798877564291575,
+              "std": 0.12288428083590995,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "context_overlap": {
+              "name": "context_overlap",
+              "count": 485,
+              "mean": 0.6607118311242023,
+              "stderr": 0.015211021073239564,
+              "std": 0.33498799025324916,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "answer_overlap": {
+              "name": "answer_overlap",
+              "count": 485,
+              "mean": 0.7070419783033488,
+              "stderr": 0.01863112794062726,
+              "std": 0.41030803092909424,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "f1_score": {
+              "name": "f1_score",
+              "count": 485,
+              "mean": 0.6725121186382865,
+              "stderr": 0.01770219797567612,
+              "std": 0.38985047054924193,
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "unscored": {},
+          "fingerprint": "f55940028a06e898"
+        },
+        "answerable_context": {
+          "input_n": 563,
+          "stats": {
+            "context_coverage": {
+              "name": "context_coverage",
+              "count": 563,
+              "mean": 0.92810847251867,
+              "stderr": 0.009489848523608294,
+              "std": 0.22517152945161648,
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "unscored": {},
+          "fingerprint": "a1e425d635501795"
+        },
+        "answerable_first_search": {
+          "input_n": 304,
+          "stats": {
+            "hit_rate@3": {
+              "name": "hit_rate@3",
+              "count": 304,
+              "mean": 0.9572368421052632,
+              "stderr": 0.011604002006681767,
+              "std": 0.20232268835107606,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "precision@3": {
+              "name": "precision@3",
+              "count": 304,
+              "mean": 0.5175438596491228,
+              "stderr": 0.014758213683723317,
+              "std": 0.2573182481381163,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "recall@3": {
+              "name": "recall@3",
+              "count": 304,
+              "mean": 0.6590029797084818,
+              "stderr": 0.021134833315096392,
+              "std": 0.36849841043632764,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "mrr@3": {
+              "name": "mrr@3",
+              "count": 304,
+              "mean": 0.8689692982456141,
+              "stderr": 0.01569076623437647,
+              "std": 0.2735778574494691,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "average_precision@3": {
+              "name": "average_precision@3",
+              "count": 304,
+              "mean": 0.7412280701754387,
+              "stderr": 0.01897500260416858,
+              "std": 0.33084047521996784,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "ndcg@3": {
+              "name": "ndcg@3",
+              "count": 304,
+              "mean": 0.7903964912824988,
+              "stderr": 0.016624536824905792,
+              "std": 0.2898587040117395,
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "unscored": {},
+          "fingerprint": "a79d9b646d06c05e"
+        }
+      },
+      "by_suite": {
+        "r5t_squad": {
+          "rag_stress": {
+            "evidence_set_recall": {
+              "count": 227,
+              "mean": 0.8193832599118943
+            },
+            "citation_support": {
+              "count": 227,
+              "mean": 0.7929515418502202
+            },
+            "citation_precision": {
+              "count": 227,
+              "mean": 0.4008810572687225
+            },
+            "citation_recall": {
+              "count": 227,
+              "mean": 0.5748898678414097
+            }
+          },
+          "agent": {
+            "tool_call_validity": {
+              "count": 276,
+              "mean": 1.0
+            },
+            "redundant_tool_calls": {
+              "count": 276,
+              "mean": 0.01570048309178744
+            },
+            "agent_loop_detection": {
+              "count": 385,
+              "mean": 0.974025974025974
+            }
+          },
+          "abstention": {
+            "abstention": {
+              "count": 374,
+              "mean": 0.6577540106951871
+            }
+          },
+          "answerable_answered": {
+            "lexical_groundedness": {
+              "count": 180,
+              "mean": 0.9796296296296296
+            },
+            "context_overlap": {
+              "count": 180,
+              "mean": 0.561574074074074
+            },
+            "answer_overlap": {
+              "count": 180,
+              "mean": 0.49804829339143064
+            },
+            "f1_score": {
+              "count": 180,
+              "mean": 0.5196944706309142
+            }
+          },
+          "answerable_context": {
+            "context_coverage": {
+              "count": 227,
+              "mean": 0.9068652130455707
+            }
+          },
+          "answerable_first_search": {
+            "hit_rate@3": {
+              "count": 151,
+              "mean": 0.9403973509933775
+            },
+            "precision@3": {
+              "count": 151,
+              "mean": 0.41501103752759383
+            },
+            "recall@3": {
+              "count": 151,
+              "mean": 0.9172185430463576
+            },
+            "mrr@3": {
+              "count": 151,
+              "mean": 0.9161147902869757
+            },
+            "average_precision@3": {
+              "count": 151,
+              "mean": 0.8780353200883003
+            },
+            "ndcg@3": {
+              "count": 151,
+              "mean": 0.8974582554232278
+            }
+          }
+        },
+        "r5t_hotpot": {
+          "rag_stress": {
+            "evidence_set_recall": {
+              "count": 44,
+              "mean": 0.6363636363636364
+            },
+            "citation_support": {
+              "count": 44,
+              "mean": 0.5909090909090909
+            },
+            "citation_precision": {
+              "count": 44,
+              "mean": 0.375
+            },
+            "citation_recall": {
+              "count": 44,
+              "mean": 0.375
+            }
+          },
+          "agent": {
+            "tool_call_validity": {
+              "count": 82,
+              "mean": 1.0
+            },
+            "redundant_tool_calls": {
+              "count": 82,
+              "mean": 0.026422764227642274
+            },
+            "agent_loop_detection": {
+              "count": 82,
+              "mean": 0.926829268292683
+            }
+          },
+          "abstention": {
+            "abstention": {
+              "count": 77,
+              "mean": 0.6883116883116883
+            }
+          },
+          "answerable_answered": {
+            "lexical_groundedness": {
+              "count": 26,
+              "mean": 0.9230769230769231
+            },
+            "context_overlap": {
+              "count": 26,
+              "mean": 0.507051282051282
+            },
+            "answer_overlap": {
+              "count": 26,
+              "mean": 0.6230769230769231
+            },
+            "f1_score": {
+              "count": 26,
+              "mean": 0.6153846153846154
+            }
+          },
+          "answerable_context": {
+            "context_coverage": {
+              "count": 44,
+              "mean": 0.7651515151515151
+            }
+          },
+          "answerable_first_search": {
+            "hit_rate@3": {
+              "count": 44,
+              "mean": 0.9772727272727273
+            },
+            "precision@3": {
+              "count": 44,
+              "mean": 0.4621212121212121
+            },
+            "recall@3": {
+              "count": 44,
+              "mean": 0.6931818181818182
+            },
+            "mrr@3": {
+              "count": 44,
+              "mean": 0.875
+            },
+            "average_precision@3": {
+              "count": 44,
+              "mean": 0.6231060606060607
+            },
+            "ndcg@3": {
+              "count": 44,
+              "mean": 0.7017293420016961
+            }
+          }
+        },
+        "r5t_rgb": {
+          "rag_stress": {
+            "evidence_set_recall": {
+              "count": 292,
+              "mean": 0.9965753424657534
+            },
+            "citation_support": {
+              "count": 292,
+              "mean": 0.9554794520547946
+            },
+            "citation_precision": {
+              "count": 292,
+              "mean": 0.714041095890411
+            },
+            "citation_recall": {
+              "count": 292,
+              "mean": 0.2304314804251417
+            }
+          },
+          "agent": {
+            "tool_call_validity": {
+              "count": 208,
+              "mean": 1.0
+            },
+            "redundant_tool_calls": {
+              "count": 208,
+              "mean": 0.011217948717948716
+            },
+            "agent_loop_detection": {
+              "count": 471,
+              "mean": 0.9872611464968153
+            }
+          },
+          "abstention": {
+            "abstention": {
+              "count": 465,
+              "mean": 0.6817204301075269
+            }
+          },
+          "answerable_answered": {
+            "lexical_groundedness": {
+              "count": 279,
+              "mean": 0.9926757051581736
+            },
+            "context_overlap": {
+              "count": 279,
+              "mean": 0.7389912954429083
+            },
+            "answer_overlap": {
+              "count": 279,
+              "mean": 0.8497013142174432
+            },
+            "f1_score": {
+              "count": 279,
+              "mean": 0.7764278595914137
+            }
+          },
+          "answerable_context": {
+            "context_coverage": {
+              "count": 292,
+              "mean": 0.9691780821917808
+            }
+          },
+          "answerable_first_search": {
+            "hit_rate@3": {
+              "count": 109,
+              "mean": 0.9724770642201835
+            },
+            "precision@3": {
+              "count": 109,
+              "mean": 0.6819571865443425
+            },
+            "recall@3": {
+              "count": 109,
+              "mean": 0.2874945489117289
+            },
+            "mrr@3": {
+              "count": 109,
+              "mean": 0.8012232415902141
+            },
+            "average_precision@3": {
+              "count": 109,
+              "mean": 0.599388379204893
+            },
+            "ndcg@3": {
+              "count": 109,
+              "mean": 0.6778738140632806
+            }
+          }
+        }
+      }
+    },
+    "dora+FB": {
+      "input_episodes": 938,
+      "invalid_final_actions": 0,
+      "existing_benchmark_macro": 0.35909126518752044,
+      "cohorts": {
+        "rag_stress": {
+          "input_n": 938,
+          "stats": {
+            "evidence_set_recall": {
+              "name": "evidence_set_recall",
+              "count": 563,
+              "mean": 0.8969804618117229,
+              "stderr": 0.012811414824451521,
+              "std": 0.30398439588201104,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "citation_support": {
+              "name": "citation_support",
+              "count": 563,
+              "mean": 0.8614564831261101,
+              "stderr": 0.014559805666321148,
+              "std": 0.3454695511996739,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "citation_precision": {
+              "name": "citation_precision",
+              "count": 563,
+              "mean": 0.5612788632326821,
+              "stderr": 0.01590029230299214,
+              "std": 0.3772761101176337,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "citation_recall": {
+              "name": "citation_recall",
+              "count": 563,
+              "mean": 0.3806145511263612,
+              "stderr": 0.015598388243700955,
+              "std": 0.37011264500972063,
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "unscored": {
+            "evidence_set_recall": {
+              "unknown": 0,
+              "not_tested": 375
+            },
+            "citation_support": {
+              "unknown": 0,
+              "not_tested": 375
+            }
+          },
+          "fingerprint": "ecf371b7c0a4ac95"
+        },
+        "agent": {
+          "input_n": 938,
+          "stats": {
+            "tool_call_validity": {
+              "name": "tool_call_validity",
+              "count": 566,
+              "mean": 1.0,
+              "stderr": 0.0,
+              "std": 0.0,
+              "min": 1.0,
+              "max": 1.0
+            },
+            "redundant_tool_calls": {
+              "name": "redundant_tool_calls",
+              "count": 566,
+              "mean": 0.015606595995288576,
+              "stderr": 0.0034091399807542554,
+              "std": 0.08110601236123899,
+              "min": 0.0,
+              "max": 0.5
+            },
+            "agent_loop_detection": {
+              "name": "agent_loop_detection",
+              "count": 938,
+              "mean": 0.976545842217484,
+              "stderr": 0.004941454714596301,
+              "std": 0.15134087440354255,
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "unscored": {},
+          "fingerprint": "b24464308953b966"
+        },
+        "abstention": {
+          "input_n": 938,
+          "stats": {
+            "abstention": {
+              "name": "abstention",
+              "count": 938,
+              "mean": 0.6705756929637526,
+              "stderr": 0.015346180600715673,
+              "std": 0.4700041839919466,
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "unscored": {},
+          "fingerprint": "0226507cd597174a"
+        },
+        "answerable_answered": {
+          "input_n": 485,
+          "stats": {
+            "lexical_groundedness": {
+              "name": "lexical_groundedness",
+              "count": 485,
+              "mean": 0.9841027939638428,
+              "stderr": 0.0055798877564291575,
+              "std": 0.12288428083590995,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "context_overlap": {
+              "name": "context_overlap",
+              "count": 485,
+              "mean": 0.6607118311242023,
+              "stderr": 0.015211021073239564,
+              "std": 0.33498799025324916,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "answer_overlap": {
+              "name": "answer_overlap",
+              "count": 485,
+              "mean": 0.7070419783033488,
+              "stderr": 0.01863112794062726,
+              "std": 0.41030803092909424,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "f1_score": {
+              "name": "f1_score",
+              "count": 485,
+              "mean": 0.6725121186382865,
+              "stderr": 0.01770219797567612,
+              "std": 0.38985047054924193,
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "unscored": {},
+          "fingerprint": "f55940028a06e898"
+        },
+        "answerable_context": {
+          "input_n": 563,
+          "stats": {
+            "context_coverage": {
+              "name": "context_coverage",
+              "count": 563,
+              "mean": 0.92810847251867,
+              "stderr": 0.009489848523608294,
+              "std": 0.22517152945161648,
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "unscored": {},
+          "fingerprint": "0e6e92bc6b8fe821"
+        },
+        "answerable_first_search": {
+          "input_n": 304,
+          "stats": {
+            "hit_rate@3": {
+              "name": "hit_rate@3",
+              "count": 304,
+              "mean": 0.9572368421052632,
+              "stderr": 0.011604002006681767,
+              "std": 0.20232268835107606,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "precision@3": {
+              "name": "precision@3",
+              "count": 304,
+              "mean": 0.5175438596491228,
+              "stderr": 0.014758213683723317,
+              "std": 0.2573182481381163,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "recall@3": {
+              "name": "recall@3",
+              "count": 304,
+              "mean": 0.6590029797084818,
+              "stderr": 0.021134833315096392,
+              "std": 0.36849841043632764,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "mrr@3": {
+              "name": "mrr@3",
+              "count": 304,
+              "mean": 0.8689692982456141,
+              "stderr": 0.01569076623437647,
+              "std": 0.2735778574494691,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "average_precision@3": {
+              "name": "average_precision@3",
+              "count": 304,
+              "mean": 0.7412280701754387,
+              "stderr": 0.01897500260416858,
+              "std": 0.33084047521996784,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "ndcg@3": {
+              "name": "ndcg@3",
+              "count": 304,
+              "mean": 0.7903964912824988,
+              "stderr": 0.016624536824905792,
+              "std": 0.2898587040117395,
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "unscored": {},
+          "fingerprint": "a290a0203c6ab9cc"
+        }
+      },
+      "by_suite": {
+        "r5t_squad": {
+          "rag_stress": {
+            "evidence_set_recall": {
+              "count": 227,
+              "mean": 0.8193832599118943
+            },
+            "citation_support": {
+              "count": 227,
+              "mean": 0.7929515418502202
+            },
+            "citation_precision": {
+              "count": 227,
+              "mean": 0.4008810572687225
+            },
+            "citation_recall": {
+              "count": 227,
+              "mean": 0.5748898678414097
+            }
+          },
+          "agent": {
+            "tool_call_validity": {
+              "count": 276,
+              "mean": 1.0
+            },
+            "redundant_tool_calls": {
+              "count": 276,
+              "mean": 0.01570048309178744
+            },
+            "agent_loop_detection": {
+              "count": 385,
+              "mean": 0.974025974025974
+            }
+          },
+          "abstention": {
+            "abstention": {
+              "count": 385,
+              "mean": 0.6571428571428571
+            }
+          },
+          "answerable_answered": {
+            "lexical_groundedness": {
+              "count": 180,
+              "mean": 0.9796296296296296
+            },
+            "context_overlap": {
+              "count": 180,
+              "mean": 0.561574074074074
+            },
+            "answer_overlap": {
+              "count": 180,
+              "mean": 0.49804829339143064
+            },
+            "f1_score": {
+              "count": 180,
+              "mean": 0.5196944706309142
+            }
+          },
+          "answerable_context": {
+            "context_coverage": {
+              "count": 227,
+              "mean": 0.9068652130455707
+            }
+          },
+          "answerable_first_search": {
+            "hit_rate@3": {
+              "count": 151,
+              "mean": 0.9403973509933775
+            },
+            "precision@3": {
+              "count": 151,
+              "mean": 0.41501103752759383
+            },
+            "recall@3": {
+              "count": 151,
+              "mean": 0.9172185430463576
+            },
+            "mrr@3": {
+              "count": 151,
+              "mean": 0.9161147902869757
+            },
+            "average_precision@3": {
+              "count": 151,
+              "mean": 0.8780353200883003
+            },
+            "ndcg@3": {
+              "count": 151,
+              "mean": 0.8974582554232278
+            }
+          }
+        },
+        "r5t_hotpot": {
+          "rag_stress": {
+            "evidence_set_recall": {
+              "count": 44,
+              "mean": 0.6363636363636364
+            },
+            "citation_support": {
+              "count": 44,
+              "mean": 0.5909090909090909
+            },
+            "citation_precision": {
+              "count": 44,
+              "mean": 0.375
+            },
+            "citation_recall": {
+              "count": 44,
+              "mean": 0.375
+            }
+          },
+          "agent": {
+            "tool_call_validity": {
+              "count": 82,
+              "mean": 1.0
+            },
+            "redundant_tool_calls": {
+              "count": 82,
+              "mean": 0.026422764227642274
+            },
+            "agent_loop_detection": {
+              "count": 82,
+              "mean": 0.926829268292683
+            }
+          },
+          "abstention": {
+            "abstention": {
+              "count": 82,
+              "mean": 0.6829268292682927
+            }
+          },
+          "answerable_answered": {
+            "lexical_groundedness": {
+              "count": 26,
+              "mean": 0.9230769230769231
+            },
+            "context_overlap": {
+              "count": 26,
+              "mean": 0.507051282051282
+            },
+            "answer_overlap": {
+              "count": 26,
+              "mean": 0.6230769230769231
+            },
+            "f1_score": {
+              "count": 26,
+              "mean": 0.6153846153846154
+            }
+          },
+          "answerable_context": {
+            "context_coverage": {
+              "count": 44,
+              "mean": 0.7651515151515151
+            }
+          },
+          "answerable_first_search": {
+            "hit_rate@3": {
+              "count": 44,
+              "mean": 0.9772727272727273
+            },
+            "precision@3": {
+              "count": 44,
+              "mean": 0.4621212121212121
+            },
+            "recall@3": {
+              "count": 44,
+              "mean": 0.6931818181818182
+            },
+            "mrr@3": {
+              "count": 44,
+              "mean": 0.875
+            },
+            "average_precision@3": {
+              "count": 44,
+              "mean": 0.6231060606060607
+            },
+            "ndcg@3": {
+              "count": 44,
+              "mean": 0.7017293420016961
+            }
+          }
+        },
+        "r5t_rgb": {
+          "rag_stress": {
+            "evidence_set_recall": {
+              "count": 292,
+              "mean": 0.9965753424657534
+            },
+            "citation_support": {
+              "count": 292,
+              "mean": 0.9554794520547946
+            },
+            "citation_precision": {
+              "count": 292,
+              "mean": 0.714041095890411
+            },
+            "citation_recall": {
+              "count": 292,
+              "mean": 0.2304314804251417
+            }
+          },
+          "agent": {
+            "tool_call_validity": {
+              "count": 208,
+              "mean": 1.0
+            },
+            "redundant_tool_calls": {
+              "count": 208,
+              "mean": 0.011217948717948716
+            },
+            "agent_loop_detection": {
+              "count": 471,
+              "mean": 0.9872611464968153
+            }
+          },
+          "abstention": {
+            "abstention": {
+              "count": 471,
+              "mean": 0.6794055201698513
+            }
+          },
+          "answerable_answered": {
+            "lexical_groundedness": {
+              "count": 279,
+              "mean": 0.9926757051581736
+            },
+            "context_overlap": {
+              "count": 279,
+              "mean": 0.7389912954429083
+            },
+            "answer_overlap": {
+              "count": 279,
+              "mean": 0.8497013142174432
+            },
+            "f1_score": {
+              "count": 279,
+              "mean": 0.7764278595914137
+            }
+          },
+          "answerable_context": {
+            "context_coverage": {
+              "count": 292,
+              "mean": 0.9691780821917808
+            }
+          },
+          "answerable_first_search": {
+            "hit_rate@3": {
+              "count": 109,
+              "mean": 0.9724770642201835
+            },
+            "precision@3": {
+              "count": 109,
+              "mean": 0.6819571865443425
+            },
+            "recall@3": {
+              "count": 109,
+              "mean": 0.2874945489117289
+            },
+            "mrr@3": {
+              "count": 109,
+              "mean": 0.8012232415902141
+            },
+            "average_precision@3": {
+              "count": 109,
+              "mean": 0.599388379204893
+            },
+            "ndcg@3": {
+              "count": 109,
+              "mean": 0.6778738140632806
+            }
+          }
+        }
+      }
+    },
+    "dora+FB+V": {
+      "input_episodes": 938,
+      "invalid_final_actions": 0,
+      "existing_benchmark_macro": 0.47340761508646817,
+      "cohorts": {
+        "rag_stress": {
+          "input_n": 938,
+          "stats": {
+            "evidence_set_recall": {
+              "name": "evidence_set_recall",
+              "count": 563,
+              "mean": 0.8969804618117229,
+              "stderr": 0.012811414824451521,
+              "std": 0.30398439588201104,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "citation_support": {
+              "name": "citation_support",
+              "count": 563,
+              "mean": 0.6962699822380106,
+              "stderr": 0.019381103304892216,
+              "std": 0.45986747446660214,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "citation_precision": {
+              "name": "citation_precision",
+              "count": 563,
+              "mean": 0.4911190053285968,
+              "stderr": 0.017262569864768054,
+              "std": 0.4095997158484939,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "citation_recall": {
+              "name": "citation_recall",
+              "count": 563,
+              "mean": 0.32535490057363786,
+              "stderr": 0.015589136027593261,
+              "std": 0.36989311193217955,
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "unscored": {
+            "evidence_set_recall": {
+              "unknown": 0,
+              "not_tested": 375
+            },
+            "citation_support": {
+              "unknown": 0,
+              "not_tested": 375
+            }
+          },
+          "fingerprint": "64a44ac401f9ad99"
+        },
+        "agent": {
+          "input_n": 938,
+          "stats": {
+            "tool_call_validity": {
+              "name": "tool_call_validity",
+              "count": 566,
+              "mean": 1.0,
+              "stderr": 0.0,
+              "std": 0.0,
+              "min": 1.0,
+              "max": 1.0
+            },
+            "redundant_tool_calls": {
+              "name": "redundant_tool_calls",
+              "count": 566,
+              "mean": 0.015606595995288576,
+              "stderr": 0.0034091399807542554,
+              "std": 0.08110601236123899,
+              "min": 0.0,
+              "max": 0.5
+            },
+            "agent_loop_detection": {
+              "name": "agent_loop_detection",
+              "count": 938,
+              "mean": 0.976545842217484,
+              "stderr": 0.004941454714596301,
+              "std": 0.15134087440354255,
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "unscored": {},
+          "fingerprint": "91b03ec39a973ea9"
+        },
+        "abstention": {
+          "input_n": 938,
+          "stats": {
+            "abstention": {
+              "name": "abstention",
+              "count": 938,
+              "mean": 0.7196162046908315,
+              "stderr": 0.014666466786996344,
+              "std": 0.44918673470750975,
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "unscored": {},
+          "fingerprint": "1488b20a41cd87fc"
+        },
+        "answerable_answered": {
+          "input_n": 392,
+          "stats": {
+            "lexical_groundedness": {
+              "name": "lexical_groundedness",
+              "count": 392,
+              "mean": 0.9948979591836735,
+              "stderr": 0.0035984726053446612,
+              "std": 0.07124612267229052,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "context_overlap": {
+              "name": "context_overlap",
+              "count": 392,
+              "mean": 0.7059493440233235,
+              "stderr": 0.01640814772424313,
+              "std": 0.32486475063064213,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "answer_overlap": {
+              "name": "answer_overlap",
+              "count": 392,
+              "mean": 0.7813772532822653,
+              "stderr": 0.018219610745180324,
+              "std": 0.36072988863789623,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "f1_score": {
+              "name": "f1_score",
+              "count": 392,
+              "mean": 0.7436693304580841,
+              "stderr": 0.017363087396717956,
+              "std": 0.34377159153551046,
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "unscored": {},
+          "fingerprint": "31ce4c7f76df6578"
+        },
+        "answerable_context": {
+          "input_n": 563,
+          "stats": {
+            "context_coverage": {
+              "name": "context_coverage",
+              "count": 563,
+              "mean": 0.92810847251867,
+              "stderr": 0.009489848523608294,
+              "std": 0.22517152945161648,
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "unscored": {},
+          "fingerprint": "5a066d4d1c997188"
+        },
+        "answerable_first_search": {
+          "input_n": 304,
+          "stats": {
+            "hit_rate@3": {
+              "name": "hit_rate@3",
+              "count": 304,
+              "mean": 0.9572368421052632,
+              "stderr": 0.011604002006681767,
+              "std": 0.20232268835107606,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "precision@3": {
+              "name": "precision@3",
+              "count": 304,
+              "mean": 0.5175438596491228,
+              "stderr": 0.014758213683723317,
+              "std": 0.2573182481381163,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "recall@3": {
+              "name": "recall@3",
+              "count": 304,
+              "mean": 0.6590029797084818,
+              "stderr": 0.021134833315096392,
+              "std": 0.36849841043632764,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "mrr@3": {
+              "name": "mrr@3",
+              "count": 304,
+              "mean": 0.8689692982456141,
+              "stderr": 0.01569076623437647,
+              "std": 0.2735778574494691,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "average_precision@3": {
+              "name": "average_precision@3",
+              "count": 304,
+              "mean": 0.7412280701754387,
+              "stderr": 0.01897500260416858,
+              "std": 0.33084047521996784,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "ndcg@3": {
+              "name": "ndcg@3",
+              "count": 304,
+              "mean": 0.7903964912824988,
+              "stderr": 0.016624536824905792,
+              "std": 0.2898587040117395,
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "unscored": {},
+          "fingerprint": "9f2f08287bae1a39"
+        }
+      },
+      "by_suite": {
+        "r5t_squad": {
+          "rag_stress": {
+            "evidence_set_recall": {
+              "count": 227,
+              "mean": 0.8193832599118943
+            },
+            "citation_support": {
+              "count": 227,
+              "mean": 0.5947136563876652
+            },
+            "citation_precision": {
+              "count": 227,
+              "mean": 0.3237885462555066
+            },
+            "citation_recall": {
+              "count": 227,
+              "mean": 0.4779735682819383
+            }
+          },
+          "agent": {
+            "tool_call_validity": {
+              "count": 276,
+              "mean": 1.0
+            },
+            "redundant_tool_calls": {
+              "count": 276,
+              "mean": 0.01570048309178744
+            },
+            "agent_loop_detection": {
+              "count": 385,
+              "mean": 0.974025974025974
+            }
+          },
+          "abstention": {
+            "abstention": {
+              "count": 385,
+              "mean": 0.6701298701298701
+            }
+          },
+          "answerable_answered": {
+            "lexical_groundedness": {
+              "count": 135,
+              "mean": 1.0
+            },
+            "context_overlap": {
+              "count": 135,
+              "mean": 0.6153615520282187
+            },
+            "answer_overlap": {
+              "count": 135,
+              "mean": 0.5990114811356642
+            },
+            "f1_score": {
+              "count": 135,
+              "mean": 0.6236667015819597
+            }
+          },
+          "answerable_context": {
+            "context_coverage": {
+              "count": 227,
+              "mean": 0.9068652130455707
+            }
+          },
+          "answerable_first_search": {
+            "hit_rate@3": {
+              "count": 151,
+              "mean": 0.9403973509933775
+            },
+            "precision@3": {
+              "count": 151,
+              "mean": 0.41501103752759383
+            },
+            "recall@3": {
+              "count": 151,
+              "mean": 0.9172185430463576
+            },
+            "mrr@3": {
+              "count": 151,
+              "mean": 0.9161147902869757
+            },
+            "average_precision@3": {
+              "count": 151,
+              "mean": 0.8780353200883003
+            },
+            "ndcg@3": {
+              "count": 151,
+              "mean": 0.8974582554232278
+            }
+          }
+        },
+        "r5t_hotpot": {
+          "rag_stress": {
+            "evidence_set_recall": {
+              "count": 44,
+              "mean": 0.6363636363636364
+            },
+            "citation_support": {
+              "count": 44,
+              "mean": 0.4318181818181818
+            },
+            "citation_precision": {
+              "count": 44,
+              "mean": 0.3181818181818182
+            },
+            "citation_recall": {
+              "count": 44,
+              "mean": 0.3181818181818182
+            }
+          },
+          "agent": {
+            "tool_call_validity": {
+              "count": 82,
+              "mean": 1.0
+            },
+            "redundant_tool_calls": {
+              "count": 82,
+              "mean": 0.026422764227642274
+            },
+            "agent_loop_detection": {
+              "count": 82,
+              "mean": 0.926829268292683
+            }
+          },
+          "abstention": {
+            "abstention": {
+              "count": 82,
+              "mean": 0.6341463414634146
+            }
+          },
+          "answerable_answered": {
+            "lexical_groundedness": {
+              "count": 19,
+              "mean": 0.8947368421052632
+            },
+            "context_overlap": {
+              "count": 19,
+              "mean": 0.5745614035087719
+            },
+            "answer_overlap": {
+              "count": 19,
+              "mean": 0.6947368421052631
+            },
+            "f1_score": {
+              "count": 19,
+              "mean": 0.6842105263157895
+            }
+          },
+          "answerable_context": {
+            "context_coverage": {
+              "count": 44,
+              "mean": 0.7651515151515151
+            }
+          },
+          "answerable_first_search": {
+            "hit_rate@3": {
+              "count": 44,
+              "mean": 0.9772727272727273
+            },
+            "precision@3": {
+              "count": 44,
+              "mean": 0.4621212121212121
+            },
+            "recall@3": {
+              "count": 44,
+              "mean": 0.6931818181818182
+            },
+            "mrr@3": {
+              "count": 44,
+              "mean": 0.875
+            },
+            "average_precision@3": {
+              "count": 44,
+              "mean": 0.6231060606060607
+            },
+            "ndcg@3": {
+              "count": 44,
+              "mean": 0.7017293420016961
+            }
+          }
+        },
+        "r5t_rgb": {
+          "rag_stress": {
+            "evidence_set_recall": {
+              "count": 292,
+              "mean": 0.9965753424657534
+            },
+            "citation_support": {
+              "count": 292,
+              "mean": 0.815068493150685
+            },
+            "citation_precision": {
+              "count": 292,
+              "mean": 0.6472602739726028
+            },
+            "citation_recall": {
+              "count": 292,
+              "mean": 0.20779044185944556
+            }
+          },
+          "agent": {
+            "tool_call_validity": {
+              "count": 208,
+              "mean": 1.0
+            },
+            "redundant_tool_calls": {
+              "count": 208,
+              "mean": 0.011217948717948716
+            },
+            "agent_loop_detection": {
+              "count": 471,
+              "mean": 0.9872611464968153
+            }
+          },
+          "abstention": {
+            "abstention": {
+              "count": 471,
+              "mean": 0.7749469214437368
+            }
+          },
+          "answerable_answered": {
+            "lexical_groundedness": {
+              "count": 238,
+              "mean": 1.0
+            },
+            "context_overlap": {
+              "count": 238,
+              "mean": 0.7678221288515407
+            },
+            "answer_overlap": {
+              "count": 238,
+              "mean": 0.8917366946778711
+            },
+            "f1_score": {
+              "count": 238,
+              "mean": 0.8164847597731277
+            }
+          },
+          "answerable_context": {
+            "context_coverage": {
+              "count": 292,
+              "mean": 0.9691780821917808
+            }
+          },
+          "answerable_first_search": {
+            "hit_rate@3": {
+              "count": 109,
+              "mean": 0.9724770642201835
+            },
+            "precision@3": {
+              "count": 109,
+              "mean": 0.6819571865443425
+            },
+            "recall@3": {
+              "count": 109,
+              "mean": 0.2874945489117289
+            },
+            "mrr@3": {
+              "count": 109,
+              "mean": 0.8012232415902141
+            },
+            "average_precision@3": {
+              "count": 109,
+              "mean": 0.599388379204893
+            },
+            "ndcg@3": {
+              "count": 109,
+              "mean": 0.6778738140632806
+            }
+          }
+        }
+      }
+    }
+  },
+  "untested": {
+    "faithfulness/context_precision/context_recall/context_relevance/answer_relevancy/response_groundedness/hallucination/task_completion/tool_selection": "Requires an LLM judge; no judge backend was configured or called.",
+    "tool_call_f1/trajectory_match/parallel_tool_calls": "No unique reference tool-call route or parallel-call ground truth in these traces.",
+    "wrong_version_rate/freshness/acl_compliance/context_retention/numeric_accuracy/tool_permission": "Required versions, dates, permission policies, conversational anchors or typed numeric labels are absent. The citation scorer's default wrong_version_rate=0 is not reported as a measured temporal result.",
+    "security/toxicity/bias/guard/pairwise/perplexity": "Require their own tasks, labels, models, comparisons or logits; not inferred from RAG traces."
+  },
+  "notes": [
+    "All 938 original episodes are audited; the separate scorer-v2 exclusions and retained counts are recorded in computed_round5.json and can vary by checkpoint.",
+    "Citation support checks existence/current-version of mapped document spans, not semantic entailment. These traces have document ids, so spans cover the visible prefix (800 characters maximum).",
+    "RGB alternative positives are OR evidence sets; historical benchmark scores are preserved.",
+    "This diagnostic uses recorded-v2; compare other models only after rescoring their traces with the same adapter.",
+    "Lexical scores are token-overlap diagnostics, not LLM-judged faithfulness. Answer scores use the canonical answer, not alias matching.",
+    "First-search ranking is measured only for answerable episodes with a search; supplied context and later searches are excluded from that ranked list.",
+    "Abstention accuracy is measured on valid final actions; invalid actions are counted separately.",
+    "Precomputed scoring latency is not model inference latency; no fresh inference performance claim is made."
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "assets_sha256": "6608df676c91cdd457045167ebeb061c35dc44d3240bb6c372f1710b7300d6fc",
+  "checkpoints": {
+    "base": {
+      "repo": "CohereLabs/tiny-aya-global",
+      "revision": "af89d219b53ed9b13b8a4645f9c8028973510324",
+      "sha256": {
+        "model-00001-of-00002.safetensors": "0590022d0efe06f12e08e1e94302f069dff404341b426f7435c6303725635fb1",
+        "model-00002-of-00002.safetensors": "2ac3809931d113785058809f27775620e0b8aec6fbc7e163c9c09c08b5f90dab",
+        "config.json": "458a9265b6a96e5ad4bbe1857716bd69e434f062f8b32fae48f5f06197d26384",
+        "tokenizer.json": "2227ea9c52e8afb3f98bfed2679008b275f2664de69dfde174b374389eb0225d",
+        "tokenizer_config.json": "fb56a3ef7659346aae196a2ab877355f1e7fd871c36843f709bb2e23c606d972"
+      }
+    },
+    "adapters": {
+      "main": {
+        "repo": "BMEscanor/against-the-safety-tiny-aya-rag-main",
+        "revision": "269ffae880ec53885a7279e9fd6b667219fff31a",
+        "sha256": {
+          "adapter_model.safetensors": "5834043354893027625a7198341616ca904393f6dc29d993912da8a1d7a8916a",
+          "adapter_config.json": "d1bdce4764c296dfee33f3e35f8ab1811a69c010b97c3e44ceae54194530064a"
+        }
+      },
+      "candA": {
+        "repo": "BMEscanor/against-the-safety-tiny-aya-rag-cand-a",
+        "revision": "7b7a5e07ece926fa279b6a9331b914d875d75fff",
+        "sha256": {
+          "adapter_model.safetensors": "8bc3c51a3d32b0b2725a877d4ea08a09b55ab16d01775d2faf61199d28b4003d",
+          "adapter_config.json": "c6343056929b86fc3137ce92be8b3da1ffc7ccd4637fd6738671730b53adc565"
+        }
+      }
+    }
+  },
+  "systems": [
+    "dora"
+  ],
+  "batch_size": 4,
+  "concurrency": 8,
+  "verifier_batch_size": 2,
+  "workers": 4,
+  "checker": "main/A/0.5",
+  "dora_checkpoint": {
+    "path": "/kaggle/input/notebooks/mlsingh1234/tranining-2/ats-evidence/dora_evidence_order/dora/adapter",
+    "sha256": {
+      "adapter_config.json": "012204738f8c8f3dab6937bc8cfa01cbbb34b1df520a0ccb2f45e8eb4a44ef29",
+      "adapter_model.safetensors": "89552acaf005b840318d75feb98b9a4522110e84ad62a2415f98815db2b6b436"
+    }
+  }
+}

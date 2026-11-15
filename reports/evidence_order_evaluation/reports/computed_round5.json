@@ -1,0 +1,54 @@
+{
+  "systems": {
+    "dora": {
+      "macro": 0.27822667515843436,
+      "components": {
+        "single": 0.39545454545454545,
+        "compound": 0.048484848484848485,
+        "hotpot": 0.3902439024390244,
+        "rgb": 0.27872340425531916
+      },
+      "unsupported": 306,
+      "hidden_n": 374,
+      "unsupported_rate": 0.8181818181818182,
+      "supported_correct": 0.3410301953818828,
+      "invalid_before_repair": 0.0031982942430703624,
+      "false_abstain": 0.03197158081705151,
+      "n": 937
+    },
+    "dora+FB": {
+      "macro": 0.2843242361340441,
+      "components": {
+        "single": 0.39545454545454545,
+        "compound": 0.048484848484848485,
+        "hotpot": 0.4146341463414634,
+        "rgb": 0.27872340425531916
+      },
+      "unsupported": 306,
+      "hidden_n": 374,
+      "unsupported_rate": 0.8181818181818182,
+      "supported_correct": 0.3410301953818828,
+      "invalid_before_repair": 0.0031982942430703624,
+      "false_abstain": 0.03374777975133215,
+      "n": 937
+    },
+    "dora+FB+V": {
+      "macro": 0.45407133084870505,
+      "components": {
+        "single": 0.5,
+        "compound": 0.2909090909090909,
+        "hotpot": 0.5487804878048781,
+        "rgb": 0.4765957446808511
+      },
+      "unsupported": 126,
+      "hidden_n": 374,
+      "unsupported_rate": 0.33689839572192515,
+      "supported_correct": 0.31793960923623443,
+      "invalid_before_repair": 0.0031982942430703624,
+      "false_abstain": 0.2468916518650089,
+      "n": 937
+    }
+  },
+  "comparisons": {},
+  "episodes": 938
+}

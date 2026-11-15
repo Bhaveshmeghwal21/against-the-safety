@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="395" viewBox="0 0 920 395" role="img" aria-labelledby="title desc" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<title id="title">DoRA training: elapsed time versus total compute</title>
+<desc id="desc">Training-only resource records. The latest checkpoint includes its four-L4 parent&#x27;s training plus continuation. This is not a controlled scaling experiment and excludes preparation and evaluation.</desc>
+<rect width="920" height="395" fill="#ffffff"/>
+<text x="30" y="34" font-size="23" fill="#172b3a" font-weight="700" text-anchor="start">DoRA training: elapsed time versus total compute</text>
+<text x="30" y="58" font-size="13" fill="#546b79" font-weight="400" text-anchor="start">Training-loop measurements · latest checkpoint includes its parent</text>
+<text x="245" y="100" font-size="16" fill="#172b3a" font-weight="700" text-anchor="start">Sequential elapsed minutes</text>
+<text x="245" y="121" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Training loops only</text>
+<text x="583" y="100" font-size="16" fill="#172b3a" font-weight="700" text-anchor="start">Allocated GPU-hours</text>
+<text x="583" y="121" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Wall hours × GPU count</text>
+<line x1="245.00" x2="245.00" y1="138" y2="277" stroke="#dfe8e8"/>
+<text x="245.00" y="298" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">0</text>
+<line x1="362.50" x2="362.50" y1="138" y2="277" stroke="#dfe8e8"/>
+<text x="362.50" y="298" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">125</text>
+<line x1="480.00" x2="480.00" y1="138" y2="277" stroke="#dfe8e8"/>
+<text x="480.00" y="298" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">250</text>
+<line x1="583.00" x2="583.00" y1="138" y2="277" stroke="#dfe8e8"/>
+<text x="583.00" y="298" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">0</text>
+<line x1="700.50" x2="700.50" y1="138" y2="277" stroke="#dfe8e8"/>
+<text x="700.50" y="298" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">3</text>
+<line x1="818.00" x2="818.00" y1="138" y2="277" stroke="#dfe8e8"/>
+<text x="818.00" y="298" font-size="12" fill="#546b79" font-weight="400" text-anchor="middle">6</text>
+<text x="226" y="173" font-size="13" fill="#172b3a" font-weight="600" text-anchor="end">Modal DoRA (1 L4)</text>
+<rect x="245" y="156" width="205.94" height="23" rx="4" fill="#c27b34"/>
+<text x="457.94" y="173" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">219.08</text>
+<rect x="583" y="156" width="143.01" height="23" rx="4" fill="#c27b34"/>
+<text x="733.01" y="173" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">3.6514</text>
+<text x="226" y="216" font-size="13" fill="#172b3a" font-weight="600" text-anchor="end">Kaggle parent (4 L4)</text>
+<rect x="245" y="199" width="58.96" height="23" rx="4" fill="#8055a1"/>
+<text x="310.96" y="216" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">62.73</text>
+<rect x="583" y="199" width="163.79" height="23" rx="4" fill="#8055a1"/>
+<text x="753.79" y="216" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">4.1819</text>
+<text x="226" y="259" font-size="13" fill="#172b3a" font-weight="600" text-anchor="end">Evidence-order lineage</text>
+<rect x="245" y="242" width="69.10" height="23" rx="4" fill="#b05260"/>
+<text x="321.10" y="259" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">73.51</text>
+<rect x="583" y="242" width="191.94" height="23" rx="4" fill="#b05260"/>
+<text x="781.94" y="259" font-size="13" fill="#172b3a" font-weight="700" text-anchor="start">4.9006</text>
+<text x="30" y="330" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Continuation alone: 10.78 minutes on 4 L4s = 0.7187 GPU-hours.</text>
+<text x="30" y="352" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Different LR, data and continuation histories; not a controlled GPU-scaling or equal-training-budget experiment.</text>
+<text x="30" y="374" font-size="12" fill="#546b79" font-weight="400" text-anchor="start">Preparation, loading, DEV/final evaluation, failed runs and idle allocation are excluded.</text>
+</svg>
