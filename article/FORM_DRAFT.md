@@ -8,7 +8,7 @@ Form: https://tally.so/r/o9E0Ve. Due 15 November 2026, 11:59 PM AoE (Monday 16 N
 | Lexsi repositories used | AgentTune (search tool and keyword index, EventLog and TrajectoryStore recordings, `create_distill_trainer` with our QLoRA trainer, `qa_metrics`), AuditKIT (each episode scored as an `ak.Sample` with a `RAGTrace`: evidence-set recall, citation support, abstention, tool-call validity, redundant calls, loop detection, freshness). Details: README section "The two Lexsi tools" |
 | Model collection | https://huggingface.co/collections/BMEscanor/against-the-safety-tiny-aya-rag-adapters-6aec1fda812ed14d9f60bfbc |
 | Dataset collection | https://huggingface.co/collections/BMEscanor/against-the-safety-rag-episodes-traces-and-demo-6aec1fdb994e3b036c6c958d |
-| Write-up | Hugging Face Article (URL to add after posting); source in `article/ARTICLE.md` |
+| Write-up | GitHub README (Hugging Face Articles need a Pro account, and the rules accept a README): https://github.com/Bhaveshmeghwal21/against-the-safety#readme; the long version is `article/ARTICLE.md` in the same repository |
 | GitHub repository | https://github.com/Bhaveshmeghwal21/against-the-safety (must be public before submitting) |
 | Demo | Trace viewer https://huggingface.co/spaces/BMEscanor/against-the-safety-trace-viewer (recorded episodes); live web demo `scripts/demo_app.py` on a GPU |
 | Registered email, Discord username | to fill in by the team |

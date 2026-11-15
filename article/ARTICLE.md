@@ -234,7 +234,7 @@ The submitted adapter trained for 3.9 T4 GPU-hours on Kaggle's free quota (about
 
 ## 9. What more credits would enable
 
-Quote-first answer targets, so the model copies the supporting span before answering. Balanced answer and refusal data in both directions. The semicolon format for two-part answers stated in the prompt, and far more than 488 parent questions. Retraining the checker on independent labelled data, judged on a fresh sealed test under a new pre-registration.
+Quote-first answer targets, so the model copies the supporting span before answering. Balanced answer and refusal data in both directions. The semicolon format for two-part answers stated in the prompt, and far more than 488 parent questions. Retraining the checker on independent labelled data, judged on a fresh sealed test under a new pre-registration. A second Hindi attempt with more English replay, on fresh tests. A hand-labelled check of the hidden-evidence flags with a judge-based faithfulness score calibrated on it, and single-request latency, neither of which we measured.
 
 ## 10. Reproduction and artifacts
 

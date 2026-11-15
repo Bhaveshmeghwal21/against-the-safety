@@ -4,7 +4,7 @@
 
 Team Against-the-safety · Lexsi AI Safety and Alignment Hackathon · Track 3 (agentic fine-tuning) · Problem statement 4: fine-tuning for retrieval-augmented generation
 
-[Models](https://huggingface.co/collections/BMEscanor/against-the-safety-tiny-aya-rag-adapters-6aec1fda812ed14d9f60bfbc) · [Data and traces](https://huggingface.co/collections/BMEscanor/against-the-safety-rag-episodes-traces-and-demo-6aec1fdb994e3b036c6c958d) · [Trace viewer](https://huggingface.co/spaces/BMEscanor/against-the-safety-trace-viewer) · [Article](article/ARTICLE.md) · [Demo](#try-it)
+[Models](https://huggingface.co/collections/BMEscanor/against-the-safety-tiny-aya-rag-adapters-6aec1fda812ed14d9f60bfbc) · [Data and traces](https://huggingface.co/collections/BMEscanor/against-the-safety-rag-episodes-traces-and-demo-6aec1fdb994e3b036c6c958d) · [Trace viewer](https://huggingface.co/spaces/BMEscanor/against-the-safety-trace-viewer) · [Full write-up](article/ARTICLE.md) · [Demo](#try-it)
 
 ## The idea in one minute
 
@@ -342,6 +342,15 @@ Training and evaluation ran on Kaggle T4s: see [`kaggle/README.md`](kaggle/READM
 - The self-check withholds some correct answers. The submitted system refuses 39% of answerable questions.
 - On benchmarks the adapters never trained on, the adapter is level with GPT-6 Luna and behind DeepSeek V4 Flash, and on SQuAD 2.0 it scores the same as refusing every question. Large hosted models are more accurate when the documents hold the answer. See [Against hosted models](#against-hosted-models).
 - There is no hosted live endpoint: the web demo needs a GPU you start yourself. Its GPU run answered the eight example questions as shown above (five right, two wrong, one over-refusal); eight questions say little about accuracy, which the sealed test measures.
+
+## Hackathon submission notes
+
+Hugging Face Articles need a Pro account, so this README is the write-up, as the rules allow. The long version with every section is [`article/ARTICLE.md`](article/ARTICLE.md), and the abstract (under 500 words) is [`article/ABSTRACT.md`](article/ABSTRACT.md).
+
+- **Track and problem statement:** Track 3 (agentic fine-tuning), problem statement 4: fine-tuning for retrieval-augmented generation.
+- **Work done outside the hackathon:** none. The repository history starts on 4 November 2026. The base model, AgentTune, AuditKIT and the public datasets are third-party.
+- **LLM usage:** AI coding assistants drafted a large share of the code, tests and prose under the team's direction. Every number comes from a script run on saved transcripts and is in a file under `reports/`.
+- **With more credits:** quote-first answer targets, balanced answer and refusal data in both directions, far more than 488 parent questions, and a second Hindi attempt with more English replay, judged on fresh sealed tests under a new pre-registration. Two measurements we did not make: a hand-labelled check of the hidden-evidence flags with a judge-based faithfulness score calibrated on it, and single-request latency.
 
 ## Artifacts and licenses
 
