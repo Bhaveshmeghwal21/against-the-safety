@@ -332,12 +332,33 @@ The Hindi gain is large. Correct, cited answers rose from 2% and 4% to 35%, and 
 
 ### What we tried
 
-![Rounds 1 to 6 and their outcomes](../docs/figures/png/rounds.png)
+![Rounds 1 to 6 and the DoRA side study, with their outcomes](../docs/figures/png/rounds.png)
 
 - **Refusal examples are what make the model stop.** The control adapter answered more but never refused; it kept searching until its budget ran out.
 - **Cheap fixes beat more training.** The two repairs added 10 points of macro success with no retraining. Every training change after round 1 missed its own pre-registered release rule.
 - **Preference training removed refusals.** Preference training (DPO) shows the model pairs of a better and a worse answer and nudges it toward the better one. Our pairs almost never chose a refusal, so the checkpoints stopped refusing. A second run with refusal pairs restored it from main but passed no gate. Some of these training prompts also exposed held-out evidence; main and candF1 predate them, and the cleaned pair files are in the remediation report.
 - **A trained checker did not beat the plain one.** Two adapters trained to check answers never reached our hidden-evidence limit at any threshold. A second look at refusals, checked by the plain self-check, also failed its rule on the fresh test, which we opened once.
+- **DoRA did not beat LoRA.** A teammate trained three DoRA checkpoints in place of LoRA. The best scored 50.1% macro with both repairs, against 51.7% for main on the same scorer, and it cost more to serve. Details below.
+
+### DoRA instead of LoRA: a teammate's side study
+
+Ansh ([@Ansh13579](https://github.com/Ansh13579)) contributed this work as pull request 1. DoRA is a variant of LoRA that splits each weight update into a size and a direction. Three DoRA checkpoints were evaluated on the same 938 Round 5 input episodes that main and candF1 had been scored on. The first (Modal DoRA) trained on one L4 with 1,611 rows and 202 steps, the same counts as main. The second trained on four Kaggle L4s at learning rate 5e-5. The third continued from the second on 541 evidence-order rows and failed its own development screen, so it was not adopted.
+
+| System | Raw macro success | With fail-closed and self-check | Hidden-evidence answers, raw |
+| --- | ---: | ---: | ---: |
+| main (LoRA) | 41.43% | 51.74% | 108/364 |
+| candF1 (LoRA) | 44.93% | 56.97% | 114/364 |
+| Modal DoRA | 44.71% | 50.09% | 117/364 |
+| Kaggle DoRA, learning rate 5e-5 | 34.00% | 47.34% | 227/371 |
+| Evidence-order DoRA | 27.82% | 45.41% | 306/374 |
+
+Modal DoRA scored higher than main before the repairs and lower after them. The other two answered far more questions whose evidence was hidden. None of the three beat main with both repairs, and none came close to candF1.
+
+![LoRA and DoRA macro success and serving cost](../docs/figures/png/dora_lora_cost_efficiency.png)
+
+These are scorer-v2 results from reports, not from saved transcripts: the pull request does not include the raw run files, so we could not rescore them, and the judge-based metrics in this article were not run for DoRA. The three checkpoints have different exclusions, the test set was already open when they were evaluated, and no paired interval or significance test is claimed. Training used 3.65, 4.18 and 0.72 allocated GPU-hours. At a historical $0.80 per L4-hour that is about $2.92, $3.34 and $0.57. Serving Modal DoRA was estimated at $36.78 per 10,000 episodes on an L4, against $6.30 for main on a T4, but the two runs used different hardware and batching, so this is not a controlled price comparison. Reports: `reports/evidence_order_all_previous_comparison.md` (every earlier model side by side), `reports/dora_lora_cost_efficiency.md` (cost and resources) and `research/2026-11-15-pr1-review.md` (our review of the pull request).
+
+![DoRA training time and GPU-hours](../docs/figures/png/dora_training_efficiency.png)
 
 ## 7. Compute and cost
 

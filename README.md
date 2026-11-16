@@ -360,7 +360,7 @@ Contributed by Ansh ([@Ansh13579](https://github.com/Ansh13579), pull request 1)
 | Kaggle DoRA, learning rate 5e-5 | 34.00% | 47.34% | 91/371 |
 | Evidence-order continuation | 27.82% | 45.41% | 126/374 |
 
-The evidence-order continuation failed its development screen and was not adopted. These are results on an already opened test, not a new blind holdout. The PR reports use the main adapter as verifier; its checkpoint-specific exclusions and older scoring limit direct comparisons.
+The evidence-order continuation failed its development screen and was not adopted. For reference, on the same scorer main with the same repairs scored 51.74% (41.43% raw) and candF1 56.97% (44.93% raw), so no DoRA checkpoint beat main once the repairs were applied ([comparison](reports/evidence_order_all_previous_comparison.md)). These are results on an already opened test, not a new blind holdout. The PR reports use the main adapter as verifier; its checkpoint-specific exclusions and older scoring limit direct comparisons.
 
 ![Historical DoRA and LoRA cost and effectiveness comparison](docs/figures/dora_lora_cost_efficiency.svg)
 
@@ -415,12 +415,13 @@ Because the English-only adapter answers almost nothing in Hindi, we continued t
 
 ## What we tried, and what we kept
 
-![Timeline of rounds 1 to 6 with the outcome of each](docs/figures/rounds.svg)
+![Timeline of rounds 1 to 6 and the DoRA side study, with the outcome of each](docs/figures/rounds.svg)
 
 - **Refusal training is what makes the model stop.** A control adapter trained without refusal examples answered more but never refused; it kept searching until the budget ran out.
 - **Cheap fixes beat more training.** The two repairs moved macro success from 47.9% to 58.0% with no retraining. Every training change after round 1 missed its own pre-registered release rule.
 - **Preference training removed refusals.** Preference training (DPO) shows the model pairs of a better and a worse answer and nudges it toward the better one. Our pairs almost never chose a refusal, so the checkpoints stopped refusing. Adding refusal pairs restored it from main but passed no gate. Some of those training prompts also exposed held-out evidence; main and candF1 predate them. See the [remediation report](reports/2026-11-13-evaluation-remediation.md).
 - **A trained checker did not beat the plain one.** Two adapters trained to check answers (V2m, V2b) never reached the hidden-evidence limit we set, at any threshold ([report](reports/round6_selection.md)). A second look at refusals, checked by the plain self-check, also failed its rule on the fresh Round 6 test, which we opened once ([results](research/2026-11-15-round6-second-look-results.md)).
+- **DoRA did not beat LoRA.** A teammate's three DoRA checkpoints (pull request 1) are described [above](#dora-experiments-on-the-opened-round-5-suite). The best scored 50.1% macro with both repairs against 51.7% for main on the same scorer, and cost more to serve.
 
 The full record, with every pre-registered rule and each result, is in [`docs/HISTORY.md`](docs/HISTORY.md).
 

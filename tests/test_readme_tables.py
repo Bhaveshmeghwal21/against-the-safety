@@ -308,3 +308,15 @@ def test_the_adapter_cards_keep_the_correction_notice_and_carry_the_capability_n
     for text in (cards.model_card("main", "BMEscanor"), cards.cand_f1_card("BMEscanor")):
         assert "13 November 2026 correction" in text and "General capability (retention check)" in text
     assert "13 November 2026 correction" not in cards.general_capability_note("main")
+
+
+@pytest.mark.parametrize("document", ["README.md", "article/ARTICLE.md"])
+def test_the_dora_side_study_is_in_the_write_up_with_the_same_numbers(document):
+    text = (ROOT / document).read_text(encoding="utf-8")
+    for number in ("44.71%", "50.09%", "34.00%", "47.34%", "27.82%", "45.41%", "51.74%"):
+        assert number in text, f"{document} is missing the DoRA figure {number}"
+
+
+def test_the_rounds_figure_includes_the_dora_side_study():
+    rounds = (ROOT / "docs/figures/rounds.svg").read_text(encoding="utf-8")
+    assert "Side study" in rounds and "DoRA instead of LoRA" in rounds

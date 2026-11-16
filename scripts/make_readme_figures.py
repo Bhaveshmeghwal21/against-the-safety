@@ -302,6 +302,7 @@ def rounds() -> None:
         ("Round 5", "Preference training (DPO) on 335 pairs", "Rejected: the checkpoints stopped abstaining", RED),
         ("Round 5b", "DPO again, with abstention pairs added", "Rejected: one eligible checkpoint, candF1, missed the safety bound", RED),
         ("Round 6", "Trained answer checkers V2m and V2b", "Rejected: no threshold met the hidden-evidence limit", RED),
+        ("Side study", "DoRA instead of LoRA, three checkpoints (Ansh)", "Not adopted: best 50.1% macro against 51.7% for main (scorer v2)", RED),
     ]
     w, rh, top = 820, 50, 66
     h = top + len(rows) * rh + 24
