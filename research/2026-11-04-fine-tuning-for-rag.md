@@ -8,7 +8,7 @@
 **Resources:** One Kaggle account with about 30 GPU hours per week in the T4 ×2 configuration (the quota resets weekly), the $20 HF credit once redeemed, and the Kaggle Model Proxy quota ($10/day) for evaluation-only API calls.  
 **Status:** Research and proposed experiments. Training performance, cost and improvements have yet to be measured.
 
-The active project is now PS 4. The earlier [distillation research note](2026-11-03-agentic-distillation.md) records the previous direction. This document covers the new research, decisions, implementation sequence and evaluation protocol.
+This document covers the research, decisions, implementation sequence and evaluation protocol for PS 4.
 
 **Recheck conclusion:** Retain PS 4 and the small-model SFT direction. The original 30-hour allocation did not demonstrate that the proposed experiment matrix would fit. Sections 5–8 now specify a smaller core experiment, a fairer training control and throughput-based admission gates. GPU feasibility remains unmeasured; the pilot must determine the final sample and token counts. Section 14 records the corrections.
 
