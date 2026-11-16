@@ -10,13 +10,26 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 needs_reports = pytest.mark.skipif(not (ROOT / "reports" / "fair_rerun.json").exists(), reason="saved reports unavailable")
 
+# The README's longer sections live on the linked pages under docs/. Checks of "the README" read those pages too.
+WRITE_UP_PAGES = (
+    "docs/GLOSSARY.md", "docs/TRAINING.md", "docs/TOOLS.md", "docs/RESULTS.md",
+    "docs/AUDITKIT_METRICS.md", "docs/SIDE_STUDIES.md", "docs/FORECASTS.md",
+)
+
+
+def write_up(document):
+    text = (ROOT / document).read_text(encoding="utf-8")
+    if document == "README.md":
+        text += "".join("\n" + (ROOT / page).read_text(encoding="utf-8") for page in WRITE_UP_PAGES)
+    return text
+
 
 @needs_reports
 @pytest.mark.parametrize("document", ["README.md", "article/ARTICLE.md"])
 def test_results_tables_match_the_reports(document):
     import make_readme_table as tables
 
-    text = (ROOT / document).read_text(encoding="utf-8")
+    text = write_up(document)
     for table in (tables.results_table(), tables.hosted_table()):
         for line in table.splitlines():
             assert line in text, f"{document} is missing or has changed: {line}"
@@ -47,6 +60,39 @@ def test_local_links_in_the_readme_resolve():
     assert not missing, missing
 
 
+def test_the_readme_links_every_write_up_page():
+    text = (ROOT / "README.md").read_text(encoding="utf-8")
+    for page in WRITE_UP_PAGES:
+        assert f"]({page})" in text or f"]({page}#" in text, f"README does not link {page}"
+
+
+def _github_anchor(heading):
+    import re
+
+    return re.sub(r"[^\w\- ]", "", heading.strip().lower()).replace(" ", "-")
+
+
+def test_links_and_anchors_in_the_readme_and_write_up_pages_resolve():
+    import os
+    import re
+
+    pages = ["README.md", *WRITE_UP_PAGES]
+    texts = {p: (ROOT / p).read_text(encoding="utf-8") for p in pages}
+    anchors = {p: {_github_anchor(h) for h in re.findall(r"^#{1,6} (.+)$", t, re.M)} for p, t in texts.items()}
+    problems = []
+    for page, text in texts.items():
+        for target in re.findall(r"\]\(([^)\s]+)\)", text):
+            if target.startswith(("http://", "https://", "mailto:")):
+                continue
+            path, _, anchor = target.partition("#")
+            dest = page if not path else os.path.normpath(os.path.join(os.path.dirname(page), path)).replace("\\", "/")
+            if not (ROOT / dest).exists():
+                problems.append(f"{page}: missing file {target}")
+            elif anchor and dest in anchors and anchor not in anchors[dest]:
+                problems.append(f"{page}: no heading #{anchor} in {dest}")
+    assert not problems, problems
+
+
 def test_the_demo_run_in_the_readme_matches_the_saved_output():
     import json
 
@@ -71,7 +117,7 @@ def test_the_auditkit_table_matches_the_first_round_scorecard(document):
     import re
 
     scorecard = (ROOT / "reports" / "scorecard_test_lenient.md").read_text(encoding="utf-8")
-    text = (ROOT / document).read_text(encoding="utf-8")
+    text = write_up(document)
     rows = {
         "auditkit_evidence_set_recall": ("| Evidence-set recall |", False),
         "auditkit_citation_support": ("| Citation support |", False),
@@ -94,7 +140,7 @@ def test_the_auditkit_table_matches_the_first_round_scorecard(document):
 def test_the_external_suite_table_and_hosted_claims_match_the_reports(document):
     import make_readme_table as tables
 
-    text = (ROOT / document).read_text(encoding="utf-8")
+    text = write_up(document)
     for line in tables.external_table().splitlines():
         assert line in text, f"{document} is missing or has changed: {line}"
     fair = tables.load("fair_rerun.json")["systems"]
@@ -112,7 +158,7 @@ def test_the_documents_say_the_adapter_was_trained_in_english_only_and_show_the_
     import make_readme_table as tables
 
     for document in ("README.md", "article/ARTICLE.md"):
-        text = (ROOT / document).read_text(encoding="utf-8")
+        text = write_up(document)
         assert "trained the adapter in English only" in text or "trained the adapter on English only" in text, document
         for line in tables.multilingual_table().splitlines():
             assert line in text, f"{document} is missing or has changed: {line}"
@@ -135,7 +181,7 @@ def test_the_main_card_reports_the_language_check_with_the_saved_numbers():
 def test_the_fresh_test_table_and_the_second_look_claims_match_the_reports(document):
     import make_readme_table as tables
 
-    text = (ROOT / document).read_text(encoding="utf-8")
+    text = write_up(document)
     for line in tables.fresh_test_table().splitlines():
         assert line in text, f"{document} is missing or has changed: {line}"
     sl = tables.load("round6_second_look.json")
@@ -156,7 +202,7 @@ def test_the_fresh_test_table_and_the_second_look_claims_match_the_reports(docum
 def test_the_hindi_training_tables_and_verdict_match_the_report(document):
     import make_readme_table as tables
 
-    text = (ROOT / document).read_text(encoding="utf-8")
+    text = write_up(document)
     for table in (tables.hindi_training_table(), tables.hindi_rules_table()):
         for line in table.splitlines():
             assert line in text, f"{document} is missing or has changed: {line}"
@@ -213,7 +259,7 @@ def test_the_main_card_reports_the_second_test_with_the_saved_numbers():
 def test_the_judge_context_and_numeric_tables_match_the_reports(document):
     import make_readme_table as tables
 
-    text = (ROOT / document).read_text(encoding="utf-8")
+    text = write_up(document)
     for table in (tables.judge_table(), tables.judge_agreement_table(), tables.context_table(), tables.numeric_table(), tables.latency_table()):
         for line in table.splitlines():
             assert line in text, f"{document} is missing or has changed: {line}"
@@ -250,14 +296,14 @@ def test_the_abstract_and_limits_quote_the_measured_latency():
     abstract = (ROOT / "article" / "ABSTRACT.md").read_text(encoding="utf-8")
     assert f"a median of {lat['p50'] / 1000:.1f} s (95th percentile {lat['p95'] / 1000:.1f} s)" in abstract
     for document in ("README.md", "article/ARTICLE.md"):
-        assert f"a median of {lat['p50'] / 1000:.1f} s per question" in (ROOT / document).read_text(encoding="utf-8")
+        assert f"a median of {lat['p50'] / 1000:.1f} s per question" in write_up(document)
 
 @needs_reports
 @pytest.mark.parametrize("document", ["README.md", "article/ARTICLE.md"])
 def test_the_tool_use_table_and_judge_agreement_match_the_reports(document):
     import make_readme_table as tables
 
-    text = (ROOT / document).read_text(encoding="utf-8")
+    text = write_up(document)
     for line in tables.tool_use_table().splitlines():
         assert line in text, f"{document} is missing or has changed: {line}"
     assert tables.judge_agreement_sentence() in text
@@ -268,7 +314,7 @@ def test_the_tool_use_table_and_judge_agreement_match_the_reports(document):
 def test_the_write_up_states_hyperparameters_leak_checks_seed_and_forecasts(document):
     import json
 
-    text = (ROOT / document).read_text(encoding="utf-8")
+    text = write_up(document)
     report = json.loads((ROOT / "runs/kaggle/ats-train-both/out/main/train_report.json").read_text(encoding="utf-8")) \
         if (ROOT / "runs/kaggle/ats-train-both/out/main/train_report.json").exists() else None
     if report:
@@ -289,7 +335,7 @@ def test_the_capability_tables_match_the_report_and_the_abstract_quotes_it(docum
     import json
     import make_readme_table as tables
 
-    text = (ROOT / document).read_text(encoding="utf-8")
+    text = write_up(document)
     for table in (tables.general_table(), tables.general_rules_table()):
         for line in table.splitlines():
             assert line in text, f"{document} is missing or has changed: {line}"
@@ -312,7 +358,7 @@ def test_the_adapter_cards_keep_the_correction_notice_and_carry_the_capability_n
 
 @pytest.mark.parametrize("document", ["README.md", "article/ARTICLE.md"])
 def test_the_dora_side_study_is_in_the_write_up_with_the_same_numbers(document):
-    text = (ROOT / document).read_text(encoding="utf-8")
+    text = write_up(document)
     for number in ("44.71%", "50.09%", "34.00%", "47.34%", "27.82%", "45.41%", "51.74%"):
         assert number in text, f"{document} is missing the DoRA figure {number}"
 
