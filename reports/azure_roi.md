@@ -10,6 +10,7 @@ Cost per 1,000 successful episodes divides the cost per 1,000 episodes by the co
 | --- | ---: | ---: | ---: | ---: |
 | main+FB+V, busy T4 | 938 | 11.98 | $6.30 | $1.09 |
 | candF1+FB+V, busy T4 | 938 | 11.40 | $5.99 | $0.94 |
+| candA+FB+V, busy T4 | 938 | 10.13 | $5.33 | $0.87 |
 | Azure GPT-6 Luna, exact + fail-closed | 938 | provider-managed | $1.57 | $0.32 |
 | Azure GPT-6 Luna, native + fail-closed | 938 | provider-managed | $2.66 | $0.44 |
 
@@ -23,6 +24,7 @@ Cost per 1,000 successful episodes divides the cost per 1,000 episodes by the co
 
 - main+FB+V: actor 20.0 output tokens/s effective batched throughput; actor plus estimated verifier 4.31 GPU seconds/episode; 476/938 episodes invoke the checker in this approximation.
 - candF1+FB+V: actor 20.2 output tokens/s effective batched throughput; actor plus estimated verifier 4.10 GPU seconds/episode; 450/938 episodes invoke the checker in this approximation.
+- candA+FB+V: actor 21.8 output tokens/s effective batched throughput; actor plus estimated verifier 3.65 GPU seconds/episode; 541/938 episodes invoke the checker in this approximation.
 - Azure exact: 1278 recorded calls, 984,623 input tokens (35,877 cache reads, 299,937 cache writes), 89,144 output tokens; recorded usage estimated $0.147 for 938 episodes, including 0 provider-blocked episodes.
 - Azure native: 2534 recorded calls, 2,483,405 input tokens (682,658 cache reads, 897,424 cache writes), 80,264 output tokens; recorded usage estimated $0.249 for 938 episodes, including 3 provider-blocked episodes.
 

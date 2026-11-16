@@ -57,7 +57,11 @@ def main():
       'main+FB+V':local('main',ROOT/'runs/account2_round5/ats-eval-jobs-r5test-ref/out/eval',
           ROOT/'data/processed/verifier/cases_r5test_refs.jsonl',ROOT/'runs/account2_round5/ats-verify-main-r5-r5test-refs/out/verify/main/summary.json'),
       'candF1+FB+V':local('candF1',ROOT/'runs/account2_round5/ats-eval-jobs-r5test-final/out/eval',
-          ROOT/'data/processed/verifier/cases_r5test_final.jsonl',ROOT/'runs/account2_round5/ats-verify-main-r5-r5test-final/out/verify/main/summary.json')}
+          ROOT/'data/processed/verifier/cases_r5test_final.jsonl',ROOT/'runs/account2_round5/ats-verify-main-r5-r5test-final/out/verify/main/summary.json'),
+      # candA has no verifier run of its own. Its answers are in the main verifier run's case file, so that run's average
+      # time per case is used. This is an estimate (actor time measured, checker time averaged), the same method as the rows above.
+      'candA+FB+V':local('candA',ROOT/'runs/account2_round5/ats-eval-jobs-r5test-ref/out/eval',
+          ROOT/'data/processed/verifier/cases_r5test_refs.jsonl',ROOT/'runs/account2_round5/ats-verify-main-r5-r5test-refs/out/verify/main/summary.json')}
     local_scores = json.loads((ROOT/'reports/round5_corrected.json').read_text(encoding='utf-8'))['systems']
     cloud_scores = json.loads((ROOT/'reports/azure_round5_comparison_corrected.json').read_text(encoding='utf-8'))['systems']
     for name, value in local_data.items():

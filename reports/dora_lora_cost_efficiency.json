@@ -1842,13 +1842,26 @@
       "estimated_gpu_seconds_per_episode": 4.102482777260578,
       "estimated_gpu_hours_per_10000": 11.395785492390495,
       "estimated_busy_gpu_usd_per_10000": 5.994183168997401
+    },
+    "candA+FB+V": {
+      "episodes": 938,
+      "actor_seconds_amortized": 3164.914,
+      "actor_output_tokens": 68866,
+      "effective_actor_output_tokens_per_second": 21.75920103990187,
+      "answer_cases": 606,
+      "verifier_calls_estimated": 541,
+      "verifier_seconds_per_case_batched": 0.4717314487632509,
+      "estimated_gpu_seconds_per_episode": 3.6461841298304036,
+      "estimated_gpu_hours_per_10000": 10.1282892495289,
+      "estimated_busy_gpu_usd_per_10000": 5.327480145252201,
+      "cost_per_1000_successes": 0.8681806490567233
     }
   },
   "sources_sha256": {
     "reports/dora_evaluation_data.json": "1d028a3467435a7cb778f7fe442801a53de0714f2ac61f2d604c16ba7d154b25",
     "reports/dora_kaggle_lr5e5_comparison.json": "3da7e1923544a9570c508737a6580342cd2263d2e8e080f67b3f40b632c5e66d",
     "reports/evidence_order_all_previous_comparison.json": "d98a3fcc0aa01ef0fac7c9b5a215aa601c9d50ed902dc0644ff5a53e2733fc5d",
-    "reports/azure_roi.json": "e17e74a358e4bb91440ed90156390c912eebb7bfd7e3eeaf0e69ea0b36eaa49f",
+    "reports/azure_roi.json": "c7c94005be3e1113f9aecbe72a75c0787a05e89081faa30f6e6ac763ed204089",
     "reports/evidence_order_training_data.json": "0231656b98f3dfa2b42adb03a163b62fe9100675744c644640bb04cbb0c19a7c",
     "reports/evidence_order_inference_resources.json": "f63a8f04ab282669b35b7e3441a9f30ab1dbf9b4c9255361468eabfeb311a278"
   }

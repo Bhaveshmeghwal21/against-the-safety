@@ -48,6 +48,10 @@ def main():
     comparison = read(REPORTS / "dora_kaggle_lr5e5_comparison.json")
     all_results = read(REPORTS / "evidence_order_all_previous_comparison.json")
     lora = read(REPORTS / "azure_roi.json")
+    # The frozen snapshot has no candA row. Take candA from the ROI report, which uses the same method as main and candF1.
+    local_t4 = dict(original["historical_cost_scenario"]["local_t4"])
+    assert abs(lora["local"]["main+FB+V"]["estimated_busy_gpu_usd_per_10000"] - local_t4["main+FB+V"]["estimated_busy_gpu_usd_per_10000"]) < 0.01
+    local_t4["candA+FB+V"] = lora["local"]["candA+FB+V"]
     training = [original["training"], comparison["new_training"], data["training"]]
     names = ["Original Modal DoRA", "Kaggle DoRA lr5e-5", "Evidence-order DoRA continuation"]
     worlds = [1, 4, 4]
@@ -161,9 +165,10 @@ def main():
               "### Historical LoRA serving estimates from the README's sources", ""]
     lines += table(["System", "Historical T4 GPU-seconds/episode", "Historical T4 USD / 10k episodes"],
                    [[name, f"{cost['estimated_gpu_seconds_per_episode']:.3f}", f"${cost['estimated_busy_gpu_usd_per_10000']:.2f}"]
-                    for name, cost in original["historical_cost_scenario"]["local_t4"].items()])
+                    for name, cost in local_t4.items()])
     lines += ["These LoRA scenarios use **$0.526/T4-hour**, batched verifier estimates and their "
-              "original serving settings. DoRA uses recorded L4 timings and a different scenario rate. "
+              "original serving settings. candA+FB+V is computed by the same method from its saved run times and the main "
+              "verifier's average time per case, so it is an estimate. DoRA uses recorded L4 timings and a different scenario rate. "
               "They are not a controlled price/performance ranking. Hosted API token-price scenarios "
               "remain in [azure_roi.md](azure_roi.md) and [deepseek_roi.md](deepseek_roi.md); no current "
               "API prices are inferred here.", "",
@@ -199,12 +204,13 @@ def main():
     source_paths = [REPORTS / p for p in ("dora_evaluation_data.json", "dora_kaggle_lr5e5_comparison.json",
                                          "evidence_order_all_previous_comparison.json", "azure_roi.json",
                                          "evidence_order_training_data.json", "evidence_order_inference_resources.json")]
+    # The frozen snapshot has no candA row. Take candA from the ROI report, which uses the same method as main and candF1.
     snapshot = {"report_date": "2026-11-14", "price_basis": "historical scenario from 2026-11-12; not current quote or invoice",
                 "l4_usd_per_gpu_hour": rate, "training": train_rows, "inference": inference_rows,
                 "continuation_lineage_gpu_hours": total_hours, "latest_dev_passes_screen": dev["passes_screen"],
                 "latest_training": data, "latest_inference": resources,
                 "historical_lora_training": lora["training_report"],
-                "historical_lora_serving": original["historical_cost_scenario"]["local_t4"],
+                "historical_lora_serving": local_t4,
                 "sources_sha256": {p.relative_to(ROOT).as_posix(): sha(p) for p in source_paths}}
     DEST.with_suffix(".json").write_text(json.dumps(snapshot, indent=2), encoding="utf-8")
     lines[4:4] = ["![LoRA and DoRA performance and serving cost](../docs/figures/dora_lora_cost_efficiency.svg)", "",

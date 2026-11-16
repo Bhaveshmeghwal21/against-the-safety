@@ -23,19 +23,21 @@ def serving(cost, benchmark):
     prices = {
         "Main LoRA": (cost["historical_lora_serving"]["main+FB+V"]["estimated_busy_gpu_usd_per_10000"], "T4"),
         "candF1 LoRA": (cost["historical_lora_serving"]["candF1+FB+V"]["estimated_busy_gpu_usd_per_10000"], "T4"),
+        "candA LoRA": (cost["historical_lora_serving"]["candA+FB+V"]["estimated_busy_gpu_usd_per_10000"], "T4"),
     }
     for name, source in (("Modal DoRA", "Original Modal DoRA"), ("Evidence-order DoRA", "Latest evidence-order DoRA")):
         row = next(r for r in cost["inference"] if r["model"] == source and r["configuration"] == "FB+V")
         prices[name] = (row["historical_l4_gpu_only_usd_per_10000"], "L4")
     svg = F.begin("LoRA and DoRA: performance and serving cost", "All six adapters with fail-closed and the fixed main-LoRA verifier. "
-                  "Four serving costs are available; candA and Kaggle lr5e-5 costs are not measured. "
+                  "Serving costs are estimates from saved run times; the checker part is an average. "
+                  "Kaggle lr5e-5 has no timing data. "
                   "Historical T4 and L4 assumptions differ; no equal-hardware cost ranking is established.", 518)
     svg += [F.text(30, 34, "LoRA and DoRA: performance and serving cost", 23, F.INK, 700),
             F.text(30, 58, "938 input episodes · fail-closed + fixed main-LoRA verifier", 13, F.MUTED),
             F.text(245, 100, "Macro success", 16, F.INK, 700),
             F.text(245, 121, "Higher is better", 12, F.MUTED),
             F.text(583, 100, "USD per 10,000 episodes", 16, F.INK, 700),
-            F.text(583, 121, "Historical busy-GPU scenarios", 12, F.MUTED)]
+            F.text(583, 121, "Estimated busy-GPU scenarios", 12, F.MUTED)]
     F.axis(svg, 245, 240, 138, 406, 65, (0, 20, 40, 60))
     F.axis(svg, 583, 235, 138, 406, 45, (0, 15, 30, 45), money=True)
     for i, ((name, label), color) in enumerate(zip(LABELS, COLORS)):

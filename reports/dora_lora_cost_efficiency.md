@@ -58,8 +58,9 @@ The previous Kaggle lr5e-5 download contains final reports but not its full raw 
 | --- | --- | --- |
 | main+FB+V | 4.313 | $6.30 |
 | candF1+FB+V | 4.102 | $5.99 |
+| candA+FB+V | 3.646 | $5.33 |
 
-These LoRA scenarios use **$0.526/T4-hour**, batched verifier estimates and their original serving settings. DoRA uses recorded L4 timings and a different scenario rate. They are not a controlled price/performance ranking. Hosted API token-price scenarios remain in [azure_roi.md](azure_roi.md) and [deepseek_roi.md](deepseek_roi.md); no current API prices are inferred here.
+These LoRA scenarios use **$0.526/T4-hour**, batched verifier estimates and their original serving settings. candA+FB+V is computed by the same method from its saved run times and the main verifier's average time per case, so it is an estimate. DoRA uses recorded L4 timings and a different scenario rate. They are not a controlled price/performance ranking. Hosted API token-price scenarios remain in [azure_roi.md](azure_roi.md) and [deepseek_roi.md](deepseek_roi.md); no current API prices are inferred here.
 
 ## Verified training and development outcome of the latest approach
 
