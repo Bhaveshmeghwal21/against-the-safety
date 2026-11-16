@@ -88,6 +88,9 @@ def test_the_built_sets_have_the_registered_sizes_and_valid_gold():
         pytest.skip("data/general not built")
     sizes = {k: v["questions"] for k, v in json.loads(manifest.read_text(encoding="utf-8")).items()}
     assert sizes == {"mmlu": 14042, "arc_c": 1172, "arc_e": 2376, "truthfulqa": 817, "gmmlu_en": 400, "gmmlu_hi": 400, "gmmlu_es": 400}
+    # The manifest is committed but the question files are git-ignored (rebuilt by prepare_general.py).
+    if not all((ROOT / "data/general" / f"{name}.jsonl").exists() for name in sizes):
+        pytest.skip("data/general question files not built")
     for name in sizes:
         for line in [l for l in (ROOT / "data/general" / f"{name}.jsonl").read_text(encoding="utf-8").split("\n") if l.strip()]:
             r = json.loads(line)
