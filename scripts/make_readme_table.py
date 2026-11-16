@@ -187,7 +187,7 @@ def tool_use_table():
     """AuditKIT tool-call metrics of the raw agents per suite of the first sealed test (reports/tool_use_r5t.json, scripts/report_tool_use.py)."""
     rep = load('tool_use_r5t.json')['trajectories']
     suites = {'r5t_squad': 'SQuAD', 'r5t_hotpot': 'HotpotQA', 'r5t_rgb': 'RGB'}
-    lines = ['| System | Suite | Well-formed tool calls | Repeated searches (lower is better) | Loop-free episodes | Searches per episode | Invalid endings (lower is better) |',
+    lines = ['| System | Suite | Tool calls matching the schema | Repeated searches (lower is better) | Loop-free episodes | Searches per episode | Invalid endings (lower is better) |',
              '| --- | --- | ---: | ---: | ---: | ---: | ---: |']
     for name, title in (('base', 'Tiny Aya base'), ('main', 'Main adapter'), ('candF1', 'candF1')):
         for part, suite in suites.items():
@@ -195,6 +195,16 @@ def tool_use_table():
             lines.append(f"| {title} | {suite} | {m['tool_call_validity'] * 100:.1f}% | {m['redundant_tool_calls'] * 100:.1f}% | {m['loop_free_episodes'] * 100:.1f}% | "
                          f"{m['mean_searches']:.2f} | {m['invalid_endings'] * 100:.1f}% |")
     return '\n'.join(lines)
+
+
+def tool_use_validity_sentence():
+    """What the tool-call validity column does and does not cover, with the counts of turns it never scored (reports/tool_use_r5t.json)."""
+    rep = load('tool_use_r5t.json')['trajectories']
+    unseen = {n: (sum(m['turns_not_seen_by_validity'] for m in rep[n].values()), sum(m['turns'] for m in rep[n].values())) for n in rep}
+    (b_n, b_t), (m_n, m_t), (f_n, f_t) = unseen['base'], unseen['main'], unseen['candF1']
+    return (f"Every turn that was a JSON tool call matched the search tool's schema, for all three systems. The adapters get this almost for free, because a search turn only counts "
+            f"as a tool call after our parser has accepted it. The metric never sees a turn that was neither a JSON search call nor a correctly tagged final turn: "
+            f"the base model wrote {b_n} of those in {b_t:,} turns ({b_n / b_t * 100:.1f}%), main {m_n} in {m_t:,} and candF1 {f_n} in {f_t:,}. Each one ends its episode and is counted under invalid endings.")
 
 
 def judge_agreement_sentence():

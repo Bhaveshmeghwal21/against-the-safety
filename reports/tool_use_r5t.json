@@ -8,7 +8,9 @@
     "redundant_tool_calls": 0.0,
     "loop_free_episodes": 1.0,
     "mean_searches": 0.9844155844155844,
-    "invalid_endings": 0.2831168831168831
+    "invalid_endings": 0.2831168831168831,
+    "turns": 764,
+    "turns_not_seen_by_validity": 109
    },
    "r5t_hotpot": {
     "episodes": 82,
@@ -16,7 +18,9 @@
     "redundant_tool_calls": 0.0,
     "loop_free_episodes": 1.0,
     "mean_searches": 0.975609756097561,
-    "invalid_endings": 0.0975609756097561
+    "invalid_endings": 0.0975609756097561,
+    "turns": 162,
+    "turns_not_seen_by_validity": 8
    },
    "r5t_rgb": {
     "episodes": 471,
@@ -24,7 +28,9 @@
     "redundant_tool_calls": 0.005,
     "loop_free_episodes": 0.989,
     "mean_searches": 0.8301486199575372,
-    "invalid_endings": 0.16348195329087048
+    "invalid_endings": 0.16348195329087048,
+    "turns": 862,
+    "turns_not_seen_by_validity": 72
    }
   },
   "main": {
@@ -34,7 +40,9 @@
     "redundant_tool_calls": 0.057,
     "loop_free_episodes": 0.875,
     "mean_searches": 1.6207792207792209,
-    "invalid_endings": 0.12207792207792208
+    "invalid_endings": 0.12207792207792208,
+    "turns": 1009,
+    "turns_not_seen_by_validity": 0
    },
    "r5t_hotpot": {
     "episodes": 82,
@@ -42,7 +50,9 @@
     "redundant_tool_calls": 0.02,
     "loop_free_episodes": 0.939,
     "mean_searches": 2.182926829268293,
-    "invalid_endings": 0.07317073170731707
+    "invalid_endings": 0.07317073170731707,
+    "turns": 261,
+    "turns_not_seen_by_validity": 0
    },
    "r5t_rgb": {
     "episodes": 471,
@@ -50,7 +60,9 @@
     "redundant_tool_calls": 0.031,
     "loop_free_episodes": 0.941,
     "mean_searches": 1.1125265392781316,
-    "invalid_endings": 0.05732484076433121
+    "invalid_endings": 0.05732484076433121,
+    "turns": 995,
+    "turns_not_seen_by_validity": 0
    }
   },
   "candF1": {
@@ -60,7 +72,9 @@
     "redundant_tool_calls": 0.076,
     "loop_free_episodes": 0.842,
     "mean_searches": 1.4493506493506494,
-    "invalid_endings": 0.15584415584415584
+    "invalid_endings": 0.15584415584415584,
+    "turns": 943,
+    "turns_not_seen_by_validity": 0
    },
    "r5t_hotpot": {
     "episodes": 82,
@@ -68,7 +82,9 @@
     "redundant_tool_calls": 0.03,
     "loop_free_episodes": 0.902,
     "mean_searches": 2.0853658536585367,
-    "invalid_endings": 0.07317073170731707
+    "invalid_endings": 0.07317073170731707,
+    "turns": 253,
+    "turns_not_seen_by_validity": 0
    },
    "r5t_rgb": {
     "episodes": 471,
@@ -76,7 +92,9 @@
     "redundant_tool_calls": 0.022,
     "loop_free_episodes": 0.962,
     "mean_searches": 1.059447983014862,
-    "invalid_endings": 0.040339702760084924
+    "invalid_endings": 0.040339702760084924,
+    "turns": 970,
+    "turns_not_seen_by_validity": 1
    }
   }
  },

@@ -23,7 +23,7 @@ First-round scores on the HotpotQA test split, scored before the 13 November cor
 | Evidence-set recall | Did the searches retrieve at least one complete set of passages that is enough to answer? | 0.512 | 0.727 | 0.824 |
 | Citation support | Do the citations point to passages that exist, are current and support the answer? | 0.302 | 0.771 | 0.941 |
 | Abstention | Did it refuse when it should and answer when it should? | 0.721 | 0.794 | 0.714 |
-| Tool-call validity | Were the search calls well formed? | 1.000 | 1.000 | 1.000 |
+| Tool-call validity | Of the turns that were JSON tool calls, did they match the tool's schema? | 1.000 | 1.000 | 1.000 |
 | Redundant tool calls (lower is better) | What share of searches exactly repeat an earlier one? | 3.1% | 2.9% | 8.8% |
 | Loop-free episodes | What share of episodes never fell into a repetition loop? | 94.1% | 93.4% | 78.4% |
 

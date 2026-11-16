@@ -84,7 +84,7 @@ For every evaluation episode we build two records and hand them to AuditKIT. An 
 | Evidence-set recall | Did the searches retrieve at least one complete set of passages that is enough to answer? | 0.512 | 0.727 | 0.824 |
 | Citation support | Do the citations point to passages that exist, are current and support the answer? | 0.302 | 0.771 | 0.941 |
 | Abstention | Did it refuse when it should and answer when it should? | 0.721 | 0.794 | 0.714 |
-| Tool-call validity | Were the search calls well formed? | 1.000 | 1.000 | 1.000 |
+| Tool-call validity | Of the turns that were JSON tool calls, did they match the tool's schema? | 1.000 | 1.000 | 1.000 |
 | Redundant tool calls (lower is better) | What share of searches exactly repeat an earlier one? | 3.1% | 2.9% | 8.8% |
 | Loop-free episodes | What share of episodes never fell into a repetition loop? | 94.1% | 93.4% | 78.4% |
 
@@ -160,7 +160,7 @@ The refusing carried over: 10.0% of hidden-evidence episodes were answered, and 
 
 AuditKIT's tool-call checks, as each evaluation run saved them, for the raw agents before the fail-closed rule, over all 938 episodes of the first sealed test (`reports/tool_use_r5t.md`).
 
-| System | Suite | Well-formed tool calls | Repeated searches (lower is better) | Loop-free episodes | Searches per episode | Invalid endings (lower is better) |
+| System | Suite | Tool calls matching the schema | Repeated searches (lower is better) | Loop-free episodes | Searches per episode | Invalid endings (lower is better) |
 | --- | --- | ---: | ---: | ---: | ---: | ---: |
 | Tiny Aya base | SQuAD | 100.0% | 0.0% | 100.0% | 0.98 | 28.3% |
 | Tiny Aya base | HotpotQA | 100.0% | 0.0% | 100.0% | 0.98 | 9.8% |
@@ -172,7 +172,7 @@ AuditKIT's tool-call checks, as each evaluation run saved them, for the raw agen
 | candF1 | HotpotQA | 100.0% | 3.0% | 90.2% | 2.09 | 7.3% |
 | candF1 | RGB | 100.0% | 2.2% | 96.2% | 1.06 | 4.0% |
 
-Every search call was well formed for all three systems. The trained adapters search more (1.1 to 2.2 searches per episode, against about one for the base model) and repeat a query more often: 2% to 8% of their searches repeat an earlier one, and 84% to 96% of their episodes are loop-free. The fail-closed rule turns such an episode into a refusal. The base model looks loop-free because it rarely searches twice. It ends 10% to 28% of episodes with an invalid turn instead, against 4% to 16% for the adapters. Latency per suite is in `reports/latency.md`.
+Every turn that was a JSON tool call matched the search tool's schema, for all three systems. The adapters get this almost for free, because a search turn only counts as a tool call after our parser has accepted it. The metric never sees a turn that was neither a JSON search call nor a correctly tagged final turn: the base model wrote 189 of those in 1,788 turns (10.6%), main 0 in 2,265 and candF1 1 in 2,166. Each one ends its episode and is counted under invalid endings. The trained adapters search more (1.1 to 2.2 searches per episode, against about one for the base model) and repeat a query more often: 2% to 8% of their searches repeat an earlier one, and 84% to 96% of their episodes are loop-free. The fail-closed rule turns such an episode into a refusal. The base model looks loop-free because it rarely searches twice. It ends 10% to 28% of episodes with an invalid turn instead, against 4% to 16% for the adapters. Latency per suite is in `reports/latency.md`.
 
 ### More AuditKIT metrics: faithfulness, retrieval quality, numbers and speed
 

@@ -307,6 +307,8 @@ def test_the_tool_use_table_and_judge_agreement_match_the_reports(document):
     for line in tables.tool_use_table().splitlines():
         assert line in text, f"{document} is missing or has changed: {line}"
     assert tables.judge_agreement_sentence() in text
+    assert tables.tool_use_validity_sentence() in text, f"{document} does not state what tool-call validity does not cover"
+    assert "Every search call was well formed" not in text and "Well-formed tool calls" not in text
 
 
 @needs_reports
@@ -366,3 +368,20 @@ def test_the_dora_side_study_is_in_the_write_up_with_the_same_numbers(document):
 def test_the_rounds_figure_includes_the_dora_side_study():
     rounds = (ROOT / "docs/figures/rounds.svg").read_text(encoding="utf-8")
     assert "Side study" in rounds and "DoRA instead of LoRA" in rounds
+
+def test_tool_use_report_counts_the_turns_the_validity_metric_never_scores():
+    import json
+
+    import report_tool_use as r
+
+    search = {"kind": "search", "assistant": '[{"tool_name": "search_corpus", "parameters": {"query": "x"}}]'}
+    repeated = {"kind": "invalid", "assistant": '[{"tool_name": "search_corpus", "parameters": {"query": "x"}}]'}  # a JSON call, so AuditKIT scores it
+    free_text = {"kind": "invalid", "assistant": "The answer is 42."}
+    broken = {"kind": "invalid", "assistant": '[{"tool_name": "search_corpus", "parameters": {"query": '}
+    assert [r.not_a_json_tool_call(s) for s in (search, repeated, free_text, broken)] == [False, False, True, True]
+    if (ROOT / "reports" / "tool_use_r5t.json").exists():
+        rep = json.loads((ROOT / "reports" / "tool_use_r5t.json").read_text(encoding="utf-8"))["trajectories"]
+        for system, suites in rep.items():
+            for suite, m in suites.items():
+                # an invalid turn ends its episode, so the turns left out of the metric cannot outnumber the invalid endings
+                assert m["turns_not_seen_by_validity"] <= round(m["invalid_endings"] * m["episodes"]), (system, suite)
